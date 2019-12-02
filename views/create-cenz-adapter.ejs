@@ -1,0 +1,17 @@
+const axios_general = require('axios');
+const globals = require('../config/globals');
+const {
+    handleError
+} = require('../utils/errors');
+
+let axios = axios_general.create();
+axios.defaults.timeout = globals.MAX_TIME_OUT;
+
+const remoteCenzontleURL = "<%- url -%>";
+const iriRegex = "<%- regex -%>";
+
+module.exports = class <%- adapterName -%>{
+
+
+
+}
