@@ -8,7 +8,7 @@ let axios = axios_general.create();
 axios.defaults.timeout = globals.MAX_TIME_OUT;
 
 const remoteCenzontleURL = "<%- url -%>";
-const iriRegex = "<%- regex -%>";
+const iriRegex = new RegExp('<%- regex -%>');
 
 module.exports = class <%- adapterName -%>{
 
