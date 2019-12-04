@@ -343,6 +343,31 @@ writeIndexModelsCommons = function(dir_write){
     });
 };
 
+writeIndexAdapters = function(dir_write){
+  let index = `
+  const fs = require('fs');
+  const path = require('path');
+
+  let adapters = {};
+  module.exports = adapters;
+
+  fs.readdirSync(__dirname)
+    .filter( file =>{ return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
+  }).forEach( file =>{
+
+    let adapter = require(path.join(__dirname, file));
+    if( adapters[adapter.name] ){
+      throw Error(\`Duplicated adapter name \${adapter.name}\`);
+    }
+    adapters[adapter.name] = adapter;
+  });
+  `
+  fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {
+    if (err)
+      throw Error(err);
+    });
+
+}
 
 /**
  * convertToType - Generate a string correspondant to the model type as needed for graphql schema.
@@ -563,6 +588,7 @@ createNameMigration = function(dir_write, model_name){
  */
 writeCommons = function(dir_write){
   writeSchemaCommons(dir_write);
+  writeIndexAdapters(dir_write);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
