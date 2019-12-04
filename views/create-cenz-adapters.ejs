@@ -30,4 +30,8 @@ module.exports = class <%- adapterName -%>{
        handleError(error);
      });
   }
+
+  static get name(){
+    return "<%- adapterName -%>";
+  }
 }
