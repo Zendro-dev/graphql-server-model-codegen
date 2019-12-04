@@ -4,6 +4,7 @@ const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
 const models_webservice = require('./unit_test_misc/data_models_webservice');
 const models_cenz = require('./unit_test_misc/data_models_cenz');
+const models_distributed = require('./unit_test_misc/data_models_distributed');
 const requireFromString = require('require-from-string');
 
 //const components_code = require('./unit_test_misc/components_code');
@@ -951,5 +952,19 @@ describe('Cursor based pagination', function(){
     let test_model = data_test.many_to_many_association_connection_cenz_server.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
+
+});
+
+describe('Distributed data models', function(){
+
+  let data_test = require('./unit_test_misc/test-describe/distributed-models');
+  it('ReadById adapter- book', async function(){
+    let opts = funks.getOptions(models_distributed.book);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_adapter_readById.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+  });
+
 
 });

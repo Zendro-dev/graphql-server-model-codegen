@@ -388,7 +388,9 @@ module.exports.getOptions = function(dataModel){
       indices: dataModel.indices,
       definition : stringify_obj(dataModel),
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
-      url: dataModel.url || ""
+      url: dataModel.url || "",
+      regex: dataModel.regex || "",
+      adapterName: dataModel.adapterName || ""
   };
   return opts;
 };
@@ -603,6 +605,11 @@ module.exports.generateCode = function(json_dir, dir_write){
     fs.mkdirSync(dir_write+'/models-cenz-server');
   }
 
+  if(!fs.existsSync(dir_write+'/adapters'))
+  {
+    fs.mkdirSync(dir_write+'/adapters');
+  }
+
   //test
   fs.readdirSync(json_dir).forEach((json_file) => {
       console.log("Reading...", json_file);
@@ -660,6 +667,11 @@ module.exports.generateCode = function(json_dir, dir_write){
             console.log(file_name + ' written successfully!');
           });
 
+      }else if(opts.storageType === 'cenzontle-web-service-adapter'){
+        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+        generateSection("cenz-adapters",opts,file_name).then( ()=>{
+          console.log(file_name + ' written successfully!');
+        });
       }
 
   });
