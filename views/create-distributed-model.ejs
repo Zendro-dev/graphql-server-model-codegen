@@ -1,0 +1,41 @@
+
+
+const adapters = require('../adapters/index');
+
+module.exports = class <%- name -%>{
+
+  /**
+   * constructor - Creates an instance of the model
+   *
+   * @param  {obejct} input    Data for the new instances. Input for each field of the model.
+   */
+
+  constructor({id <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+      this.id = id;
+       <%for(var key in attributes){-%>
+         this.<%=key-%> =<%=key-%>;
+        <%}-%>
+  }
+
+  static get name(){
+    return "<%- nameLc -%>";
+  }
+
+
+  let registry = [<%- registryStr -%>];
+
+  static readById(id) {
+
+    let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
+
+    if(responsibleAdapter.length > 1 ){
+      throw new Error("IRI has no unique match");
+    }else if(responsibleAdapter.length === 0){
+      throw new Error("IRI has no match WS");
+    }
+
+    return adapters[responsibleAdapter[0] ].readById(id);
+
+  }
+
+}
