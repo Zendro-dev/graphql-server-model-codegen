@@ -31,6 +31,26 @@ module.exports = class <%- adapterName -%>{
      });
   }
 
+  static countRecords(search){
+    static countRecords(search){
+      let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
+    count<%- namePlCp -%>(search: $search)
+    }`
+
+      return axios.post(remoteCenzontleURL, {
+          query: query,
+          variables: {
+              search: search
+          }
+      }).then(res => {
+          return res.data.data.count<%- namePlCp -%>;
+      }).catch(error => {
+          error['url'] = remoteCenzontleURL;
+          handleError(error);
+      });
+    }
+  }
+
   static get name(){
     return "<%- adapterName -%>";
   }

@@ -18,3 +18,23 @@ static readById(iri){
 }
 
 `
+
+module.exports.book_adapter_count = `
+static countRecords(search){
+  let query = \`query countBooks($search: searchBookInput){
+countBooks(search: $search)
+}\`
+
+  return axios.post(remoteCenzontleURL, {
+      query: query,
+      variables: {
+          search: search
+      }
+  }).then(res => {
+      return res.data.data.countBooks;
+  }).catch(error => {
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+  });
+}
+`
