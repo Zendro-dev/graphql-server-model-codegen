@@ -481,6 +481,14 @@ describe('Implement date/time types', function(){
     expect(g_migration).to.have.string(test_migration);
   });
 
+  it('Model - Academic Team', async function(){
+    let opts = funks.getOptions(models.academic_Team);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.academic_Team_model_time.replace(/\s/g, '');
+    expect(g_model, 'Incorrect model').to.have.string(test_model);
+  });
+
 });
 
 describe('Update sequelize model to class', function(){

@@ -514,3 +514,24 @@ module.exports.person_description_optional = {
     }
   }
 }
+
+module.exports.academic_Team = {
+  "model" : "academic_Team",
+  "storageType" : "SQL",
+  "attributes" : {
+    "name" : "String",
+    "department" : "String",
+    "subject": "String",
+    "meetings_time": "Time"
+  },
+  "associations":{
+    "members":{
+      "type" : "to_many",
+      "target" : "Researcher",
+      "targetKey" : "AcademicTeam_Id",
+      "keyIn": "Researcher",
+      "targetStorageType" : "sql"
+    }
+  }
+
+}
