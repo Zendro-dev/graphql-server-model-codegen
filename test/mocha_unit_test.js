@@ -974,6 +974,12 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-
+  it('Read All Records adapter- book', async function(){
+    let opts = funks.getOptions(models_distributed.book);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_adapter_read_all.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+  });
 
 });

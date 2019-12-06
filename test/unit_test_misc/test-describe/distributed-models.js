@@ -38,3 +38,35 @@ countBooks(search: $search)
   });
 }
 `
+
+module.exports.book_adapter_read_all = `
+static readAllCursor(search, order, pagination){
+
+  if(pagination === undefined || (pagination.first!==undefined || pagination.cursor !== undefined)){
+
+    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+  booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
+    genre
+    publisher_id
+  }} pageInfo{endCursor hasNextPage  } } }\`
+
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: {
+            search: search,
+            order: order,
+            pagination: pagination
+        }
+    }).then(res => {
+        return res.data.data.booksConnection;
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+
+  }else{
+    throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+  }
+
+}
+`

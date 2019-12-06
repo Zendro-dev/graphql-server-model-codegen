@@ -51,6 +51,23 @@ module.exports = class <%- adapterName -%>{
     }
   }
 
+  static readAllCursor(search, order, pagination){
+    if(pagination === undefined || (pagination.first !== undefined || pagination.cursor!== undefined)){
+      let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
+        <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id <%for(var key in attributes){-%> <%=key %>
+         <%}-%>} } pageInfo{endCursor hasNextPage  } } }`
+
+         return axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
+           return res.data.data.<%- namePl -%>Connection;
+         }).catch(error=>{
+           error['url'] = remoteCenzontleURL;
+           handleError(error);
+         });
+    }else{
+      throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+    }
+  }
+
   static get name(){
     return "<%- adapterName -%>";
   }
