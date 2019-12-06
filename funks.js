@@ -415,7 +415,8 @@ module.exports.getOptions = function(dataModel){
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
       url: dataModel.url || "",
       regex: dataModel.regex || "",
-      adapterName: dataModel.adapterName || ""
+      adapterName: dataModel.adapterName || "",
+      registry: dataModel.registry || []
   };
   return opts;
 };

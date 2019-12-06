@@ -2,6 +2,10 @@
 
 const adapters = require('../adapters/index');
 
+
+
+let registry = [ <%- registry.map( x => '"'+x+'"') -%> ];
+
 module.exports = class <%- name -%>{
 
   /**
@@ -20,9 +24,6 @@ module.exports = class <%- name -%>{
   static get name(){
     return "<%- nameLc -%>";
   }
-
-
-  let registry = [<%- registryStr -%>];
 
   static readById(id) {
 

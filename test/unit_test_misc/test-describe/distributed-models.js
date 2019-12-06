@@ -70,3 +70,23 @@ static readAllCursor(search, order, pagination){
 
 }
 `
+
+module.exports.book_ddm_registry = `
+  let registry = ["BooksOne", "BooksTwo"];
+`
+
+module.exports.book_ddm_readById = `
+static readById(id) {
+
+  let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
+
+  if(responsibleAdapter.length > 1 ){
+    throw new Error("IRI has no unique match");
+  }else if(responsibleAdapter.length === 0){
+    throw new Error("IRI has no match WS");
+  }
+
+  return adapters[responsibleAdapter[0] ].readById(id);
+
+}
+`
