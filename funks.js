@@ -637,6 +637,11 @@ module.exports.generateCode = function(json_dir, dir_write){
     fs.mkdirSync(dir_write+'/adapters');
   }
 
+  if(!fs.existsSync(dir_write+'/models-distributed'))
+  {
+    fs.mkdirSync(dir_write+'/models-distributed');
+  }
+
   //test
   fs.readdirSync(json_dir).forEach((json_file) => {
       console.log("Reading...", json_file);
@@ -667,7 +672,7 @@ module.exports.generateCode = function(json_dir, dir_write){
 
         });
         //generateAssociationsMigrations(opts, dir_write);
-      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server'){
+      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server' || opts.storageType === 'distributed-data-model'){
           let file_name = "";
           file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
           generateSection("schemas",opts,file_name).then( ()=>{
@@ -684,6 +689,11 @@ module.exports.generateCode = function(json_dir, dir_write){
             file_name = dir_write + '/models-cenz-server/' + opts.nameLc + '.js';
             generateSection("models-cenz",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!(from cenz server)');
+            });
+          }else if(opts.storageType === 'distributed-data-model'){
+            file_name = dir_write + '/models-distributed/' + opts.nameLc + '.js';
+            generateSection("distributed-model",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
             });
           }
 
