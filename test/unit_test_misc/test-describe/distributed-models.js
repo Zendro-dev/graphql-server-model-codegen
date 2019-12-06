@@ -90,3 +90,14 @@ static readById(id) {
 
 }
 `
+
+module.exports.book_ddm_count = `
+static countRecords(search) {
+  let promises = registry.map( adapter =>  adapters[adapter].countRecords(search));
+
+  return Promise.all(promises).then( results =>{
+    return results.reduce( (total, current)=> total+current, 0);
+  });
+
+}
+`

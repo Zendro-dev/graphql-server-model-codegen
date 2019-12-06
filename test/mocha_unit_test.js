@@ -998,5 +998,12 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
+  it('Count distributed data model- book', async function(){
+    let opts = funks.getOptions(models_distributed.book_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_ddm_count.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+  });
 
 });
