@@ -47,4 +47,21 @@ module.exports = class <%- name -%>{
     });
   }
 
+
+  static readAllCursor(search, order, pagination) {
+
+    if(pagination === undefined || (pagination.first!==undefined || pagination.cursor !== undefined)){
+
+      let promises = registry.map( adapter => adapters[adapter].readAllCursor(search, order,pagination) );
+
+      return Promise.all(promises).then( results => {
+        return results.reduce( (total, current)=> {return total.concat(current.edges)}, [] );
+      }).then( edges => {  return {edges: edges} } );
+
+    }else{
+      throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+    }
+  }
+
+
 }
