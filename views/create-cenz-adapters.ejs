@@ -31,7 +31,6 @@ module.exports = class <%- adapterName -%>{
      });
   }
 
-  static countRecords(search){
     static countRecords(search){
       let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
     count<%- namePlCp -%>(search: $search)
@@ -49,7 +48,6 @@ module.exports = class <%- adapterName -%>{
           handleError(error);
       });
     }
-  }
 
   static readAllCursor(search, order, pagination){
     if(pagination === undefined || (pagination.first !== undefined || pagination.cursor!== undefined)){
