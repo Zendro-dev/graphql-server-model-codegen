@@ -1,8 +1,8 @@
 
 
 const adapters = require('../adapters/index');
-
-
+const globals = require('../config/globals');
+const helper = require('../utils/helper');
 
 let registry = [ <%- registry.map( x => '"'+x+'"') -%> ];
 
