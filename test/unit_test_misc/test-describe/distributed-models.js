@@ -117,8 +117,8 @@ static readAllCursor(search, order, pagination) {
 
         let ordered_records = helper.orderRecords(nodes, order);
         let pagigated_records = helper.paginateRecords(ordered_records, pagination.first);
-
-        return helper.toGraphQLConnectionObject(pagigated_records, this);
+        let hasNextPage = ordered_records.length > pagination.first;
+        return helper.toGraphQLConnectionObject(pagigated_records, this, hasNextPage );
       }
     );
 
