@@ -1,8 +1,10 @@
-
+const _ = require('lodash');
 
 const adapters = require('../adapters/index');
 const globals = require('../config/globals');
 const helper = require('../utils/helper');
+
+const definition = <%- definition -%>;
 
 let registry = [ <%- registry.map( x => '"'+x+'"') -%> ];
 
@@ -71,5 +73,25 @@ module.exports = class <%- name -%>{
     }
   }
 
+
+  static get definition(){
+    return definition;
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    attributes.push('id');
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
 
 }
