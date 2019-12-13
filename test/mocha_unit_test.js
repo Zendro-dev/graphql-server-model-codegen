@@ -987,7 +987,7 @@ describe('Distributed data models', function(){
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.book_ddm_registry.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
   it('ReadById distributed data model- book', async function(){
@@ -995,7 +995,7 @@ describe('Distributed data models', function(){
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.book_ddm_readById.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
   it('Count distributed data model- book', async function(){
@@ -1003,7 +1003,7 @@ describe('Distributed data models', function(){
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.book_ddm_count.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
   it('Read all distributed data model- book', async function(){
@@ -1011,7 +1011,7 @@ describe('Distributed data models', function(){
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.book_ddm_read_all.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
 });
