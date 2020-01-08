@@ -1014,4 +1014,12 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
+  it('To-many association distributed data model- person', async function(){
+    let opts = funks.getOptions(models_distributed.person_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.person_ddm_many_association.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
 });

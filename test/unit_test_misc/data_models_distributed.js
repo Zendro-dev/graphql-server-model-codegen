@@ -66,3 +66,43 @@ module.exports.book_ddm =
   }
 
 }
+
+module.exports.person_ddm =  {
+    "model": "Person",
+    "storageType": "distributed-data-model",
+    "registry": ["PeopleOne","PeopleTwo" ],
+    "attributes" :{
+      "firstName": "String",
+      "lastName": "String",
+      "email" : "String",
+      "companyId": "Int"
+    },
+
+    "associations" : {
+      "works" : {
+        "type": "to_many",
+        "target": "Book",
+        "targetKey": "bookId",
+        "sourceKey": "personId",
+        "keysIn" : "books_to_people",
+        "targetStorageType": "sql"
+      },
+
+      "company":{
+        "type": "to_one",
+        "target": "publi_sher",
+        "targetKey": "companyId",
+        "keyIn": "Person",
+        "targetStorageType": "cenz_server"
+      },
+
+      "dogs" :{
+        "type": "to_many",
+        "target": "Dog",
+        "targetKey": "personId",
+        "keyIn": "Dog",
+        "targetStorageType": "sql"
+      }
+    }
+
+  }

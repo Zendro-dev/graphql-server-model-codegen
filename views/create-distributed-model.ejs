@@ -95,4 +95,16 @@ module.exports = class <%- name -%>{
     return data_values;
   }
 
+  <% let associations_temp = associations["hasMany"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
+      if(search === undefined)
+      {
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"}, order, pagination);
+      }else{
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] }, order, pagination )
+      }
+    }
+  <%}-%>
+
 }

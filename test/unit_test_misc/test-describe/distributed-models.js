@@ -139,3 +139,15 @@ static readAllCursor(search, order, pagination) {
 }
 
 `
+
+module.exports.person_ddm_many_association = `
+dogsConnectionImpl({search,order,pagination}){
+  if(search === undefined)
+  {
+    return models.dog.readAllCursor({"field" : "personId", "value":{"value":this.id }, "operator": "eq"}, order, pagination);
+  }else{
+    return models.dog.readAllCursor({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.id }, "operator": "eq"} , search] }, order, pagination )
+  }
+}
+
+`
