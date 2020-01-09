@@ -160,6 +160,17 @@ module.exports = class <%- name -%>{
 
   <% let associations_temp = associations["hasMany"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    countFiltered<%=associations_temp[i].name_cp%>Impl ({search}){
+
+      if(search === undefined)
+      {
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} );
+      }else{
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] })
+      }
+    }
+
     <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
       if(search === undefined)
       {
@@ -167,6 +178,25 @@ module.exports = class <%- name -%>{
       }else{
         return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] }, order, pagination )
       }
+    }
+  <%}-%>
+
+  <% associations_temp = associations["belongsToMany"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('countFiltered<%=associations_temp[i].name_cp%>Impl is not implemented in the model');
+    }
+
+    <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>ConnectionImpl is not implemented in the model');
+
     }
   <%}-%>
 

@@ -181,3 +181,15 @@ ownerImpl (search){
     }
   }
 `
+
+module.exports.person_ddm_count_association = `
+countFilteredDogsImpl ({search}){
+
+  if(search === undefined)
+  {
+    return models.dog.countRecords({"field" : "personId", "value":{"value":this.id }, "operator": "eq"} );
+  }else{
+    return models.dog.countRecords({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.id }, "operator": "eq"} , search] })
+  }
+}
+`
