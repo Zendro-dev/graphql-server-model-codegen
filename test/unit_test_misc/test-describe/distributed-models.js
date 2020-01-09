@@ -77,7 +77,7 @@ module.exports.book_ddm_registry = `
 
 module.exports.book_ddm_readById = `
 static readById(id) {
-
+  if(id!==null){
   let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
   if(responsibleAdapter.length > 1 ){
@@ -87,7 +87,7 @@ static readById(id) {
   }
 
   return adapters[responsibleAdapter[0] ].readById(id);
-
+  }
 }
 `
 

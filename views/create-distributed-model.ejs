@@ -1,8 +1,9 @@
 const _ = require('lodash');
-
+const path = require('path');
 const adapters = require('../adapters/index');
 const globals = require('../config/globals');
 const helper = require('../utils/helper');
+const models = require(path.join(__dirname, '..', 'models_index.js'));
 
 const definition = <%- definition -%>;
 
@@ -28,17 +29,17 @@ module.exports = class <%- name -%>{
   }
 
   static readById(id) {
+    if(id!==null){
+      let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
-    let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
+      if(responsibleAdapter.length > 1 ){
+        throw new Error("IRI has no unique match");
+      }else if(responsibleAdapter.length === 0){
+        throw new Error("IRI has no match WS");
+      }
 
-    if(responsibleAdapter.length > 1 ){
-      throw new Error("IRI has no unique match");
-    }else if(responsibleAdapter.length === 0){
-      throw new Error("IRI has no match WS");
-    }
-
-    return adapters[responsibleAdapter[0] ].readById(id);
-
+      return adapters[responsibleAdapter[0] ].readById(id);
+   }
   }
 
   static countRecords(search){
