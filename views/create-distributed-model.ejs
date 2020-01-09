@@ -96,6 +96,38 @@ module.exports = class <%- name -%>{
     return data_values;
   }
 
+  <%let associations_one = associations["belongsTo"]-%>
+  <% for(let i=0; i < associations_one.length; i++){ -%>
+
+  <%=associations_one[i].name%>Impl (search){
+      if(search === undefined){
+        return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
+      }else if(this.<%=associations_one[i].targetKey%> !== null){
+        let id_search = {
+            "field": "id",
+            "value": {
+              "value": this.<%=associations_one[i].targetKey%>
+            },
+            "operator": "eq"
+        }
+
+        let ext_search = {
+          "operator": "and",
+          "search": [id_search, search]
+        }
+
+        return models.<%=associations_one[i].target_lc%>.readAllCursor(ext_search)
+        .then( found =>{
+            if(found.edges.length > 0){
+              return found.edges[0].node;
+            }
+            return null;
+        });
+      }
+    }
+  <%}-%>
+
+
   <% let associations_temp = associations["hasMany"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){

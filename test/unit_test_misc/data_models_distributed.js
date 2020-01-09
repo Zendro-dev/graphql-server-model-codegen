@@ -106,3 +106,25 @@ module.exports.person_ddm =  {
     }
 
   }
+
+
+module.exports.dog_ddm =  {
+    "model" : "Dog",
+    "storageType" : "distributed-data-model",
+    "registry": ["DogsOne", "DogsTwo"],
+    "attributes" : {
+      "name" : "String",
+      "breed" : "String",
+      "personId": "String"
+    },
+
+    "associations" : {
+      "owner" : {
+        "type" : "to_one",
+        "target" : "Person",
+        "targetKey" : "personId",
+        "keyIn" : "Dog",
+        "targetStorageType" : "sql"
+      }
+    }
+  }

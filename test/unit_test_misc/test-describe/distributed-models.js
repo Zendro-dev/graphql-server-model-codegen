@@ -151,3 +151,33 @@ dogsConnectionImpl({search,order,pagination}){
 }
 
 `
+module.exports.dog_ddm_one_association = `
+ownerImpl (search){
+    if(search === undefined){
+      return models.person.readById(this.personId);
+    }else if(this.personId !== null){
+      let id_search = {
+          "field": "id",
+          "value": {
+            "value": this.personId
+          },
+          "operator": "eq"
+      }
+
+      let ext_search = {
+        "operator": "and",
+        "search": [id_search, search]
+      }
+
+      return models.person.readAllCursor(ext_search)
+      .then( found =>{
+
+          if(found.edges.length > 0){
+            return  found.edges[0].node;
+          }
+          return null;
+      });
+
+    }
+  }
+`
