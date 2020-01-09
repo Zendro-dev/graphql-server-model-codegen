@@ -127,6 +127,36 @@ module.exports = class <%- name -%>{
     }
   <%}-%>
 
+  <%associations_one = associations["hasOne"]-%>
+  <% for(let i=0; i < associations_one.length; i++){ -%>
+    <%=associations_one[i].name%>Impl(search){
+
+      let simple_search = {
+        "field": "<%=associations_one[i].targetKey%>",
+        "value": {
+          "value": this.id
+        },
+        "operator": "eq"
+      }
+
+      let ext_search = simple_search;
+
+      if(search !== undefined){
+        ext_search = {
+          "operator": "and",
+          "search": [simple_search, search]
+        }
+      }
+
+      return models.<%=associations_one[i].target_lc%>.readAllCursor(ext_search)
+      .then( found => { if(found.edges.length > 0){
+        return found.edges[0].node;
+      }
+        return null;
+      });
+    }
+  <%}-%>
+
 
   <% let associations_temp = associations["hasMany"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
