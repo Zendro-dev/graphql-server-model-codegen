@@ -192,11 +192,27 @@ module.exports = class <%- name -%>{
     <%=associations_one[i].name%>Impl (search){
         if(search === undefined){
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
-        }else{
-          /*
-          YOUR CODE GOES HERE
-          */
-          throw new Error('<%=associations_one[i].name%>Impl is not implemented in the model');
+        }else if(this.<%=associations_one[i].targetKey%> !== null){
+          let id_search = {
+              "field": "id",
+              "value": {
+                "value": this.<%=associations_one[i].targetKey%>
+              },
+              "operator": "eq"
+          }
+
+          let ext_search = {
+            "operator": "and",
+            "search": [id_search, search]
+          }
+
+          return models.<%=associations_one[i].target_lc%>.readAll(ext_search)
+          .then( found =>{
+              if(found){
+                return found[0]
+              }
+              return found;
+          });
         }
       }
     <%}-%>
@@ -205,28 +221,29 @@ module.exports = class <%- name -%>{
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
     <%=associations_one[i].name%>Impl (search){
-        if(search === undefined){
-          let simple_search = {
-            "field": "<%=associations_one[i].targetKey%>",
-            "value": {
-              "value": this.id
-            },
-            "operator": "eq"
-          }
+      let simple_search = {
+        "field": "<%=associations_one[i].targetKey%>",
+        "value": {
+          "value": this.id
+        },
+        "operator": "eq"
+      }
 
-          return models.<%=associations_one[i].target_lc%>.readAll(simple_search)
-          .then( found => { if(found){
-            return found[0];
-          }
-            return found;
-          })
+      let ext_search = simple_search;
 
-        }else{
-          /*
-          YOUR CODE GOES HERE
-          */
-          throw new Error('<%=associations_one[i].name%>Impl is not implemented in the model');
+      if(search !== undefined){
+        ext_search = {
+          "operator": "and",
+          "search": [simple_search, search]
         }
+      }
+
+      return models.<%=associations_one[i].target_lc%>.readAll(ext_search)
+      .then( found => { if(found){
+        return found[0];
+      }
+        return found;
+      })
       }
     <%}-%>
 
