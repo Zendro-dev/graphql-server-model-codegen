@@ -535,3 +535,23 @@ module.exports.academic_Team = {
   }
 
 }
+
+module.exports.dog_one_assoc = {
+  "model" : "Dog",
+  "storageType" : "sql",
+  "attributes" : {
+    "name" : "String",
+    "breed" : "String",
+    "personId": "Int"
+  },
+
+  "associations" : {
+    "owner" : {
+      "type" : "to_one",
+      "target" : "Person",
+      "targetKey" : "personId",
+      "keyIn" : "Dog",
+      "targetStorageType" : "sql"
+    }
+  }
+}
