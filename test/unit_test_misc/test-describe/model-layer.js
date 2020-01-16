@@ -196,14 +196,15 @@ static updateOne(input){
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
       .then((valSuccess) => {
           return super.findByPk(input.id)
-              .then(item => {
+              .then(async item => {
+                  let promises_associations = [];
                   if (input.addAuthors) {
-                      item.addAuthors(input.addAuthors);
+                      promises_associations.push(item.addAuthors(input.addAuthors) );
                   }
                   if (input.removeAuthors) {
-                      item.removeAuthors(input.removeAuthors);
+                      promises_associations.push(item.removeAuthors(input.removeAuthors));
                   }
-                  return item.update(input);
+                  return  Promise.all(promises_associations).then( () => { return item.update(input); } );
               });
       }).catch((err) => {
           return err

@@ -982,4 +982,12 @@ describe('To-one associations editing', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  it('Update with to-one association - person', async function(){
+    let opts = funks.getOptions(models.person_one_assoc);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.person_update_model.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
 });
