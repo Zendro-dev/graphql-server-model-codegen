@@ -113,10 +113,11 @@ static addOne(input){
       .then((valSuccess) => {
           return super.create(input)
               .then(item => {
+                let promises_associations = [];
                   if (input.addAuthors) {
-                      item.setAuthors(input.addAuthors);
+                    promises_associations.push( item.setAuthors(input.addAuthors) );
                   }
-                  return item;
+                  return  Promise.all(promises_associations).then( () => { return item } );
               });
       }).catch((err) => {
           return err

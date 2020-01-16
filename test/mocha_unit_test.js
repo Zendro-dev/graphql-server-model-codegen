@@ -966,12 +966,20 @@ describe('Cursor based pagination', function(){
 describe('To-one associations editing', function(){
 
   let data_test = require('./unit_test_misc/test-describe/to-one-assoc-edit');
-  it('Associations in schema - person', async function(){
+  it('Associations in schema - dog', async function(){
     let opts = funks.getOptions(models.dog_one_assoc);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     let test_schema = data_test.dog_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
+
+  it('AddOne with to-one association - person', async function(){
+    let opts = funks.getOptions(models.person_one_assoc);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.person_addOne_model.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 
 });

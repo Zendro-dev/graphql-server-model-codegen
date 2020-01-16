@@ -6,12 +6,13 @@ updatePerson(id: ID!, firstName: String, lastName: String, email: String , addDo
 
 module.exports.person_model = `
 .then(item => {
+    let promises_associations = [];
     if (input.addDogs) {
-        item.setDogs(input.addDogs);
+      promises_associations.push(  item.setDogs(input.addDogs));
     }
     if (input.addBooks) {
-        item.setBooks(input.addBooks);
+        promises_associations.push( item.setBooks(input.addBooks));
     }
-    return item;
+    return  Promise.all(promises_associations).then( () => { return item } );
 });
 `

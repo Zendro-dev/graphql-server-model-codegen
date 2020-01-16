@@ -194,13 +194,22 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         .then((valSuccess) => {
             return super.create(input)
                 .then(item => {
+                  let promises_associations = [];
                   <%associations_temp = associations["hasMany"].concat(associations["belongsToMany"])-%>
                   <%for(let i=0; i < associations_temp.length; i++){-%>
                     <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-                      if(input.add<%=associations_temp[i].name_cp-%>){item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);}
+                      if(input.add<%=associations_temp[i].name_cp-%>){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));}
                     <%}-%>
                     <%}-%>
-                    return item;
+
+                    <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
+                    <%for(let i=0; i < associations_temp.length; i++){-%>
+                      <%if(associations_temp[i].targetStorageType === 'sql'){-%>
+                        if(input.add<%=associations_temp[i].name_cp-%>){ promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));}
+                      <%}-%>
+                      <%}-%>
+
+                    return  Promise.all(promises_associations).then( () => { return item } );
                 });
         }).catch((err) => {
             return err

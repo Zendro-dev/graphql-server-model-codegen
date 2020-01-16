@@ -555,3 +555,25 @@ module.exports.dog_one_assoc = {
     }
   }
 }
+
+module.exports.person_one_assoc = {
+  "model": "Person",
+  "storageType": "sql",
+  "attributes" :{
+    "firstName": "String",
+    "lastName": "String",
+    "email" : "String",
+    "companyId": "Int"
+  },
+
+  "associations" : {
+    "unique_pet" :{
+      "type": "to_one",
+      "target": "Dog",
+      "targetKey": "personId",
+      "keyIn": "Dog",
+      "targetStorageType": "sql"
+    }
+  }
+
+}
