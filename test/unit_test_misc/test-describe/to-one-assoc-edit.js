@@ -30,12 +30,12 @@ static updateOne(input) {
                 .then(async item => {
                     let promises_associations = [];
 
-                    if(input.addUnique_pet){
+                    if(input.addUnique_pet || input.addUnique_pet === null ){
                         promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
                     }
 
                     let unique_pet = await item.getUnique_pet();
-                    if(input.removeUnique_pet === null || (unique_pet && input.removeUnique_pet === unique_pet.id) ){
+                    if( unique_pet && input.removeUnique_pet === unique_pet.id ){
                       promises_associations.push(item.setUnique_pet(null) );
                     }
 
