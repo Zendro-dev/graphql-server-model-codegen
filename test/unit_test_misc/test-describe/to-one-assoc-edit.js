@@ -34,9 +34,11 @@ static updateOne(input) {
                         promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
                     }
 
-                    let unique_pet = await item.getUnique_pet();
-                    if( unique_pet && input.removeUnique_pet === unique_pet.id ){
-                      promises_associations.push(item.setUnique_pet(null) );
+                    if(input.removeUnique_pet ){
+                        let unique_pet = await item.getUnique_pet();
+                        if (unique_pet && input.removeUnique_pet === unique_pet.id) {
+                            promises_associations.push(item.setUnique_pet(null));
+                        }
                     }
 
                     return  Promise.all(promises_associations).then( () => { return item.update(input); } );
