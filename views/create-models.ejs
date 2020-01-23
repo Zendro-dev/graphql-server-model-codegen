@@ -65,11 +65,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   }
 
   static readById( id ){
-    return <%- name -%>.findOne({
-        where: {
-            id: id
-        }
-    });
+    let options = {};
+    options['where'] = {};
+    options['where'][this.getIdAttribute()] = id;
+    return <%- name -%>.findOne(options); 
   }
 
   static countRecords(search){
@@ -510,6 +509,13 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     }
   <%}-%>
 
+  static getIdAttribute() {
+    return <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId; 
+  }
+
+  static getIdType() {
+    return <%- name -%>.definition.attributes[this.getIdAttribute()];  
+  }
 
   static get definition(){
     return definition;
