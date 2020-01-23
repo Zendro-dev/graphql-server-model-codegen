@@ -510,7 +510,15 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   <%}-%>
 
   static getIdAttribute() {
-    return <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId; 
+    let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
+    let idType = <%- name -%>.definition.attributes[internalId];
+    if(idType === undefined) {
+      return new Error(`Attribute ${internalId} does not exist`)
+    }
+    if(!(idType === "String" || idType === "Int" || idType === "Float")) {
+      return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
+    }
+    return internalId; 
   }
 
   static getIdType() {
