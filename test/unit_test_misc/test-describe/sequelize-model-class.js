@@ -33,11 +33,10 @@ static associate(models){
 `
 
 module.exports.book_model_read_by_id = `
-static readById( id ){
-  return Book.findOne({
-      where: {
-          id: id
-      }
-  });
+static readById(id) {
+  let options = {};
+  options['where'] = {};
+  options['where'][this.getIdAttribute()] = id;
+  return Book.findOne(options);
 }
 `
