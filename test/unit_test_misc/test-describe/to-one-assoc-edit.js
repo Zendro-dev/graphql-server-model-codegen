@@ -8,14 +8,19 @@ static addOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then((valSuccess) => {
             return super.create(input)
-                .then(item => {
-
+                .then(async item => {
                     let promises_associations = [];
-                    if(input.addUnique_pet){
-                      promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
+                    if (input.addUnique_pet) {
+                      let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "Dog", "personId", input.addUnique_pet);
+                      if(unique_pet){
+                          promises_associations.push(item.setUnique_pet(input.addUnique_pet));
+                      }
                     }
-                    return  Promise.all(promises_associations).then( () => { return item } );
-                });
+
+                    return Promise.all(promises_associations).then(() => {
+                        return item
+                    });
+                }).catch(error => {return error});
         }).catch((err) => {
             return err
         })
