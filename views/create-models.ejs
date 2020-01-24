@@ -67,7 +67,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static readById( id ){
     let options = {};
     options['where'] = {};
-    options['where'][this.getIdAttribute()] = id;
+    options['where'][this.idAttribute()] = id;
     return <%- name -%>.findOne(options); 
   }
 
@@ -509,7 +509,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     }
   <%}-%>
 
-  static getIdAttribute() {
+  static idAttribute() {
     let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
     let idType = <%- name -%>.definition.attributes[internalId];
     if(idType === undefined) {
@@ -521,8 +521,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return internalId; 
   }
 
-  static getIdType() {
-    return <%- name -%>.definition.attributes[this.getIdAttribute()];  
+  static idAttributeType() {
+    return <%- name -%>.definition.attributes[this.idAttribute()];  
   }
 
   static get definition(){
@@ -531,6 +531,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   static base64Decode(cursor){
     return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  getIdValue() {
+    return this[<%- name -%>.idAttribute()]
   }
 
 
