@@ -205,7 +205,7 @@ static updateOne(input){
                       promises_associations.push(item.removeAuthors(input.removeAuthors));
                   }
                   return  Promise.all(promises_associations).then( () => { return item.update(input); } );
-              });
+              }).catch(error => {return error});
       }).catch((err) => {
           return err
       })

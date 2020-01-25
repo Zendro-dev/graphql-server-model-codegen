@@ -258,16 +258,26 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                   <%associations_temp = associations["hasOne"].concat(associations["belongsTo"])-%>
                   <%for(let i=0; i < associations_temp.length; i++){-%>
                     <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-                      if(input.add<%=associations_temp[i].name_cp-%> || input.add<%=associations_temp[i].name_cp-%> === null ){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));}
+                      if(input.add<%=associations_temp[i].name_cp-%> ){
+                          let <%=associations_temp[i].name-%> = await helper.checkInverseAssociation(models.<%- nameLc %>, models.<%=associations_temp[i].target_lc-%>, "<%=associations_temp[i].keyIn_lc-%>", "<%=associations_temp[i].targetKey-%>", input.add<%=associations_temp[i].name_cp-%>);
+                          if(<%=associations_temp[i].name-%> ){
+                            promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
+                          }
+                      }else if(input.add<%=associations_temp[i].name_cp-%> === null ){
+                        promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
+                      }
 
                       if(input.remove<%=associations_temp[i].name_cp-%>){
                           let <%=associations_temp[i].name-%> = await item.get<%=associations_temp[i].name_cp-%>();
                           if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === <%=associations_temp[i].name-%>.id){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(null));}
+                          else{
+                            throw new Error("The association you're trying to remove it doesn't exists");
+                          }
                       }
                     <%}-%>
                   <%}-%>
                     return  Promise.all(promises_associations).then( () => { return item.update(input); } );
-                });
+                }).catch(error => {return error});
         }).catch((err) => {
             return err
         })

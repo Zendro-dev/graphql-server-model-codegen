@@ -35,19 +35,26 @@ static updateOne(input) {
                 .then(async item => {
                     let promises_associations = [];
 
-                    if(input.addUnique_pet || input.addUnique_pet === null ){
-                        promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
+                    if(input.addUnique_pet ){
+                        let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "dog", "personId", input.addUnique_pet);
+                        if(unique_pet){
+                            promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
+                        }
+                    }else if(input.addUnique_pet === null){
+                      promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
                     }
 
                     if(input.removeUnique_pet ){
                         let unique_pet = await item.getUnique_pet();
                         if (unique_pet && input.removeUnique_pet === unique_pet.id) {
                             promises_associations.push(item.setUnique_pet(null));
+                        }else{
+                          throw new Error("The association you're trying to remove it doesn't exists");
                         }
                     }
 
                     return  Promise.all(promises_associations).then( () => { return item.update(input); } );
-                });
+                }).catch(error => {return error});
         }).catch((err) => {
             return err
         })
