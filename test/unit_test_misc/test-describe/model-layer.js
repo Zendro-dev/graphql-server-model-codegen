@@ -112,13 +112,13 @@ static addOne(input){
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
       .then((valSuccess) => {
           return super.create(input)
-              .then(item => {
+              .then(async item => {
                 let promises_associations = [];
                   if (input.addAuthors) {
                     promises_associations.push( item.setAuthors(input.addAuthors) );
                   }
                   return  Promise.all(promises_associations).then( () => { return item } );
-              });
+              }).catch(error => {return error});
       }).catch((err) => {
           return err
       })

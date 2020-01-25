@@ -11,7 +11,7 @@ static addOne(input) {
                 .then(async item => {
                     let promises_associations = [];
                     if (input.addUnique_pet) {
-                      let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "Dog", "personId", input.addUnique_pet);
+                      let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "dog", "personId", input.addUnique_pet);
                       if(unique_pet){
                           promises_associations.push(item.setUnique_pet(input.addUnique_pet));
                       }

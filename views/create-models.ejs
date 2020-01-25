@@ -206,7 +206,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                     <%for(let i=0; i < associations_temp.length; i++){-%>
                       <%if(associations_temp[i].targetStorageType === 'sql'){-%>
                         if(input.add<%=associations_temp[i].name_cp-%>){
-                          let <%=associations_temp[i].name-%> = await helper.checkInverseAssociation(models.<%- nameLc %>, models.<%=associations_temp[i].target_lc-%>, "<%=associations_temp[i].keyIn-%>", "<%=associations_temp[i].targetKey-%>", input.add<%=associations_temp[i].name_cp-%>);
+                          let <%=associations_temp[i].name-%> = await helper.checkInverseAssociation(models.<%- nameLc %>, models.<%=associations_temp[i].target_lc-%>, "<%=associations_temp[i].keyIn_lc-%>", "<%=associations_temp[i].targetKey-%>", input.add<%=associations_temp[i].name_cp-%>);
                           if(<%=associations_temp[i].name-%> ){
                               promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
                           }
