@@ -110,7 +110,8 @@ dogs: function({
 module.exports.add_one_model = `
 static addOne(input){
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-      .then((valSuccess) => {
+      .then(async (valSuccess) => {
+          let associations_check = {};
           return super.create(input)
               .then(async item => {
                 let promises_associations = [];

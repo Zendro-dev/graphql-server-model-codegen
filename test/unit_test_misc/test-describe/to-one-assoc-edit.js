@@ -6,21 +6,27 @@ updateDog(id: ID!, name: String, breed: String, personId: Int, addOwner: ID,remo
 module.exports.person_addOne_model = `
 static addOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then((valSuccess) => {
+        .then(async (valSuccess) => {
+          let associations_check = {};
+          if(input.addUnique_pet){
+              let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "dog", "personId", input.addUnique_pet);
+              associations_check['unique_pet'] = unique_pet;
+          }
+
             return super.create(input)
                 .then(async item => {
                     let promises_associations = [];
-                    if (input.addUnique_pet) {
-                      let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "dog", "personId", input.addUnique_pet);
-                      if(unique_pet){
-                          promises_associations.push(item.setUnique_pet(input.addUnique_pet));
-                      }
+
+                    if (input.addUnique_pet && associations_check['unique_pet']) {
+                        promises_associations.push(item.setUnique_pet(input.addUnique_pet));
                     }
 
                     return Promise.all(promises_associations).then(() => {
                         return item
                     });
-                }).catch(error => {return error});
+                }).catch(error => {
+                    return error
+                });
         }).catch((err) => {
             return err
         })

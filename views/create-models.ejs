@@ -191,7 +191,18 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   static addOne(input){
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then((valSuccess) => {
+        .then(async (valSuccess) => {
+          let associations_check = {};
+          <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
+          <%for(let i=0; i < associations_temp.length; i++){-%>
+            <%if(associations_temp[i].targetStorageType === 'sql'){-%>
+              if(input.add<%=associations_temp[i].name_cp-%>){
+                let <%=associations_temp[i].name-%> = await helper.checkInverseAssociation(models.<%- nameLc %>, models.<%=associations_temp[i].target_lc-%>, "<%=associations_temp[i].keyIn_lc-%>", "<%=associations_temp[i].targetKey-%>", input.add<%=associations_temp[i].name_cp-%>);
+                associations_check['<%=associations_temp[i].name-%>'] = <%=associations_temp[i].name-%>;
+              }
+            <%}-%>
+            <%}-%>
+
             return super.create(input)
                 .then(async item => {
                   let promises_associations = [];
@@ -205,11 +216,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                     <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
                     <%for(let i=0; i < associations_temp.length; i++){-%>
                       <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-                        if(input.add<%=associations_temp[i].name_cp-%>){
-                          let <%=associations_temp[i].name-%> = await helper.checkInverseAssociation(models.<%- nameLc %>, models.<%=associations_temp[i].target_lc-%>, "<%=associations_temp[i].keyIn_lc-%>", "<%=associations_temp[i].targetKey-%>", input.add<%=associations_temp[i].name_cp-%>);
-                          if(<%=associations_temp[i].name-%> ){
-                              promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
-                          }
+                        if(input.add<%=associations_temp[i].name_cp-%> && associations_check['<%=associations_temp[i].name-%>']){
+                          promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
                         }
                       <%}-%>
                       <%}-%>
