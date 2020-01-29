@@ -28,7 +28,7 @@ module.exports = class <%- name -%>{
     return "<%- nameLc -%>";
   }
 
-  static readById(id) {
+  static async readById(id) {
     if(id!==null){
       let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -38,7 +38,7 @@ module.exports = class <%- name -%>{
         throw new Error("IRI has no match WS");
       }
 
-      return adapters[responsibleAdapter[0] ].readById(id);
+      return new <%- name -%>(await adapters[responsibleAdapter[0] ].readById(id));
    }
   }
 
@@ -134,7 +134,7 @@ module.exports = class <%- name -%>{
       let simple_search = {
         "field": "<%=associations_one[i].targetKey%>",
         "value": {
-          "value": this.id
+          "value": this.<%=associations_temp[i].targetKey%>
         },
         "operator": "eq"
       }
@@ -174,9 +174,9 @@ module.exports = class <%- name -%>{
     <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
       if(search === undefined)
       {
-        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"}, order, pagination);
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"}, order, pagination);
       }else{
-        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] }, order, pagination )
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} , search] }, order, pagination )
       }
     }
   <%}-%>
