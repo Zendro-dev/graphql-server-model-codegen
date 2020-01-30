@@ -111,15 +111,21 @@ module.exports.add_one_model = `
 static addOne(input){
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
       .then(async (valSuccess) => {
-          let associations_check = {};
-          return super.create(input)
-              .then(async item => {
-                let promises_associations = [];
-                  if (input.addAuthors) {
-                    promises_associations.push( item.setAuthors(input.addAuthors) );
-                  }
-                  return  Promise.all(promises_associations).then( () => { return item } );
-              }).catch(error => {return error});
+
+        try{
+          const result = await sequelize.transaction( async (t) =>{
+
+            let item = await super.create(input, {transaction : t});
+            let promises_associations = [];
+            if (input.addAuthors) {
+              promises_associations.push( item.setAuthors(input.addAuthors) );
+            }
+          return  Promise.all(promises_associations).then( () => { return item } );
+        });
+         return result;
+        }catch(error){
+          return error;
+        }
       }).catch((err) => {
           return err
       })

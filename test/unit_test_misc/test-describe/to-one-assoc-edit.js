@@ -7,26 +7,30 @@ module.exports.person_addOne_model = `
 static addOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
-          let associations_check = {};
-          if(input.addUnique_pet){
-              let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "dog", "personId", input.addUnique_pet);
-              associations_check['unique_pet'] = unique_pet;
+
+          try{
+            const result = await sequelize.transaction( async (t) =>{
+
+              let item = await super.create(input, {transaction : t});
+
+              let promises_associations = [];
+              if (input.addUnique_pet) {
+                let wrong_ids = await helper.checkExistence(input.addUnique_pet, models.dog);
+                if(wrong_ids.length > 0 ){
+                  throw new Error(\`Ids \${wrong_ids.join(",")} in model dog were not found.\`);
+                }else{
+                  promises_associations.push(item.setUnique_pet(input.addUnique_pet));
+                }
+              }
+
+              return Promise.all(promises_associations).then(() => {return item});
+            });
+
+           return result;
+          }catch(error){
+            return error;
           }
 
-            return super.create(input)
-                .then(async item => {
-                    let promises_associations = [];
-
-                    if (input.addUnique_pet && associations_check['unique_pet']) {
-                        promises_associations.push(item.setUnique_pet(input.addUnique_pet));
-                    }
-
-                    return Promise.all(promises_associations).then(() => {
-                        return item
-                    });
-                }).catch(error => {
-                    return error
-                });
         }).catch((err) => {
             return err
         })
