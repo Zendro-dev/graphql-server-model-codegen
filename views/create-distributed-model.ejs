@@ -28,7 +28,7 @@ module.exports = class <%- name -%>{
     return "<%- nameLc -%>";
   }
 
-  static async readById(id) {
+  static readById(id) {
     if(id!==null){
       let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -38,8 +38,8 @@ module.exports = class <%- name -%>{
         throw new Error("IRI has no match WS");
       }
 
-      return new <%- name -%>(await adapters[responsibleAdapter[0] ].readById(id));
-   }
+      return adapters[responsibleAdapter[0] ].readById(id)).then(result => new <%- name -%>(result));
+    }
   }
 
   static countRecords(search){
