@@ -270,10 +270,18 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                           throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
                         }else{
                           promises_associations.push(item.add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
-                        }                          
+                        }
                       }
 
-                      if(input.remove<%=associations_temp[i].name_cp-%>){promises_associations.push(item.remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>));}
+                      if(input.remove<%=associations_temp[i].name_cp-%>){
+                        let ids_associated = await item.get<%=associations_temp[i].name_cp-%>().map(t => `${t.id}`);
+                        input.remove<%=associations_temp[i].name_cp-%>.forEach( id =>{
+                            if(! ids_associated.includes(id)){
+                              throw new Error(`The association with id ${id} that you're trying to remove desn't exist` )
+                            }
+                        });
+                        promises_associations.push(item.remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>));
+                      }
                     <%}-%>
                   <%}-%>
 

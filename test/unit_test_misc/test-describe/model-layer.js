@@ -220,6 +220,12 @@ static updateOne(input){
                     }
                   }
                   if (input.removeAuthors) {
+                    let ids_associated = await item.getAuthors().map(t => \`\${t.id}\`);
+                    input.removeAuthors.forEach( id =>{
+                        if(! ids_associated.includes(id)){
+                          throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\` )
+                        }
+                    });
                       promises_associations.push(item.removeAuthors(input.removeAuthors));
                   }
                   return  Promise.all(promises_associations).then( () => { return item.update(input); } );
