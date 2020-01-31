@@ -212,7 +212,12 @@ static updateOne(input){
               .then(async item => {
                   let promises_associations = [];
                   if (input.addAuthors) {
-                      promises_associations.push(item.addAuthors(input.addAuthors) );
+                    let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
+                    if(wrong_ids.length > 0){
+                      throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+                    }else{
+                      promises_associations.push(item.addAuthors(input.addAuthors));
+                    }
                   }
                   if (input.removeAuthors) {
                       promises_associations.push(item.removeAuthors(input.removeAuthors));

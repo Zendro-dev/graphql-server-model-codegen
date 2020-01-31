@@ -46,10 +46,12 @@ static updateOne(input) {
                     let promises_associations = [];
 
                     if(input.addUnique_pet ){
-                        let unique_pet = await helper.checkInverseAssociation(models.person, models.dog, "dog", "personId", input.addUnique_pet);
-                        if(unique_pet){
-                            promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
-                        }
+                      let wrong_ids = await helper.checkExistence(input.addUnique_pet, models.dog);
+                      if(wrong_ids.length > 0 ){
+                        throw new Error(\`Ids \${wrong_ids.join(",")} in model dog were not found.\`);
+                      }else{
+                        promises_associations.push(item.setUnique_pet(input.addUnique_pet));
+                      }
                     }else if(input.addUnique_pet === null){
                       promises_associations.push( item.setUnique_pet(input.addUnique_pet) );
                     }
