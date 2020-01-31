@@ -165,9 +165,9 @@ module.exports = class <%- name -%>{
 
       if(search === undefined)
       {
-        return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} );
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} );
       }else{
-        return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] })
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} , search] })
       }
     }
 
