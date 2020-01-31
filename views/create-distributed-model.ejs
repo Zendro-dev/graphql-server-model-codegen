@@ -38,7 +38,7 @@ module.exports = class <%- name -%>{
         throw new Error("IRI has no match WS");
       }
 
-      return adapters[responsibleAdapter[0] ].readById(id)).then(result => new <%- name -%>(result));
+      return adapters[responsibleAdapter[0]].readById(id).then(result => new <%- name -%>(result));
     }
   }
 
