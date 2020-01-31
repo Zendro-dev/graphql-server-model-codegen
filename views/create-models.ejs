@@ -199,7 +199,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               <%associations_temp = associations["hasMany"].concat(associations["belongsToMany"])-%>
               <%for(let i=0; i < associations_temp.length; i++){-%>
                 <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-                  if(input.add<%=associations_temp[i].name_cp-%>){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));}
+                  if(input.add<%=associations_temp[i].name_cp-%>){
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                        throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
+                      promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
+                    }
+                  }
                 <%}-%>
                 <%}-%>
 

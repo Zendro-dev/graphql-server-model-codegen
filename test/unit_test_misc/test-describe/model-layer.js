@@ -118,7 +118,13 @@ static addOne(input){
             let item = await super.create(input, {transaction : t});
             let promises_associations = [];
             if (input.addAuthors) {
-              promises_associations.push( item.setAuthors(input.addAuthors) );
+              let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
+              if(wrong_ids.length > 0){
+                throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+              }else{
+                  promises_associations.push( item.setAuthors(input.addAuthors) );
+              }
+
             }
           return  Promise.all(promises_associations).then( () => { return item } );
         });
