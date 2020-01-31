@@ -209,7 +209,7 @@ module.exports = class <%- name -%>{
           let simple_search = {
             "field": "<%=associations_one[i].targetKey%>",
             "value": {
-              "value": this.<%=associations_temp[i].targetKey%>
+              "value": this.<%=associations_one[i].targetKey%>
             },
             "operator": "eq"
           }
