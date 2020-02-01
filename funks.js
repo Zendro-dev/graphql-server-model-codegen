@@ -125,31 +125,40 @@ attributesToJsonSchemaProperties = function(attributes) {
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
       jsonSchemaProps[key] = {
-        "type": "string"
+        "type": ["string", "null"]
       }
     } else if (jsonSchemaProps[key] === "Int") {
       jsonSchemaProps[key] = {
-        "type": "integer"
+        "type": ["integer", "null"]
       }
     } else if (jsonSchemaProps[key] === "Float") {
       jsonSchemaProps[key] = {
-        "type": "number"
+        "type": ["number", "null"]
       }
     } else if (jsonSchemaProps[key] === "Boolean") {
       jsonSchemaProps[key] = {
-        "type": "boolean"
+        "type": ["boolean", "null"]
       }
     } else if (jsonSchemaProps[key] === "Date") {
       jsonSchemaProps[key] = {
-        "isoDate": true
+	      "anyOf": [
+          { "isoDate": true },
+          { "type": "null" }
+        ]
       }
     } else if (jsonSchemaProps[key] === "Time") {
       jsonSchemaProps[key] = {
-        "isoTime": true
+	      "anyOf": [
+          { "isoTime": true },
+          { "type": "null" }
+        ]
       }
     } else if (jsonSchemaProps[key] === "DateTime") {
       jsonSchemaProps[key] = {
-        "isoDateTime": true
+        "anyOf": [
+          { "isoDateTime": true },
+          { "type": "null" }
+        ]
       }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
