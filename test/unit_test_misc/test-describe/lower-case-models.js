@@ -9,8 +9,8 @@ type Query {
 }
 
   type Mutation {
-    addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String, individual_id: Int, addIndividual:ID   ): transcript_count!
-  updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, individual_id: Int, addIndividual:ID, removeIndividual: ID  ): transcript_count!
+    addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String,  addIndividual:ID   ): transcript_count!
+  updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, addIndividual:ID, removeIndividual: ID  ): transcript_count!
 
 `
 

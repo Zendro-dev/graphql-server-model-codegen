@@ -90,8 +90,8 @@ type <%- nameCp -%>Edge{
   }
 
     type Mutation {
-    add<%- nameCp -%>( <%- attributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ): <%- name %>!
-    update<%- nameCp -%>(id: ID!, <%- attributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID, remove<%= associations.schema_attributes.one[key][2]%>:ID <%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID], remove<%= associations.schema_attributes.many[key][2]%>:[ID] <%}-%>): <%- name %>!
+    add<%- nameCp -%>( <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ): <%- name %>!
+    update<%- nameCp -%>(id: ID!, <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID, remove<%= associations.schema_attributes.one[key][2]%>:ID <%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID], remove<%= associations.schema_attributes.many[key][2]%>:[ID] <%}-%>): <%- name %>!
   delete<%- nameCp -%>(id: ID!): String!
   bulkAdd<%- nameCp -%>Csv: [<%- name -%>] }
 

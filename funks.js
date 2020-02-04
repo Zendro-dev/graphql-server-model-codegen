@@ -381,7 +381,6 @@ module.exports.getOptions = function(dataModel){
       namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
-      attributesStr: attributesToString( getOnlyTypeAttributes(dataModel.attributes)),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
       associations: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
@@ -390,6 +389,9 @@ module.exports.getOptions = function(dataModel){
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
       url: dataModel.url || ""
   };
+
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo));
+
   return opts;
 };
 
@@ -407,6 +409,19 @@ module.exports.getOptions = function(dataModel){
     }else if(association.type === 'to_many' && association.keyIn === association.target){
       return 'hasMany';
     }
+  }
+
+
+  getEditableAttributes = function(attributes, parsedAssocForeignKeys){
+    let editable_attributes = {};
+    let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
+
+    for(let attrib in attributes ){
+      if(!target_keys.includes(attrib) ){
+        editable_attributes[ attrib ] = attributes[attrib];
+      }
+    }
+    return editable_attributes;
   }
 
 

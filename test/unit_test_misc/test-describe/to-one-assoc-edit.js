@@ -1,6 +1,6 @@
 module.exports.dog_schema = `
-addDog( name: String, breed: String, personId: Int, addOwner: ID   ): Dog!
-updateDog(id: ID!, name: String, breed: String, personId: Int, addOwner: ID,removeOwner: ID): Dog!
+addDog( name: String, breed: String, addOwner: ID   ): Dog!
+updateDog(id: ID!, name: String, breed: String, addOwner: ID,removeOwner: ID): Dog!
 `
 
 module.exports.person_addOne_model = `
