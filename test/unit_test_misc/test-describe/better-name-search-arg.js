@@ -19,9 +19,10 @@ countResearchers: function({
         if (authorization === true) {
             return researcher.countRecords(search);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 },

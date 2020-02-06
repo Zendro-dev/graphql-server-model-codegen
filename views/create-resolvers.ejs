@@ -143,7 +143,7 @@ module.exports = {
         if (authorization === true) {
           return <%- nameLc -%>.readAll(search, order, pagination);
       } else {
-          return new Error("You don't have authorization to perform this action");
+          throw new Error("You don't have authorization to perform this action");
       }
     }).catch( error =>{
           console.error(error);
@@ -166,7 +166,7 @@ module.exports = {
          if (authorization === true) {
            return <%- nameLc -%>.readAllCursor(search, order, pagination);
        } else {
-           return new Error("You don't have authorization to perform this action");
+           throw new Error("You don't have authorization to perform this action");
        }
      }).catch( error =>{
           console.error(error);
@@ -187,7 +187,7 @@ module.exports = {
       if (authorization === true) {
       return <%- nameLc -%>.readById(id);
     } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
     }
   }).catch( error =>{
         console.error(error);
@@ -207,7 +207,7 @@ module.exports = {
       if (authorization === true) {
           return <%- nameLc -%>.addOne(input);
     } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
     }
   }).catch( error =>{
       console.error(error);
@@ -226,10 +226,11 @@ module.exports = {
         if (authorization === true) {
           return <%- nameLc -%>.bulkAddCsv(context);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-        return error;
+      console.error(error);
+      handleError( error);
     })
   },
 
@@ -245,7 +246,7 @@ module.exports = {
       if (authorization === true) {
         return <%- nameLc -%>.deleteOne(id);
       } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
       }
       }).catch( error =>{
           console.error(error);
@@ -265,7 +266,7 @@ module.exports = {
       if (authorization === true) {
           return <%- nameLc -%>.updateOne(input);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
       }).catch( error =>{
             console.error(error);
@@ -285,7 +286,7 @@ module.exports = {
         if (authorization === true) {
           return <%- nameLc -%>.countRecords(search);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
       }).catch( error =>{
           console.error(error);
@@ -305,7 +306,7 @@ module.exports = {
       if (authorization === true) {
       return helper.vueTable(context.request, <%- nameLc -%>, <%-  JSON.stringify(arrayAttributeString) -%>  );
     } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
     }
   }).catch( error =>{
       console.error(error);
@@ -325,7 +326,7 @@ module.exports = {
         if (authorization === true) {
             return <%- nameLc -%>.csvTableTemplate();
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
       console.error(error);

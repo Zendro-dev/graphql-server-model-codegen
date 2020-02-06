@@ -35,9 +35,10 @@ countDogs: function({
         if (authorization === true) {
             return dog.countRecords(search);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -99,9 +100,10 @@ dogs: function({
         if (authorization === true) {
             return dog.readAll(search, order, pagination);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -152,9 +154,10 @@ addBook: function(input, context) {
 
           return book.addOne(input);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -196,9 +199,10 @@ deleteBook: function({
         if (authorization === true) {
           return book.deleteOne(id);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -249,9 +253,10 @@ updateBook: function(input, context) {
         if (authorization === true) {
           return book.updateOne(input);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -323,10 +328,11 @@ module.exports.bulk_add_resolver = `
               return book.bulkAddCsv(context);
 
             } else {
-                return new Error("You don't have authorization to perform this action");
+                throw new Error("You don't have authorization to perform this action");
             }
         }).catch(error => {
-            return error;
+            console.error(error);
+            handleError(error);
         })
     }
 `
@@ -349,9 +355,10 @@ csvTableTemplateIndividual: function(_, context) {
         if (authorization === true) {
             return individual.csvTableTemplate();
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }

@@ -100,9 +100,10 @@ booksConnection: function({
       if (authorization === true) {
           return book.readAllCursor(search, order, pagination);
       } else {
-          return new Error("You don't have authorization to perform this action");
+          throw new Error("You don't have authorization to perform this action");
       }
   }).catch(error => {
+      console.error(error);
       handleError(error);
   })
 }

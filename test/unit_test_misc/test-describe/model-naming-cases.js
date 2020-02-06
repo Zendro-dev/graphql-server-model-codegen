@@ -18,9 +18,10 @@ module.exports.resolvers_webservice_aminoAcid = `
         if (authorization === true) {
           return aminoAcidSequence.readAll(search, order, pagination);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
       }).catch( error =>{
+          console.error(error);
             handleError( error);
       })
   }
@@ -126,9 +127,10 @@ readOneTranscriptCount: function({
         if (authorization === true) {
           return transcriptCount.readById(id);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
