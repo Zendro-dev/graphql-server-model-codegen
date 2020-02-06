@@ -132,11 +132,9 @@ static addOne(input){
         });
          return result;
         }catch(error){
-          return error;
+          throw error;
         }
-      }).catch((err) => {
-          return err
-      })
+      });
 }
 `
 
