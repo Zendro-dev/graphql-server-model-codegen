@@ -70,8 +70,6 @@ static readAllCursor(search, order, pagination){
 
 
       return {edges,pageInfo};
-    }).catch(error =>{
-      console.log(error)
     });
 
   });
