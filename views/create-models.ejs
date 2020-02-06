@@ -304,10 +304,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                     <%}-%>
                   <%}-%>
                     return  Promise.all(promises_associations).then( () => { return item.update(input); } );
-                }).catch(error => {return error});
-        }).catch((err) => {
-            return err
-        })
+                });
+        });
   }
 
   static bulkAddCsv(context){
