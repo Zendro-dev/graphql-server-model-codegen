@@ -285,27 +285,27 @@ static bulkAddCsv(context){
                     console.log(info);
                 }).catch(function(err) {
                     fileTools.deleteIfExists(addedZipFilePath);
-                    console.log(err);
+                    console.error(err);
                 });
 
             } catch (error) {
-                console.log(error.message);
+                console.error(error.message);
             }
 
             fs.unlinkSync(tmpFile);
         }).catch((error) => {
             email.sendEmail(helpersAcl.getTokenFromContext(context).email,
                 'ScienceDB batch add', \`\${error.message}\`).then(function(info) {
-                console.log(info);
+                console.error(info);
             }).catch(function(err) {
-                console.log(err);
+                console.error(err);
             });
 
             fs.unlinkSync(tmpFile);
         });
 
     }).catch((error) => {
-        return new Error(error);
+        throw new Error(error);
     });
 }
 `
