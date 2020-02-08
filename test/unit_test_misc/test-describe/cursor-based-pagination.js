@@ -133,11 +133,16 @@ person.prototype.booksConnection = function({
     pagination
 }, context) {
 
+  try{
     return this.booksConnectionImpl({
         search,
         order,
         pagination
     });
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 

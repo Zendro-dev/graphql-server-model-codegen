@@ -25,8 +25,13 @@ const os = require('os');
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
+    try{
+        return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
 
-    return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
   }
 
   /**
@@ -45,8 +50,12 @@ const os = require('os');
        order,
        pagination
    }, context) {
-
+     try{
        return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
+     }catch(error){
+       console.error(error);
+       handleError(error);
+     };
    }
 
   /**
@@ -57,7 +66,12 @@ const os = require('os');
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-    return this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
+    try{
+      return this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 
@@ -72,7 +86,12 @@ const os = require('os');
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = function({search}, context){
-    return this.<%=associations_one[i].name%>Impl(search);
+    try{
+      return this.<%=associations_one[i].name%>Impl(search);
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 
@@ -91,7 +110,12 @@ const os = require('os');
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
-    return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+    try{
+      return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 
   /**
@@ -102,8 +126,12 @@ const os = require('os');
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-
-    return this.countFiltered<%=associations_temp[i].name_cp%>Impl ({search});
+    try{
+      return this.countFiltered<%=associations_temp[i].name_cp%>Impl ({search});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 
 
@@ -119,7 +147,12 @@ const os = require('os');
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
-    return this.<%=associations_temp[i].name%>ConnectionImpl({search, order, pagination});
+    try{
+      return this.<%=associations_temp[i].name%>ConnectionImpl({search, order, pagination});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 

@@ -31,7 +31,13 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-  return this.transcript_countsFilterImpl({search, order, pagination});
+  try{
+      return this.transcript_countsFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
+
 }
 `
 

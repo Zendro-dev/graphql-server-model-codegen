@@ -58,7 +58,12 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
     order,
     pagination
 }, context) {
-  return this.transcriptCountsFilterImpl({search, order, pagination});
+  try{
+    return this.transcriptCountsFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 

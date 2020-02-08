@@ -75,7 +75,12 @@ module.exports.resolvers_book = `
  * @return {type}         Associated record
  */
 book.prototype.publisher = function({search}, context) {
+  try{
     return this.publisherImpl( search);
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 
 `
@@ -114,8 +119,12 @@ person.prototype.worksFilter = function({
     order,
     pagination
 }, context) {
-
-  return this.worksFilterImpl({search, order, pagination});
+  try{
+    return this.worksFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 
 }
 
