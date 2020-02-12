@@ -361,12 +361,16 @@ module.exports = class <%- name -%>{
   static idAttribute() {
     let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
     let idType = <%- name -%>.definition.attributes[internalId];
-    if(idType === undefined) {
-      return new Error(`Attribute ${internalId} does not exist`)
+
+    if(internalId !== "id") {
+      if(idType === undefined) {
+        return new Error(`Attribute ${internalId} does not exist`)
+      }
+      if(!(idType === "String" || idType === "Int" || idType === "Float")) {
+        return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
+      }
     }
-    if(!(idType === "String" || idType === "Int" || idType === "Float")) {
-      return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
-    }
+    
     return internalId; 
   }
 
