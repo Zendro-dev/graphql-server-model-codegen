@@ -36,7 +36,7 @@ module.exports.book_model_read_by_id = `
 static readById(id) {
   let options = {};
   options['where'] = {};
-  options['where'][this.getIdAttribute()] = id;
+  options['where'][this.idAttribute()] = id;
   return Book.findOne(options);
 }
 `
