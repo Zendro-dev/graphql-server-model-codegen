@@ -124,7 +124,7 @@ static addOne(input){
               if(wrong_ids.length > 0){
                 throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
               }else{
-                  promises_associations.push( item.setAuthors(input.addAuthors) );
+                  promises_associations.push( item.setAuthors(input.addAuthors, {transaction:t}) );
               }
 
             }

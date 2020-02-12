@@ -11,7 +11,7 @@ module.exports.person_model = `
       if(wrong_ids.length > 0){
         throw new Error(\`Ids \${wrong_ids.join(",")} in model dog were not found.\`);
       }else{
-        promises_associations.push(  item.setDogs(input.addDogs));
+        promises_associations.push(  item.setDogs(input.addDogs, {transaction:t}));
       }
 
     }
@@ -20,7 +20,7 @@ module.exports.person_model = `
       if(wrong_ids.length > 0){
         throw new Error(\`Ids \${wrong_ids.join(",")} in model book were not found.\`);
       }else{
-        promises_associations.push( item.setBooks(input.addBooks));
+        promises_associations.push( item.setBooks(input.addBooks, {transaction:t}));
       }
     }
     return  Promise.all(promises_associations).then( () => { return item } );

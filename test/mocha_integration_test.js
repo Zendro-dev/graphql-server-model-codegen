@@ -519,57 +519,57 @@ describe(
             expect(transcript_count_id !== 0).to.equal(true);
         });
 
-        // it('02. Check filtered JOIN with JSON response', async function () {
-        //
-        //
-        //
-        //     let params = {
-        //         outputFormat : "JSON",
-        //         modelAdjacencies : [{
-        //             name : "individual",
-        //             association_name : "transcript_counts",
-        //             search : {
-        //                 field : "id",
-        //                 value : { value : individual_id },
-        //                 operator : "eq"
-        //             },
-        //             attributes : [ "id" , "name" ]
-        //         },{
-        //             name : "transcript_count",
-        //             // note, this is a web service
-        //             association_name : "aminoacidsequence",
-        //             attributes : [ "id", "gene", "aminoacidsequence_id"]
-        //         },{
-        //             name: "aminoacidsequence",
-        //             attributes : [ "id"]
-        //         }
-        //     ]};
-        //
-        //     let res = {};
-        //     try {
-        //         params = JSON.stringify(params);
-        //         console.log("PARAMS", params);
-        //         res = await itHelpers.request_join_post(params);
-        //     }catch(err){
-        //         console.log("GOT ERROR")
-        //         console.log(err.response);
-        //         console.log(err.response.data);
-        //         throw err;
-        //     }
-        //
-        //     console.log("DATA HERE", res.data);
-        //     console.log("\n\n");
-        //
-        //     expect(res.data).to.deep.equal(
-        //     {   'individual.id': Number(individual_id),
-        //         'individual.name': "AssociatedIndividual",
-        //         'transcript_count.aminoacidsequence_id': 63165,
-        //         'transcript_count.gene': "AssociatedGene",
-        //         'transcript_count.id': Number(transcript_count_id),
-        //         'aminoacidsequence.id': 63165
-        //     });
-        //
-        // });
+        it('02. Check filtered JOIN with JSON response', async function () {
+
+
+
+            let params = {
+                outputFormat : "JSON",
+                modelAdjacencies : [{
+                    name : "individual",
+                    association_name : "transcript_counts",
+                    search : {
+                        field : "id",
+                        value : { value : individual_id },
+                        operator : "eq"
+                    },
+                    attributes : [ "id" , "name" ]
+                },{
+                    name : "transcript_count",
+                    // note, this is a web service
+                    association_name : "aminoacidsequence",
+                    attributes : [ "id", "gene", "aminoacidsequence_id"]
+                },{
+                    name: "aminoacidsequence",
+                    attributes : [ "id"]
+                }
+            ]};
+
+            let res = {};
+            try {
+                params = JSON.stringify(params);
+                console.log("PARAMS", params);
+                res = await itHelpers.request_join_post(params);
+            }catch(err){
+                console.log("GOT ERROR")
+                console.log(err.response);
+                console.log(err.response.data);
+                throw err;
+            }
+
+            console.log("DATA HERE", res.data);
+            console.log("\n\n");
+
+            expect(res.data).to.deep.equal(
+            {   'individual.id': Number(individual_id),
+                'individual.name': "AssociatedIndividual",
+                'transcript_count.aminoacidsequence_id': 63165,
+                'transcript_count.gene': "AssociatedGene",
+                'transcript_count.id': Number(transcript_count_id),
+                'aminoacidsequence.id': 63165
+            });
+
+        });
 
         it('03. Start to JOIN from remote service', async function () {
 
