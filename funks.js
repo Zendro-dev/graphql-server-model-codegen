@@ -5,7 +5,7 @@ const jsb = require('js-beautify').js_beautify;
 const {promisify} = require('util');
 const ejsRenderFile = promisify( ejs.renderFile );
 const stringify_obj = require('stringify-object');
-
+const colors = require('colors/safe');
 
 /**
  *  Allowed type of associations classified accordingly the number of possible records involved
@@ -396,7 +396,8 @@ module.exports.getOptions = function(dataModel){
       indices: dataModel.indices,
       definition : stringify_obj(dataModel),
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
-      url: dataModel.url || ""
+      url: dataModel.url || "",
+      externalIds: dataModel.externalIds || []
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo));
@@ -404,6 +405,20 @@ module.exports.getOptions = function(dataModel){
   return opts;
 };
 
+validateJsonFile =  function(opts){
+
+  let valid = true;
+
+  //validate external ids declare in attributes
+  opts.externalIds.forEach( x => {
+    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String' || opts.attributes[x] === 'Float' || opts.attributes[x] === 'Int'  ) ){
+      valid = false;
+      console.error(colors.red(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`) );
+    }
+  });
+
+  return valid;
+}
 
   getSqlType = function(association, model_name){
 
@@ -636,58 +651,61 @@ module.exports.generateCode = function(json_dir, dir_write){
       console.log("Reading...", json_file);
       let file_to_object = parseFile(json_dir+'/'+json_file);
       let opts = module.exports.getOptions(file_to_object);
-      models.push([opts.name , opts.namePl]);
-      console.log(opts.name);
-      //console.log(opts.associations);
 
-      if(opts.storageType === 'sql'){
-        sections.forEach((section) =>{
+      if(validateJsonFile(opts) ){
+        models.push([opts.name , opts.namePl]);
+        console.log(opts.name);
+        //console.log(opts.associations);
+
+        if(opts.storageType === 'sql'){
+          sections.forEach((section) =>{
+              let file_name = "";
+              if(section==='migrations')
+              {
+                file_name = createNameMigration(dir_write,opts.nameLc);
+              }else{
+                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+              }
+
+              if( (section == 'validations' || section == 'patches') && fs.existsSync(file_name)){
+                  console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
+              }else{
+                  generateSection(section, opts, file_name)
+                      .then( () => {
+                          console.log(file_name + ' written successfully!');
+                      });
+              }
+
+          });
+          //generateAssociationsMigrations(opts, dir_write);
+        }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server'){
             let file_name = "";
-            if(section==='migrations')
-            {
-              file_name = createNameMigration(dir_write,opts.nameLc);
-            }else{
-              file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+            generateSection("schemas",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+
+
+            if(opts.storageType === 'webservice'){
+              file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
+              generateSection("models-webservice",opts,file_name).then( ()=>{
+                console.log(file_name + ' written successfully!(from webservice)');
+              });
+            }else if(opts.storageType === 'cenz_server'){
+              file_name = dir_write + '/models-cenz-server/' + opts.nameLc + '.js';
+              generateSection("models-cenz",opts,file_name).then( ()=>{
+                console.log(file_name + ' written successfully!(from cenz server)');
+              });
             }
 
-            if( (section == 'validations' || section == 'patches') && fs.existsSync(file_name)){
-                console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
-            }else{
-                generateSection(section, opts, file_name)
-                    .then( () => {
-                        console.log(file_name + ' written successfully!');
-                    });
-            }
-
-        });
-        //generateAssociationsMigrations(opts, dir_write);
-      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server'){
-          let file_name = "";
-          file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
-          generateSection("schemas",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!');
-          });
 
 
-          if(opts.storageType === 'webservice'){
-            file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
-            generateSection("models-webservice",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!(from webservice)');
+            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+            generateSection("resolvers",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
             });
-          }else if(opts.storageType === 'cenz_server'){
-            file_name = dir_write + '/models-cenz-server/' + opts.nameLc + '.js';
-            generateSection("models-cenz",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!(from cenz server)');
-            });
-          }
 
-
-
-          file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-          generateSection("resolvers",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!');
-          });
-
+        }
       }
 
   });
