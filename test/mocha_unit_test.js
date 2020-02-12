@@ -194,6 +194,14 @@ describe('Migrations', function(){
     let test_resolvers = data_test.person_indices_migration.replace(/\s/g, '');
     expect(g_resolvers).to.have.string(test_resolvers);
   });
+
+  it('Migration externalIds - Person', async function(){
+    let opts = funks.getOptions(models.person_externalIds);
+    let generated_resolvers =await funks.generateJs('create-migrations', opts);
+    let g_resolvers = generated_resolvers.replace(/\s/g, '');
+    let test_resolvers = data_test.person_externalIds_migration.replace(/\s/g, '');
+    expect(g_resolvers).to.have.string(test_resolvers);
+  });
 });
 
 describe('Model naming cases ', function(){

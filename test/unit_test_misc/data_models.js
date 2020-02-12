@@ -354,6 +354,40 @@ module.exports.person_indices = {
   "indices": ["email", "phone"]
 }
 
+module.exports.person_externalIds = {
+    "model" : "Person",
+    "storageType" : "SQL",
+    "attributes" : {
+      "firstName" : "String",
+      "lastName" : "String",
+      "email" : "String",
+      "phone" : "String"
+    },
+    "associations":{
+      "dogs":{
+        "type" : "to_many",
+        "target" : "Dog",
+        "targetKey" : "personId",
+        "keyIn": "Dog",
+        "targetStorageType" : "sql",
+        "label": "name"
+      },
+
+      "books":{
+        "type" : "to_many",
+        "target" : "Book",
+        "targetKey" : "bookId",
+        "sourceKey" : "personId",
+        "keysIn" : "books_to_people",
+        "targetStorageType" : "sql",
+        "label" : "title"
+      }
+    },
+
+    "externalIds": ["email", "phone"]
+
+}
+
 module.exports.academicTeam = {
   "model" : "academicTeam",
   "storageType" : "SQL",

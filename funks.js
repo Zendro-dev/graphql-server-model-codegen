@@ -405,6 +405,7 @@ module.exports.getOptions = function(dataModel){
   return opts;
 };
 
+
 validateJsonFile =  function(opts){
 
   let valid = true;
@@ -421,9 +422,6 @@ validateJsonFile =  function(opts){
 }
 
   getSqlType = function(association, model_name){
-
-
-
     if(association.type === 'to_one' && association.keyIn !== association.target){
       return 'belongsTo';
     }else if(association.type === 'to_one' && association.keyIn === association.target){
