@@ -286,7 +286,7 @@ describe(
                                                                              'variable: "RPKM", ' +
                                                                              'count: 321.23, ' +
                                                                              'tissue_or_condition: "Stem", ' +
-                                                                             `individual_id: ${plantId}) ` +
+                                                                             `addIndividual: ${plantId}) ` +
                                                                              '{id gene individual { id name } } }');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
 
@@ -360,7 +360,7 @@ describe(
 
         it('03. Webservice associate new TranscriptCount', function() {
             let res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "new_gene", ' +
-                                                                                     'aminoacidsequence_id: 63165) { id } }');
+                                                                                     'addAminoacidsequence: 63165) { id aminoacidsequence{id }} }');
             let resBody = JSON.parse(res.body.toString('utf8'));
             expect(res.statusCode).to.equal(200);
 
@@ -511,8 +511,8 @@ describe(
 
             res = itHelpers.request_graph_ql_post(`mutation { addTranscript_count(` +
                       `gene: "AssociatedGene", ` +
-                      `aminoacidsequence_id: 63165, ` +
-                      `individual_id: ${individual_id}) { id } }`);
+                      `addAminoacidsequence: 63165, ` +
+                      `addIndividual: ${individual_id}) { id  gene individual_id aminoacidsequence_id} }`);
             resBody = JSON.parse(res.body.toString('utf8'));
             expect(res.statusCode).to.equal(200);
             transcript_count_id = resBody.data.addTranscript_count.id;
@@ -520,6 +520,8 @@ describe(
         });
 
         it('02. Check filtered JOIN with JSON response', async function () {
+
+
 
             let params = {
                 outputFormat : "JSON",
@@ -546,14 +548,16 @@ describe(
             let res = {};
             try {
                 params = JSON.stringify(params);
+                console.log("PARAMS", params);
                 res = await itHelpers.request_join_post(params);
             }catch(err){
+                console.log("GOT ERROR")
                 console.log(err.response);
                 console.log(err.response.data);
                 throw err;
             }
 
-            console.log(res.data);
+            console.log("DATA HERE", res.data);
             console.log("\n\n");
 
             expect(res.data).to.deep.equal(
@@ -664,5 +668,5 @@ describe(
                   }
               })
           });
-          
+
   });

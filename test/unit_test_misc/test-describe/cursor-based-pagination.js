@@ -70,8 +70,6 @@ static readAllCursor(search, order, pagination){
 
 
       return {edges,pageInfo};
-    }).catch(error =>{
-      console.log(error)
     });
 
   });
@@ -100,9 +98,10 @@ booksConnection: function({
       if (authorization === true) {
           return book.readAllCursor(search, order, pagination);
       } else {
-          return new Error("You don't have authorization to perform this action");
+          throw new Error("You don't have authorization to perform this action");
       }
   }).catch(error => {
+      console.error(error);
       handleError(error);
   })
 }
@@ -134,11 +133,16 @@ person.prototype.booksConnection = function({
     pagination
 }, context) {
 
+  try{
     return this.booksConnectionImpl({
         search,
         order,
         pagination
     });
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 

@@ -7,7 +7,12 @@ module.exports.dog_owner_resolvers = `
  * @return {type}         Associated record
  */
 dog.prototype.owner = function({search }, context) {
+  try{
     return this.ownerImpl(search);
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 
@@ -39,7 +44,12 @@ academicTeam.prototype.membersFilter = function({
     order,
     pagination
 }, context) {
-  return this.membersFilterImpl({search,order,pagination});
+  try{
+    return this.membersFilterImpl({search,order,pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 

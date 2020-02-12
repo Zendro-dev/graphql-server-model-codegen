@@ -75,7 +75,12 @@ module.exports.resolvers_book = `
  * @return {type}         Associated record
  */
 book.prototype.publisher = function({search}, context) {
+  try{
     return this.publisherImpl( search);
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 
 `
@@ -91,8 +96,8 @@ type Query {
 }
 
   type Mutation {
-    addPerson( firstName: String, lastName: String, Age: Int, companyId: Int, addWorks:[ID]): Person!
-  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, companyId: Int, addWorks:[ID], removeWorks:[ID]): Person!
+    addPerson( firstName: String, lastName: String, Age: Int,  addCompany: ID, addWorks:[ID]): Person!
+  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, addCompany: ID, removeCompany: ID, addWorks:[ID], removeWorks:[ID]): Person!
 
 
 deletePerson(id: ID!): String!
@@ -114,8 +119,12 @@ person.prototype.worksFilter = function({
     order,
     pagination
 }, context) {
-
-  return this.worksFilterImpl({search, order, pagination});
+  try{
+    return this.worksFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 
 }
 

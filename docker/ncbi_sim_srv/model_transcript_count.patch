@@ -1,0 +1,19 @@
+--- transcript_count.js	2020-02-11 16:08:03.195109402 -0600
++++ transcript_count_edited.js	2020-02-11 16:19:45.116547156 -0600
+@@ -239,6 +239,9 @@
+             .then(async (valSuccess) => {
+                 try {
+                     const result = await sequelize.transaction(async (t) => {
++                      if(input.addAminoacidsequence){
++                        input['aminoacidsequence_id'] = input.addAminoacidsequence;
++                      }
+                         let item = await super.create(input, {
+                             transaction: t
+                         });
+@@ -453,4 +456,4 @@
+         return data_values;
+     }
+ 
+-}
+\ No hay ningún carácter de nueva línea al final del archivo
++}

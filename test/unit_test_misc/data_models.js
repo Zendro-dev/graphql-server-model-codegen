@@ -535,3 +535,45 @@ module.exports.academic_Team = {
   }
 
 }
+
+module.exports.dog_one_assoc = {
+  "model" : "Dog",
+  "storageType" : "sql",
+  "attributes" : {
+    "name" : "String",
+    "breed" : "String",
+    "personId": "Int"
+  },
+
+  "associations" : {
+    "owner" : {
+      "type" : "to_one",
+      "target" : "Person",
+      "targetKey" : "personId",
+      "keyIn" : "Dog",
+      "targetStorageType" : "sql"
+    }
+  }
+}
+
+module.exports.person_one_assoc = {
+  "model": "Person",
+  "storageType": "sql",
+  "attributes" :{
+    "firstName": "String",
+    "lastName": "String",
+    "email" : "String",
+    "companyId": "Int"
+  },
+
+  "associations" : {
+    "unique_pet" :{
+      "type": "to_one",
+      "target": "Dog",
+      "targetKey": "personId",
+      "keyIn": "Dog",
+      "targetStorageType": "sql"
+    }
+  }
+
+}
