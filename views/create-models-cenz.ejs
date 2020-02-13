@@ -358,6 +358,12 @@ module.exports = class <%- name -%>{
     return data_values;
   }
 
+  /**
+   * idAttribute - Check wether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
   static idAttribute() {
     let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
     let idType = <%- name -%>.definition.attributes[internalId];
@@ -374,9 +380,21 @@ module.exports = class <%- name -%>{
     return internalId; 
   }
 
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model 
+   */
+
   static idAttributeType() {
     return <%- name -%>.definition.attributes[this.idAttribute()];  
   }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   *
+   * @return {type} id value 
+   */
 
   getIdValue() {
     return this[<%- name -%>.idAttribute()]
