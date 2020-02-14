@@ -328,7 +328,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       let simple_search = {
         "field": "<%=associations_one[i].targetKey%>",
         "value": {
-          "value": this.<%=associations_one[i].targetKey%>
+          "value": this.getIdValue()
         },
         "operator": "eq"
       }
@@ -356,9 +356,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
       if(search === undefined)
       {
-        return models.<%=associations_temp[i].target_lc%>.readAll({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"}, order, pagination);
+        return models.<%=associations_temp[i].target_lc%>.readAll({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
       }else{
-        return models.<%=associations_temp[i].target_lc%>.readAll({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} , search] }, order, pagination )
+        return models.<%=associations_temp[i].target_lc%>.readAll({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
       }
     }
 
@@ -366,9 +366,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
       if(search === undefined)
       {
-        return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} );
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} );
       }else{
-        return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} , search] })
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
       }
 
     }
@@ -376,9 +376,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
       if(search === undefined)
       {
-        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"}, order, pagination);
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
       }else{
-        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.<%=associations_temp[i].targetKey%> }, "operator": "eq"} , search] }, order, pagination )
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
       }
     }
   <%}-%>
