@@ -144,9 +144,9 @@ module.exports.person_ddm_many_association = `
 dogsConnectionImpl({search,order,pagination}){
   if(search === undefined)
   {
-    return models.dog.readAllCursor({"field" : "personId", "value":{"value":this.personId }, "operator": "eq"}, order, pagination);
+    return models.dog.readAllCursor({"field" : "personId", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
   }else{
-    return models.dog.readAllCursor({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.personId }, "operator": "eq"} , search] }, order, pagination )
+    return models.dog.readAllCursor({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
   }
 }
 
@@ -187,9 +187,9 @@ countFilteredDogsImpl ({search}){
 
   if(search === undefined)
   {
-    return models.dog.countRecords({"field" : "personId", "value":{"value":this.personId }, "operator": "eq"} );
+    return models.dog.countRecords({"field" : "personId", "value":{"value":this.getIdValue() }, "operator": "eq"} );
   }else{
-    return models.dog.countRecords({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.personId }, "operator": "eq"} , search] })
+    return models.dog.countRecords({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
   }
 }
 `
