@@ -23,5 +23,15 @@ static externalIdsArray(){
 
   return externalIds;
 }
+`
+
+module.exports.externalIdsObject = `
+
+static externalIdsObject(){
+  return {
+    email: 'String',
+    phone: 'String'
+  };
+}
 
 `

@@ -1011,4 +1011,12 @@ describe('External ids', function(){
     let test_model = data_test.externalIdsArray.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
+
+  it('Get object external ids - person', async function(){
+    let opts = funks.getOptions(models.person_externalIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.externalIdsObject.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 });

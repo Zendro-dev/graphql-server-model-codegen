@@ -613,4 +613,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return externalIds;
   }
 
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i<externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
+  }
+
 }
