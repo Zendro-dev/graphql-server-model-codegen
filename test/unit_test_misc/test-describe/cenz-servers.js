@@ -117,16 +117,14 @@ static bulkAddCsv(context) {
     formData.append('csv_file', fs.createReadStream(tmpFile));
     formData.append('query', query);
 
-    axios.post(url, formData,  {
+    return axios.post(url, formData,  {
       headers: formData.getHeaders()
     }).then(res =>{
         return res.data.data.bulkAddBookCsv;
-      }).catch(error =>{
-        error['url'] = url;
-        handleError(error);
       });
 
   }).catch(error =>{
+    error['url'] = url;
     handleError(error);
   });
 }

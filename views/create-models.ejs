@@ -15,6 +15,7 @@ const os = require('os');
 const uuidv4 = require('uuidv4');
 const helper = require('../utils/helper');
 const models = require(path.join(__dirname, '..', 'models_index.js'));
+const moment = require('moment');
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
 
@@ -34,7 +35,17 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
         <%=  keys[i] %>: {
-            type: Sequelize[ dict['<%= type_seq %>'] ]
+            type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
+            get(){
+              let <%=  keys[i] %> = this.getDataValue('<%=  keys[i] %>');
+              if(<%=  keys[i] %> !== null ){
+                let m = moment(<%=  keys[i] %>, "HH:mm:ss.SSS[Z]");
+                if(m.isValid()){
+                  return m.format("HH:mm:ss.SSS[Z]");
+                }
+              }
+            }
+            <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>
       <%}-%>
@@ -170,29 +181,51 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
 
         return {  edges, pageInfo };
-      }).catch(error =>{
-        console.log(error)
       });
-
     });
   }
 
   static addOne(input){
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then((valSuccess) => {
-            return super.create(input)
-                .then(item => {
-                  <%associations_temp = associations["hasMany"].concat(associations["belongsToMany"])-%>
-                  <%for(let i=0; i < associations_temp.length; i++){-%>
-                    <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-                      if(input.add<%=associations_temp[i].name_cp-%>){item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);}
-                    <%}-%>
-                    <%}-%>
-                    return item;
-                });
-        }).catch((err) => {
-            return err
-        })
+        .then(async (valSuccess) => {
+          try{
+            const result = await sequelize.transaction( async(t) =>{
+              let item = await super.create(input, {transaction:t});
+              let promises_associations = [];
+              <%associations_temp = associations["hasMany"].concat(associations["belongsToMany"])-%>
+              <%for(let i=0; i < associations_temp.length; i++){-%>
+                <%if(associations_temp[i].targetStorageType === 'sql'){-%>
+                  if(input.add<%=associations_temp[i].name_cp-%>){
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                        throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
+                      promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction:t}));
+                    }
+                  }
+                <%}-%>
+                <%}-%>
+
+                <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
+                <%for(let i=0; i < associations_temp.length; i++){-%>
+                  <%if(associations_temp[i].targetStorageType === 'sql'){-%>
+                    if(input.add<%=associations_temp[i].name_cp-%> ){
+                      let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                      if(wrong_ids.length > 0){
+                        throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                      }else{
+                        promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction:t}));
+                      }
+                    }
+                  <%}-%>
+                  <%}-%>
+              return Promise.all(promises_associations).then(() => {return item});
+            });
+            return result;
+          }catch(error){
+            throw error;
+          }
+        });
   }
 
   static deleteOne(id){
@@ -219,19 +252,59 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
         .then((valSuccess) => {
             return super.findByPk(input.id)
-                .then(item => {
+                .then(async item => {
+                  let promises_associations = [];
                   <%associations_temp = associations["hasMany"].concat(associations["belongsToMany"])-%>
                   <%for(let i=0; i < associations_temp.length; i++){-%>
                     <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-                      if(input.add<%=associations_temp[i].name_cp-%>){item.add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);}
-                      if(input.remove<%=associations_temp[i].name_cp-%>){item.remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);}
+
+                      if(input.add<%=associations_temp[i].name_cp-%> ){
+                        let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                        if(wrong_ids.length > 0){
+                          throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                        }else{
+                          promises_associations.push(item.add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
+                        }
+                      }
+
+                      if(input.remove<%=associations_temp[i].name_cp-%>){
+                        let ids_associated = await item.get<%=associations_temp[i].name_cp-%>().map(t => `${t.id}`);
+                        input.remove<%=associations_temp[i].name_cp-%>.forEach( id =>{
+                            if(! ids_associated.includes(id)){
+                              throw new Error(`The association with id ${id} that you're trying to remove desn't exist` )
+                            }
+                        });
+                        promises_associations.push(item.remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>));
+                      }
                     <%}-%>
                   <%}-%>
-                    return item.update(input);
+
+                  <%associations_temp = associations["hasOne"].concat(associations["belongsTo"])-%>
+                  <%for(let i=0; i < associations_temp.length; i++){-%>
+                    <%if(associations_temp[i].targetStorageType === 'sql'){-%>
+                      if(input.add<%=associations_temp[i].name_cp-%> ){
+                        let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                        if(wrong_ids.length > 0){
+                          throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                        }else{
+                          promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
+                        }
+                      }else if(input.add<%=associations_temp[i].name_cp-%> === null ){
+                        promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>));
+                      }
+
+                      if(input.remove<%=associations_temp[i].name_cp-%>){
+                          let <%=associations_temp[i].name-%> = await item.get<%=associations_temp[i].name_cp-%>();
+                          if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === <%=associations_temp[i].name-%>.id){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(null));}
+                          else{
+                            throw new Error("The association you're trying to remove it doesn't exists");
+                          }
+                      }
+                    <%}-%>
+                  <%}-%>
+                    return  Promise.all(promises_associations).then( () => { return item.update(input); } );
                 });
-        }).catch((err) => {
-            return err
-        })
+        });
   }
 
   static bulkAddCsv(context){
@@ -260,27 +333,27 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                       console.log(info);
                   }).catch(function(err) {
                       fileTools.deleteIfExists(addedZipFilePath);
-                      console.log(err);
+                      console.error(err);
                   });
 
               } catch (error) {
-                  console.log(error.message);
+                  console.error(error.message);
               }
 
               fs.unlinkSync(tmpFile);
           }).catch((error) => {
               email.sendEmail(helpersAcl.getTokenFromContext(context).email,
                   'ScienceDB batch add', `${error.message}`).then(function(info) {
-                  console.log(info);
+                  console.error(info);
               }).catch(function(err) {
-                  console.log(err);
+                  console.error(err);
               });
 
               fs.unlinkSync(tmpFile);
           });
 
       }).catch((error) => {
-          return new Error(error);
+          throw new Error(error);
       });
   }
 

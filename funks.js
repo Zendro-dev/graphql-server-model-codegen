@@ -125,31 +125,40 @@ attributesToJsonSchemaProperties = function(attributes) {
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
       jsonSchemaProps[key] = {
-        "type": "string"
+        "type": ["string", "null"]
       }
     } else if (jsonSchemaProps[key] === "Int") {
       jsonSchemaProps[key] = {
-        "type": "integer"
+        "type": ["integer", "null"]
       }
     } else if (jsonSchemaProps[key] === "Float") {
       jsonSchemaProps[key] = {
-        "type": "number"
+        "type": ["number", "null"]
       }
     } else if (jsonSchemaProps[key] === "Boolean") {
       jsonSchemaProps[key] = {
-        "type": "boolean"
+        "type": ["boolean", "null"]
       }
     } else if (jsonSchemaProps[key] === "Date") {
       jsonSchemaProps[key] = {
-        "isoDate": true
+	      "anyOf": [
+          { "isoDate": true },
+          { "type": "null" }
+        ]
       }
     } else if (jsonSchemaProps[key] === "Time") {
       jsonSchemaProps[key] = {
-        "isoTime": true
+	      "anyOf": [
+          { "isoTime": true },
+          { "type": "null" }
+        ]
       }
     } else if (jsonSchemaProps[key] === "DateTime") {
       jsonSchemaProps[key] = {
-        "isoDateTime": true
+        "anyOf": [
+          { "isoDateTime": true },
+          { "type": "null" }
+        ]
       }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
@@ -406,7 +415,6 @@ module.exports.getOptions = function(dataModel){
       namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
-      attributesStr: attributesToString( getOnlyTypeAttributes(dataModel.attributes)),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
       associations: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
@@ -418,6 +426,9 @@ module.exports.getOptions = function(dataModel){
       adapterName: dataModel.adapterName || "",
       registry: dataModel.registry || []
   };
+
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo));
+
   return opts;
 };
 
@@ -435,6 +446,19 @@ module.exports.getOptions = function(dataModel){
     }else if(association.type === 'to_many' && association.keyIn === association.target){
       return 'hasMany';
     }
+  }
+
+
+  getEditableAttributes = function(attributes, parsedAssocForeignKeys){
+    let editable_attributes = {};
+    let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
+
+    for(let attrib in attributes ){
+      if(!target_keys.includes(attrib) ){
+        editable_attributes[ attrib ] = attributes[attrib];
+      }
+    }
+    return editable_attributes;
   }
 
 
@@ -474,7 +498,7 @@ module.exports.getOptions = function(dataModel){
           //}else if(associations_type["one"].includes(association.type))
         }else if(association.type === 'to_one')
           {
-            associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target) ];
+            associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
           }else{
             console.log("Association type "+ association.type + " not supported.");
             return;
@@ -489,6 +513,10 @@ module.exports.getOptions = function(dataModel){
           assoc["target_pl"] = inflection.pluralize(association.target);
           assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
           assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
+          if(association.keyIn){
+              assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
+          }
+
 
           let sql_type = getSqlType(assoc);
           associations_info[sql_type].push(assoc);

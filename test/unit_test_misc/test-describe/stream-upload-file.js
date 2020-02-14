@@ -12,10 +12,11 @@ bulkAddDogCsv: function(_, context) {
           return dog.bulkAddCsv(context);
 
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-        return error;
+        console.error(error);
+        handleError(error);
     })
 }
 `

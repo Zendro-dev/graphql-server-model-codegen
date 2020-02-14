@@ -25,8 +25,13 @@ const os = require('os');
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
+    try{
+        return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
 
-    return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
   }
 
   /**
@@ -45,8 +50,12 @@ const os = require('os');
        order,
        pagination
    }, context) {
-
+     try{
        return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
+     }catch(error){
+       console.error(error);
+       handleError(error);
+     };
    }
 
   /**
@@ -57,7 +66,12 @@ const os = require('os');
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-    return this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
+    try{
+      return this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 
@@ -72,7 +86,12 @@ const os = require('os');
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = function({search}, context){
-    return this.<%=associations_one[i].name%>Impl(search);
+    try{
+      return this.<%=associations_one[i].name%>Impl(search);
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 
@@ -91,7 +110,12 @@ const os = require('os');
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
-    return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+    try{
+      return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 
   /**
@@ -102,8 +126,12 @@ const os = require('os');
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-
-    return this.countFiltered<%=associations_temp[i].name_cp%>Impl ({search});
+    try{
+      return this.countFiltered<%=associations_temp[i].name_cp%>Impl ({search});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 
 
@@ -119,7 +147,12 @@ const os = require('os');
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
-    return this.<%=associations_temp[i].name%>ConnectionImpl({search, order, pagination});
+    try{
+      return this.<%=associations_temp[i].name%>ConnectionImpl({search, order, pagination});
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 
@@ -143,9 +176,10 @@ module.exports = {
         if (authorization === true) {
           return <%- nameLc -%>.readAll(search, order, pagination);
       } else {
-          return new Error("You don't have authorization to perform this action");
+          throw new Error("You don't have authorization to perform this action");
       }
     }).catch( error =>{
+          console.error(error);
           handleError( error);
     })
   },
@@ -165,9 +199,10 @@ module.exports = {
          if (authorization === true) {
            return <%- nameLc -%>.readAllCursor(search, order, pagination);
        } else {
-           return new Error("You don't have authorization to perform this action");
+           throw new Error("You don't have authorization to perform this action");
        }
      }).catch( error =>{
+          console.error(error);
            handleError( error);
      })
    },
@@ -185,9 +220,10 @@ module.exports = {
       if (authorization === true) {
       return <%- nameLc -%>.readById(id);
     } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
     }
   }).catch( error =>{
+        console.error(error);
         handleError( error);
   })
   },
@@ -204,9 +240,10 @@ module.exports = {
       if (authorization === true) {
           return <%- nameLc -%>.addOne(input);
     } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
     }
   }).catch( error =>{
+      console.error(error);
       handleError( error);
   })
   },
@@ -222,10 +259,11 @@ module.exports = {
         if (authorization === true) {
           return <%- nameLc -%>.bulkAddCsv(context);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-        return error;
+      console.error(error);
+      handleError( error);
     })
   },
 
@@ -241,9 +279,10 @@ module.exports = {
       if (authorization === true) {
         return <%- nameLc -%>.deleteOne(id);
       } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
       }
       }).catch( error =>{
+          console.error(error);
           handleError( error);
       })
   },
@@ -260,9 +299,10 @@ module.exports = {
       if (authorization === true) {
           return <%- nameLc -%>.updateOne(input);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
       }).catch( error =>{
+            console.error(error);
             handleError( error);
       })
   },
@@ -279,9 +319,10 @@ module.exports = {
         if (authorization === true) {
           return <%- nameLc -%>.countRecords(search);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
       }).catch( error =>{
+          console.error(error);
             handleError( error);
       })
   },
@@ -298,9 +339,10 @@ module.exports = {
       if (authorization === true) {
       return helper.vueTable(context.request, <%- nameLc -%>, <%-  JSON.stringify(arrayAttributeString) -%>  );
     } else {
-        return new Error("You don't have authorization to perform this action");
+        throw new Error("You don't have authorization to perform this action");
     }
   }).catch( error =>{
+      console.error(error);
         handleError( error);
   })
 },
@@ -317,9 +359,10 @@ module.exports = {
         if (authorization === true) {
             return <%- nameLc -%>.csvTableTemplate();
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+      console.error(error);
         handleError(error);
     })
   }
