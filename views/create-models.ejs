@@ -604,4 +604,13 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return data_values;
   }
 
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
 }

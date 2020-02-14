@@ -36,17 +36,3 @@ module.exports.person_indices_migration = `
   queryInterface.addIndex('people', ['phone'])
 });
 `
-module.exports.person_externalIds_migration =`
-
-email: {
-    type: Sequelize[dict['String']],
-    allowNull: false,
-    unique: true
-},
-
-phone: {
-  type: Sequelize[dict['String']],
-  allowNull: false,
-  unique: true
-}
-`

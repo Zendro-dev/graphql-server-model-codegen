@@ -195,13 +195,7 @@ describe('Migrations', function(){
     expect(g_resolvers).to.have.string(test_resolvers);
   });
 
-  it('Migration externalIds - Person', async function(){
-    let opts = funks.getOptions(models.person_externalIds);
-    let generated_resolvers =await funks.generateJs('create-migrations', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolvers = data_test.person_externalIds_migration.replace(/\s/g, '');
-    expect(g_resolvers).to.have.string(test_resolvers);
-  });
+
 });
 
 describe('Model naming cases ', function(){
@@ -998,4 +992,23 @@ describe('To-one associations editing', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+});
+
+describe('External ids', function(){
+  let data_test = require('./unit_test_misc/test-describe/external-ids');
+  it('Migration externalIds - Person', async function(){
+    let opts = funks.getOptions(models.person_externalIds);
+    let generated_resolvers =await funks.generateJs('create-migrations', opts);
+    let g_resolvers = generated_resolvers.replace(/\s/g, '');
+    let test_resolvers = data_test.person_externalIds_migration.replace(/\s/g, '');
+    expect(g_resolvers).to.have.string(test_resolvers);
+  });
+
+  it('Get array external ids - person', async function(){
+    let opts = funks.getOptions(models.person_externalIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.externalIdsArray.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 });
