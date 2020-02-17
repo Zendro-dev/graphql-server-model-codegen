@@ -46,6 +46,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               }
             }
             <%}-%>
+            <% if(keys[i] === definitionObj.internalId ){-%>,
+              primaryKey: true
+            <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>
       <%}-%>
@@ -583,7 +586,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   <%}-%>
 
   /**
-   * idAttribute - Check wether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
    *
    * @return {type} Name of the attribute that functions as an internalId
    */

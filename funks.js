@@ -420,6 +420,7 @@ module.exports.getOptions = function(dataModel){
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definition : stringify_obj(dataModel),
+      definitionObj : dataModel,
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
       url: dataModel.url || "",
       regex: dataModel.regex || "",
