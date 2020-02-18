@@ -365,6 +365,15 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   <%let associations_one = associations["belongsTo"]-%>
   <% for(let i=0; i < associations_one.length; i++){ -%>
 
+  _add<%=associations_one[i].name_cp%>(id){
+    let p = new Promise(async (resolve, reject)=>{
+      this.<%=associations_one[i].targetKey%> = id;
+      await super.save();
+      resolve();
+    });
+    return p;
+  }
+
   <%=associations_one[i].name%>Impl (search){
       if(search === undefined){
         return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);

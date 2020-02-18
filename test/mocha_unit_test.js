@@ -1020,3 +1020,16 @@ describe('External ids', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 });
+
+describe('Extend api model layer associations', function(){
+  let data_test = require('./unit_test_misc/test-describe/extended-api-model-layer');
+
+  it('Add to-one association foreign key in source', async function(){
+    let opts = funks.getOptions(models.transcript_count);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.to_add_individual.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
+});
