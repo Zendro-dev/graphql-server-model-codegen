@@ -365,13 +365,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   <%let associations_one = associations["belongsTo"]-%>
   <% for(let i=0; i < associations_one.length; i++){ -%>
 
+    set_<%=associations_one[i].targetKey%>( value ){
+      this.<%=associations_one[i].targetKey%> = value;
+      return super.save();
+    }
+
+
   _add<%=associations_one[i].name_cp%>(id){
-    let p = new Promise(async (resolve, reject)=>{
-      this.<%=associations_one[i].targetKey%> = id;
-      await super.save();
-      resolve();
-    });
-    return p;
+    return this.set_<%=associations_one[i].targetKey%>(id);
   }
 
   <%=associations_one[i].name%>Impl (search){
@@ -436,6 +437,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   <% associations_temp = associations["hasMany"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    async _add<%=associations_temp[i].name_cp%>(ids){
+      await helper.asyncForEach(ids, async id =>{
+        let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
+        await record.set_<%=associations_temp[i].targetKey%>(this.id);
+      });
+    }
+
     <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
       if(search === undefined)
       {
