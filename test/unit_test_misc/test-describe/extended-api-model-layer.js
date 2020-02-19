@@ -94,3 +94,18 @@ async _removeAuthors(ids){
 }
 
 `
+
+module.exports.cenz_set_personId = `
+
+  set_personId(value ){
+    super.updateOne({id: this.id, addOwner: value});
+  }
+
+`
+
+module.exports.cenz_add_owner = `
+_addOwner( id ){
+  super.updateOne({id: this.id, addOwner: id});
+}
+
+`

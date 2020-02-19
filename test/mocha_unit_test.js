@@ -1097,4 +1097,21 @@ describe('Extend api model layer associations', function(){
     let test_model = data_test.remove_trough_table.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
+
+
+  it('Add to-one association foreign key in source', async function(){
+    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.cenz_add_owner.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
+  it('Set foreign key in source', async function(){
+    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.cenz_set_personId.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 });

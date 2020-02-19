@@ -187,6 +187,14 @@ module.exports = class <%- name -%>{
     <%let associations_one = associations["belongsTo"]-%>
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
+    set_<%=associations_one[i].targetKey%>(value){
+      super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>: value });
+    }
+
+    _add<%=associations_one[i].name_cp%>(id){
+      super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>: id });
+    }
+
     <%=associations_one[i].name%>Impl (search){
         if(search === undefined){
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
