@@ -226,6 +226,10 @@ module.exports = class <%- name -%>{
     <%associations_one = associations["hasOne"]-%>
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
+    _add<%=associations_one[i].name_cp%>(id){
+      super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>:id});
+    }
+
     <%=associations_one[i].name%>Impl (search){
       let simple_search = {
         "field": "<%=associations_one[i].targetKey%>",

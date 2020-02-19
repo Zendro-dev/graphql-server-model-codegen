@@ -109,3 +109,11 @@ _addOwner( id ){
 }
 
 `
+
+module.exports.cenz_add_unique_pet = `
+
+_addUnique_pet(id){
+  super.updateOne({id: this.id, addUnique_pet: id});
+}
+
+`
