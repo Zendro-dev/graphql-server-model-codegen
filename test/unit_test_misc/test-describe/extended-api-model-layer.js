@@ -21,3 +21,13 @@ async _addTranscript_counts( ids ){
   });
 }
 `
+
+module.exports.to_add_unique_pet = `
+
+async _addUnique_pet(id){
+  let record = await models.dog.readById(id);
+  await record.set_personId(this.id);
+}
+
+
+`

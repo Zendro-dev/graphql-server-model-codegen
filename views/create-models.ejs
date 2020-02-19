@@ -407,6 +407,12 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   <%associations_one = associations["hasOne"]-%>
   <% for(let i=0; i < associations_one.length; i++){ -%>
+
+    async _add<%=associations_one[i].name_cp%>(id){
+      let record = await models.<%=associations_one[i].target_lc%>.readById(id);
+      await record.set_<%=associations_one[i].targetKey%>(this.id);
+    }
+
     <%=associations_one[i].name%>Impl(search){
 
       let simple_search = {
