@@ -46,3 +46,9 @@ async _addAuthors(ids){
 }
 
 `
+
+module.exports.remove_individual = `
+  _removeIndividual( ){
+    return this.set_individual_id(null);
+  }
+`

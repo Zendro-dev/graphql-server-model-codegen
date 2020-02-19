@@ -375,6 +375,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return this.set_<%=associations_one[i].targetKey%>(id);
   }
 
+  _remove<%=associations_one[i].name_cp%>(){
+    return this.set_<%=associations_one[i].targetKey%>(null);
+  }
+
   <%=associations_one[i].name%>Impl (search){
       if(search === undefined){
         return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
