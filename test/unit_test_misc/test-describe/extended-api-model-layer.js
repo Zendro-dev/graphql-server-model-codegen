@@ -70,3 +70,27 @@ async _removeUnique_pet(id){
 }
 
 `
+
+module.exports.remove_trough_table = `
+
+async _removeAuthors(ids){
+
+  await helper.asyncForEach(ids, async id =>{
+      let search_a = {
+        "field" : "book_Id",
+        "value": { "value": this.id},
+        "operator": "eq"
+      }
+
+      let search_b = {
+        "field" : "person_Id",
+        "value": { "value": id},
+        "operator": "eq"
+      }
+
+      let record = await models.books_to_people.readAll({operator: "and", search:[search_a, search_b]} );
+      await models.books_to_people.deleteOne(record[0].id);
+  });
+}
+
+`

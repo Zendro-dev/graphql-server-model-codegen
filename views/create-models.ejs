@@ -512,6 +512,25 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         });
     }
 
+    async _remove<%=associations_temp[i].name_cp%>(ids){
+        await helper.asyncForEach(ids, async id =>{
+          let search_a = {
+            "field": "<%- associations_temp[i].sourceKey%>",
+            "value": { "value": this.id},
+            "operator": "eq"
+
+          }
+
+          let search_b = {
+            "field": "<%- associations_temp[i].targetKey%>",
+            "value":{"value": id},
+            "operator": "eq"
+          }
+          let record = await models.<%- associations_temp[i].keysIn%>.readAll({operator: "and", search:[search_a, search_b]});
+          await models.<%- associations_temp[i].keysIn%>.deleteOne(record[0].id);
+        });
+    }
+
     <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
 
     <%if(associations_temp[i].targetStorageType === 'sql'){-%>

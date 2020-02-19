@@ -1058,7 +1058,7 @@ describe('Extend api model layer associations', function(){
   })
 
 
-  it('Add to-many association foreign key in target', async function(){
+  it('Add to-many association trough table', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -1090,4 +1090,11 @@ describe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  it('Remove to-many association trough table', async function(){
+    let opts = funks.getOptions(models.book_authors);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.remove_trough_table.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 });
