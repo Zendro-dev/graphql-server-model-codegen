@@ -31,3 +31,18 @@ async _addUnique_pet(id){
 
 
 `
+
+module.exports.to_add_trough_table = `
+
+async _addAuthors(ids){
+
+  await helper.asyncForEach(ids, async id =>{
+      let input = {
+        book_Id : this.id,
+        person_Id: id
+      }
+      await models.books_to_people.addOne(input);
+  });
+}
+
+`

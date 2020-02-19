@@ -483,7 +483,18 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
 
   <% associations_temp = associations["belongsToMany"]-%>
+
   <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    async _add<%=associations_temp[i].name_cp%>(ids){
+        await helper.asyncForEach(ids, async id =>{
+          let input = {
+            <%- associations_temp[i].sourceKey%>: this.id,
+            <%- associations_temp[i].targetKey%>: id
+          }
+          await models.<%- associations_temp[i].keysIn%>.addOne(input);
+        });
+    }
 
     <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
 

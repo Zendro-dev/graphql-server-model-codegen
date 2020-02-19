@@ -1057,4 +1057,13 @@ describe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+
+  it('Add to-many association foreign key in target', async function(){
+    let opts = funks.getOptions(models.book_authors);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.to_add_trough_table.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
 });
