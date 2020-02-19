@@ -448,6 +448,13 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   <% associations_temp = associations["hasMany"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
 
+    async _remove<%=associations_temp[i].name_cp%>(ids){
+      await helper.asyncForEach(ids, async id =>{
+        let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
+        await record.set_<%=associations_temp[i].targetKey%>(null);
+      });
+    }
+
     async _add<%=associations_temp[i].name_cp%>(ids){
       await helper.asyncForEach(ids, async id =>{
         let record = await models.<%=associations_temp[i].target_lc%>.readById(id);

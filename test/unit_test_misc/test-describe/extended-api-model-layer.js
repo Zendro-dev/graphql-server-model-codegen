@@ -52,3 +52,13 @@ module.exports.remove_individual = `
     return this.set_individual_id(null);
   }
 `
+
+module.exports.remove_transcript_counts = `
+async _removeTranscript_counts( ids ){
+   await helper.asyncForEach(ids, async id =>{
+     let record  = await models.transcript_count.readById(id);
+     await record.set_individual_id(null);
+   });
+}
+
+`
