@@ -375,7 +375,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return this.set_<%=associations_one[i].targetKey%>(id);
   }
 
-  _remove<%=associations_one[i].name_cp%>(){
+  _remove<%=associations_one[i].name_cp%>(id){
     return this.set_<%=associations_one[i].targetKey%>(null);
   }
 
@@ -415,6 +415,11 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     async _add<%=associations_one[i].name_cp%>(id){
       let record = await models.<%=associations_one[i].target_lc%>.readById(id);
       await record.set_<%=associations_one[i].targetKey%>(this.id);
+    }
+
+    async _remove<%=associations_one[i].name_cp%>(id){
+      let record = await models.<%=associations_one[i].target_lc%>.readById(id);
+      await record.set_<%=associations_one[i].targetKey%>(null);
     }
 
     <%=associations_one[i].name%>Impl(search){

@@ -1082,5 +1082,12 @@ describe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  it('Remove to-one association foreign key in target', async function(){
+    let opts = funks.getOptions(models.person_one_assoc);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.remove_unique_pet.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 
 });

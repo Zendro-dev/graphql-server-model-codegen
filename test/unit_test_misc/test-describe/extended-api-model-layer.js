@@ -48,7 +48,7 @@ async _addAuthors(ids){
 `
 
 module.exports.remove_individual = `
-  _removeIndividual( ){
+  _removeIndividual(id ){
     return this.set_individual_id(null);
   }
 `
@@ -59,6 +59,14 @@ async _removeTranscript_counts( ids ){
      let record  = await models.transcript_count.readById(id);
      await record.set_individual_id(null);
    });
+}
+
+`
+
+module.exports.remove_unique_pet = `
+async _removeUnique_pet(id){
+  let record = await models.dog.readById(id);
+  await record.set_personId(null);
 }
 
 `
