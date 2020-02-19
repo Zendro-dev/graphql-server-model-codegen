@@ -1075,3 +1075,40 @@ describe('To-one associations editing', function(){
   })
 
 });
+
+describe('extended ids', function(){
+  let data_test = require('./unit_test_misc/test-describe/extended-internal-ids');
+
+  it('idAttribute - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_idAttribute.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+  it('idAttributeType - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_idAttributeType.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+  it('getIdValue - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_getIdValue.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+  it('internalId as sequelize primaryKey - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_sequelize_primaryKey.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+});
