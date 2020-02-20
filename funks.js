@@ -425,7 +425,8 @@ module.exports.getOptions = function(dataModel){
       url: dataModel.url || "",
       regex: dataModel.regex || "",
       adapterName: dataModel.adapterName || "",
-      registry: dataModel.registry || []
+      registry: dataModel.registry || [],
+      idAttribute: getIdAttribute(dataModel)
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo));
@@ -623,7 +624,9 @@ writeCommons = function(dir_write){
   //writeIndexModelsCommons(dir_write);
 };
 
-
+getIdAttribute = function(dataModel){
+  return dataModel.internalId === undefined ? "id" : dataModel.internalId;
+}
 
 
  /**

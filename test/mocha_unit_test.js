@@ -258,6 +258,7 @@ describe('Model naming cases ', function(){
   it('Resolvers - transcriptCount', async function(){
     let opts = funks.getOptions(models.transcriptCount_indiv);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
+    console.log(generated_resolvers);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.transcriptCount_resolvers_camelcase.replace(/\s/g, '');
       expect(g_resolvers).to.have.string(test_resolvers);

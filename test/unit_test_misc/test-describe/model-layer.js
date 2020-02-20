@@ -186,7 +186,7 @@ module.exports.delete_one_resolver = `
 /**
  * deleteBook - Check user authorization and delete a record with the specified id in the id argument.
  *
- * @param  {number} {id}    Id of the record to delete
+ * @param  {number} {id}    id of the record to delete
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {string}         Message indicating if deletion was successfull.
  */

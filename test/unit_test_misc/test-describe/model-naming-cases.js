@@ -121,7 +121,7 @@ module.exports.transcriptCount_resolvers_camelcase=`
 /**
  * readOneTranscriptCount - Check user authorization and return one record with the specified id in the id argument.
  *
- * @param  {number} {id}    Id of the record to retrieve
+ * @param  {number} {id}    id of the record to retrieve
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {object}         Record with id requested
  */
