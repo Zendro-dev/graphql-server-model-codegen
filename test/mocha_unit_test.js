@@ -1122,4 +1122,12 @@ describe('Extend api model layer associations', function(){
     let test_model = data_test.cenz_add_unique_pet.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
+
+  it('Cenz server - Add to-many association ', async function(){
+    let opts = funks.getOptions(models_cenz.person_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.cenz_add_works.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 });

@@ -117,3 +117,9 @@ _addUnique_pet(id){
 }
 
 `
+
+module.exports.cenz_add_works = `
+ _addPatients(ids){
+   super.updateOne({id: this.id, addPatients: ids});
+ }
+`

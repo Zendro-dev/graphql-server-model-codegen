@@ -261,6 +261,11 @@ module.exports = class <%- name -%>{
 
       <% associations_temp = associations["hasMany"]-%>
       <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+        _add<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({id:this.id, add<%=associations_temp[i].name_cp%>: ids});
+        }
+
         <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
           if(search === undefined)
           {
@@ -294,6 +299,10 @@ module.exports = class <%- name -%>{
 
       <% associations_temp = associations["belongsToMany"]-%>
       <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+        _add<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({id:this.id, add<%=associations_temp[i].name_cp%>: ids});
+        }
 
         <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
 
