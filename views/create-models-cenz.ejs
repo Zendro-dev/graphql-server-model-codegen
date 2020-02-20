@@ -195,6 +195,11 @@ module.exports = class <%- name -%>{
       super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>: id });
     }
 
+    _remove<%=associations_one[i].name_cp%>(id){
+      super.updateOne({id: this.id, remove<%=associations_one[i].name_cp%>: id });
+    }
+
+
     <%=associations_one[i].name%>Impl (search){
         if(search === undefined){
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
@@ -228,6 +233,10 @@ module.exports = class <%- name -%>{
 
     _add<%=associations_one[i].name_cp%>(id){
       super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>:id});
+    }
+
+    _remove<%=associations_one[i].name_cp%>(id){
+      super.updateOne({id: this.id, remove<%=associations_one[i].name_cp%>:id});
     }
 
     <%=associations_one[i].name%>Impl (search){
@@ -266,6 +275,10 @@ module.exports = class <%- name -%>{
           super.updateOne({id:this.id, add<%=associations_temp[i].name_cp%>: ids});
         }
 
+        _remove<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({id:this.id, remove<%=associations_temp[i].name_cp%>: ids});
+        }
+
         <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
           if(search === undefined)
           {
@@ -302,6 +315,10 @@ module.exports = class <%- name -%>{
 
         _add<%=associations_temp[i].name_cp%>(ids){
           super.updateOne({id:this.id, add<%=associations_temp[i].name_cp%>: ids});
+        }
+
+        _remove<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({id:this.id, remove<%=associations_temp[i].name_cp%>: ids});
         }
 
         <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
