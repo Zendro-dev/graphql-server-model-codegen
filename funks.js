@@ -429,7 +429,7 @@ module.exports.getOptions = function(dataModel){
       idAttribute: getIdAttribute(dataModel)
   };
 
-  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo));
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
 
   return opts;
 };
@@ -451,12 +451,11 @@ module.exports.getOptions = function(dataModel){
   }
 
 
-  getEditableAttributes = function(attributes, parsedAssocForeignKeys){
+  getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
     let editable_attributes = {};
     let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
-
     for(let attrib in attributes ){
-      if(!target_keys.includes(attrib) ){
+      if(!target_keys.includes(attrib) && attrib !== idAttribute){
         editable_attributes[ attrib ] = attributes[attrib];
       }
     }
