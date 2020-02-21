@@ -296,7 +296,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
                       if(input.remove<%=associations_temp[i].name_cp-%>){
                           let <%=associations_temp[i].name-%> = await item.get<%=associations_temp[i].name_cp-%>();
-                          if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === <%=associations_temp[i].name-%>.id){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(null));}
+                          if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>.id}`){promises_associations.push(item.set<%=associations_temp[i].name_cp-%>(null));}
                           else{
                             throw new Error("The association you're trying to remove it doesn't exists");
                           }

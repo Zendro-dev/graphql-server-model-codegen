@@ -56,7 +56,7 @@ static updateOne(input) {
 
                     if(input.removeUnique_pet ){
                         let unique_pet = await item.getUnique_pet();
-                        if (unique_pet && input.removeUnique_pet === unique_pet.id) {
+                        if (unique_pet && input.removeUnique_pet === \`\${unique_pet.id}\`) {
                             promises_associations.push(item.setUnique_pet(null));
                         }else{
                           throw new Error("The association you're trying to remove it doesn't exists");
