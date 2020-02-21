@@ -93,6 +93,24 @@ module.exports = class <%- name -%>{
     <%let associations_one = associations["belongsTo"]-%>
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
+      set_<%=associations_one[i].targetKey%>( value ){
+        this.<%=associations_one[i].targetKey%> = value;
+      }
+
+      _add<%=associations_one[i].name_cp%>(id){
+        /*
+        YOUR CODE GOES HERE
+        */
+        throw new Error('_add<%=associations_one[i].name_cp%> is not implemented');
+      }
+
+      _remove<%=associations_one[i].name_cp%>(id){
+        /*
+        YOUR CODE GOES HERE
+        */
+        throw new Error('_remove<%=associations_one[i].name_cp%> is not implemented');
+      }
+
     <%=associations_one[i].name%>Impl (search){
         if(search === undefined){
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
@@ -107,6 +125,20 @@ module.exports = class <%- name -%>{
 
     <%associations_one = associations["hasOne"]-%>
     <% for(let i=0; i < associations_one.length; i++){ -%>
+
+      _add<%=associations_one[i].name_cp%>(id){
+        /*
+        YOUR CODE GOES HERE
+        */
+        throw new Error('_add<%=associations_one[i].name_cp%> is not implemented in the model');
+      }
+
+      _remove<%=associations_one[i].name_cp%>(id){
+        /*
+        YOUR CODE GOES HERE
+        */
+        throw new Error('_remove<%=associations_one[i].name_cp%> is not implemented in the model');
+      }
 
     <%=associations_one[i].name%>Impl (search){
         if(search === undefined){
@@ -138,6 +170,21 @@ module.exports = class <%- name -%>{
 
       <% associations_temp = associations["hasMany"]-%>
       <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+        _add<%=associations_temp[i].name_cp%>(ids){
+          /*
+          YOUR CODE GOES HERE
+          */
+          throw new Error('_add<%=associations_temp[i].name_cp%> is not implemented in the model');
+        }
+
+        _remove<%=associations_temp[i].name_cp%>(ids){
+          /*
+          YOUR CODE GOES HERE
+          */
+          throw new Error('_remove<%=associations_temp[i].name_cp%> is not implemented in the model');
+        }
+
         <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
           if(search === undefined)
           {
@@ -172,6 +219,20 @@ module.exports = class <%- name -%>{
 
       <% associations_temp = associations["belongsToMany"]-%>
       <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+        _add<%=associations_temp[i].name_cp%>(ids){
+          YOUR CODE GOES HERE
+          */
+          throw new Error('_add<%=associations_temp[i].name_cp%> is not implemented in the model');
+
+        }
+
+        _remove<%=associations_temp[i].name_cp%>(ids){
+          YOUR CODE GOES HERE
+          */
+          throw new Error('_remove<%=associations_temp[i].name_cp%> is not implemented in the model');
+
+        }
 
         <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
           /*
