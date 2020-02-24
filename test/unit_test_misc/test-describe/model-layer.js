@@ -130,6 +130,16 @@ static addOne(input){
             }
           return  Promise.all(promises_associations).then( () => { return item } );
         });
+
+        if(input.addPublisher){
+          let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
+          if(wrong_ids.length > 0){
+            throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
+          }else{
+            await result._addPublisher(input.addPublisher);
+          }
+        }
+
          return result;
         }catch(error){
           throw error;
