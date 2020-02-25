@@ -372,7 +372,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
       }else{
         let id_search = {
-            "field": "id",
+            "field": models.<%=associations_one[i].target_lc%>.idAttribute(),
             "value": {
               "value": this.<%=associations_one[i].targetKey%>
             },
