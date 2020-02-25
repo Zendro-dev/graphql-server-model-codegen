@@ -23,7 +23,7 @@ researcherImpl(search){
    return models.researcher.readById( this.researcherId );
  }else{
    let id_search = {
-       "field": "id",
+       "field":  models.researcher.idAttribute(),
        "value": {
          "value": this.researcherId
        },
