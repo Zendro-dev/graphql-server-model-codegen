@@ -352,6 +352,31 @@ writeIndexModelsCommons = function(dir_write){
     });
 };
 
+writeIndexAdapters = function(dir_write){
+  let index = `
+  const fs = require('fs');
+  const path = require('path');
+
+  let adapters = {};
+  module.exports = adapters;
+
+  fs.readdirSync(__dirname)
+    .filter( file =>{ return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
+  }).forEach( file =>{
+
+    let adapter = require(path.join(__dirname, file));
+    if( adapters[adapter.name] ){
+      throw Error(\`Duplicated adapter name \${adapter.name}\`);
+    }
+    adapters[adapter.name] = adapter;
+  });
+  `
+  fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {
+    if (err)
+      throw Error(err);
+    });
+
+}
 
 /**
  * convertToType - Generate a string correspondant to the model type as needed for graphql schema.
@@ -395,11 +420,16 @@ module.exports.getOptions = function(dataModel){
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definition : stringify_obj(dataModel),
+      definitionObj : dataModel,
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
-      url: dataModel.url || ""
+      url: dataModel.url || "",
+      regex: dataModel.regex || "",
+      adapterName: dataModel.adapterName || "",
+      registry: dataModel.registry || [],
+      idAttribute: getIdAttribute(dataModel)
   };
 
-  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo));
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
 
   return opts;
 };
@@ -421,12 +451,11 @@ module.exports.getOptions = function(dataModel){
   }
 
 
-  getEditableAttributes = function(attributes, parsedAssocForeignKeys){
+  getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
     let editable_attributes = {};
     let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
-
     for(let attrib in attributes ){
-      if(!target_keys.includes(attrib) ){
+      if(!target_keys.includes(attrib) && attrib !== idAttribute){
         editable_attributes[ attrib ] = attributes[attrib];
       }
     }
@@ -589,11 +618,14 @@ createNameMigration = function(dir_write, model_name){
  */
 writeCommons = function(dir_write){
   writeSchemaCommons(dir_write);
+  writeIndexAdapters(dir_write);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
 
-
+getIdAttribute = function(dataModel){
+  return dataModel.internalId === undefined ? "id" : dataModel.internalId;
+}
 
 
  /**
@@ -631,6 +663,16 @@ module.exports.generateCode = function(json_dir, dir_write){
     fs.mkdirSync(dir_write+'/models-cenz-server');
   }
 
+  if(!fs.existsSync(dir_write+'/adapters'))
+  {
+    fs.mkdirSync(dir_write+'/adapters');
+  }
+
+  if(!fs.existsSync(dir_write+'/models-distributed'))
+  {
+    fs.mkdirSync(dir_write+'/models-distributed');
+  }
+
   //test
   fs.readdirSync(json_dir).forEach((json_file) => {
       console.log("Reading...", json_file);
@@ -661,7 +703,7 @@ module.exports.generateCode = function(json_dir, dir_write){
 
         });
         //generateAssociationsMigrations(opts, dir_write);
-      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server'){
+      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server' || opts.storageType === 'distributed-data-model'){
           let file_name = "";
           file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
           generateSection("schemas",opts,file_name).then( ()=>{
@@ -679,6 +721,11 @@ module.exports.generateCode = function(json_dir, dir_write){
             generateSection("models-cenz",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!(from cenz server)');
             });
+          }else if(opts.storageType === 'distributed-data-model'){
+            file_name = dir_write + '/models-distributed/' + opts.nameLc + '.js';
+            generateSection("distributed-model",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
           }
 
 
@@ -688,6 +735,11 @@ module.exports.generateCode = function(json_dir, dir_write){
             console.log(file_name + ' written successfully!');
           });
 
+      }else if(opts.storageType === 'cenzontle-web-service-adapter'){
+        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+        generateSection("cenz-adapters",opts,file_name).then( ()=>{
+          console.log(file_name + ' written successfully!');
+        });
       }
 
   });

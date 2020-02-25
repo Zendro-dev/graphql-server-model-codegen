@@ -577,3 +577,26 @@ module.exports.person_one_assoc = {
   }
 
 }
+
+module.exports.book_extendedIds = {
+  "model": "Book",
+  "storageType": "sql",
+  "attributes": {
+      "title": "String",
+      "genre": "String",
+      "internalPersonId": "String",
+      "internalBookId": "String"
+  },
+  "associations": {
+      "author": {
+          "type": "to_one",
+          "target": "Person",
+          "targetKey": "internalPersonId",
+          "keyIn": "Book",
+          "targetStorageType": "sql",
+          "label": "email"
+      }
+  },
+  "internalId": "internalBookId"
+}
+

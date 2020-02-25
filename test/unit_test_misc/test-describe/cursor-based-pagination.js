@@ -268,7 +268,7 @@ worksConnectionImpl ({search,order,pagination}){
   }
 
   let query = \`query worksConnection($search: searchBookInput $order: [orderBookInput] $pagination: paginationCursorInput ){
-    readOnePerson(id: \${this.id}){ worksConnection(search: $search, order:$order pagination:$pagination){
+    readOnePerson(id: \${this.getIdValue()}){ worksConnection(search: $search, order:$order pagination:$pagination){
       edges{ cursor node{ \${string_attrib}  } } pageInfo{endCursor hasNextPage  }} }
   }\`
 

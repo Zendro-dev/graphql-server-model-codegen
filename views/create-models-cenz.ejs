@@ -219,13 +219,14 @@ module.exports = class <%- name -%>{
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
     <%=associations_one[i].name%>Impl (search){
-      let simple_search = {
-        "field": "<%=associations_one[i].targetKey%>",
-        "value": {
-          "value": this.id
-        },
-        "operator": "eq"
-      }
+        if(search === undefined){
+          let simple_search = {
+            "field": "<%=associations_one[i].targetKey%>",
+            "value": {
+              "value": this.getIdValue()
+            },
+            "operator": "eq"
+          }
 
       let ext_search = simple_search;
 
@@ -252,9 +253,9 @@ module.exports = class <%- name -%>{
         <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
           if(search === undefined)
           {
-            return models.<%=associations_temp[i].target_lc%>.readAll({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"}, order, pagination);
+            return models.<%=associations_temp[i].target_lc%>.readAll({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
           }else{
-            return models.<%=associations_temp[i].target_lc%>.readAll({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] }, order, pagination )
+            return models.<%=associations_temp[i].target_lc%>.readAll({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
           }
         }
 
@@ -262,9 +263,9 @@ module.exports = class <%- name -%>{
 
           if(search === undefined)
           {
-            return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} );
+            return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} );
           }else{
-            return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] })
+            return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
           }
 
         }
@@ -272,9 +273,9 @@ module.exports = class <%- name -%>{
         <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
           if(search === undefined)
           {
-            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"}, order, pagination);
+            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
           }else{
-            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , search] }, order, pagination )
+            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
           }
         }
       <%}-%>
@@ -292,7 +293,7 @@ module.exports = class <%- name -%>{
           }
 
           let query = `query <%=associations_temp[i].name%>Filter($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationInput){
-            readOne<%- nameCp -%>(id:${this.id}){ <%=associations_temp[i].name%>Filter(search: $search, order:$order pagination:$pagination){ ${string_attrib} } }
+            readOne<%- nameCp -%>(id:${this.getIdValue()}){ <%=associations_temp[i].name%>Filter(search: $search, order:$order pagination:$pagination){ ${string_attrib} } }
           }`
 
           return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})
@@ -307,7 +308,7 @@ module.exports = class <%- name -%>{
 
         countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
           let query = `query count<%=associations_temp[i].name_cp%>($search: search<%=associations_temp[i].target_cp%>Input){
-            readOne<%- nameCp -%>(id:${this.id}){countFiltered<%=associations_temp[i].name_cp%>(search: $search)}
+            readOne<%- nameCp -%>(id:${this.getIdValue()}){countFiltered<%=associations_temp[i].name_cp%>(search: $search)}
           }`;
 
           return axios.post(url, {
@@ -332,7 +333,7 @@ module.exports = class <%- name -%>{
           }
 
           let query = `query <%=associations_temp[i].name%>Connection($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationCursorInput){
-            readOne<%- nameCp -%>(id:${this.id}){ <%=associations_temp[i].name%>Connection(search: $search, order:$order pagination:$pagination){
+            readOne<%- nameCp -%>(id:${this.getIdValue()}){ <%=associations_temp[i].name%>Connection(search: $search, order:$order pagination:$pagination){
               edges{cursor node{ ${string_attrib}}} pageInfo{endCursor hasNextPage} } }
           }`
 
@@ -373,5 +374,45 @@ module.exports = class <%- name -%>{
     return data_values;
   }
 
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
 
+  static idAttribute() {
+    let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
+    let idType = <%- name -%>.definition.attributes[internalId];
+
+    if(internalId !== "id") {
+      if(idType === undefined) {
+        return new Error(`Attribute ${internalId} does not exist`)
+      }
+      if(!(idType === "String" || idType === "Int" || idType === "Float")) {
+        return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
+      }
+    }
+    
+    return internalId; 
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model 
+   */
+
+  static idAttributeType() {
+    return <%- name -%>.definition.attributes[this.idAttribute()];  
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   *
+   * @return {type} id value 
+   */
+
+  getIdValue() {
+    return this[<%- name -%>.idAttribute()]
+  }
 };

@@ -4,6 +4,7 @@ const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
 const models_webservice = require('./unit_test_misc/data_models_webservice');
 const models_cenz = require('./unit_test_misc/data_models_cenz');
+const models_distributed = require('./unit_test_misc/data_models_distributed');
 const requireFromString = require('require-from-string');
 
 //const components_code = require('./unit_test_misc/components_code');
@@ -962,6 +963,89 @@ describe('Cursor based pagination', function(){
 
 });
 
+describe('Distributed data models', function(){
+
+  let data_test = require('./unit_test_misc/test-describe/distributed-models');
+  it('ReadById adapter- book', async function(){
+    let opts = funks.getOptions(models_distributed.book);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_adapter_readById.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+  });
+
+  it('Count Records adapter- book', async function(){
+    let opts = funks.getOptions(models_distributed.book);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_adapter_count.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+  });
+
+  it('Read All Records adapter- book', async function(){
+    let opts = funks.getOptions(models_distributed.book);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_adapter_read_all.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+  });
+
+  it('Registry distributed data model- book', async function(){
+    let opts = funks.getOptions(models_distributed.book_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_ddm_registry.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
+  it('ReadById distributed data model- book', async function(){
+    let opts = funks.getOptions(models_distributed.book_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_ddm_readById.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
+  it('Count distributed data model- book', async function(){
+    let opts = funks.getOptions(models_distributed.book_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_ddm_count.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
+  it('Read all distributed data model- book', async function(){
+    let opts = funks.getOptions(models_distributed.book_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.book_ddm_read_all.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
+  it('To-many association distributed data model- person', async function(){
+    let opts = funks.getOptions(models_distributed.person_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.person_ddm_many_association.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
+  it('To-one association distributed data model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.dog_ddm_one_association.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+
+  it('To-many association distributed data model- person', async function(){
+    let opts = funks.getOptions(models_distributed.person_ddm);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.person_ddm_count_association.replace(/\s/g, '');
+    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });
+});
 
 describe('To-one associations editing', function(){
 
@@ -989,5 +1073,42 @@ describe('To-one associations editing', function(){
     let test_model = data_test.person_update_model.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
+
+});
+
+describe('extended ids', function(){
+  let data_test = require('./unit_test_misc/test-describe/extended-internal-ids');
+
+  it('idAttribute - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_idAttribute.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+  it('idAttributeType - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_idAttributeType.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+  it('getIdValue - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_getIdValue.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
+
+  it('internalId as sequelize primaryKey - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_sequelize_primaryKey.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+  });
 
 });

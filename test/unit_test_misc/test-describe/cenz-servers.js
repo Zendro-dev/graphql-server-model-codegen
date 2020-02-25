@@ -143,7 +143,7 @@ worksFilterImpl({
     }
 
     let query = \`query worksFilter($search: searchBookInput $order: [orderBookInput] $pagination: paginationInput){
-        readOnePerson(id: \${this.id}){ worksFilter(search: $search, order:$order pagination:$pagination){
+        readOnePerson(id: \${this.getIdValue()}){ worksFilter(search: $search, order:$order pagination:$pagination){
           \${string_attrib}
         }}
     }\`
@@ -166,7 +166,7 @@ module.exports.many_to_many_association_count = `
 countFilteredWorksImpl({
     search
 }) {
-    let query = \`query countWorks($search:searchBookInput){readOnePerson(id:\${this.id}){ countFilteredWorks(search: $search) } }\`;
+    let query = \`query countWorks($search:searchBookInput){readOnePerson(id:\${this.getIdValue()}){ countFilteredWorks(search: $search) } }\`;
 
     return axios.post(url, {
         query: query,
