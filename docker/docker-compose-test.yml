@@ -19,6 +19,7 @@ services:
       - ./integration_test_run/schemas:/usr/src/app/schemas
       - ./integration_test_run/resolvers:/usr/src/app/resolvers
       - ./integration_test_run/models:/usr/src/app/models
+      - ./integration_test_run/models-distributed:/usr/src/app/models-distributed
       - ./integration_test_run/models-webservice:/usr/src/app/models-webservice
       - ./integration_test_run/models-cenz-server:/usr/src/app/models-cenz-server
       - ./integration_test_run/migrations:/usr/src/app/migrations
