@@ -220,28 +220,38 @@ static updateOne(input){
 
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
       .then((valSuccess) => {
-          return super.findByPk(input.id)
-              .then(async item => {
-                  let promises_associations = [];
-                  if (input.addAuthors) {
-                    let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
-                    if(wrong_ids.length > 0){
-                      throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
-                    }else{
-                      promises_associations.push(item.addAuthors(input.addAuthors));
+
+        try{
+
+          let result = await sequelize.transaction( async(t) =>{
+              let promises_associations = [];
+              let item = await super.findByPk(input.id, {transaction:t});
+              let updated = await item.update(input, {transaction:t});
+
+              if (input.addAuthors) {
+                let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
+                if(wrong_ids.length > 0){
+                  throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+                }else{
+                  promises_associations.push(updated.addAuthors(input.addAuthors, {transaction: t}));
+                }
+              }
+              if (input.removeAuthors) {
+                let ids_associated = await item.getAuthors().map(t => \`\${t.id}\`);
+                input.removeAuthors.forEach( id =>{
+                    if(! ids_associated.includes(id)){
+                      throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\` )
                     }
-                  }
-                  if (input.removeAuthors) {
-                    let ids_associated = await item.getAuthors().map(t => \`\${t.id}\`);
-                    input.removeAuthors.forEach( id =>{
-                        if(! ids_associated.includes(id)){
-                          throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\` )
-                        }
-                    });
-                      promises_associations.push(item.removeAuthors(input.removeAuthors));
-                  }
-                  return  Promise.all(promises_associations).then( () => { return item.update(input); } );
-              });
+                });
+                  promises_associations.push(updated.removeAuthors(input.removeAuthors, {transaction: t}));
+              }
+              return  Promise.all(promises_associations).then( () => { return updated; } );
+          });
+
+          return result;
+        }catch(error){
+          throw error;
+        }
       });
 }
 `

@@ -1131,3 +1131,14 @@ describe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 });
+
+describe('Create and update transaction', function(){
+  let data_test = require('./unit_test_misc/test-describe/transaction-create-update');
+  it('Update - transcript_count', async function(){
+    let opts = funks.getOptions(models.transcript_count);
+    let generated_resolvers =await funks.generateJs('create-models', opts);
+    let g_resolvers = generated_resolvers.replace(/\s/g, '');
+    let test_resolvers = data_test.update_transcript_count.replace(/\s/g, '');
+    expect(g_resolvers).to.have.string(test_resolvers);
+  });
+});
