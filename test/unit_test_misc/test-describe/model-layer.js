@@ -210,7 +210,7 @@ static updateOne(input){
 
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
       .then((valSuccess) => {
-          return super.findByPk(input.id)
+          return super.findByPk(input[this.idAttribute()])
               .then(async item => {
                   let promises_associations = [];
                   if (input.addAuthors) {
@@ -222,7 +222,7 @@ static updateOne(input){
                     }
                   }
                   if (input.removeAuthors) {
-                    let ids_associated = await item.getAuthors().map(t => \`\${t.id}\`);
+                    let ids_associated = await item.getAuthors().map(t => \`\${t[models.person.idAttribute()]}\`);
                     input.removeAuthors.forEach( id =>{
                         if(! ids_associated.includes(id)){
                           throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\` )

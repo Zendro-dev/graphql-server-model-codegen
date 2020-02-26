@@ -39,7 +39,7 @@ module.exports.person_update_model = `
 static updateOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
         .then((valSuccess) => {
-            return super.findByPk(input.id)
+            return super.findByPk(input[this.idAttribute()])
                 .then(async item => {
                     let promises_associations = [];
 
@@ -56,7 +56,7 @@ static updateOne(input) {
 
                     if(input.removeUnique_pet ){
                         let unique_pet = await item.getUnique_pet();
-                        if (unique_pet && input.removeUnique_pet === \`\${unique_pet.id}\`) {
+                        if (unique_pet && input.removeUnique_pet === \`\${unique_pet[models.dog.idAttribute()]}\`) {
                             promises_associations.push(item.setUnique_pet(null));
                         }else{
                           throw new Error("The association you're trying to remove it doesn't exists");
