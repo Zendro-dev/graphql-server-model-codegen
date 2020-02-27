@@ -265,7 +265,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   static updateOne(input){
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then((valSuccess) => {
+        .then(async (valSuccess) => {
           try{
             let result = await sequelize.transaction( async (t) =>{
               let promises_associations = [];
@@ -286,10 +286,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
                   if(input.remove<%=associations_temp[i].name_cp-%>){
                     let ids_associated = await item.get<%=associations_temp[i].name_cp-%>().map(t => `${t.id}`);
-                    input.remove<%=associations_temp[i].name_cp-%>.forEach( id =>{
-                        if(! ids_associated.includes(id)){
-                          throw new Error(`The association with id ${id} that you're trying to remove desn't exist` )
-                        }
+                    await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, id =>{
+                      if(!ids_associated.includes(id)){
+                        throw new Error(`The association with id ${id} that you're trying to remove desn't exists`);
+                      }
                     });
                     promises_associations.push(updated.remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>, {transaction:t}));
                   }
@@ -321,6 +321,54 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
               return  Promise.all(promises_associations).then( () => { return updated; } );
             });
+
+            <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
+            <%for(let i=0; i < associations_temp.length; i++){-%>
+              <%if(associations_temp[i].targetStorageType !== 'sql'){-%>
+                if(input.add<%=associations_temp[i].name_cp-%> ){
+                  let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                  if(wrong_ids.length > 0){
+                    throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                  }else{
+                    await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
+                  }
+                }
+
+                if(input.remove<%=associations_temp[i].name_cp-%>){
+                  let <%=associations_temp[i].name-%> = await result.<%=associations_temp[i].name-%>Impl();
+                  if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>.id}`){await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);}
+                  else{
+                    throw new Error("The association you're trying to remove it doesn't exists");
+                  }
+                }
+              <%}-%>
+              <%}-%>
+
+
+              <%associations_temp =  associations["hasMany"].concat(associations["belongsToMany"])-%>
+              <%for(let i=0; i < associations_temp.length; i++){-%>
+                <%if(associations_temp[i].targetStorageType !== 'sql'){-%>
+                  if(input.add<%=associations_temp[i].name_cp-%> ){
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                      throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
+                      await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
+                    }
+                  }
+
+                  if(input.remove<%=associations_temp[i].name_cp-%>){
+                    let ids_associated = await result.<%=associations_temp[i].name-%>Impl().map(t => `${t.id}`);
+                    await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, async id =>{
+                      if(!ids_associated.includes(id)){
+                        throw new Error(`The association with id ${id} that you're trying to remove desn't exist`);
+                      }
+                    });
+                    await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
+                  }
+                <%}-%>
+                <%}-%>
+
 
             return result;
           }catch(error){

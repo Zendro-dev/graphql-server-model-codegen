@@ -1,7 +1,7 @@
 module.exports.update_transcript_count = `
 static updateOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then( (valSuccess) => {
+        .then(async (valSuccess) => {
           try{
 
             let result = await sequelize.transaction( async(t) =>{

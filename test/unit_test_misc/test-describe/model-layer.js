@@ -219,7 +219,7 @@ module.exports.update_one_model = `
 static updateOne(input){
 
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-      .then((valSuccess) => {
+      .then(async (valSuccess) => {
 
         try{
 
@@ -238,15 +238,33 @@ static updateOne(input){
               }
               if (input.removeAuthors) {
                 let ids_associated = await item.getAuthors().map(t => \`\${t.id}\`);
-                input.removeAuthors.forEach( id =>{
-                    if(! ids_associated.includes(id)){
-                      throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\` )
-                    }
+                await helper.asyncForEach(input.removeAuthors, id=>{
+                  if(! ids_associated.includes(id)){
+                    throw new Error(\`The association with id \${id} that you're trying to remove desn't exists\` );
+                  }
                 });
                   promises_associations.push(updated.removeAuthors(input.removeAuthors, {transaction: t}));
               }
               return  Promise.all(promises_associations).then( () => { return updated; } );
           });
+
+          if(input.addPublisher){
+            let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
+            if(wrong_ids.length > 0){
+              throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
+            }else{
+              await result._addPublisher(input.addPublisher);
+            }
+          }
+
+          if(input.removePublisher){
+            let publisher = await result.publisherImpl();
+            if(publisher && input.removePublisher === \`\${publisher.id}\`){
+              await result._removePublisher(input.removePublisher);
+            }else{
+              throw new Error("The association you're trying to remove it doesn't exists");
+            }
+          }
 
           return result;
         }catch(error){

@@ -38,7 +38,7 @@ static addOne(input) {
 module.exports.person_update_model = `
 static updateOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then((valSuccess) => {
+        .then(async (valSuccess) => {
 
           try{
 
