@@ -1,0 +1,245 @@
+const _ = require('lodash');
+const path = require('path');
+const adapters = require('../adapters/index');
+const globals = require('../config/globals');
+const helper = require('../utils/helper');
+const models = require(path.join(__dirname, '..', 'models_index.js'));
+
+const definition = <%- definition -%>;
+
+let registry = [ <%- registry.map( x => '"'+x+'"') -%> ];
+
+module.exports = class <%- name -%>{
+
+  /**
+   * constructor - Creates an instance of the model
+   *
+   * @param  {obejct} input    Data for the new instances. Input for each field of the model.
+   */
+
+  constructor({id <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+      this.id = id;
+       <%for(var key in attributes){-%>
+         this.<%=key-%> =<%=key-%>;
+        <%}-%>
+  }
+
+  static get name(){
+    return "<%- nameLc -%>";
+  }
+
+  static readById(id) {
+    if(id!==null){
+      let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
+
+      if(responsibleAdapter.length > 1 ){
+        throw new Error("IRI has no unique match");
+      }else if(responsibleAdapter.length === 0){
+        throw new Error("IRI has no match WS");
+      }
+
+      return adapters[responsibleAdapter[0]].readById(id).then(result => new <%- name -%>(result));
+    }
+  }
+
+  static countRecords(search){
+    let promises = registry.map( adapter =>  adapters[adapter].countRecords(search));
+
+    return Promise.all(promises).then( results =>{
+      return results.reduce( (total, current)=> total+current, 0);
+    });
+  }
+
+
+  static readAllCursor(search, order, pagination) {
+
+    if(pagination === undefined || (pagination.first!==undefined || pagination.cursor !== undefined)){
+
+      let promises = registry.map( adapter => adapters[adapter].readAllCursor(search, order,pagination) );
+      let someHasNextPage = false;
+      return Promise.all(promises).then( results => {
+        return results.reduce( (total, current)=> {someHasNextPage |=  current.pageInfo.hasNextPage;
+          return total.concat(current.edges.map( e =>  e.node))}, [] );
+      }).then( nodes => {
+          if(order === undefined ){ order = [{field:"id", order:'ASC'}]; }
+          if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
+
+          let ordered_records = helper.orderRecords(nodes, order);
+          let pagigated_records = helper.paginateRecords(ordered_records, pagination.first);
+          let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+          return helper.toGraphQLConnectionObject(pagigated_records, this, hasNextPage);
+        });
+
+    }else{
+      throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+    }
+  }
+
+
+  static get definition(){
+    return definition;
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    attributes.push('id');
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  <%let associations_one = associations["belongsTo"]-%>
+  <% for(let i=0; i < associations_one.length; i++){ -%>
+
+  <%=associations_one[i].name%>Impl (search){
+      if(search === undefined){
+        return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
+      }else if(this.<%=associations_one[i].targetKey%> !== null){
+        let id_search = {
+            "field": "id",
+            "value": {
+              "value": this.<%=associations_one[i].targetKey%>
+            },
+            "operator": "eq"
+        }
+
+        let ext_search = {
+          "operator": "and",
+          "search": [id_search, search]
+        }
+
+        return models.<%=associations_one[i].target_lc%>.readAllCursor(ext_search)
+        .then( found =>{
+            if(found.edges.length > 0){
+              return found.edges[0].node;
+            }
+            return null;
+        });
+      }
+    }
+  <%}-%>
+
+  <%associations_one = associations["hasOne"]-%>
+  <% for(let i=0; i < associations_one.length; i++){ -%>
+    <%=associations_one[i].name%>Impl(search){
+
+      let simple_search = {
+        "field": "<%=associations_one[i].targetKey%>",
+        "value": {
+          "value": this.getIdValue()
+        },
+        "operator": "eq"
+      }
+
+      let ext_search = simple_search;
+
+      if(search !== undefined){
+        ext_search = {
+          "operator": "and",
+          "search": [simple_search, search]
+        }
+      }
+
+      return models.<%=associations_one[i].target_lc%>.readAllCursor(ext_search)
+      .then( found => { if(found.edges.length > 0){
+        return found.edges[0].node;
+      }
+        return null;
+      });
+    }
+  <%}-%>
+
+
+  <% let associations_temp = associations["hasMany"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    countFiltered<%=associations_temp[i].name_cp%>Impl ({search}){
+
+      if(search === undefined)
+      {
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} );
+      }else{
+        return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
+      }
+    }
+
+    <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
+      if(search === undefined)
+      {
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
+      }else{
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
+      }
+    }
+  <%}-%>
+
+  <% associations_temp = associations["belongsToMany"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('countFiltered<%=associations_temp[i].name_cp%>Impl is not implemented in the model');
+    }
+
+    <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>ConnectionImpl is not implemented in the model');
+
+    }
+  <%}-%>
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
+  static idAttribute() {
+    let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
+    let idType = <%- name -%>.definition.attributes[internalId];
+
+    if(internalId !== "id") {
+      if(idType === undefined) {
+        return new Error(`Attribute ${internalId} does not exist`)
+      }
+      if(!(idType === "String" || idType === "Int" || idType === "Float")) {
+        return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
+      }
+    }
+    
+    return internalId; 
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model 
+   */
+
+  static idAttributeType() {
+    return <%- name -%>.definition.attributes[this.idAttribute()];  
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   *
+   * @return {type} id value 
+   */
+
+  getIdValue() {
+    return this[<%- name -%>.idAttribute()]
+  }
+
+}

@@ -39,12 +39,11 @@ module.exports.person_update_model = `
 static updateOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
         .then(async (valSuccess) => {
-
           try{
 
             let result = await sequelize.transaction( async(t) =>{
                 let promises_associations = [];
-                let item = await super.findByPk(input.id, {transaction:t});
+                let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
                 let updated = await item.update(input, {transaction:t});
 
                 if(input.addUnique_pet ){
@@ -57,10 +56,9 @@ static updateOne(input) {
                 }else if(input.addUnique_pet === null){
                   promises_associations.push( updated.setUnique_pet(input.addUnique_pet, {transaction:t}) );
                 }
-
                 if(input.removeUnique_pet ){
                     let unique_pet = await item.getUnique_pet();
-                    if (unique_pet && input.removeUnique_pet === \`\${unique_pet.id}\`) {
+                    if (unique_pet && input.removeUnique_pet === \`\${unique_pet[models.dog.idAttribute()]}\`) {
                         promises_associations.push(updated.setUnique_pet(null, {transaction:t}));
                     }else{
                       throw new Error("The association you're trying to remove it doesn't exists");

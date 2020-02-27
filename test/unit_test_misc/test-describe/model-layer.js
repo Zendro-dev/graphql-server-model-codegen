@@ -196,7 +196,7 @@ module.exports.delete_one_resolver = `
 /**
  * deleteBook - Check user authorization and delete a record with the specified id in the id argument.
  *
- * @param  {number} {id}    Id of the record to delete
+ * @param  {number} {id}    id of the record to delete
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {string}         Message indicating if deletion was successfull.
  */
@@ -220,12 +220,10 @@ static updateOne(input){
 
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
       .then(async (valSuccess) => {
-
         try{
-
           let result = await sequelize.transaction( async(t) =>{
               let promises_associations = [];
-              let item = await super.findByPk(input.id, {transaction:t});
+              let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
               let updated = await item.update(input, {transaction:t});
 
               if (input.addAuthors) {
@@ -237,7 +235,7 @@ static updateOne(input){
                 }
               }
               if (input.removeAuthors) {
-                let ids_associated = await item.getAuthors().map(t => \`\${t.id}\`);
+                let ids_associated = await item.getAuthors().map(t => \`\${t[models.person.idAttribute()]}\`);
                 await helper.asyncForEach(input.removeAuthors, id=>{
                   if(! ids_associated.includes(id)){
                     throw new Error(\`The association with id \${id} that you're trying to remove desn't exists\` );
@@ -259,7 +257,7 @@ static updateOne(input){
 
           if(input.removePublisher){
             let publisher = await result.publisherImpl();
-            if(publisher && input.removePublisher === \`\${publisher.id}\`){
+            if(publisher && input.removePublisher === \`\${publisher[models.publisher.idAttribute()]}\`){
               await result._removePublisher(input.removePublisher);
             }else{
               throw new Error("The association you're trying to remove it doesn't exists");

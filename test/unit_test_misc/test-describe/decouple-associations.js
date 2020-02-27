@@ -23,7 +23,7 @@ researcherImpl(search){
    return models.researcher.readById( this.researcherId );
  }else{
    let id_search = {
-       "field": "id",
+       "field":  models.researcher.idAttribute(),
        "value": {
          "value": this.researcherId
        },
@@ -70,7 +70,7 @@ dogImpl(search){
   let simple_search = {
         "field": "researcherId",
         "value": {
-        "value": this.id
+        "value": this.getIdValue()
           },
         "operator": "eq"
       }
@@ -114,7 +114,7 @@ transcript_countsFilterImpl({
       return models.transcript_count.readAll( {
               "field": "individual_id",
               "value": {
-                  "value": this.id
+                  "value": this.getIdValue()
               },
               "operator": "eq"
           },
@@ -126,7 +126,7 @@ transcript_countsFilterImpl({
               "search": [{
                   "field": "individual_id",
                   "value": {
-                      "value": this.id
+                      "value": this.getIdValue()
                   },
                   "operator": "eq"
               }, search]
@@ -168,7 +168,7 @@ countFilteredTranscript_countsImpl({search}){
       return models.transcript_count.countRecords( {
               "field": "individual_id",
               "value": {
-                  "value": this.id
+                  "value": this.getIdValue()
               },
               "operator": "eq"
           });
@@ -178,7 +178,7 @@ countFilteredTranscript_countsImpl({search}){
               "search": [{
                   "field": "individual_id",
                   "value": {
-                      "value": this.id
+                      "value": this.getIdValue()
                   },
                   "operator": "eq"
               }, search]

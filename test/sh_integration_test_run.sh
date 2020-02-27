@@ -144,6 +144,7 @@ DOCKER_SERVICES=(gql_postgres \
 TEST_MODELS="./test/integration_test_models"
 TARGET_DIR="./docker/integration_test_run"
 CODEGEN_DIRS=("./docker/integration_test_run/models" \
+              "./docker/integration_test_run/models-distributed" \
               "./docker/integration_test_run/models-webservice" \
               "./docker/integration_test_run/models-cenz-server"
               "./docker/integration_test_run/migrations" \

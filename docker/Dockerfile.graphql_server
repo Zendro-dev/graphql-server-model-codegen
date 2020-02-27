@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 # Clone the skeleton project and install dependencies
 RUN apt-get update && apt-get install -y git && apt-get install -y procps &&\
   git clone https://github.com/ScienceDb/graphql-server.git . && \
+  git checkout test-merge-internalId && \
   chmod u+x ./migrateDbAndStartServer.sh
 
 EXPOSE 3000

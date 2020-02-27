@@ -1,0 +1,72 @@
+const axios_general = require('axios');
+const globals = require('../config/globals');
+const {
+    handleError
+} = require('../utils/errors');
+
+let axios = axios_general.create();
+axios.defaults.timeout = globals.MAX_TIME_OUT;
+
+const remoteCenzontleURL = "<%- url -%>";
+const iriRegex = new RegExp('<%- regex -%>');
+
+module.exports = class <%- adapterName -%>{
+
+
+  static recognizeId(iri){
+    return iriRegex.test(iri);
+  }
+
+  static readById(iri){
+    let query = `query readOne<%- nameCp -%>{readOne<%- nameCp -%>(<%- idAttribute -%>: "${iri}"){ id <%for(var key in attributes){-%>
+       <%=key %>
+     <%}-%> }}  `;
+
+     return axios.post(remoteCenzontleURL,{query: query}).then(res =>{
+       let data = res.data.data.readOne<%- nameCp -%>;
+       return data;
+     }).catch(error =>{
+       error['url'] = remoteCenzontleURL;
+       handleError(error);
+     });
+  }
+
+    static countRecords(search){
+      let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
+    count<%- namePlCp -%>(search: $search)
+    }`
+
+      return axios.post(remoteCenzontleURL, {
+          query: query,
+          variables: {
+              search: search
+          }
+      }).then(res => {
+          return res.data.data.count<%- namePlCp -%>;
+      }).catch(error => {
+          error['url'] = remoteCenzontleURL;
+          handleError(error);
+      });
+    }
+
+  static readAllCursor(search, order, pagination){
+    if(pagination === undefined || (pagination.first !== undefined || pagination.cursor!== undefined)){
+      let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
+        <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id <%for(var key in attributes){-%> <%=key %>
+         <%}-%>} } pageInfo{endCursor hasNextPage  } } }`
+
+         return axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
+           return res.data.data.<%- namePl -%>Connection;
+         }).catch(error=>{
+           error['url'] = remoteCenzontleURL;
+           handleError(error);
+         });
+    }else{
+      throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+    }
+  }
+
+  static get name(){
+    return "<%- adapterName -%>";
+  }
+}

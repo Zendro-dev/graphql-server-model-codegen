@@ -6,7 +6,7 @@ static updateOne(input) {
 
             let result = await sequelize.transaction( async(t) =>{
                 let promises_associations = [];
-                let item = await super.findByPk(input.id, {transaction:t});
+                let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
                 let updated = await item.update(input, {transaction:t});
 
                 if (input.addIndividual) {
@@ -22,7 +22,7 @@ static updateOne(input) {
 
                 if (input.removeIndividual) {
                     let individual = await item.getIndividual();
-                    if (individual && input.removeIndividual === \`\${individual.id}\`) {
+                    if (individual && input.removeIndividual === \`\${individual[models.individual.idAttribute()]}\`) {
                         promises_associations.push(updated.setIndividual(null, {transaction:t}));
                     } else {
                         throw new Error("The association you're trying to remove it doesn't exists");

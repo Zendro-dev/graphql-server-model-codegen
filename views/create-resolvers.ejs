@@ -209,16 +209,16 @@ module.exports = {
 
 
   /**
-   * readOne<%- nameCp -%> - Check user authorization and return one record with the specified id in the id argument.
+   * readOne<%- nameCp -%> - Check user authorization and return one record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
    *
-   * @param  {number} {id}    Id of the record to retrieve
+   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {object}         Record with id requested
+   * @return {object}         Record with <%- idAttribute -%> requested
    */
-  readOne<%- nameCp -%>: function({id}, context){
+  readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
       if (authorization === true) {
-      return <%- nameLc -%>.readById(id);
+      return <%- nameLc -%>.readById(<%- idAttribute -%>);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -268,16 +268,16 @@ module.exports = {
   },
 
   /**
-   * delete<%- nameCp -%> - Check user authorization and delete a record with the specified id in the id argument.
+   * delete<%- nameCp -%> - Check user authorization and delete a record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
    *
-   * @param  {number} {id}    Id of the record to delete
+   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to delete
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {string}         Message indicating if deletion was successfull.
    */
-  delete<%- nameCp -%>: function({id}, context){
+  delete<%- nameCp -%>: function({<%- idAttribute -%>}, context){
     return checkAuthorization(context, '<%- name -%>', 'delete').then( authorization =>{
       if (authorization === true) {
-        return <%- nameLc -%>.deleteOne(id);
+        return <%- nameLc -%>.deleteOne(<%- idAttribute -%>);
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
