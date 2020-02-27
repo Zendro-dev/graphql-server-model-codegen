@@ -148,8 +148,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         });
       }
 
-      if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("id") ){
-          options['order'] = [ ...options['order'], ...[ ["id", "ASC"] ]];
+      if( !options['order'].map( orderItem=>{return orderItem[0] }).includes(this.idAttribute()) ){
+          options['order'] = [ ...options['order'], ...[ [this.idAttribute(), "ASC"] ]];
       }
 
       if(pagination!== undefined && pagination.cursor){
