@@ -1,17 +1,21 @@
---- transcript_count.js	2020-02-11 16:08:03.195109402 -0600
-+++ transcript_count_edited.js	2020-02-11 16:19:45.116547156 -0600
-@@ -239,6 +239,9 @@
-             .then(async (valSuccess) => {
-                 try {
-                     const result = await sequelize.transaction(async (t) => {
-+                      if(input.addAminoacidsequence){
-+                        input['aminoacidsequence_id'] = input.addAminoacidsequence;
-+                      }
-                         let item = await super.create(input, {
-                             transaction: t
-                         });
-@@ -453,4 +456,4 @@
-         return data_values;
+--- transcript_count.js	2020-02-27 12:48:32.825366655 -0600
++++ transcript_count.js.updated	2020-02-27 12:52:05.888066002 -0600
+@@ -259,12 +259,7 @@
+                     });
+ 
+                     if (input.addAminoacidsequence) {
+-                        let wrong_ids = await helper.checkExistence(input.addAminoacidsequence, models.aminoacidsequence);
+-                        if (wrong_ids.length > 0) {
+-                            throw new Error(`Ids ${wrong_ids.join(",")} in model aminoacidsequence were not found.`);
+-                        } else {
+-                            await result._addAminoacidsequence(input.addAminoacidsequence);
+-                        }
++                        await result._addAminoacidsequence(input.addAminoacidsequence);
+                     }
+                     return result;
+                 } catch (error) {
+@@ -583,4 +578,4 @@
+         return {};
      }
  
 -}
