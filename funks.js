@@ -428,10 +428,12 @@ module.exports.getOptions = function(dataModel){
       adapterName: dataModel.adapterName || "",
       registry: dataModel.registry || [],
       idAttribute: getIdAttribute(dataModel)
-
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
+  opts['idAttributeType'] = opts.idAttribute === 'id' ? 'Int' :  opts.attributes.idAttribute;
+
+  delete opts.attributes.idAttribute;
 
   return opts;
 };

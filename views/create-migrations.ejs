@@ -16,10 +16,11 @@ module.exports = {
   up: function(queryInterface, Sequelize){
     return queryInterface.createTable('<%-namePl-%>', {
 
-      id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+      <%- idAttribute -%>: {
+        type: Sequelize[ dict['<%= idAttributeType %>'] ],
+        primaryKey: true<%if(idAttribute === 'id'){-%>,
+        autoIncrement: true
+        <%}-%>
       },
 
       createdAt: {
@@ -36,7 +37,7 @@ module.exports = {
         <%=  keys[i] %>: {
             type: Sequelize[ dict['<%= type_seq %>'] ]<%if(externalIds.includes(keys[i])){-%>,
             allowNull: false,
-            unique: true  
+            unique: true
             <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>

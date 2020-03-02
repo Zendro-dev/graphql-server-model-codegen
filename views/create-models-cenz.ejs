@@ -23,8 +23,8 @@ module.exports = class <%- name -%>{
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
 
-  constructor({id <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
-      this.id = id;
+  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+      this.<%- idAttribute -%> = <%- idAttribute -%>;
        <%for(var key in attributes){-%>
          this.<%=key-%> =<%=key-%>;
         <%}-%>
@@ -35,7 +35,7 @@ module.exports = class <%- name -%>{
   }
 
   static readById( id ){
-    let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(id: ${id}){id <%for(var key in attributes){-%>
+    let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(<%- idAttribute -%>: ${id}){<%- idAttribute -%> <%for(var key in attributes){-%>
        <%=key %>
      <%}-%> } }`
 
@@ -63,7 +63,7 @@ module.exports = class <%- name -%>{
 
   static readAll(search, order, pagination){
     let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput $order: [order<%- nameCp -%>Input]){
-      <%- namePl -%>(search:$search pagination:$pagination order:$order){id <%for(var key in attributes){-%>
+      <%- namePl -%>(search:$search pagination:$pagination order:$order){<%- idAttribute -%> <%for(var key in attributes){-%>
          <%=key %>
        <%}-%> } }`
 
@@ -79,7 +79,7 @@ module.exports = class <%- name -%>{
 
   static readAllCursor(search, order, pagination){
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
-      <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id <%for(var key in attributes){-%> <%=key %>
+      <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
        <%}-%>} } pageInfo{endCursor hasNextPage  } } }`
 
        return axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
@@ -102,12 +102,12 @@ module.exports = class <%- name -%>{
   }
 
   static addOne(input){
-    let query = `mutation add<%- nameCp -%>( <%for(var key in attributes){-%>
+    let query = `mutation add<%- nameCp -%>(<%if(idAttribute !== 'id'){-%>$<%- idAttribute -%>: ID<%}-%> <%for(var key in attributes){-%>
        $<%=key %>:<%= attributes[key]%>
      <%}-%>){
-       add<%- nameCp -%>(<%for(var key in attributes){-%>
+       add<%- nameCp -%>(<%if(idAttribute !== 'id'){-%><%- idAttribute -%>:$<%- idAttribute -%><%}-%><%for(var key in attributes){-%>
           <%=key %>:$<%= key%>
-        <%}-%>){id <%for(var key in attributes){-%>
+        <%}-%>){<%- idAttribute -%> <%for(var key in attributes){-%>
            <%=key %>
          <%}-%>}
      }`;
@@ -122,7 +122,7 @@ module.exports = class <%- name -%>{
   }
 
   static deleteOne(id){
-    let query = `mutation delete<%- nameCp -%>{ delete<%- nameCp -%>(id: ${id}) }`;
+    let query = `mutation delete<%- nameCp -%>{ delete<%- nameCp -%>(<%- idAttribute -%>: ${id}) }`;
 
     return axios.post(url, {query: query}).then(res =>{
       return res.data.data.delete<%- nameCp -%>;
@@ -134,12 +134,12 @@ module.exports = class <%- name -%>{
   }
 
   static updateOne(input){
-    let query = `mutation update<%- nameCp-%>($id:ID! <%for(var key in attributes){-%>
+    let query = `mutation update<%- nameCp-%>($<%- idAttribute -%>:ID! <%for(var key in attributes){-%>
        $<%=key %>:<%= attributes[key]%>
      <%}-%> ){
-       update<%- nameCp-%>(id:$id <%for(var key in attributes){-%>
+       update<%- nameCp-%>(<%- idAttribute -%>:$id <%for(var key in attributes){-%>
           <%=key %>:$<%= key%>
-        <%}-%> ){id <%for(var key in attributes){-%>
+        <%}-%> ){<%- idAttribute -%> <%for(var key in attributes){-%>
            <%=key %>
          <%}-%>}
      }`
@@ -157,7 +157,7 @@ module.exports = class <%- name -%>{
     let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
 
     return context.request.files.csv_file.mv(tmpFile).then(() =>{
-      let query = `mutation {bulkAdd<%- nameCp -%>Csv{id}}`;
+      let query = `mutation {bulkAdd<%- nameCp -%>Csv{<%- idAttribute -%>}}`;
       let formData = new FormData();
       formData.append('csv_file', fs.createReadStream(tmpFile));
       formData.append('query', query);
@@ -188,15 +188,15 @@ module.exports = class <%- name -%>{
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
     set_<%=associations_one[i].targetKey%>(value){
-      super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>: value });
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, add<%=associations_one[i].name_cp%>: value });
     }
 
     _add<%=associations_one[i].name_cp%>(id){
-      super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>: id });
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, add<%=associations_one[i].name_cp%>: id });
     }
 
     _remove<%=associations_one[i].name_cp%>(id){
-      super.updateOne({id: this.id, remove<%=associations_one[i].name_cp%>: id });
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, remove<%=associations_one[i].name_cp%>: id });
     }
 
 
@@ -205,7 +205,7 @@ module.exports = class <%- name -%>{
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
         }else if(this.<%=associations_one[i].targetKey%> !== null){
           let id_search = {
-              "field": "id",
+              "field": "<%- idAttribute -%>",
               "value": {
                 "value": this.<%=associations_one[i].targetKey%>
               },
@@ -232,11 +232,11 @@ module.exports = class <%- name -%>{
     <% for(let i=0; i < associations_one.length; i++){ -%>
 
     _add<%=associations_one[i].name_cp%>(id){
-      super.updateOne({id: this.id, add<%=associations_one[i].name_cp%>:id});
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, add<%=associations_one[i].name_cp%>:id});
     }
 
     _remove<%=associations_one[i].name_cp%>(id){
-      super.updateOne({id: this.id, remove<%=associations_one[i].name_cp%>:id});
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, remove<%=associations_one[i].name_cp%>:id});
     }
 
     <%=associations_one[i].name%>Impl (search){
@@ -273,11 +273,11 @@ module.exports = class <%- name -%>{
       <% for(let i=0; i < associations_temp.length; i++){ -%>
 
         _add<%=associations_temp[i].name_cp%>(ids){
-          super.updateOne({id:this.id, add<%=associations_temp[i].name_cp%>: ids});
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, add<%=associations_temp[i].name_cp%>: ids});
         }
 
         _remove<%=associations_temp[i].name_cp%>(ids){
-          super.updateOne({id:this.id, remove<%=associations_temp[i].name_cp%>: ids});
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, remove<%=associations_temp[i].name_cp%>: ids});
         }
 
         <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
@@ -315,11 +315,11 @@ module.exports = class <%- name -%>{
       <% for(let i=0; i < associations_temp.length; i++){ -%>
 
         _add<%=associations_temp[i].name_cp%>(ids){
-          super.updateOne({id:this.id, add<%=associations_temp[i].name_cp%>: ids});
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, add<%=associations_temp[i].name_cp%>: ids});
         }
 
         _remove<%=associations_temp[i].name_cp%>(ids){
-          super.updateOne({id:this.id, remove<%=associations_temp[i].name_cp%>: ids});
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, remove<%=associations_temp[i].name_cp%>: ids});
         }
 
         <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
@@ -331,7 +331,7 @@ module.exports = class <%- name -%>{
           }
 
           let query = `query <%=associations_temp[i].name%>Filter($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationInput){
-            readOne<%- nameCp -%>(id:${this.getIdValue()}){ <%=associations_temp[i].name%>Filter(search: $search, order:$order pagination:$pagination){ ${string_attrib} } }
+            readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){ <%=associations_temp[i].name%>Filter(search: $search, order:$order pagination:$pagination){ ${string_attrib} } }
           }`
 
           return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})
@@ -346,7 +346,7 @@ module.exports = class <%- name -%>{
 
         countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
           let query = `query count<%=associations_temp[i].name_cp%>($search: search<%=associations_temp[i].target_cp%>Input){
-            readOne<%- nameCp -%>(id:${this.getIdValue()}){countFiltered<%=associations_temp[i].name_cp%>(search: $search)}
+            readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){countFiltered<%=associations_temp[i].name_cp%>(search: $search)}
           }`;
 
           return axios.post(url, {
@@ -371,7 +371,7 @@ module.exports = class <%- name -%>{
           }
 
           let query = `query <%=associations_temp[i].name%>Connection($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationCursorInput){
-            readOne<%- nameCp -%>(id:${this.getIdValue()}){ <%=associations_temp[i].name%>Connection(search: $search, order:$order pagination:$pagination){
+            readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){ <%=associations_temp[i].name%>Connection(search: $search, order:$order pagination:$pagination){
               edges{cursor node{ ${string_attrib}}} pageInfo{endCursor hasNextPage} } }
           }`
 
@@ -430,24 +430,24 @@ module.exports = class <%- name -%>{
         return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
       }
     }
-    
-    return internalId; 
+
+    return internalId;
   }
 
   /**
    * idAttributeType - Return the Type of the internalId.
    *
-   * @return {type} Type given in the JSON model 
+   * @return {type} Type given in the JSON model
    */
 
   static idAttributeType() {
-    return <%- name -%>.definition.attributes[this.idAttribute()];  
+    return <%- name -%>.definition.attributes[this.idAttribute()];
   }
 
   /**
    * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
    *
-   * @return {type} id value 
+   * @return {type} id value
    */
 
   getIdValue() {

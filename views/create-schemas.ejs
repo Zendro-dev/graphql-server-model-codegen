@@ -5,7 +5,7 @@ module.exports = `
     """
     @original-field
     """
-    id: ID
+    <%- idAttribute -%>: ID
 
   <%for(var key in attributes)
 {-%>
@@ -62,7 +62,7 @@ type <%- nameCp -%>Edge{
   }
 
   enum <%- name -%>Field {
-    id <%for (var key in attributes) {%>
+    <%- idAttribute -%> <%for (var key in attributes) {%>
     <%= key -%>
   <% }%>
   }
