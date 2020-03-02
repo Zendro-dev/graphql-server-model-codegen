@@ -105,37 +105,43 @@ static countRecords(search) {
 module.exports.book_ddm_read_all = `
 static readAllCursor(search, order, pagination) {
 
-    if (pagination === undefined || (pagination.first !== undefined || pagination.cursor !== undefined)) {
+  if(pagination === undefined || (pagination.first!==undefined || pagination.cursor !== undefined)){
 
-        let promises = registry.map(adapter => adapters[adapter].readAllCursor(search, order, pagination));
-        let someHasNextPage = false;
-        return Promise.all(promises).then(results => {
-            return results.reduce((total, current) => {
-                someHasNextPage |=  current.pageInfo.hasNextPage;
-                return total.concat(current.edges.map(e => e.node))
-            }, []);
-        }).then(nodes => {
-            if (order === undefined) {
-                order = [{
-                    field: "id",
-                    order: 'ASC'
-                }];
-            }
-            if (pagination === undefined) {
-                pagination = {
-                    first: Math.min(globals.LIMIT_RECORDS, nodes.length)
-                }
-            }
-
-            let ordered_records = helper.orderRecords(nodes, order);
-            let pagigated_records = helper.paginateRecords(ordered_records, pagination.first);
-            let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-            return helper.toGraphQLConnectionObject(pagigated_records, this, hasNextPage);
+    //Errors are caught in order to continue with nonfailing services
+    let promises = registry.map( adapter => adapters[adapter].readAllCursor(search, order,pagination).catch(err => err) );
+    let someHasNextPage = false;
+    return Promise.all(promises).then( results => {
+      return results.reduce( (total, current)=> {
+        if(current instanceof Error) {
+          total.unshift(current);
+          return total;
+        } else {
+          someHasNextPage |=  current.pageInfo.hasNextPage;
+          return total.concat(current.edges.map( e =>  e.node))
+        }
+      }, [] );
+    }).then( nodes => {
+        let errors = nodes.filter(record => record instanceof Error).map(err =>{
+          return {
+            node: err,
+            cursor: null
+          }
         });
+        nodes.splice(0,errors.length);
+        if(order === undefined ){ order = [{field:"id", order:'ASC'}]; }
+        if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
-    } else {
-        throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
-    }
+        let ordered_records = helper.orderRecords(nodes, order);
+        let pagigated_records = helper.paginateRecords(ordered_records, pagination.first);
+        let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+        let nodesGraphQLConnectionObject = helper.toGraphQLConnectionObject(pagigated_records, this, hasNextPage);
+        errors.forEach(err => {nodesGraphQLConnectionObject.edges.unshift(err)})
+        return nodesGraphQLConnectionObject;
+      });
+
+  }else{
+    throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+  }
 }
 
 `
