@@ -17,8 +17,8 @@ module.exports = class <%- name -%>{
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
 
-  constructor({id <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
-      this.id = id;
+  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+      this.<%- idAttribute -%> = <%- idAttribute -%>;
        <%for(var key in attributes){-%>
          this.<%=key-%> =<%=key-%>;
         <%}-%>
@@ -61,7 +61,7 @@ module.exports = class <%- name -%>{
         return results.reduce( (total, current)=> {someHasNextPage |=  current.pageInfo.hasNextPage;
           return total.concat(current.edges.map( e =>  e.node))}, [] );
       }).then( nodes => {
-          if(order === undefined ){ order = [{field:"id", order:'ASC'}]; }
+          if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
           if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
           let ordered_records = helper.orderRecords(nodes, order);
@@ -91,7 +91,8 @@ module.exports = class <%- name -%>{
 
   stripAssociations(){
     let attributes = Object.keys(<%- name -%>.definition.attributes);
-    attributes.push('id');
+    <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+
     let data_values = _.pick(this, attributes);
     return data_values;
   }
@@ -104,7 +105,7 @@ module.exports = class <%- name -%>{
         return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
       }else if(this.<%=associations_one[i].targetKey%> !== null){
         let id_search = {
-            "field": "id",
+            "field": "<%- idAttribute -%>",
             "value": {
               "value": this.<%=associations_one[i].targetKey%>
             },
@@ -218,24 +219,24 @@ module.exports = class <%- name -%>{
         return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
       }
     }
-    
-    return internalId; 
+
+    return internalId;
   }
 
   /**
    * idAttributeType - Return the Type of the internalId.
    *
-   * @return {type} Type given in the JSON model 
+   * @return {type} Type given in the JSON model
    */
 
   static idAttributeType() {
-    return <%- name -%>.definition.attributes[this.idAttribute()];  
+    return '<%- idAttributeType -%>';
   }
 
   /**
    * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
    *
-   * @return {type} id value 
+   * @return {type} id value
    */
 
   getIdValue() {

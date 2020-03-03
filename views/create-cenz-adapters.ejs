@@ -18,7 +18,7 @@ module.exports = class <%- adapterName -%>{
   }
 
   static readById(iri){
-    let query = `query readOne<%- nameCp -%>{readOne<%- nameCp -%>(<%- idAttribute -%>: "${iri}"){ id <%for(var key in attributes){-%>
+    let query = `query readOne<%- nameCp -%>{readOne<%- nameCp -%>(<%- idAttribute -%>: "${iri}"){ <%- idAttribute -%> <%for(var key in attributes){-%>
        <%=key %>
      <%}-%> }}  `;
 
@@ -52,7 +52,7 @@ module.exports = class <%- adapterName -%>{
   static readAllCursor(search, order, pagination){
     if(pagination === undefined || (pagination.first !== undefined || pagination.cursor!== undefined)){
       let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
-        <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id <%for(var key in attributes){-%> <%=key %>
+        <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
          <%}-%>} } pageInfo{endCursor hasNextPage  } } }`
 
          return axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
