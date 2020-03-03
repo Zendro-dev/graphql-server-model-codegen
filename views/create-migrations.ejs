@@ -16,11 +16,12 @@ module.exports = {
   up: function(queryInterface, Sequelize){
     return queryInterface.createTable('<%-namePl-%>', {
 
-      id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-      },
+      <%- idAttribute -%>: {
+        type: Sequelize[ dict['<%= idAttributeType %>'] ],
+        primaryKey: true<%if(defaultId){-%>,
+        autoIncrement: true
+        <%}-%>
+      }
 
       createdAt: {
         type: Sequelize.DATE
