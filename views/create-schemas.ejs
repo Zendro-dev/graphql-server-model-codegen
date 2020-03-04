@@ -5,7 +5,7 @@ module.exports = `
     """
     @original-field
     """
-    id: ID
+    <%- idAttribute -%>: ID
 
   <%for(var key in attributes)
 {-%>
@@ -62,7 +62,7 @@ type <%- nameCp -%>Edge{
   }
 
   enum <%- name -%>Field {
-    id <%for (var key in attributes) {%>
+    <%- idAttribute -%> <%for (var key in attributes) {%>
     <%= key -%>
   <% }%>
   }
@@ -90,7 +90,7 @@ type <%- nameCp -%>Edge{
   }
 
     type Mutation {
-    add<%- nameCp -%>(<%if(idAttribute !== 'id'){-%><%- idAttribute -%>: ID!,<%}-%> <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ): <%- name %>!
+    add<%- nameCp -%>(<%if(!defaultId){-%><%- idAttribute -%>: ID!,<%}-%> <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ): <%- name %>!
     update<%- nameCp -%>(<%- idAttribute -%>: ID!, <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID, remove<%= associations.schema_attributes.one[key][2]%>:ID <%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID], remove<%= associations.schema_attributes.many[key][2]%>:[ID] <%}-%>): <%- name %>!
   delete<%- nameCp -%>(<%- idAttribute -%>: ID!): String!
   bulkAdd<%- nameCp -%>Csv: [<%- name -%>] }
