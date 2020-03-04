@@ -53,7 +53,7 @@ static readAllCursor(search, order, pagination){
         let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
         options['where'] = {
             ...options['where'],
-            ...helper.parseOrderCursor(options['order'], decoded_cursor)
+            ...helper.parseOrderCursor(options['order'], decoded_cursor, "id")
         };
       }
     }else {//backward 
@@ -61,7 +61,7 @@ static readAllCursor(search, order, pagination){
         let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
         options['where'] = {
             ...options['where'],
-            ...helper.parseOrderCursorBefore(options['order'], decoded_cursor)
+            ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "id")
         };
       }
     }
@@ -226,105 +226,166 @@ booksConnectionImpl({
         options['where'] = arg_sequelize;
     }
 
-    return this.countBooks(options).then(items => {
-
-      options['offset'] = 0;
-      options['order'] = [];
+    /*
+     * Get count
+     */
+    return this.countBooks(options).then(countA => {
+        options['offset'] = 0;
+        options['order'] = [];
+        options['limit'] = countA;
+        let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
 
         if (order !== undefined) {
             options['order'] = order.map((orderItem) => {
                 return [orderItem.field, orderItem.order];
             });
         }
-
-        if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("id") ){
-            options['order'] = [ ...options['order'], ...[ ["id", "ASC"] ]];
+        if (!options['order'].map(orderItem => {
+                return orderItem[0]
+            }).includes("id")) {
+            options['order'] = [...options['order'], ...[
+                ["id", "ASC"]
+            ]];
         }
 
-        if (pagination !== undefined && pagination.cursor) {
+        /*
+         * Set pagination conditions
+         */
+        //forward
+        if (isForwardPagination) {
 
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-            options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
-        }
-
-        options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;
-
-        if (globals.LIMIT_RECORDS < options['limit']) {
-            throw new Error(\`Request of total booksConnection exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-        }
-        return this.getBooks(options).then( records =>{
-          let edges = [];
-          let pageInfo = {
-            hasNextPage: false,
-            endCursor: null
-          }
-
-          if(records.length > 0){
-           edges = records.map(record=>{ return {
-              node: record,
-              cursor: record.base64Enconde()
-            }});
-            let last = options.limit;
-            delete options.limit;
-            delete options.order;
-             pageInfo = {
-              hasNextPage: this.countBooks(options).then(num =>{return num > last}),
-              endCursor:  edges[edges.length - 1].cursor
+            if (pagination.cursor) {
+                let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+                options['where'] = {
+                    ...options['where'],
+                    ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute())
+                };
             }
-          }
-            return {
-              edges,
-              pageInfo
-            };
-        }).catch(error =>{
-          throw error;
-        });
-    });
-}
+        } else { //backward 
+            if (pagination.before) {
+                let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
+                options['where'] = {
+                    ...options['where'],
+                    ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.book.idAttribute())
+                };
+            }
+        }
 
+        this.countBooks(options).then(countB => {
+          //forward
+          if (isForwardPagination) {
+
+              if (pagination.first) {
+                  options['limit'] = pagination.first;
+              }
+          } else { //backward
+              if (pagination.last) {
+                  options['limit'] = pagination.last;
+                  options['offset'] = Math.max((countB - pagination.last), 0);
+              }
+          }
+          //check: limit
+          if (globals.LIMIT_RECORDS < options['limit']) {
+              throw new Error(\`Request of total booksConnection exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
+          }
+
+          /*
+           * Get records
+           */
+          return this.getBooks(options).then(records => {
+              let edges = [];
+              let pageInfo = {
+                  hasPreviousPage: false,
+                  hasNextPage: false,
+                  startCursor: null,
+                  endCursor: null
+              };
+
+              //edges
+              if (records.length > 0) {
+                  edges = records.map(record => {
+                      return {
+                          node: record,
+                          cursor: record.base64Enconde()
+                      }
+                  });
+              }
+
+              //forward
+              if (isForwardPagination) {
+
+                  pageInfo = {
+                      hasPreviousPage: ((countA - countB) > 0),
+                      hasNextPage: (pagination.first ? (countB > pagination.first) : false),
+                      startCursor: edges[0].cursor,
+                      endCursor: edges[edges.length - 1].cursor
+                  }
+              } else { //backward
+
+                  pageInfo = {
+                      hasPreviousPage: (pagination.last ? (countB > pagination.last) : false),
+                      hasNextPage: ((countA - countB) > 0),
+                      startCursor: edges[0].cursor,
+                      endCursor: edges[edges.length - 1].cursor
+                  }
+              }
+
+              return {
+                  edges,
+                  pageInfo
+              };
+          }).catch(error => {
+              throw error;
+          });
+      }).catch(error => {
+          throw error;
+      });
+  }).catch(error => {
+      throw error;
+  });
+}
 
 `
 
 module.exports.read_all_cenz_server = `
 static readAllCursor(search, order, pagination) {
-    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
-  booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
-    genre
-    publisher_id
-  }} pageInfo{endCursor hasNextPage  } } }\`
+  let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
+  genre
+  publisher_id
+ } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
-    return axios.post(url, {
-        query: query,
-        variables: {
-            search: search,
-            order: order,
-            pagination: pagination
-        }
-    }).then(res => {
-        let data_edges = res.data.data.booksConnection.edges;
-        let pageInfo = res.data.data.booksConnection.pageInfo;
-        let edges = data_edges.map(e => {
-            return {
-                node: new Book(e.node),
-                cursor: e.cursor
-            }
-        })
+  return axios.post(url, {
+      query: query,
+      variables: {
+          search: search,
+          order: order,
+          pagination: pagination
+      }
+  }).then(res => {
+      let data_edges = res.data.data.booksConnection.edges;
+      let pageInfo = res.data.data.booksConnection.pageInfo;
 
-        return {
-            edges,
-            pageInfo
-        };
-    }).catch(error => {
-        error['url'] = url;
-        handleError(error);
-    });
+      let edges = data_edges.map(e => {
+          return {
+              node: new Book(e.node),
+              cursor: e.cursor
+          }
+      })
 
+      return {
+          edges,
+          pageInfo
+      };
+  }).catch(error => {
+      error['url'] = url;
+      handleError(error);
+  });
 }
 `
 
 module.exports.many_to_many_association_connection_cenz_server = `
-worksConnectionImpl ({search,order,pagination}){
-
+worksConnectionImpl ({search,order,pagination}) {
   let association_attributes = models.book.definition.attributes;
   let string_attrib = 'id';
   for(let attrib in association_attributes){
@@ -333,7 +394,7 @@ worksConnectionImpl ({search,order,pagination}){
 
   let query = \`query worksConnection($search: searchBookInput $order: [orderBookInput] $pagination: paginationCursorInput ){
     readOnePerson(id: \${this.getIdValue()}){ worksConnection(search: $search, order:$order pagination:$pagination){
-      edges{ cursor node{ \${string_attrib}  } } pageInfo{endCursor hasNextPage  }} }
+      edges{ cursor node{ \${string_attrib}  } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }
   }\`
 
   return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})

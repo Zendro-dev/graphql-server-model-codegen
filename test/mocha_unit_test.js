@@ -987,6 +987,8 @@ describe('Distributed data models', function(){
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.book_adapter_read_all.replace(/\s/g, '');
+    console.log("\ngenerated_adapter: \n", generated_adapter);
+    //console.log("\test_model: \n", test_model);
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 

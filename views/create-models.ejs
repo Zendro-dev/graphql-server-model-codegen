@@ -153,8 +153,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           return [orderItem.field, orderItem.order];
         });
       }
-      if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("id") ){
-        options['order'] = [ ...options['order'], ...[ ["id", "ASC"] ]];
+      if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("<%- idAttribute -%>") ){
+        options['order'] = [ ...options['order'], ...[ ["<%- idAttribute -%>", "ASC"] ]];
       }
 
       /*
@@ -167,7 +167,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
           options['where'] = {
               ...options['where'],
-              ...helper.parseOrderCursor(options['order'], decoded_cursor)
+              ...helper.parseOrderCursor(options['order'], decoded_cursor, "<%- idAttribute -%>")
           };
         }
       }else {//backward 
@@ -175,7 +175,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
           options['where'] = {
               ...options['where'],
-              ...helper.parseOrderCursorBefore(options['order'], decoded_cursor)
+              ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "<%- idAttribute -%>")
           };
         }
       }
@@ -590,8 +590,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             return [orderItem.field, orderItem.order];
           });
         }
-        if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("id") ){
-          options['order'] = [ ...options['order'], ...[ ["id", "ASC"] ]];
+        if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("<%- idAttribute -%>") ){
+          options['order'] = [ ...options['order'], ...[ ["<%- idAttribute -%>", "ASC"] ]];
         }
 
         /*
@@ -604,7 +604,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
             options['where'] = {
                 ...options['where'],
-                ...helper.parseOrderCursor(options['order'], decoded_cursor)
+                ...helper.parseOrderCursor(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())
             };
           }
         }else {//backward 
@@ -612,7 +612,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
             options['where'] = {
                 ...options['where'],
-                ...helper.parseOrderCursorBefore(options['order'], decoded_cursor)
+                ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())
             };
           }
         }
@@ -632,7 +632,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           }
           //check: limit
           if(globals.LIMIT_RECORDS < options['limit']) {
-            throw new Error(`Request of total <%- namePl -%> exceeds max limit of ${globals.LIMIT_RECORDS}. Please use pagination.`);
+            throw new Error(`Request of total <%=associations_temp[i].target_lc_pl-%>Connection exceeds max limit of ${globals.LIMIT_RECORDS}. Please use pagination.`);
           }
 
           /*

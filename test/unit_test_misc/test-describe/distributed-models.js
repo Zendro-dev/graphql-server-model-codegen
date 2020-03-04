@@ -42,13 +42,12 @@ countBooks(search: $search)
 module.exports.book_adapter_read_all = `
 static readAllCursor(search, order, pagination){
 
-  if(pagination === undefined || (pagination.first!==undefined || pagination.cursor !== undefined)){
-
+  if (pagination === undefined || (pagination.first !== undefined || pagination.last !== undefined || pagination.cursor !== undefined || pagination.before !== undefined)) {
     let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
   booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
     genre
     publisher_id
-  }} pageInfo{endCursor hasNextPage  } } }\`
+  }} pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
     return axios.post(remoteCenzontleURL, {
         query: query,
@@ -65,7 +64,7 @@ static readAllCursor(search, order, pagination){
     });
 
   }else{
-    throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
+    throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor'/'before' or 'first'/'last' parameters.Please check the documentation.");
   }
 
 }
