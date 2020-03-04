@@ -157,7 +157,7 @@ ownerImpl (search){
       return models.person.readById(this.personId);
     }else if(this.personId !== null){
       let id_search = {
-          "field": \`\${models.person.definition.id.name}\`,
+          "field": models.person.idAttribute(),
           "value": {
             "value": this.personId
           },

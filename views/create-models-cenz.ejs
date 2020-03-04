@@ -192,7 +192,7 @@ module.exports = class <%- name -%>{
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
         }else if(this.<%=associations_one[i].targetKey%> !== null){
           let id_search = {
-              "field":  `${models.<%=associations_one[i].target_lc%>.definition.id.name}`,
+              "field": models.<%=associations_one[i].target_lc%>.idAttribute(),
               "value": {
                 "value": this.<%=associations_one[i].targetKey%>
               },
