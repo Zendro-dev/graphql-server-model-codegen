@@ -105,7 +105,7 @@ module.exports = class <%- name -%>{
         return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
       }else if(this.<%=associations_one[i].targetKey%> !== null){
         let id_search = {
-            "field": "<%- idAttribute -%>",
+            "field": `${models.<%=associations_one[i].target_lc%>.definition.id.name}`,
             "value": {
               "value": this.<%=associations_one[i].targetKey%>
             },
@@ -208,18 +208,7 @@ module.exports = class <%- name -%>{
    */
 
   static idAttribute() {
-    let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
-    let idType = <%- name -%>.definition.attributes[internalId];
-
-    if(internalId !== "id") {
-      if(idType === undefined) {
-        return new Error(`Attribute ${internalId} does not exist`)
-      }
-      if(!(idType === "String" || idType === "Int" || idType === "Float")) {
-        return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
-      }
-    }
-
+    let internalId = <%- name -%>.definition.id.name;
     return internalId;
   }
 
@@ -230,7 +219,7 @@ module.exports = class <%- name -%>{
    */
 
   static idAttributeType() {
-    return '<%- idAttributeType -%>';
+    return <%- name -%>.definition.id.type;
   }
 
   /**

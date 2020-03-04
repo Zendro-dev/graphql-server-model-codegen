@@ -262,10 +262,11 @@ module.exports.many_to_many_association_connection_cenz_server = `
 worksConnectionImpl ({search,order,pagination}){
 
   let association_attributes = models.book.definition.attributes;
-  let string_attrib = 'id';
+  let string_attrib = '';
   for(let attrib in association_attributes){
-    string_attrib+= ' '+attrib;
+    string_attrib+= attrib+' ';
   }
+  string_attrib+= 'id';
 
   let query = \`query worksConnection($search: searchBookInput $order: [orderBookInput] $pagination: paginationCursorInput ){
     readOnePerson(id: \${this.getIdValue()}){ worksConnection(search: $search, order:$order pagination:$pagination){

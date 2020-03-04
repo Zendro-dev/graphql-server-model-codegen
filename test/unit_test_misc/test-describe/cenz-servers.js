@@ -137,10 +137,11 @@ worksFilterImpl({
     pagination
 }) {
     let association_attributes = models.book.definition.attributes;
-    let string_attrib = 'id';
+    let string_attrib = '';
     for(let attrib in association_attributes){
-      string_attrib+= ' '+attrib;
+      string_attrib+= attrib+' ';
     }
+    string_attrib+= 'id';
 
     let query = \`query worksFilter($search: searchBookInput $order: [orderBookInput] $pagination: paginationInput){
         readOnePerson(id: \${this.getIdValue()}){ worksFilter(search: $search, order:$order pagination:$pagination){
