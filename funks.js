@@ -279,11 +279,15 @@ writeSchemaCommons = function(dir_write){
 
   input paginationCursorInput{
     first: Int
+    last: Int
     cursor: String
+    before: String
   }
 
   type pageInfo{
+    startCursor: String
     endCursor: String
+    hasPreviousPage: Boolean!
     hasNextPage: Boolean!
   }
 
