@@ -40,7 +40,7 @@ static readAllCursor(search, order, pagination){
 
     if(pagination!== undefined && pagination.cursor ){
         let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-        options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
+        options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor, this.idAttribute()) } ;
     }
 
     options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;
@@ -180,7 +180,7 @@ booksConnectionImpl({
         if (pagination !== undefined && pagination.cursor) {
 
             let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-            options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
+            options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute()) } ;
         }
 
         options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;
@@ -262,10 +262,11 @@ module.exports.many_to_many_association_connection_cenz_server = `
 worksConnectionImpl ({search,order,pagination}){
 
   let association_attributes = models.book.definition.attributes;
-  let string_attrib = 'id';
+  let string_attrib = '';
   for(let attrib in association_attributes){
-    string_attrib+= ' '+attrib;
+    string_attrib+= attrib+' ';
   }
+  string_attrib+= 'id';
 
   let query = \`query worksConnection($search: searchBookInput $order: [orderBookInput] $pagination: paginationCursorInput ){
     readOnePerson(id: \${this.getIdValue()}){ worksConnection(search: $search, order:$order pagination:$pagination){

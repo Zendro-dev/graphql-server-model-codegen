@@ -13,8 +13,8 @@ module.exports = class <%- name -%>{
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
 
-  constructor({id <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
-      this.id = id;
+  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+      this.<%- idAttribute -%> = <%- idAttribute -%>;
        <%for(var key in attributes){-%>
          this.<%=key-%> =<%=key-%>;
         <%}-%>
@@ -272,7 +272,7 @@ module.exports = class <%- name -%>{
 
   stripAssociations(){
     let attributes = Object.keys(<%- name -%>.definition.attributes);
-    attributes.push('id');
+    <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
     let data_values = _.pick(this, attributes);
     return data_values;
   }
@@ -284,35 +284,23 @@ module.exports = class <%- name -%>{
    */
 
   static idAttribute() {
-    let internalId = <%- name -%>.definition.internalId === undefined ? "id" : <%- name -%>.definition.internalId;
-    let idType = <%- name -%>.definition.attributes[internalId];
-
-    if(internalId !== "id") {
-      if(idType === undefined) {
-        return new Error(`Attribute ${internalId} does not exist`)
-      }
-      if(!(idType === "String" || idType === "Int" || idType === "Float")) {
-        return new Error(`Attribute ${internalId} must be of Type String, Int or Float`)
-      }
-    }
-    
-    return internalId; 
+    return <%- name -%>.definition.id.name;
   }
 
   /**
    * idAttributeType - Return the Type of the internalId.
    *
-   * @return {type} Type given in the JSON model 
+   * @return {type} Type given in the JSON model
    */
 
   static idAttributeType() {
-    return <%- name -%>.definition.attributes[this.idAttribute()];  
+    return <%- name -%>.definition.id.type;
   }
 
   /**
    * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
    *
-   * @return {type} id value 
+   * @return {type} id value
    */
 
   getIdValue() {

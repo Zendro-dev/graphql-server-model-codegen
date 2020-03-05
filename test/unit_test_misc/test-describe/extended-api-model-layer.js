@@ -17,7 +17,7 @@ async _addTranscript_counts( ids ){
 
   await helper.asyncForEach( ids, async id =>{
       let record = await models.transcript_count.readById(id);
-      await record.set_individual_id(this.id);
+      await record.set_individual_id(this.getIdValue());
   });
 }
 `
@@ -26,7 +26,7 @@ module.exports.to_add_unique_pet = `
 
 async _addUnique_pet(id){
   let record = await models.dog.readById(id);
-  await record.set_personId(this.id);
+  await record.set_personId(this.getIdValue());
 }
 
 
@@ -38,7 +38,7 @@ async _addAuthors(ids){
 
   await helper.asyncForEach(ids, async id =>{
       let input = {
-        book_Id : this.id,
+        book_Id : this.getIdValue(),
         person_Id: id
       }
       await models.books_to_people.addOne(input);
@@ -78,7 +78,7 @@ async _removeAuthors(ids){
   await helper.asyncForEach(ids, async id =>{
       let search_a = {
         "field" : "book_Id",
-        "value": { "value": this.id},
+        "value": { "value": this.getIdValue()},
         "operator": "eq"
       }
 
@@ -89,7 +89,7 @@ async _removeAuthors(ids){
       }
 
       let record = await models.books_to_people.readAll({operator: "and", search:[search_a, search_b]} );
-      await models.books_to_people.deleteOne(record[0].id);
+      await models.books_to_people.deleteOne(record[0][models.books_to_people.idAttribute()]);
   });
 }
 

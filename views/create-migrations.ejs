@@ -18,7 +18,7 @@ module.exports = {
 
       <%- idAttribute -%>: {
         type: Sequelize[ dict['<%= idAttributeType %>'] ],
-        primaryKey: true<%if(idAttribute === 'id'){-%>,
+        primaryKey: true<%if(defaultId){-%>,
         autoIncrement: true
         <%}-%>
       },
