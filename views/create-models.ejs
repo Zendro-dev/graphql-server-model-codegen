@@ -154,7 +154,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
       if(pagination!== undefined && pagination.cursor){
           let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-          options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
+          options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor, this.idAttribute()) } ;
       }
 
       options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;
@@ -529,7 +529,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           if (pagination !== undefined && pagination.cursor) {
 
               let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-              options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
+              options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor, models.<%- associations_temp[i].target_lc%>.idAttribute()) } ;
           }
 
           options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;

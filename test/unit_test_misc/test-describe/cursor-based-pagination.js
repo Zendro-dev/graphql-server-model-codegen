@@ -40,7 +40,7 @@ static readAllCursor(search, order, pagination){
 
     if(pagination!== undefined && pagination.cursor ){
         let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-        options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
+        options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor, this.idAttribute()) } ;
     }
 
     options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;
@@ -180,7 +180,7 @@ booksConnectionImpl({
         if (pagination !== undefined && pagination.cursor) {
 
             let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-            options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor) } ;
+            options['where'] = {...options['where'], ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute()) } ;
         }
 
         options['limit'] = (pagination !== undefined && pagination.first!==undefined) ? pagination.first : items;
