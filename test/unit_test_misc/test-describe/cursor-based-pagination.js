@@ -16,9 +16,13 @@ booksConnection(search: searchBookInput, order: [orderBookInput], pagination: pa
 
 module.exports.model_read_all_connection = `
 static readAllCursor(search, order, pagination) {
+  let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
   let options = {};
   options['where'] = {};
 
+  /*
+   * Search conditions
+   */
   if (search !== undefined) {
       let arg = new searchArg(search);
       let arg_sequelize = arg.toSequelize();
@@ -26,14 +30,16 @@ static readAllCursor(search, order, pagination) {
   }
 
   /*
-   * Get count
+   * Count
    */
   return super.count(options).then(countA => {
       options['offset'] = 0;
       options['order'] = [];
       options['limit'] = countA;
-      let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
 
+      /*
+       * Order conditions
+       */
       if (order !== undefined) {
           options['order'] = order.map((orderItem) => {
               return [orderItem.field, orderItem.order];
@@ -48,7 +54,7 @@ static readAllCursor(search, order, pagination) {
       }
 
       /*
-       * Set pagination conditions
+       * Pagination conditions
        */
       if (pagination) {
           //forward
@@ -71,11 +77,20 @@ static readAllCursor(search, order, pagination) {
               }
           }
       }
+      //woptions: copy of {options} with only 'where' options
+      let woptions = {};
+      woptions['where'] = {
+          ...options['where']
+      };
 
       /*
-       * Get count (with no-limits)
+       *  Count (with only where-options)
        */
-      return super.count(options).then(countB => {
+      return super.count(woptions).then(countB => {
+
+          /*
+           * Limit conditions
+           */
           if (pagination) {
               //forward
               if (isForwardPagination) {
@@ -229,9 +244,13 @@ booksConnectionImpl({
   pagination
 }) {
 
+  let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
   let options = {};
   options['where'] = {};
 
+  /*
+   * Search conditions
+   */
   if (search !== undefined) {
       let arg = new searchArg(search);
       let arg_sequelize = arg.toSequelize();
@@ -239,14 +258,16 @@ booksConnectionImpl({
   }
 
   /*
-   * Get count
+   * Count
    */
   return this.countBooks(options).then(countA => {
       options['offset'] = 0;
       options['order'] = [];
       options['limit'] = countA;
-      let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
 
+      /*
+       * Order conditions
+       */
       if (order !== undefined) {
           options['order'] = order.map((orderItem) => {
               return [orderItem.field, orderItem.order];
@@ -261,7 +282,7 @@ booksConnectionImpl({
       }
 
       /*
-       * Set pagination conditions
+       * Pagination conditions
        */
       if (pagination) {
           //forward
@@ -284,8 +305,19 @@ booksConnectionImpl({
               }
           }
       }
+      //woptions: copy of {options} with only 'where' options
+      let woptions = {};
+      woptions['where'] = {
+          ...options['where']
+      };
 
-      return this.countBooks(options).then(countB => {
+      /*
+       *  Count (with only where-options)
+       */
+      return this.countBooks(woptions).then(countB => {
+          /*
+           * Limit conditions
+           */
           if (pagination) {
               //forward
               if (isForwardPagination) {
@@ -360,6 +392,7 @@ booksConnectionImpl({
   }).catch(error => {
       throw error;
   });
+
 }
 
 `
