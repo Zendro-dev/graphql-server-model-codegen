@@ -7,16 +7,14 @@ module.exports = `
     """
     <%- idAttribute -%>: ID
 
-  <%for(var key in attributes) {
-    if(key !== idAttribute) {
--%>
+  <%for(var key in attributes) {-%>
   """
     @original-field
     <%= attributesDescription[key]%>
     """
     <%= key %>: <%= attributes[key]%>
 
-  <%}}-%>
+  <%}-%>
   <%for(var key in associations.schema_attributes.one){-%>
 <%=key%>(search: search<%= associations.schema_attributes.one[key][1] -%>Input): <%= associations.schema_attributes.one[key][0]%>
   <%}-%>
@@ -63,12 +61,10 @@ type <%- nameCp -%>Edge{
   }
 
   enum <%- name -%>Field {
-    <%- idAttribute %> 
-<%for (var key in attributes) {
-    if(key !== idAttribute) {
--%>
+    <%- idAttribute %>
+<%for (var key in attributes) {-%>
     <%= key %>
-<%}}-%>
+<%}-%>
   }
 
   input search<%- nameCp -%>Input {

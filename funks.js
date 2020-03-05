@@ -434,16 +434,16 @@ module.exports.getOptions = function(dataModel){
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
-  opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes.idAttribute;
+  opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
   dataModel['id'] = {
     name: opts.idAttribute,
     type: opts.idAttributeType
   }
 
-  opts['definition'] = stringify_obj(dataModel); 
-  delete opts.attributes.idAttribute;
-
+  opts['definition'] = stringify_obj(dataModel);
+  delete opts.attributes[opts.idAttribute];
+  
   return opts;
 };
 
