@@ -160,40 +160,44 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       /*
        * Set pagination conditions
        */
-      //forward
-      if(isForwardPagination) {
+      if(pagination) {
+        //forward
+        if(isForwardPagination) {
 
-        if(pagination.cursor) {
-          let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-          options['where'] = {
-              ...options['where'],
-              ...helper.parseOrderCursor(options['order'], decoded_cursor, "<%- idAttribute -%>")
-          };
-        }
-      }else {//backward 
-        if(pagination.before) {
-          let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
-          options['where'] = {
-              ...options['where'],
-              ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "<%- idAttribute -%>")
-          };
+          if(pagination.cursor) {
+            let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+            options['where'] = {
+                ...options['where'],
+                ...helper.parseOrderCursor(options['order'], decoded_cursor, "<%- idAttribute -%>")
+            };
+          }
+        }else {//backward 
+          if(pagination.before) {
+            let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
+            options['where'] = {
+                ...options['where'],
+                ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "<%- idAttribute -%>")
+            };
+          }
         }
       }
         
       /*
        * Get count (with no-limits)
        */
-      super.count(options).then( countB => {
-        //forward
-        if(isForwardPagination) {
+      return super.count(options).then( countB => {
+        if(pagination) {
+          //forward
+          if(isForwardPagination) {
 
-          if(pagination.first) {
-            options['limit'] = pagination.first;
-          }
-        } else {//backward
-          if(pagination.last) {
-            options['limit'] = pagination.last;
-            options['offset'] = Math.max( (countB - pagination.last), 0 );
+            if(pagination.first) {
+              options['limit'] = pagination.first;
+            }
+          } else {//backward
+            if(pagination.last) {
+              options['limit'] = pagination.last;
+              options['offset'] = Math.max( (countB - pagination.last), 0 );
+            }
           }
         }
         //check: limit
@@ -228,21 +232,22 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             
             pageInfo = {
               hasPreviousPage: ( (countA - countB) > 0 ),
-              hasNextPage: ( pagination.first ? (countB > pagination.first) : false ),
-              startCursor: edges[0].cursor, 
-              endCursor: edges[edges.length - 1].cursor
+              hasNextPage: ( pagination&&pagination.first ? (countB > pagination.first) : false ),
+              startCursor: (records.length > 0) ? edges[0].cursor : null,
+              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
             }
           } else {//backward
             
             pageInfo = {
-              hasPreviousPage: ( pagination.last ? (countB > pagination.last) : false ),
+              hasPreviousPage: ( pagination&&pagination.last ? (countB > pagination.last) : false ),
               hasNextPage: ( (countA - countB) > 0 ),
-              startCursor: edges[0].cursor,
-              endCursor: edges[edges.length - 1].cursor
+              startCursor: (records.length > 0) ? edges[0].cursor : null,
+              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
             }
           }
 
           return { edges, pageInfo };
+
         }).catch(error =>{
           throw error;
         });
@@ -597,37 +602,41 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         /*
          * Set pagination conditions
          */
-        //forward
-        if(isForwardPagination) {
-
-          if(pagination.cursor) {
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
-            options['where'] = {
-                ...options['where'],
-                ...helper.parseOrderCursor(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())
-            };
-          }
-        }else {//backward 
-          if(pagination.before) {
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
-            options['where'] = {
-                ...options['where'],
-                ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())
-            };
-          }
-        }
-
-        this.count<%- associations_temp[i].name_cp%>(options).then( countB => {
+        if(pagination) {
           //forward
           if(isForwardPagination) {
 
-            if(pagination.first) {
-              options['limit'] = pagination.first;
+            if(pagination.cursor) {
+              let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+              options['where'] = {
+                  ...options['where'],
+                  ...helper.parseOrderCursor(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())
+              };
             }
-          } else {//backward
-            if(pagination.last) {
-              options['limit'] = pagination.last;
-              options['offset'] = Math.max( (countB - pagination.last), 0 );
+          }else {//backward 
+            if(pagination.before) {
+              let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
+              options['where'] = {
+                  ...options['where'],
+                  ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())
+              };
+            }
+          }
+        }
+
+        return this.count<%- associations_temp[i].name_cp%>(options).then( countB => {
+          if(pagination) {
+            //forward
+            if(isForwardPagination) {
+
+              if(pagination.first) {
+                options['limit'] = pagination.first;
+              }
+            } else {//backward
+              if(pagination.last) {
+                options['limit'] = pagination.last;
+                options['offset'] = Math.max( (countB - pagination.last), 0 );
+              }
             }
           }
           //check: limit
@@ -662,21 +671,22 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               
               pageInfo = {
                 hasPreviousPage: ( (countA - countB) > 0 ),
-                hasNextPage: ( pagination.first ? (countB > pagination.first) : false ),
-                startCursor: edges[0].cursor, 
-                endCursor: edges[edges.length - 1].cursor
+                hasNextPage: ( pagination&&pagination.first ? (countB > pagination.first) : false ),
+                startCursor: (records.length > 0) ? edges[0].cursor : null,
+                endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
               }
             } else {//backward
               
               pageInfo = {
-                hasPreviousPage: ( pagination.last ? (countB > pagination.last) : false ),
+                hasPreviousPage: ( pagination&&pagination.last ? (countB > pagination.last) : false ),
                 hasNextPage: ( (countA - countB) > 0 ),
-                startCursor: edges[0].cursor,
-                endCursor: edges[edges.length - 1].cursor
+                startCursor: (records.length > 0) ? edges[0].cursor : null,
+                endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
               }
             }
 
             return {edges, pageInfo};
+            
           }).catch(error =>{
             throw error;
           });
