@@ -16,7 +16,13 @@ booksConnection(search: searchBookInput, order: [orderBookInput], pagination: pa
 
 module.exports.model_read_all_connection = `
 static readAllCursor(search, order, pagination) {
-  let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+  //check valid pagination arguments
+  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+  if (!argsValid) {
+    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+  }
+    
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
   let options = {};
   options['where'] = {};
 
@@ -399,6 +405,12 @@ booksConnectionImpl({
 
 module.exports.read_all_cenz_server = `
 static readAllCursor(search, order, pagination) {
+  //check valid pagination arguments
+  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+  if (!argsValid) {
+    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+  }
+    
   let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
 booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
   genre

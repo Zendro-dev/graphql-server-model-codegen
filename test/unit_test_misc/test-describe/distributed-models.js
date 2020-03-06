@@ -41,9 +41,13 @@ countBooks(search: $search)
 
 module.exports.book_adapter_read_all = `
 static readAllCursor(search, order, pagination){
-
-  if (pagination === undefined || (pagination.first !== undefined || pagination.last !== undefined || pagination.cursor !== undefined || pagination.before !== undefined)) {
-    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+  //check valid pagination arguments
+  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+  if (!argsValid) {
+    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+  }
+    
+  let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
   booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
     genre
     publisher_id
@@ -62,11 +66,6 @@ static readAllCursor(search, order, pagination){
         error['url'] = remoteCenzontleURL;
         handleError(error);
     });
-
-  }else{
-    throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor'/'before' or 'first'/'last' parameters.Please check the documentation.");
-  }
-
 }
 `
 
@@ -103,9 +102,13 @@ static countRecords(search) {
 
 module.exports.book_ddm_read_all = `
 static readAllCursor(search, order, pagination) {
-
-  if (pagination === undefined || (pagination.first !== undefined || pagination.last !== undefined || pagination.cursor !== undefined || pagination.before !== undefined)) {
-    let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+  //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
+    
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = registry.map(adapter => adapters[adapter].readAllCursor(search, order, pagination));
     let someHasNextPage = false;
     let someHasPreviousPage = false;
@@ -139,10 +142,6 @@ static readAllCursor(search, order, pagination) {
         let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
         return helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
     });
-
-    } else {
-        throw new Error("Pagination is expected to be cursor based.You need to specify 'cursor' or 'first' parameters.Please check the documentation.");
-    }
 }
 
 `
