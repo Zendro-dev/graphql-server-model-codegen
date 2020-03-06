@@ -78,6 +78,12 @@ module.exports = class <%- name -%>{
   }
 
   static readAllCursor(search, order, pagination){
+    //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
+    
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id <%for(var key in attributes){-%> <%=key %>
        <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
