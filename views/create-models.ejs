@@ -176,8 +176,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         //forward
         if(isForwardPagination) {
 
-          if(pagination.cursor) {
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+          if(pagination.after) {
+            let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
             options['where'] = {
                 ...options['where'],
                 ...helper.parseOrderCursor(options['order'], decoded_cursor, "<%- idAttribute -%>")
@@ -591,7 +591,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
 
     <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-      let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+      let isForwardPagination = !pagination || !(pagination.last != undefined);
       let options = {};
       options['where'] = {};
 
@@ -631,8 +631,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           //forward
           if(isForwardPagination) {
 
-            if(pagination.cursor) {
-              let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+            if(pagination.after) {
+              let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
               options['where'] = {
                   ...options['where'],
                   ...helper.parseOrderCursor(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute())

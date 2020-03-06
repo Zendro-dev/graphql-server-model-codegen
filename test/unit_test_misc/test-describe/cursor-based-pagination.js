@@ -66,8 +66,8 @@ static readAllCursor(search, order, pagination) {
           //forward
           if (isForwardPagination) {
 
-              if (pagination.cursor) {
-                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+              if (pagination.after) {
+                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
                   options['where'] = {
                       ...options['where'],
                       ...helper.parseOrderCursor(options['order'], decoded_cursor, "id")
@@ -250,7 +250,7 @@ booksConnectionImpl({
   pagination
 }) {
 
-  let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
   let options = {};
   options['where'] = {};
 
@@ -294,8 +294,8 @@ booksConnectionImpl({
           //forward
           if (isForwardPagination) {
 
-              if (pagination.cursor) {
-                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+              if (pagination.after) {
+                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
                   options['where'] = {
                       ...options['where'],
                       ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute())
