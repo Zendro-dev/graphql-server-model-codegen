@@ -288,11 +288,8 @@ writeSchemaCommons = function(dir_write){
   type pageInfo{
     startCursor: String
     endCursor: String
-    hasPreviousPage: Boolean
-    hasNextPage: Boolean,
-    count: Int,
-    counNextFromCursor: Int,
-    counPreviousFromCursor: Int,
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
   }
 
   scalar Date

@@ -231,10 +231,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             hasPreviousPage: false,
             hasNextPage: false,
             startCursor: null,
-            endCursor: null,
-            count: 0,
-            counNextFromCursor: 0,
-            counPreviousFromCursor: 0
+            endCursor: null
           };
 
           //edges
@@ -254,10 +251,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               hasPreviousPage: ( (countA - countB) > 0 ),
               hasNextPage: ( pagination&&pagination.first ? (countB > pagination.first) : false ),
               startCursor: (records.length > 0) ? edges[0].cursor : null,
-              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null,
-              count: countA,
-              counNextFromCursor: countB,
-              counPreviousFromCursor: countA-countB
+              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
             }
           } else {//backward
 
@@ -265,10 +259,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               hasPreviousPage: ( pagination&&pagination.last ? (countB > pagination.last) : false ),
               hasNextPage: ( (countA - countB) > 0 ),
               startCursor: (records.length > 0) ? edges[0].cursor : null,
-              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null,
-              count: countA,
-              counNextFromCursor: countA-countB,
-              counPreviousFromCursor: countB              
+              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
             }
           }
 
@@ -828,10 +819,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               hasPreviousPage: false,
               hasNextPage: false,
               startCursor: null,
-              endCursor: null,
-              count: 0,
-              counNextFromCursor: 0,
-              counPreviousFromCursor: 0
+              endCursor: null
             };
             //edges
             if(records.length > 0) {
@@ -850,10 +838,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 hasPreviousPage: ( (countA - countB) > 0 ),
                 hasNextPage: ( pagination&&pagination.first ? (countB > pagination.first) : false ),
                 startCursor: (records.length > 0) ? edges[0].cursor : null,
-                endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null,
-                count: countA,
-                counNextFromCursor: countB,
-                counPreviousFromCursor: countA-countB
+                endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
               }
             } else {//backward
 
@@ -861,10 +846,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 hasPreviousPage: ( pagination&&pagination.last ? (countB > pagination.last) : false ),
                 hasNextPage: ( (countA - countB) > 0 ),
                 startCursor: (records.length > 0) ? edges[0].cursor : null,
-                endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null,
-                count: countA,
-                counNextFromCursor: countA-countB,
-                counPreviousFromCursor: countB
+                endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
               }
             }
             return {edges, pageInfo};

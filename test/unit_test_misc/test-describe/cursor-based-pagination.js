@@ -64,15 +64,15 @@ static readAllCursor(search, order, pagination) {
                   let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
                   options['where'] = {
                       ...options['where'],
-                      ...helper.parseOrderCursor(options['order'], decoded_cursor, "id")
+                      ...helper.parseOrderCursor(options['order'], decoded_cursor, "id", pagination.includeCursor)
                   };
               }
-          } else { //backward 
+          } else { //backward
               if (pagination.before) {
                   let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
                   options['where'] = {
                       ...options['where'],
-                      ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "id")
+                      ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "id", pagination.includeCursor)
                   };
               }
           }
@@ -287,15 +287,15 @@ booksConnectionImpl({
                   let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
                   options['where'] = {
                       ...options['where'],
-                      ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute())
+                      ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
                   };
               }
-          } else { //backward 
+          } else { //backward
               if (pagination.before) {
                   let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
                   options['where'] = {
                       ...options['where'],
-                      ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.book.idAttribute())
+                      ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
                   };
               }
           }
