@@ -284,7 +284,7 @@ booksConnectionImpl({
           //forward
           if (isForwardPagination) {
               if (pagination.cursor) {
-                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+                  let decoded_cursor = JSON.parse(Person.base64Decode(pagination.cursor));
                   options['where'] = {
                       ...options['where'],
                       ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
@@ -292,7 +292,7 @@ booksConnectionImpl({
               }
           } else { //backward
               if (pagination.before) {
-                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
+                  let decoded_cursor = JSON.parse(Person.base64Decode(pagination.before));
                   options['where'] = {
                       ...options['where'],
                       ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
