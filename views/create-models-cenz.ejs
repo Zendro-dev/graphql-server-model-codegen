@@ -78,10 +78,16 @@ module.exports = class <%- name -%>{
   }
 
   static readAllCursor(search, order, pagination){
+    //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
+    
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
 
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
-       <%}-%>} } pageInfo{endCursor hasNextPage  } } }`
+       <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
 
        return axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
          let data_edges = res.data.data.<%- namePl -%>Connection.edges ;
@@ -99,7 +105,6 @@ module.exports = class <%- name -%>{
          error['url'] = url;
          handleError(error);
        });
-
   }
 
   static addOne(input){
@@ -377,7 +382,7 @@ module.exports = class <%- name -%>{
 
           let query = `query <%=associations_temp[i].name%>Connection($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationCursorInput){
             readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){ <%=associations_temp[i].name%>Connection(search: $search, order:$order pagination:$pagination){
-              edges{cursor node{ ${string_attrib}}} pageInfo{endCursor hasNextPage} } }
+              edges{cursor node{ ${string_attrib}}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage} } }
           }`
 
           return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})

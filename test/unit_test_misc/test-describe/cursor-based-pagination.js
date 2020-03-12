@@ -16,7 +16,13 @@ booksConnection(search: searchBookInput, order: [orderBookInput], pagination: pa
 
 module.exports.model_read_all_connection = `
 static readAllCursor(search, order, pagination) {
-  let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+  //check valid pagination arguments
+  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+  if (!argsValid) {
+    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+  }
+    
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
   let options = {};
   options['where'] = {};
 
@@ -60,8 +66,8 @@ static readAllCursor(search, order, pagination) {
           //forward
           if (isForwardPagination) {
 
-              if (pagination.cursor) {
-                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+              if (pagination.after) {
+                  let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
                   options['where'] = {
                       ...options['where'],
                       ...helper.parseOrderCursor(options['order'], decoded_cursor, "id", pagination.includeCursor)
@@ -242,10 +248,15 @@ booksConnectionImpl({
   order,
   pagination
 }) {
-
-  let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+  //check valid pagination arguments
+  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+  if (!argsValid) {
+    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+  }
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
   let options = {};
   options['where'] = {};
+
   /*
    * Search conditions
    */
@@ -283,8 +294,8 @@ booksConnectionImpl({
       if (pagination) {
           //forward
           if (isForwardPagination) {
-              if (pagination.cursor) {
-                  let decoded_cursor = JSON.parse(Person.base64Decode(pagination.cursor));
+              if (pagination.after) {
+                  let decoded_cursor = JSON.parse(Person.base64Decode(pagination.after));
                   options['where'] = {
                       ...options['where'],
                       ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
@@ -390,44 +401,49 @@ booksConnectionImpl({
 
 module.exports.read_all_cenz_server = `
 static readAllCursor(search, order, pagination) {
-    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
-  booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
-    genre
-    publisher_id
-  }} pageInfo{endCursor hasNextPage  } } }\`
+  //check valid pagination arguments
+  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+  if (!argsValid) {
+    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+  }
+    
+  let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
+  genre
+  publisher_id
+ } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
-    return axios.post(url, {
-        query: query,
-        variables: {
-            search: search,
-            order: order,
-            pagination: pagination
-        }
-    }).then(res => {
-        let data_edges = res.data.data.booksConnection.edges;
-        let pageInfo = res.data.data.booksConnection.pageInfo;
-        let edges = data_edges.map(e => {
-            return {
-                node: new Book(e.node),
-                cursor: e.cursor
-            }
-        })
+  return axios.post(url, {
+      query: query,
+      variables: {
+          search: search,
+          order: order,
+          pagination: pagination
+      }
+  }).then(res => {
+      let data_edges = res.data.data.booksConnection.edges;
+      let pageInfo = res.data.data.booksConnection.pageInfo;
 
-        return {
-            edges,
-            pageInfo
-        };
-    }).catch(error => {
-        error['url'] = url;
-        handleError(error);
-    });
+      let edges = data_edges.map(e => {
+          return {
+              node: new Book(e.node),
+              cursor: e.cursor
+          }
+      })
 
+      return {
+          edges,
+          pageInfo
+      };
+  }).catch(error => {
+      error['url'] = url;
+      handleError(error);
+  });
 }
 `
 
 module.exports.many_to_many_association_connection_cenz_server = `
-worksConnectionImpl ({search,order,pagination}){
-
+worksConnectionImpl ({search,order,pagination}) {
   let association_attributes = models.book.definition.attributes;
   let string_attrib = '';
   for(let attrib in association_attributes){
@@ -437,7 +453,7 @@ worksConnectionImpl ({search,order,pagination}){
 
   let query = \`query worksConnection($search: searchBookInput $order: [orderBookInput] $pagination: paginationCursorInput ){
     readOnePerson(id: \${this.getIdValue()}){ worksConnection(search: $search, order:$order pagination:$pagination){
-      edges{ cursor node{ \${string_attrib}  } } pageInfo{endCursor hasNextPage  }} }
+      edges{ cursor node{ \${string_attrib}  } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }
   }\`
 
   return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})

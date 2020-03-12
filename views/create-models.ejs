@@ -134,7 +134,13 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   }
 
   static readAllCursor(search, order, pagination){
-    let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+    //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
+    
+    let isForwardPagination = !pagination || !(pagination.last != undefined);
     let options = {};
     options['where'] = {};
 
@@ -154,7 +160,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       options['offset'] = 0;
       options['order'] = [];
       options['limit'] = countA;
-
       /*
        * Order conditions
        */
@@ -173,15 +178,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       if(pagination) {
         //forward
         if(isForwardPagination) {
-
-          if(pagination.cursor) {
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.cursor));
+          if(pagination.after) {
+            let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
             options['where'] = {
                 ...options['where'],
                 ...helper.parseOrderCursor(options['order'], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor)
             };
           }
-        }else {//backward
+        }else {//backward 
           if(pagination.before) {
             let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
             options['where'] = {
@@ -194,12 +198,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       //woptions: copy of {options} with only 'where' options
       let woptions = {};
       woptions['where'] = {...options['where']};
-
       /*
        *  Count (with only where-options)
        */
       return super.count(woptions).then( countB => {
-
         /*
          * Limit conditions
          */
@@ -728,9 +730,15 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
 
     <%if(associations_temp[i].targetStorageType === 'sql'){-%>
-      let isForwardPagination = !pagination || (pagination.cursor || pagination.first) || (!pagination.before && !pagination.last);
+      //check valid pagination arguments
+      let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+      if (!argsValid) {
+        throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+      }
+      let isForwardPagination = !pagination || !(pagination.last != undefined);
       let options = {};
       options['where'] = {};
+
       /*
        * Search conditions
        */
@@ -764,8 +772,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         if(pagination) {
           //forward
           if(isForwardPagination) {
-            if(pagination.cursor) {
-              let decoded_cursor = JSON.parse(<%- name -%>.base64Decode(pagination.cursor));
+            if(pagination.after) {
+              let decoded_cursor = JSON.parse(<%- name -%>.base64Decode(pagination.after));
               options['where'] = {
                   ...options['where'],
                   ...helper.parseOrderCursor(options['order'], decoded_cursor, models.<%=associations_temp[i].target_lc-%>.idAttribute(), pagination.includeCursor)
@@ -833,7 +841,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
             //forward
             if(isForwardPagination) {
-
               pageInfo = {
                 hasPreviousPage: ( (countA - countB) > 0 ),
                 hasNextPage: ( pagination&&pagination.first ? (countB > pagination.first) : false ),
@@ -841,7 +848,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
               }
             } else {//backward
-
               pageInfo = {
                 hasPreviousPage: ( pagination&&pagination.last ? (countB > pagination.last) : false ),
                 hasNextPage: ( (countA - countB) > 0 ),
