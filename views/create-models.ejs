@@ -707,7 +707,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           if(order !== undefined){
             options['order'] = order.map( (orderItem) => {return [ orderItem.field, orderItem.order]; } );
           }else if(pagination !== undefined){
-            options['order'] = [ ["<%- idAttribute -%>", "ASC"] ];
+            options['order'] = [ ["<%- associations_temp[i].targetKey -%>", "ASC"] ];
           }
           if(pagination !== undefined){
             options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
