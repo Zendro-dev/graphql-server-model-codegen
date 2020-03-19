@@ -13,3 +13,4 @@ models-webservice
 resolvers
 schemas
 TestConcept.js
+.eslintrc.js
