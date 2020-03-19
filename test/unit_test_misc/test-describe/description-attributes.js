@@ -29,6 +29,11 @@ type Person{
   dogsFilter(search: searchDogInput, order: [ orderDogInput ], pagination: paginationInput): [Dog]
 
   """
+  @search-request
+  """
+  dogsConnection(search: searchDogInput, order: [ orderDogInput ], pagination: paginationCursorInput): DogConnection
+
+  """
   @count-request
   """
   countFilteredDogs(search: searchDogInput) : Int
@@ -37,6 +42,11 @@ type Person{
   @search-request
   """
   booksFilter(search: searchBookInput, order: [ orderBookInput ], pagination: paginationInput): [Book]
+
+  """
+  @search-request
+  """
+  booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput): BookConnection
 
   """
   @count-request
@@ -76,6 +86,11 @@ type Person{
   dogsFilter(search: searchDogInput, order: [ orderDogInput ], pagination: paginationInput): [Dog]
 
   """
+  @search-request
+  """
+  dogsConnection(search: searchDogInput, order: [ orderDogInput ], pagination: paginationCursorInput): DogConnection
+
+  """
   @count-request
   """
   countFilteredDogs(search: searchDogInput) : Int
@@ -84,6 +99,11 @@ type Person{
   @search-request
   """
   booksFilter(search: searchBookInput, order: [ orderBookInput ], pagination: paginationInput): [Book]
+
+  """
+  @search-request
+  """
+  booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput): BookConnection
 
   """
   @count-request

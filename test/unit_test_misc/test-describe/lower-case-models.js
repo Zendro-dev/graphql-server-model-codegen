@@ -4,11 +4,13 @@ type Query {
   readOneTranscript_count(id: ID!): transcript_count
   countTranscript_counts(search: searchTranscript_countInput ): Int
   vueTableTranscript_count : VueTableTranscript_count    csvTableTemplateTranscript_count: [String]
+
+  transcript_countsConnection(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput ): Transcript_countConnection
 }
 
   type Mutation {
-    addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String, individual_id: Int   ): transcript_count!
-  updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, individual_id: Int  ): transcript_count!
+    addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String,  addIndividual:ID   ): transcript_count!
+  updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, addIndividual:ID, removeIndividual: ID  ): transcript_count!
 
 `
 
@@ -29,7 +31,13 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-  return this.transcript_countsFilterImpl({search, order, pagination});
+  try{
+      return this.transcript_countsFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
+
 }
 `
 

@@ -17,6 +17,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "ajv": "^6.10.0",
+    "colors": "^1.4.0",
     "commander": "^2.15.1",
     "ejs": "^2.5.8",
     "inflection": "^1.12.0",

@@ -33,6 +33,11 @@ type book{
   authorsFilter(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput): [Person]
 
   """
+  @search-request
+  """
+  authorsConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput): PersonConnection
+
+  """
   @count-request
   """
   countFilteredAuthors(search: searchPersonInput) : Int
@@ -70,7 +75,12 @@ module.exports.resolvers_book = `
  * @return {type}         Associated record
  */
 book.prototype.publisher = function({search}, context) {
+  try{
     return this.publisherImpl( search);
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 
 `
@@ -81,11 +91,13 @@ type Query {
   readOnePerson(id: ID!): Person
   countPeople(search: searchPersonInput ): Int
   vueTablePerson : VueTablePerson    csvTableTemplatePerson: [String]
+
+  peopleConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput ): PersonConnection
 }
 
   type Mutation {
-    addPerson( firstName: String, lastName: String, Age: Int, companyId: Int): Person!
-  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, companyId: Int): Person!
+    addPerson( firstName: String, lastName: String, Age: Int,  addCompany: ID, addWorks:[ID]): Person!
+  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, addCompany: ID, removeCompany: ID, addWorks:[ID], removeWorks:[ID]): Person!
 
 
 deletePerson(id: ID!): String!
@@ -107,8 +119,12 @@ person.prototype.worksFilter = function({
     order,
     pagination
 }, context) {
-
-  return this.worksFilterImpl({search, order, pagination});
+  try{
+    return this.worksFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 
 }
 

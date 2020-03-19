@@ -3,16 +3,16 @@ transcriptCount.prototype.validatorSchema = {
        "$async": true,
        "properties": {
          "gene": {
-           "type": "string"
+           "type": ["string", "null"]
          },
          "variable": {
-           "type": "string"
+           "type": ["string", "null"]
          },
          "count": {
-           "type": "number"
+           "type": ["number", "null"]
          },
          "tissue_or_condition": {
-           "type": "string"
+           "type": ["string", "null"]
          }
        }
 `

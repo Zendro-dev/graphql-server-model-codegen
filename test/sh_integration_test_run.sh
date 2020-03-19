@@ -25,8 +25,8 @@
 # DESCRIPTION
 #     Command line utility to perform graphql server's integration-test.
 #
-#     Intergation-test case creates a docker-compose ambient with three servers: 
-#     
+#     Intergation-test case creates a docker-compose ambient with three servers:
+#
 #     gql_postgres
 #     gql_science_db_graphql_server
 #     gql_ncbi_sim_srv
@@ -35,13 +35,13 @@
 #
 #     Default behavior performs the following actions:
 #
-#         1) Stop and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v). 
+#         1) Stop and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
 #         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
 #         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
 #         4) Creates and start containers with docker-compose up command.
-#         5) Excecutes integration tests. The code should exists, otherwise the integration tests are not executed. 
+#         5) Excecutes integration tests. The code should exists, otherwise the integration tests are not executed.
 #         6) Do cleanup as described on 1) and 2) steps (use -k option to skip this step).
-#       
+#
 #     The options are as follows:
 #
 #     -h, --help
@@ -54,13 +54,13 @@
 #
 #         1) Stop and removes containers with docker-compose down command (without removing images).
 #         2) Creates and start containers with docker-compose up command.
-#         
+#
 #         Because the containers that manages the test-suite's databases do not use docker named volumes, but transient ones, the databases will be re-initialized by this command, too.
 #
 #     -g, --generate-code
-#         
+#
 #         This option performs the following actions:
-#         
+#
 #         1) Stop and removes containers with docker-compose down command (without removing images).
 #         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
 #         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
@@ -69,7 +69,7 @@
 #     -t, --run-test-only
 #
 #         This option performs the following actions:
-#         
+#
 #         1) Stops and removes containers with docker-compose down command (without removing images).
 #         2) Creates and starts containers with docker-compose up command.
 #         3) Excecutes integration tests. The code should exists, otherwise the integration tests are not executed.
@@ -79,19 +79,19 @@
 #     -T, --generate-code-and-run-tests
 #
 #         This option performs the following actions:
-#         
+#
 #         1) Stops and removes containers with docker-compose down command (without removing images).
 #         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
 #         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
 #         4) Creates and starts containers with docker-compose up command.
-#         5) Excecutes integration tests. The code should exists, otherwise the integration tests are not executed. 
+#         5) Excecutes integration tests. The code should exists, otherwise the integration tests are not executed.
 #
 #         If option -k is also specified, then cleanup step is skipped at the end of the integration-test-suite, otherwise, the cleanup step is performed at the end of the tests (see -c option).
 #
 #     -k, --keep-running
 #
 #         This option skips the cleanup step at the end of the integration-test-suite and keeps the Docker containers running.
-#         
+#
 #         This option can be used alone, or in conjunction with the options -t or -T.
 #
 #         If this option is not specified, then, by default, the cleanup step is performed at the end of the tests (see -c option).
@@ -99,38 +99,38 @@
 #     -c, --cleanup
 #
 #         This option performs the following actions:
-#         
+#
 #         1) Stops and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
 #         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
 #
 # EXAMPLES
 #     Command line utility to perform graphql server's integration-test.
-#         
+#
 #     To see full test-integration info:
 #     $ npm run test-integration -- -h
-# 
+#
 #     To run default behavior (cleanup-genCode-doTests-cleanup):
 #     $ npm run test-integration
-# 
+#
 #     To run default behavior but skip final cleanup (cleanup-genCode-doTests):
 #     $ npm run test-integration -- -k
-# 
+#
 #     To restart containers:
 #     $ npm run test-integration -- -r
-# 
+#
 #     To generate code and start containers:
 #     $ npm run test-integration -- -g
-# 
+#
 #     To do the tests only and keep the containers running at end:
 #     $ npm run test-integration -- -t -k
-# 
+#
 #     To generate code and do the tests, removing all Docker images at end:
 #     $ npm run test-integration -- -T
 
 #     To do a full clean up (removes containers, images and code):
 #     $ npm run test-integration -- -c
-# 
-# 
+#
+#
 
 # exit on first error
 set -e
@@ -144,7 +144,9 @@ DOCKER_SERVICES=(gql_postgres \
 TEST_MODELS="./test/integration_test_models"
 TARGET_DIR="./docker/integration_test_run"
 CODEGEN_DIRS=("./docker/integration_test_run/models" \
+              "./docker/integration_test_run/models-distributed" \
               "./docker/integration_test_run/models-webservice" \
+              "./docker/integration_test_run/models-cenz-server"
               "./docker/integration_test_run/migrations" \
               "./docker/integration_test_run/schemas" \
               "./docker/integration_test_run/resolvers" \
@@ -240,7 +242,7 @@ restartContainers() {
   # Msg
   echo -e "\n${LGRAY}@@ ----------------------------${NC}"
   echo -e "${LGRAY}@@ Restarting containers...${NC}"
-  
+
   # Soft down
   docker-compose -f ./docker/docker-compose-test.yml down
   # Msg
@@ -250,12 +252,12 @@ restartContainers() {
   npm install
   # Msg
   echo -e "@@ Installing ... ${LGREEN}done${NC}"
-  
+
   # Up
   docker-compose -f ./docker/docker-compose-test.yml up -d
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
-  
+
   # List
   docker-compose -f ./docker/docker-compose-test.yml ps
 
@@ -278,14 +280,14 @@ cleanup() {
 
   # Hard down
   docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
-  
+
   # Delete code
   deleteGenCode
-  
+
   # Msg
   echo -e "@@ Cleanup ... ${LGREEN}done${NC}"
   echo -e "${LGRAY}---------------------------- @@${NC}\n"
-  
+
 }
 
 #
@@ -320,7 +322,7 @@ waitForGql() {
   # Msg
   echo -e "\n${LGRAY}@@ ----------------------------${NC}"
   echo -e "${LGRAY}@@ Waiting for GraphQL server to start...${NC}"
-  
+
   # Wait until the Science-DB GraphQL web-server is up and running
   waited=0
   until curl 'localhost:3000/graphql' > /dev/null 2>&1
@@ -363,6 +365,8 @@ genCode() {
   patch -V never ${TARGET_DIR}/models-webservice/aminoacidsequence.js ./docker/ncbi_sim_srv/model_aminoacidsequence.patch
   # Add monkey-patching validation with AJV
   patch -V never ${TARGET_DIR}/validations/individual.js ./test/integration_test_misc/individual_validate.patch
+  # Add patch for model webservice association
+  patch -V never ${TARGET_DIR}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
 
   # Msg
   echo -e "@@ Code generated on ${TARGET_DIR}: ... ${LGREEN}done${NC}"
@@ -378,17 +382,17 @@ upContainers() {
   # Msg
   echo -e "\n${LGRAY}@@ ----------------------------${NC}"
   echo -e "${LGRAY}@@ Starting up containers...${NC}"
-  
+
   # Install
   npm install
   # Msg
   echo -e "@@ Installing ... ${LGREEN}done${NC}"
-  
+
   # Up
   docker-compose -f ./docker/docker-compose-test.yml up -d
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
-  
+
   # List
   docker-compose -f ./docker/docker-compose-test.yml ps
 
@@ -412,7 +416,7 @@ doTests() {
 
   # Do tests
   mocha ./test/mocha_integration_test.js
-  
+
   # Msg
   echo -e "@@ Mocha tests ... ${LGREEN}done${NC}"
   echo -e "${LGRAY}---------------------------- @@${NC}\n"
@@ -422,7 +426,7 @@ doTests() {
 # Function: consumeArgs()
 #
 # Shift the remaining arguments on $# list, and sets the flag KEEP_RUNNING=true if
-# argument -k or --keep-running is found. 
+# argument -k or --keep-running is found.
 #
 consumeArgs() {
 
@@ -441,7 +445,7 @@ consumeArgs() {
           shift
           let "NUM_ARGS--"
         ;;
-        
+
         *)
           # Msg
           echo -e "@@ Discarting option: ${RED}$a${NC}"
@@ -455,7 +459,7 @@ consumeArgs() {
 #
 # Function: man()
 #
-# Show man page of this script. 
+# Show man page of this script.
 #
 man() {
   # Show
@@ -477,7 +481,7 @@ if [ $# -gt 0 ]; then
               KEEP_RUNNING=true
               # Msg
               echo -e "@@ keep containers running at end: $KEEP_RUNNING"
-              
+
               # Past argument
               shift
               let "NUM_ARGS--"

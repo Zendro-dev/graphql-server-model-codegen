@@ -5,13 +5,12 @@ module.exports = `
     """
     @original-field
     """
-    id: ID
+    <%- idAttribute -%>: ID
 
-  <%for(var key in attributes)
-{-%>
+  <%for(var key in attributes) {-%>
   """
     @original-field
-    <%= attributesDescription[key]%>   
+    <%= attributesDescription[key]%>
     """
     <%= key %>: <%= attributes[key]%>
 
@@ -26,11 +25,27 @@ module.exports = `
     """
     <%=key%>Filter(search: search<%= associations.schema_attributes.many[key][1] -%>Input, order: [ order<%= associations.schema_attributes.many[key][1] -%>Input ], pagination: paginationInput): [<%= associations.schema_attributes.many[key][0]-%>]
 
+
+    """
+    @search-request
+    """
+    <%=key%>Connection(search: search<%= associations.schema_attributes.many[key][1] -%>Input, order: [ order<%= associations.schema_attributes.many[key][1] -%>Input ], pagination: paginationCursorInput): <%= associations.schema_attributes.many[key][1]-%>Connection
+
     """
     @count-request
     """
     countFiltered<%= associations.schema_attributes.many[key][2]%>(search: search<%= associations.schema_attributes.many[key][1] -%>Input) : Int
   <%}-%>
+}
+
+type <%- nameCp -%>Connection{
+  edges: [<%- nameCp -%>Edge]
+  pageInfo: pageInfo!
+}
+
+type <%- nameCp -%>Edge{
+  cursor: String!
+  node: <%- name -%>!
 }
 
   type VueTable<%- nameCp -%>{
@@ -46,9 +61,10 @@ module.exports = `
   }
 
   enum <%- name -%>Field {
-    id <%for (var key in attributes) {%>
-    <%= key -%>
-  <% }%>
+    <%- idAttribute %>
+<%for (var key in attributes) {-%>
+    <%= key %>
+<%}-%>
   }
 
   input search<%- nameCp -%>Input {
@@ -65,23 +81,18 @@ module.exports = `
 
   type Query {
     <%- namePl -%>(search: search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationInput ): [<%- name -%>]
-    readOne<%- nameCp -%>(id: ID!): <%- name %>
+    readOne<%- nameCp -%>(<%- idAttribute -%>: ID!): <%- name %>
     count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
     vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
     csvTableTemplate<%- nameCp -%>: [String]
+
+    <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput ): <%- nameCp -%>Connection
   }
 
     type Mutation {
-  <% if(storageType === 'sql'){-%>
-    add<%- nameCp -%>( <%- attributesStr -%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ): <%- name %>!
-    update<%- nameCp -%>(id: ID!, <%- attributesStr -%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID], remove<%= associations.schema_attributes.many[key][2]%>:[ID] <%}-%>): <%- name %>!
-  <%}else{-%>
-    add<%- nameCp -%>( <%- attributesStr -%>): <%- name %>!
-    update<%- nameCp -%>(id: ID!, <%- attributesStr -%>): <%- name %>!
-  <%}-%>
-
-
-  delete<%- nameCp -%>(id: ID!): String!
+    add<%- nameCp -%>(<%if(!defaultId){-%><%- idAttribute -%>: ID!,<%}-%> <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ): <%- name %>!
+    update<%- nameCp -%>(<%- idAttribute -%>: ID!, <%- editableAttributesStr -%> <%for(var key in associations.schema_attributes.one){-%>, add<%= associations.schema_attributes.one[key][2]%>:ID, remove<%= associations.schema_attributes.one[key][2]%>:ID <%}-%> <%for(var key in associations.schema_attributes.many){-%>, add<%= associations.schema_attributes.many[key][2]%>:[ID], remove<%= associations.schema_attributes.many[key][2]%>:[ID] <%}-%>): <%- name %>!
+  delete<%- nameCp -%>(<%- idAttribute -%>: ID!): String!
   bulkAdd<%- nameCp -%>Csv: [<%- name -%>] }
 
 `;

@@ -35,9 +35,10 @@ countDogs: function({
         if (authorization === true) {
             return dog.countRecords(search);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -99,9 +100,10 @@ dogs: function({
         if (authorization === true) {
             return dog.readAll(search, order, pagination);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -110,17 +112,39 @@ dogs: function({
 module.exports.add_one_model = `
 static addOne(input){
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-      .then((valSuccess) => {
-          return super.create(input)
-              .then(item => {
-                  if (input.addAuthors) {
-                      item.setAuthors(input.addAuthors);
-                  }
-                  return item;
-              });
-      }).catch((err) => {
-          return err
-      })
+      .then(async (valSuccess) => {
+
+        try{
+          const result = await sequelize.transaction( async (t) =>{
+
+            let item = await super.create(input, {transaction : t});
+            let promises_associations = [];
+            if (input.addAuthors) {
+              let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
+              if(wrong_ids.length > 0){
+                throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+              }else{
+                  promises_associations.push( item.setAuthors(input.addAuthors, {transaction:t}) );
+              }
+
+            }
+          return  Promise.all(promises_associations).then( () => { return item } );
+        });
+
+        if(input.addPublisher){
+          let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
+          if(wrong_ids.length > 0){
+            throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
+          }else{
+            await result._addPublisher(input.addPublisher);
+          }
+        }
+
+         return result;
+        }catch(error){
+          throw error;
+        }
+      });
 }
 `
 
@@ -138,9 +162,10 @@ addBook: function(input, context) {
 
           return book.addOne(input);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -171,7 +196,7 @@ module.exports.delete_one_resolver = `
 /**
  * deleteBook - Check user authorization and delete a record with the specified id in the id argument.
  *
- * @param  {number} {id}    Id of the record to delete
+ * @param  {number} {id}    id of the record to delete
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {string}         Message indicating if deletion was successfull.
  */
@@ -182,9 +207,10 @@ deleteBook: function({
         if (authorization === true) {
           return book.deleteOne(id);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -193,20 +219,56 @@ module.exports.update_one_model = `
 static updateOne(input){
 
   return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-      .then((valSuccess) => {
-          return super.findByPk(input.id)
-              .then(item => {
-                  if (input.addAuthors) {
-                      item.addAuthors(input.addAuthors);
+      .then(async (valSuccess) => {
+        try{
+          let result = await sequelize.transaction( async(t) =>{
+              let promises_associations = [];
+              let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
+              let updated = await item.update(input, {transaction:t});
+
+              if (input.addAuthors) {
+                let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
+                if(wrong_ids.length > 0){
+                  throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+                }else{
+                  promises_associations.push(updated.addAuthors(input.addAuthors, {transaction: t}));
+                }
+              }
+              if (input.removeAuthors) {
+                let ids_associated = await item.getAuthors().map(t => \`\${t[models.person.idAttribute()]}\`);
+                await helper.asyncForEach(input.removeAuthors, id=>{
+                  if(! ids_associated.includes(id)){
+                    throw new Error(\`The association with id \${id} that you're trying to remove desn't exists\` );
                   }
-                  if (input.removeAuthors) {
-                      item.removeAuthors(input.removeAuthors);
-                  }
-                  return item.update(input);
-              });
-      }).catch((err) => {
-          return err
-      })
+                });
+                  promises_associations.push(updated.removeAuthors(input.removeAuthors, {transaction: t}));
+              }
+              return  Promise.all(promises_associations).then( () => { return updated; } );
+          });
+
+          if(input.addPublisher){
+            let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
+            if(wrong_ids.length > 0){
+              throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
+            }else{
+              await result._addPublisher(input.addPublisher);
+            }
+          }
+
+          if(input.removePublisher){
+            let publisher = await result.publisherImpl();
+            if(publisher && input.removePublisher === \`\${publisher[models.publisher.idAttribute()]}\`){
+              await result._removePublisher(input.removePublisher);
+            }else{
+              throw new Error("The association you're trying to remove it doesn't exists");
+            }
+          }
+
+          return result;
+        }catch(error){
+          throw error;
+        }
+      });
 }
 `
 
@@ -223,9 +285,10 @@ updateBook: function(input, context) {
         if (authorization === true) {
           return book.updateOne(input);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
@@ -258,27 +321,27 @@ static bulkAddCsv(context){
                     console.log(info);
                 }).catch(function(err) {
                     fileTools.deleteIfExists(addedZipFilePath);
-                    console.log(err);
+                    console.error(err);
                 });
 
             } catch (error) {
-                console.log(error.message);
+                console.error(error.message);
             }
 
             fs.unlinkSync(tmpFile);
         }).catch((error) => {
             email.sendEmail(helpersAcl.getTokenFromContext(context).email,
                 'ScienceDB batch add', \`\${error.message}\`).then(function(info) {
-                console.log(info);
+                console.error(info);
             }).catch(function(err) {
-                console.log(err);
+                console.error(err);
             });
 
             fs.unlinkSync(tmpFile);
         });
 
     }).catch((error) => {
-        return new Error(error);
+        throw new Error(error);
     });
 }
 `
@@ -297,10 +360,11 @@ module.exports.bulk_add_resolver = `
               return book.bulkAddCsv(context);
 
             } else {
-                return new Error("You don't have authorization to perform this action");
+                throw new Error("You don't have authorization to perform this action");
             }
         }).catch(error => {
-            return error;
+            console.error(error);
+            handleError(error);
         })
     }
 `
@@ -323,9 +387,10 @@ csvTableTemplateIndividual: function(_, context) {
         if (authorization === true) {
             return individual.csvTableTemplate();
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }

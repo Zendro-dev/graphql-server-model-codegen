@@ -5,7 +5,7 @@ const jsb = require('js-beautify').js_beautify;
 const {promisify} = require('util');
 const ejsRenderFile = promisify( ejs.renderFile );
 const stringify_obj = require('stringify-object');
-
+const colors = require('colors/safe');
 
 /**
  *  Allowed type of associations classified accordingly the number of possible records involved
@@ -125,31 +125,40 @@ attributesToJsonSchemaProperties = function(attributes) {
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
       jsonSchemaProps[key] = {
-        "type": "string"
+        "type": ["string", "null"]
       }
     } else if (jsonSchemaProps[key] === "Int") {
       jsonSchemaProps[key] = {
-        "type": "integer"
+        "type": ["integer", "null"]
       }
     } else if (jsonSchemaProps[key] === "Float") {
       jsonSchemaProps[key] = {
-        "type": "number"
+        "type": ["number", "null"]
       }
     } else if (jsonSchemaProps[key] === "Boolean") {
       jsonSchemaProps[key] = {
-        "type": "boolean"
+        "type": ["boolean", "null"]
       }
     } else if (jsonSchemaProps[key] === "Date") {
       jsonSchemaProps[key] = {
-        "isoDate": true
+	      "anyOf": [
+          { "isoDate": true },
+          { "type": "null" }
+        ]
       }
     } else if (jsonSchemaProps[key] === "Time") {
       jsonSchemaProps[key] = {
-        "isoTime": true
+	      "anyOf": [
+          { "isoTime": true },
+          { "type": "null" }
+        ]
       }
     } else if (jsonSchemaProps[key] === "DateTime") {
       jsonSchemaProps[key] = {
-        "isoDateTime": true
+        "anyOf": [
+          { "isoDateTime": true },
+          { "type": "null" }
+        ]
       }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
@@ -268,6 +277,21 @@ writeSchemaCommons = function(dir_write){
     offset: Int
   }
 
+  input paginationCursorInput{
+    first: Int
+    last: Int
+    after: String
+    before: String
+    includeCursor: Boolean
+  }
+
+  type pageInfo{
+    startCursor: String
+    endCursor: String
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+  }
+
   scalar Date
   scalar Time
   scalar DateTime
@@ -333,6 +357,31 @@ writeIndexModelsCommons = function(dir_write){
     });
 };
 
+writeIndexAdapters = function(dir_write){
+  let index = `
+  const fs = require('fs');
+  const path = require('path');
+
+  let adapters = {};
+  module.exports = adapters;
+
+  fs.readdirSync(__dirname)
+    .filter( file =>{ return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
+  }).forEach( file =>{
+
+    let adapter = require(path.join(__dirname, file));
+    if( adapters[adapter.name] ){
+      throw Error(\`Duplicated adapter name \${adapter.name}\`);
+    }
+    adapters[adapter.name] = adapter;
+  });
+  `
+  fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {
+    if (err)
+      throw Error(err);
+    });
+
+}
 
 /**
  * convertToType - Generate a string correspondant to the model type as needed for graphql schema.
@@ -370,27 +419,52 @@ module.exports.getOptions = function(dataModel){
       nameLc: uncapitalizeString(dataModel.model),
       namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
-      //attributes: dataModel.attributes,
       attributes: getOnlyTypeAttributes(dataModel.attributes),
-      //attributesStr: attributesToString(dataModel.attributes),
-      attributesStr: attributesToString( getOnlyTypeAttributes(dataModel.attributes)),
-      //jsonSchemaProperties: attributesToJsonSchemaProperties(dataModel.attributes),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
       associations: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
-      //arrayAttributeString: attributesArrayString(dataModel.attributes),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
-      definition : stringify_obj(dataModel),
-      attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes)
+      definitionObj : dataModel,
+      attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
+      url: dataModel.url || "",
+      externalIds: dataModel.externalIds || [],
+      regex: dataModel.regex || "",
+      adapterName: dataModel.adapterName || "",
+      registry: dataModel.registry || [],
+      idAttribute: getIdAttribute(dataModel)
   };
+
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
+  opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
+  opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
+  dataModel['id'] = {
+    name: opts.idAttribute,
+    type: opts.idAttributeType
+  }
+
+  opts['definition'] = stringify_obj(dataModel);
+  delete opts.attributes[opts.idAttribute];
+  
   return opts;
 };
 
 
+validateJsonFile =  function(opts){
+
+  let valid = true;
+
+  //validate external ids declare in attributes
+  opts.externalIds.forEach( x => {
+    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String' || opts.attributes[x] === 'Float' || opts.attributes[x] === 'Int'  ) ){
+      valid = false;
+      console.error(colors.red(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`) );
+    }
+  });
+
+  return valid;
+}
+
   getSqlType = function(association, model_name){
-
-
-
     if(association.type === 'to_one' && association.keyIn !== association.target){
       return 'belongsTo';
     }else if(association.type === 'to_one' && association.keyIn === association.target){
@@ -400,6 +474,18 @@ module.exports.getOptions = function(dataModel){
     }else if(association.type === 'to_many' && association.keyIn === association.target){
       return 'hasMany';
     }
+  }
+
+
+  getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
+    let editable_attributes = {};
+    let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
+    for(let attrib in attributes ){
+      if(!target_keys.includes(attrib) && attrib !== idAttribute){
+        editable_attributes[ attrib ] = attributes[attrib];
+      }
+    }
+    return editable_attributes;
   }
 
 
@@ -439,7 +525,7 @@ module.exports.getOptions = function(dataModel){
           //}else if(associations_type["one"].includes(association.type))
         }else if(association.type === 'to_one')
           {
-            associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target) ];
+            associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
           }else{
             console.log("Association type "+ association.type + " not supported.");
             return;
@@ -454,6 +540,10 @@ module.exports.getOptions = function(dataModel){
           assoc["target_pl"] = inflection.pluralize(association.target);
           assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
           assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
+          if(association.keyIn){
+              assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
+          }
+
 
           let sql_type = getSqlType(assoc);
           associations_info[sql_type].push(assoc);
@@ -554,11 +644,14 @@ createNameMigration = function(dir_write, model_name){
  */
 writeCommons = function(dir_write){
   writeSchemaCommons(dir_write);
+  writeIndexAdapters(dir_write);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
 
-
+getIdAttribute = function(dataModel){
+  return dataModel.internalId === undefined ? "id" : dataModel.internalId;
+}
 
 
  /**
@@ -591,58 +684,88 @@ module.exports.generateCode = function(json_dir, dir_write){
     fs.mkdirSync(dir_write+'/models-webservice');
   }
 
+  if(!fs.existsSync(dir_write+'/models-cenz-server'))
+  {
+    fs.mkdirSync(dir_write+'/models-cenz-server');
+  }
+
+  if(!fs.existsSync(dir_write+'/adapters'))
+  {
+    fs.mkdirSync(dir_write+'/adapters');
+  }
+
+  if(!fs.existsSync(dir_write+'/models-distributed'))
+  {
+    fs.mkdirSync(dir_write+'/models-distributed');
+  }
 
   //test
   fs.readdirSync(json_dir).forEach((json_file) => {
       console.log("Reading...", json_file);
       let file_to_object = parseFile(json_dir+'/'+json_file);
       let opts = module.exports.getOptions(file_to_object);
-      models.push([opts.name , opts.namePl]);
-      console.log(opts.name);
-      //console.log(opts.associations);
 
-      if(opts.storageType === 'sql'){
-        sections.forEach((section) =>{
-            let file_name = "";
-            if(section==='migrations')
-            {
-              file_name = createNameMigration(dir_write,opts.nameLc);
-            }else{
-              file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
-            }
+      if(validateJsonFile(opts) ){
+        models.push([opts.name , opts.namePl]);
+        console.log(opts.name);
+        //console.log(opts.associations);
 
-            if( (section == 'validations' || section == 'patches') && fs.existsSync(file_name)){
-                console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
-            }else{
-                generateSection(section, opts, file_name)
-                    .then( () => {
-                        console.log(file_name + ' written successfully!');
-                    });
-            }
+        if(opts.storageType === 'sql'){
+          sections.forEach((section) =>{
+              let file_name = "";
+              if(section==='migrations')
+              {
+                file_name = createNameMigration(dir_write,opts.nameLc);
+              }else{
+                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+              }
 
+              if( (section == 'validations' || section == 'patches') && fs.existsSync(file_name)){
+                  console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
+              }else{
+                  generateSection(section, opts, file_name)
+                      .then( () => {
+                          console.log(file_name + ' written successfully!');
+                      });
+              }
         });
         //generateAssociationsMigrations(opts, dir_write);
-      }else if(opts.storageType === 'webservice'){
+      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server' || opts.storageType === 'distributed-data-model'){
           let file_name = "";
           file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
           generateSection("schemas",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!(from webservice)');
+            console.log(file_name + ' written successfully!');
           });
 
+          if(opts.storageType === 'webservice'){
+            file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
+            generateSection("models-webservice",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!(from webservice)');
+            });
+          }else if(opts.storageType === 'cenz_server'){
+            file_name = dir_write + '/models-cenz-server/' + opts.nameLc + '.js';
+            generateSection("models-cenz",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!(from cenz server)');
+            });
+          }else if(opts.storageType === 'distributed-data-model'){
+            file_name = dir_write + '/models-distributed/' + opts.nameLc + '.js';
+            generateSection("distributed-model",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          }
 
-          file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
-          generateSection("models-webservice",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!(from webservice)');
-          });
+            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+            generateSection("resolvers",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
 
-
-          file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-          generateSection("resolvers",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!(from webservice)');
-          });
-
+      }else if(opts.storageType === 'cenzontle-web-service-adapter'){
+        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+        generateSection("cenz-adapters",opts,file_name).then( ()=>{
+          console.log(file_name + ' written successfully!');
+        });
       }
-
+    }
   });
 
   let index_resolvers_file = dir_write + '/resolvers/index.js';

@@ -1,0 +1,454 @@
+const _ = require('lodash');
+const path = require('path');
+const models = require(path.join(__dirname, '..', 'models_index.js'));
+const axios_general = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const os = require('os');
+const uuidv4 = require('uuidv4');
+const globals = require('../config/globals');
+
+// An exact copy of the the model definition that comes from the .json file
+const definition = <%- definition -%>;
+
+const url = "<%- url -%>";
+let axios = axios_general.create();
+axios.defaults.timeout = globals.MAX_TIME_OUT;
+
+module.exports = class <%- name -%>{
+
+  /**
+   * constructor - Creates an instance of the model stored in webservice
+   *
+   * @param  {obejct} input    Data for the new instances. Input for each field of the model.
+   */
+
+  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+      this.<%- idAttribute -%> = <%- idAttribute -%>;
+       <%for(var key in attributes){-%>
+         this.<%=key-%> =<%=key-%>;
+        <%}-%>
+  }
+
+  static get name(){
+    return "<%- nameLc -%>";
+  }
+
+  static readById( id ){
+    let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(<%- idAttribute -%>: ${id}){<%- idAttribute -%> <%for(var key in attributes){-%>
+       <%=key %>
+     <%}-%> } }`
+
+     return axios.post(url, {query:query}).then(res => {
+        let data = res.data.data.readOne<%- nameCp -%>;
+        return new <%- name -%>(data);
+     }).catch(error => {
+       error['url'] = url;
+       handleError(error);
+     });
+  }
+
+  static countRecords(search){
+    let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
+      count<%- namePlCp -%>(search: $search)
+    }`
+
+    return axios.post(url, {query:query, variables:{search: search}}).then(res=>{
+      return res.data.data.count<%- namePlCp -%>;
+    }).catch(error =>{
+      error['url'] = url;
+      handleError(error);
+    });
+  }
+
+  static readAll(search, order, pagination){
+    let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput $order: [order<%- nameCp -%>Input]){
+      <%- namePl -%>(search:$search pagination:$pagination order:$order){<%- idAttribute -%> <%for(var key in attributes){-%>
+         <%=key %>
+       <%}-%> } }`
+
+       return axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
+         let data = res.data.data.<%- namePl -%> ;
+         return data.map(item => {return new <%- name -%>(item) });
+       }).catch(error=>{
+         error['url'] = url;
+         handleError(error);
+       });
+
+  }
+
+  static readAllCursor(search, order, pagination){
+    //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
+    
+    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
+
+      <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
+       <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
+
+       return axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
+         let data_edges = res.data.data.<%- namePl -%>Connection.edges ;
+         let pageInfo = res.data.data.<%- namePl -%>Connection.pageInfo ;
+
+         let edges = data_edges.map( e =>{
+           return {
+             node: new <%- name -%>(e.node),
+             cursor: e.cursor
+           }
+         })
+
+         return { edges, pageInfo };
+       }).catch(error=>{
+         error['url'] = url;
+         handleError(error);
+       });
+  }
+
+  static addOne(input){
+
+    let query = `mutation add<%- nameCp -%>(<%if(!defaultId){-%> $<%=idAttribute%>:ID <%}-%> <%for(var key in attributes){-%>
+       $<%=key %>:<%= attributes[key]%>
+     <%}-%>){
+       add<%- nameCp -%>(<%if(!defaultId){-%> <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in attributes){-%>
+          <%=key %>:$<%= key%>
+        <%}-%>){<%- idAttribute -%> <%for(var key in attributes){-%>
+           <%=key %>
+         <%}-%>}
+     }`;
+
+     return axios.post(url, {query:query, variables:input}).then(res =>{
+       let data = res.data.data.add<%- nameCp -%>;
+       return new <%- name -%>(data);
+     }).catch(error =>{
+       error['url'] = url;
+       handleError(error);
+     });
+  }
+
+  static deleteOne(id){
+    let query = `mutation delete<%- nameCp -%>{ delete<%- nameCp -%>(<%- idAttribute -%>: ${id}) }`;
+
+    return axios.post(url, {query: query}).then(res =>{
+      return res.data.data.delete<%- nameCp -%>;
+    }).catch(error =>{
+      error['url'] = url;
+      handleError(error);
+    });
+
+  }
+
+  static updateOne(input){
+    let query = `mutation update<%- nameCp-%>($<%- idAttribute -%>:ID! <%for(var key in attributes){-%>
+       $<%=key %>:<%= attributes[key]%>
+     <%}-%> ){
+       update<%- nameCp-%>(<%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in attributes){-%>
+          <%=key %>:$<%= key%>
+        <%}-%> ){<%- idAttribute -%> <%for(var key in attributes){-%>
+           <%=key %>
+         <%}-%>}
+     }`
+
+     return axios.post(url, {query:query, variables:input}).then(res => {
+       let data = res.data.data.update<%- nameCp-%>;
+       return new <%- name -%>(data);
+     }).catch(error =>{
+       error['url'] = url;
+       handleError(error);
+     });
+  }
+
+  static bulkAddCsv(context){
+    let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
+
+    return context.request.files.csv_file.mv(tmpFile).then(() =>{
+      let query = `mutation {bulkAdd<%- nameCp -%>Csv{<%- idAttribute -%>}}`;
+      let formData = new FormData();
+      formData.append('csv_file', fs.createReadStream(tmpFile));
+      formData.append('query', query);
+
+      return axios.post(url, formData,  {
+        headers: formData.getHeaders()
+      }).then(res =>{
+          return res.data.data.bulkAdd<%- nameCp -%>Csv;
+        });
+
+    }).catch(error =>{
+      error['url'] = url;
+      handleError(error);
+    });
+  }
+
+  static  csvTableTemplate(){
+      let query = `query { csvTableTemplate<%- nameCp-%> }`;
+      return axios.post(url, {query:query}).then(res =>{
+        return res.data.data.csvTableTemplate<%- nameCp-%>;
+      }).catch(error =>{
+        error['url'] = url;
+        handleError(error);
+      });
+    }
+
+    <%let associations_one = associations["belongsTo"]-%>
+    <% for(let i=0; i < associations_one.length; i++){ -%>
+
+    set_<%=associations_one[i].targetKey%>(value){
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, add<%=associations_one[i].name_cp%>: value });
+    }
+
+    _add<%=associations_one[i].name_cp%>(id){
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, add<%=associations_one[i].name_cp%>: id });
+    }
+
+    _remove<%=associations_one[i].name_cp%>(id){
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, remove<%=associations_one[i].name_cp%>: id });
+    }
+
+
+    <%=associations_one[i].name%>Impl (search){
+        if(search === undefined){
+          return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
+        }else if(this.<%=associations_one[i].targetKey%> !== null){
+          let id_search = {
+              "field": models.<%=associations_one[i].target_lc%>.idAttribute(),
+              "value": {
+                "value": this.<%=associations_one[i].targetKey%>
+              },
+              "operator": "eq"
+          }
+
+          let ext_search = {
+            "operator": "and",
+            "search": [id_search, search]
+          }
+
+          return models.<%=associations_one[i].target_lc%>.readAll(ext_search)
+          .then( found =>{
+              if(found){
+                return found[0]
+              }
+              return found;
+          });
+        }
+      }
+    <%}-%>
+
+    <%associations_one = associations["hasOne"]-%>
+    <% for(let i=0; i < associations_one.length; i++){ -%>
+
+    _add<%=associations_one[i].name_cp%>(id){
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, add<%=associations_one[i].name_cp%>:id});
+    }
+
+    _remove<%=associations_one[i].name_cp%>(id){
+      super.updateOne({<%- idAttribute -%>: this.<%- idAttribute -%>, remove<%=associations_one[i].name_cp%>:id});
+    }
+
+    <%=associations_one[i].name%>Impl (search){
+        if(search === undefined){
+          let simple_search = {
+            "field": "<%=associations_one[i].targetKey%>",
+            "value": {
+              "value": this.getIdValue()
+            },
+            "operator": "eq"
+          }
+
+      let ext_search = simple_search;
+
+      if(search !== undefined){
+        ext_search = {
+          "operator": "and",
+          "search": [simple_search, search]
+        }
+      }
+
+      return models.<%=associations_one[i].target_lc%>.readAll(ext_search)
+      .then( found => { if(found){
+        return found[0];
+      }
+        return found;
+      })
+      }
+    <%}-%>
+
+
+
+      <% associations_temp = associations["hasMany"]-%>
+      <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+        _add<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, add<%=associations_temp[i].name_cp%>: ids});
+        }
+
+        _remove<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, remove<%=associations_temp[i].name_cp%>: ids});
+        }
+
+        <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
+          if(search === undefined)
+          {
+            return models.<%=associations_temp[i].target_lc%>.readAll({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
+          }else{
+            return models.<%=associations_temp[i].target_lc%>.readAll({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
+          }
+        }
+
+        countFiltered<%=associations_temp[i].name_cp%>Impl ({search}){
+
+          if(search === undefined)
+          {
+            return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} );
+          }else{
+            return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
+          }
+
+        }
+
+        <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
+          if(search === undefined)
+          {
+            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
+          }else{
+            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
+          }
+        }
+      <%}-%>
+
+
+      <% associations_temp = associations["belongsToMany"]-%>
+      <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+        _add<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, add<%=associations_temp[i].name_cp%>: ids});
+        }
+
+        _remove<%=associations_temp[i].name_cp%>(ids){
+          super.updateOne({<%- idAttribute -%>:this.<%- idAttribute -%>, remove<%=associations_temp[i].name_cp%>: ids});
+        }
+
+        <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
+
+          let association_attributes = models.<%=associations_temp[i].target_lc%>.definition.attributes;
+          let string_attrib = '';
+          for(let attrib in association_attributes){
+            string_attrib+= attrib+' ';
+          }
+
+          <%if(defaultId ){-%>string_attrib += '<%- idAttribute -%>'; <%}-%>
+
+          let query = `query <%=associations_temp[i].name%>Filter($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationInput){
+            readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){ <%=associations_temp[i].name%>Filter(search: $search, order:$order pagination:$pagination){ ${string_attrib} } }
+          }`
+
+          return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})
+          .then(res => {let data = res.data.data.readOne<%- nameCp -%>.<%=associations_temp[i].name%>Filter;
+            return data.map(item => {return new models.<%=associations_temp[i].target_lc%>(item)});
+          }).catch( error =>{
+            error['url'] = url;
+            handleError(error);
+          });
+
+        }
+
+        countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
+          let query = `query count<%=associations_temp[i].name_cp%>($search: search<%=associations_temp[i].target_cp%>Input){
+            readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){countFiltered<%=associations_temp[i].name_cp%>(search: $search)}
+          }`;
+
+          return axios.post(url, {
+              query: query,
+              variables: {
+                search: search
+              }
+          }).then(res => {
+              return res.data.data.readOne<%- nameCp -%>.countFiltered<%=associations_temp[i].name_cp%>;
+          }).catch(error => {
+              error['url'] = url;
+              handleError(error);
+          });
+
+        }
+
+        <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
+          let association_attributes = models.<%=associations_temp[i].target_lc%>.definition.attributes;
+          let string_attrib = '';
+          for(let attrib in association_attributes){
+            string_attrib+= attrib+' ';
+          }
+          <%if(defaultId ){-%>string_attrib += '<%- idAttribute -%>'; <%}-%>
+
+          let query = `query <%=associations_temp[i].name%>Connection($search: search<%=associations_temp[i].target_cp%>Input $order: [order<%=associations_temp[i].target_cp%>Input] $pagination: paginationCursorInput){
+            readOne<%- nameCp -%>(<%- idAttribute -%>:${this.getIdValue()}){ <%=associations_temp[i].name%>Connection(search: $search, order:$order pagination:$pagination){
+              edges{cursor node{ ${string_attrib}}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage} } }
+          }`
+
+          return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})
+          .then(res =>{
+            let data_edges = res.data.data.readOne<%- nameCp -%>.<%=associations_temp[i].name%>Connection.edges;
+            let pageInfo = res.data.data.readOne<%- nameCp -%>.<%=associations_temp[i].name%>Connection.pageInfo;
+            let edges = data_edges.map( e =>{
+              return {
+                node: new models.<%=associations_temp[i].target_lc%>(e.node),
+                cursor: e.cursor
+              }
+            });
+            return {edges,pageInfo};
+          }).catch( error=>{
+            error['url'] = url;
+            handleError(error);
+          });
+        }
+      <%}-%>
+
+  static get definition(){
+    return definition;
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
+  static idAttribute() {
+    return <%- name -%>.definition.id.name;
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model
+   */
+
+  static idAttributeType() {
+    return <%- name -%>.definition.id.type;
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   *
+   * @return {type} id value
+   */
+
+  getIdValue() {
+    return this[<%- name -%>.idAttribute()]
+  }
+};

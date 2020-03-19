@@ -8,7 +8,12 @@ module.exports.belongsTo_resolver  = `
  * @return {type}         Associated record
  */
 dog.prototype.researcher = function({search }, context) {
+  try{
     return this.researcherImpl(search);
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 
@@ -18,7 +23,7 @@ researcherImpl(search){
    return models.researcher.readById( this.researcherId );
  }else{
    let id_search = {
-       "field": "id",
+       "field":  models.researcher.idAttribute(),
        "value": {
          "value": this.researcherId
        },
@@ -50,7 +55,12 @@ module.exports.hasOne_resolver = `
  * @return {type}         Associated record
  */
 researcher.prototype.dog = function({search}, context) {
+ try{
    return this.dogImpl(search);
+ }catch(error){
+   console.error(error);
+   handleError(error);
+ };
 }
 
 `
@@ -60,7 +70,7 @@ dogImpl(search){
   let simple_search = {
         "field": "researcherId",
         "value": {
-        "value": this.id
+        "value": this.getIdValue()
           },
         "operator": "eq"
       }
@@ -104,7 +114,7 @@ transcript_countsFilterImpl({
       return models.transcript_count.readAll( {
               "field": "individual_id",
               "value": {
-                  "value": this.id
+                  "value": this.getIdValue()
               },
               "operator": "eq"
           },
@@ -116,7 +126,7 @@ transcript_countsFilterImpl({
               "search": [{
                   "field": "individual_id",
                   "value": {
-                      "value": this.id
+                      "value": this.getIdValue()
                   },
                   "operator": "eq"
               }, search]
@@ -144,7 +154,12 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-  return this.transcript_countsFilterImpl({search, order, pagination});
+  try{
+    return this.transcript_countsFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 module.exports.countAssociated_model = `
@@ -153,7 +168,7 @@ countFilteredTranscript_countsImpl({search}){
       return models.transcript_count.countRecords( {
               "field": "individual_id",
               "value": {
-                  "value": this.id
+                  "value": this.getIdValue()
               },
               "operator": "eq"
           });
@@ -163,7 +178,7 @@ countFilteredTranscript_countsImpl({search}){
               "search": [{
                   "field": "individual_id",
                   "value": {
-                      "value": this.id
+                      "value": this.getIdValue()
                   },
                   "operator": "eq"
               }, search]
@@ -184,8 +199,12 @@ module.exports.countAssociated_resolver = `
 individual.prototype.countFilteredTranscript_counts = function({
     search
 }, context) {
-
-return this.countFilteredTranscript_countsImpl({search});
+  try{
+    return this.countFilteredTranscript_countsImpl({search});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 
@@ -228,9 +247,9 @@ AuthorsFilterImpl({
           return this.getAuthors(options);
       });
   }
-
-
-  countFilteredAuthorsImpl({
+`
+module.exports.belongsToMany_model_count = `
+countFilteredAuthorsImpl({
       search
   }) {
 
@@ -263,10 +282,16 @@ book.prototype.AuthorsFilter = function({
     order,
     pagination
 }, context) {
-
-  return this.AuthorsFilterImpl({search, order, pagination});
+  try{
+    return this.AuthorsFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
+`
 
+module.exports.belongsToMany_resolver_count = `
 /**
  * book.prototype.countFilteredAuthors - Count number of associated records that holds the conditions specified in the search argument
  *
@@ -277,8 +302,11 @@ book.prototype.AuthorsFilter = function({
 book.prototype.countFilteredAuthors = function({
     search
 }, context) {
-
- return this.countFilteredAuthorsImpl({search});
+  try{
+    return this.countFilteredAuthorsImpl({search});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
-
 `

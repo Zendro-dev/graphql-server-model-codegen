@@ -14,9 +14,10 @@ vueTableBook: function(_, context) {
         if (authorization === true) {
             return helper.vueTable(context.request, book, ["id", "title", "genre"]);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }

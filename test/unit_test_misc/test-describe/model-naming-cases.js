@@ -18,9 +18,10 @@ module.exports.resolvers_webservice_aminoAcid = `
         if (authorization === true) {
           return aminoAcidSequence.readAll(search, order, pagination);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
       }).catch( error =>{
+          console.error(error);
             handleError( error);
       })
   }
@@ -32,6 +33,7 @@ type Query {
   readOneAminoAcidSequence(id: ID!): aminoAcidSequence
   countAminoAcidSequences(search: searchAminoAcidSequenceInput ): Int
   vueTableAminoAcidSequence : VueTableAminoAcidSequence    csvTableTemplateAminoAcidSequence: [String]
+  aminoAcidSequencesConnection(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationCursorInput ): AminoAcidSequenceConnection
 }
 `
 
@@ -56,7 +58,12 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
     order,
     pagination
 }, context) {
-  return this.transcriptCountsFilterImpl({search, order, pagination});
+  try{
+    return this.transcriptCountsFilterImpl({search, order, pagination});
+  }catch(error){
+    console.error(error);
+    handleError(error);
+  };
 }
 `
 
@@ -114,7 +121,7 @@ module.exports.transcriptCount_resolvers_camelcase=`
 /**
  * readOneTranscriptCount - Check user authorization and return one record with the specified id in the id argument.
  *
- * @param  {number} {id}    Id of the record to retrieve
+ * @param  {number} {id}    id of the record to retrieve
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {object}         Record with id requested
  */
@@ -125,9 +132,10 @@ readOneTranscriptCount: function({
         if (authorization === true) {
           return transcriptCount.readById(id);
         } else {
-            return new Error("You don't have authorization to perform this action");
+            throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
+        console.error(error);
         handleError(error);
     })
 }
