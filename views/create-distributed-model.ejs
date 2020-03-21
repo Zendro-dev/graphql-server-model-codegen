@@ -28,22 +28,31 @@ module.exports = class <%- name -%>{
     return "<%- nameLc -%>";
   }
 
+  static get registeredAdapters() {
+    [<%- registry.map( x => '"'+x+'"') %>].reduce( (a,c) => { a[c] = adapters[c]; return a; }, {} );
+  }
+
+  static adapterForIri(iri) {
+    let foundAdapter = registry.filter(adapter => adapters[adapter].recognizeId(iri));
+    if (responsibleAdapter.length > 1) {
+      throw new Error("IRI has no unique match");
+    } else if (responsibleAdapter.length === 0) {
+      throw new Error("IRI has no match WS");
+    }
+    return foundAdapter;
+  }
+
   static readById(id) {
-    if(id!==null){
-      let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
-
-      if(responsibleAdapter.length > 1 ){
-        throw new Error("IRI has no unique match");
-      }else if(responsibleAdapter.length === 0){
-        throw new Error("IRI has no match WS");
-      }
-
+    if (id !== null) {
+      let responsibleAdapter = this.adapterForIri(id)
       return adapters[responsibleAdapter[0]].readById(id).then(result => new <%- name -%>(result));
     }
   }
 
   static countRecords(search){
-    let promises = registry.map( adapter =>  adapters[adapter].countRecords(search));
+    // for now:
+    authorizedAdapters = this.registeredAdapters;
+    let promises = authorizedAdapters.map( adapter =>  adapters[adapter].countRecords(search));
 
     return Promise.all(promises).then( results =>{
       return results.reduce( (total, current)=> total+current, 0);
@@ -51,15 +60,18 @@ module.exports = class <%- name -%>{
   }
 
 
-  static readAllCursor(search, order, pagination) {
+  static readAllCursor(search, order, pagination, authorizedAdapters) {
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
+
+    // for now:
+    authorizedAdapters = this.registeredAdapters;
     
     let isForwardPagination = !pagination || !(pagination.last != undefined);
-    let promises = registry.map( adapter => adapters[adapter].readAllCursor(search, order,pagination) );
+    let promises = authorizedAdapters.map(adapter => adapters[adapter].readAllCursor(search, order, pagination));
     let someHasNextPage = false;
     let someHasPreviousPage = false;
     return Promise.all(promises).then( results => {
@@ -238,4 +250,35 @@ module.exports = class <%- name -%>{
     return this[<%- name -%>.idAttribute()]
   }
 
+  static assertInputHasId(input) {
+    if (! input.<%- idAttribute -%>) {
+      throw new Error(`Illegal argument. Provided input requires attribute '<%- idAttribute -%>'.`);
+    }
+    return true;
+  }
+  
+  static addOne(input) {
+    this.assertInputHasId(input);
+    let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
+    return responsibleAdapter.addOne(input);
+  }
+
+  static deleteOne(id) {
+    let responsibleAdapter = this.adapterForIri(id);
+    return responsibleAdapter.deleteOne(id);
+  }
+
+  static updateOne(input) {
+    this.assertInputHasId(input);
+    let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
+    return responsibleAdapter.updateOne(input);
+  }
+
+  static bulkAddCsv(context) {
+    throw Error("<%- name -%>.bulkAddCsv is not implemented.")
+  }
+
+  static csvTableTemplate() {
+      return helper.csvTableTemplate(<%- name -%>);
+  }
 }

@@ -12,6 +12,9 @@ const iriRegex = new RegExp('<%- regex -%>');
 
 module.exports = class <%- adapterName -%>{
 
+  static get name(){
+    return "<%- adapterName -%>";
+  }
 
   static recognizeId(iri){
     return iriRegex.test(iri);
@@ -31,23 +34,23 @@ module.exports = class <%- adapterName -%>{
      });
   }
 
-    static countRecords(search){
-      let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
-    count<%- namePlCp -%>(search: $search)
-    }`
+  static countRecords(search){
+    let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
+  count<%- namePlCp -%>(search: $search)
+  }`
 
-      return axios.post(remoteCenzontleURL, {
-          query: query,
-          variables: {
-              search: search
-          }
-      }).then(res => {
-          return res.data.data.count<%- namePlCp -%>;
-      }).catch(error => {
-          error['url'] = remoteCenzontleURL;
-          handleError(error);
-      });
-    }
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: {
+            search: search
+        }
+    }).then(res => {
+        return res.data.data.count<%- namePlCp -%>;
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+  }
 
   static readAllCursor(search, order, pagination){
     //check valid pagination arguments
@@ -67,7 +70,85 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static get name(){
-    return "<%- adapterName -%>";
+  static addOne(input){
+    let query = `mutation add<%- nameCp -%>(<%if(!defaultId){-%> 
+          $<%=idAttribute%>:ID <%}-%> 
+<%for(var key in attributes){-%>
+          $<%=key %>:<%= attributes[key]%>
+<%}-%>
+        ){
+          add<%- nameCp -%>(<%if(!defaultId){-%> 
+            <%=idAttribute %>:$<%= idAttribute%> <%}-%> 
+<%for(var key in attributes){-%>
+            <%=key %>:$<%= key%>
+<%}-%>
+          ){
+            <%- idAttribute -%> 
+<%for(var key in attributes){-%>
+            <%=key %>
+<%}-%>     
+          }
+        }`;
+
+     return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res =>{
+       let data = res.data.data.add<%- nameCp -%>;
+       return new <%- name -%>(data);
+     }).catch(error =>{
+       error['url'] = remoteCenzontleURL;
+       handleError(error);
+     });
+  }
+
+  static deleteOne(id){
+    let query = `mutation delete<%- nameCp -%>{ delete<%- nameCp -%>(<%- idAttribute -%>: ${id}) }`;
+
+    return axios.post(remoteCenzontleURL, {query: query}).then(res =>{
+      return res.data.data.delete<%- nameCp -%>;
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
+  }
+
+  static updateOne(input){
+    let query = `mutation update<%- nameCp-%>(
+          $<%- idAttribute -%>:ID!
+<%for(var key in attributes){-%>
+          $<%=key %>:<%= attributes[key] %>
+<%}-%>        ){
+            update<%- nameCp-%>(
+              <%- idAttribute -%>:$<%- idAttribute %>
+<%for(var key in attributes){-%>
+              <%=key %>:$<%= key %>
+<%}-%>
+            ){
+              <%- idAttribute %>
+<%for(var key in attributes){-%>
+              <%=key %>
+<%}-%>
+            }
+        }`
+
+    return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res => {
+      let data = res.data.data.update<%- nameCp-%>;
+      return new <%- name -%>(data);
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
+  }
+
+  static bulkAddCsv(context) {
+    throw Error("<%- name -%>.bulkAddCsv is not implemented.")
+  }
+
+  static  csvTableTemplate(){
+    let query = `query { csvTableTemplate<%- nameCp-%> }`;
+    return axios.post(remoteCenzontleURL, {query:query}).then(res =>{
+      return res.data.data.csvTableTemplate<%- nameCp-%>;
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
   }
 }
