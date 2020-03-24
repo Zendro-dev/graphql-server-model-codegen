@@ -54,8 +54,8 @@ static countRecords(search) {
 
 module.exports.add_one = `
 static addOne(input) {
-  let query = \`mutation addBook($title:String $genre:String $publisher_id:Int){
-    addBook(title:$title genre:$genre publisher_id:$publisher_id){id  title genre publisher_id   }
+  let query = \`mutation addBook($title:String $genre:String $addPublisher:ID $addAuthors: [ID]){
+    addBook(title:$title genre:$genre addPublisher:$addPublisher addAuthors:$addAuthors){id  title genre publisher_id   }
   }\`;
 
   return axios.post(url, {query: query, variables: input}).then( res =>{
@@ -82,8 +82,8 @@ static deleteOne(id) {
 
 module.exports.update_one = `
 static updateOne(input) {
-  let query = \`mutation updateBook($id:ID! $title:String $genre:String $publisher_id:Int ){
-    updateBook(id:$id title:$title genre:$genre publisher_id:$publisher_id  ){id  title genre publisher_id  }
+  let query = \`mutation updateBook($id:ID! $title:String $genre:String $addPublisher:ID $removePublisher:ID $addAuthors: [ID] $removeAuthors:[ID] ){
+    updateBook(id:$id title:$title genre:$genre addPublisher:$addPublisher removePublisher:$removePublisher addAuthors:$addAuthors removeAuthors:$removeAuthors  ){id  title genre publisher_id  }
   }\`
 
   return axios.post(url, {query: query, variables: input}).then(res=>{
