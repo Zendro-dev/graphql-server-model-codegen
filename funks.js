@@ -361,6 +361,8 @@ writeIndexAdapters = function(dir_write){
   let index = `
   const fs = require('fs');
   const path = require('path');
+  const Sequelize = require('sequelize');
+  sequelize = require('../connection');
 
   let adapters = {};
   module.exports = adapters;
@@ -373,7 +375,12 @@ writeIndexAdapters = function(dir_write){
     if( adapters[adapter.name] ){
       throw Error(\`Duplicated adapter name \${adapter.name}\`);
     }
-    adapters[adapter.name] = adapter;
+    
+    if(adapter.type === 'local'){
+      adapters[adapter.name] = adapter.init(sequelize, Sequelize);
+    }else{
+      adapters[adapter.name] = adapter;
+    }
   });
   `
   fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {

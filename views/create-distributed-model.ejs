@@ -33,13 +33,13 @@ module.exports = class <%- name -%>{
   }
 
   static adapterForIri(iri) {
-    let foundAdapter = registry.filter(adapter => adapters[adapter].recognizeId(iri));
+    let responsibleAdapter = registry.filter(adapter => adapters[adapter].recognizeId(iri));
     if (responsibleAdapter.length > 1) {
       throw new Error("IRI has no unique match");
     } else if (responsibleAdapter.length === 0) {
       throw new Error("IRI has no match WS");
     }
-    return foundAdapter;
+    return responsibleAdapter;
   }
 
   static readById(id) {
@@ -49,9 +49,7 @@ module.exports = class <%- name -%>{
     }
   }
 
-  static countRecords(search){
-    // for now:
-    authorizedAdapters = this.registeredAdapters;
+  static countRecords(search, authorizedAdapters){
     let promises = authorizedAdapters.map( adapter =>  adapters[adapter].countRecords(search));
 
     return Promise.all(promises).then( results =>{
@@ -66,9 +64,6 @@ module.exports = class <%- name -%>{
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
-
-    // for now:
-    authorizedAdapters = this.registeredAdapters;
     
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authorizedAdapters.map(adapter => adapters[adapter].readAllCursor(search, order, pagination));
@@ -260,18 +255,18 @@ module.exports = class <%- name -%>{
   static addOne(input) {
     this.assertInputHasId(input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-    return responsibleAdapter.addOne(input);
+    return adapters[responsibleAdapter].addOne(input);
   }
 
   static deleteOne(id) {
     let responsibleAdapter = this.adapterForIri(id);
-    return responsibleAdapter.deleteOne(id);
+    return adapters[responsibleAdapter].deleteOne(id);
   }
 
   static updateOne(input) {
     this.assertInputHasId(input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-    return responsibleAdapter.updateOne(input);
+    return adapters[responsibleAdapter].updateOne(input);
   }
 
   static bulkAddCsv(context) {
