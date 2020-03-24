@@ -753,11 +753,18 @@ module.exports.generateCode = function(json_dir, dir_write){
               console.log(file_name + ' written successfully!');
             });
           }
-
-            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-            generateSection("resolvers",opts,file_name).then( ()=>{
+            if (opts.storageType === 'distributed-data-model') {
+              file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+              generateSection("resolvers-ddm",opts,file_name).then( ()=>{
+                console.log(file_name + ' written successfully!');
+              });
+            } else {
+              file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+              generateSection("resolvers",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!');
             });
+            }
+            
 
       }else if(opts.storageType === 'cenzontle-web-service-adapter'){
         let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
