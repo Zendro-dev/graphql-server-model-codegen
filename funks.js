@@ -437,6 +437,7 @@ module.exports.getOptions = function(dataModel){
       externalIds: dataModel.externalIds || [],
       regex: dataModel.regex || "",
       adapterName: dataModel.adapterName || "",
+      adapterType: getAdapterType(dataModel),
       registry: dataModel.registry || [],
       idAttribute: getIdAttribute(dataModel)
   };
@@ -660,6 +661,50 @@ getIdAttribute = function(dataModel){
   return dataModel.internalId === undefined ? "id" : dataModel.internalId;
 }
 
+getAdapterType = function(dataModel) {
+  //only applies to adapters
+  if(dataModel.storageType !== 'cenzontle-web-service-adapter') {
+    return undefined;
+  }
+  
+  let valid = true;
+  
+  /**
+   * Checks for 'adapterType'.
+   */
+  //check 'adapterType' existence
+  if(!dataModel.hasOwnProperty('adapterType')) {
+    valid = false;
+    console.error(colors.red(`ERROR: 'adapterType' is a mandatory field, but has not been declared in the attributes of adapter '${dataModel.adapterName}'`));
+  } else {
+    //check 'adapterType' type
+    if(!dataModel.storageType || typeof dataModel.storageType !== 'string') {
+      valid = false;
+      console.error(colors.red(`ERROR: 'adapterType' field must be a non-empty string.`));
+    } else {
+      //check for valid adapterType
+      switch(dataModel.adapterType.toLowerCase()) {
+        case 'local':
+        case 'remote':
+          //ok
+          break;
+        
+        default:
+          //not ok
+          valid = false;
+          console.error(colors.red(`ERROR: The attribute 'adapterType' has an invalid value. One of the following types is expected: [local, remote]. But '${dataModel.adapterType}' was obtained on adapter '${dataModel.adapterName}.`));
+          break;
+      }
+    }
+  }
+
+  if(valid) {
+    return dataModel.adapterType.toLowerCase();
+  } else {
+    return "";
+  }
+}
+
 
  /**
   * generateCode - Given a set of json files, describing each of them a data model, this
@@ -739,11 +784,25 @@ module.exports.generateCode = function(json_dir, dir_write){
         //generateAssociationsMigrations(opts, dir_write);
       }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server' || opts.storageType === 'distributed-data-model'){
           let file_name = "";
-          file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
-          generateSection("schemas",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!');
-          });
+          
+          /**
+           * Schemas
+           */
+          if (opts.storageType === 'distributed-data-model') {
+            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+            generateSection("schemas-ddm",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          } else {
+            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+            generateSection("schemas",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          }
 
+          /**
+           * Models
+           */
           if(opts.storageType === 'webservice'){
             file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
             generateSection("models-webservice",opts,file_name).then( ()=>{
@@ -760,19 +819,25 @@ module.exports.generateCode = function(json_dir, dir_write){
               console.log(file_name + ' written successfully!');
             });
           }
-            if (opts.storageType === 'distributed-data-model') {
-              file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-              generateSection("resolvers-ddm",opts,file_name).then( ()=>{
-                console.log(file_name + ' written successfully!');
-              });
-            } else {
-              file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-              generateSection("resolvers",opts,file_name).then( ()=>{
+
+          /**
+           * Resolvers
+           */
+          if (opts.storageType === 'distributed-data-model') {
+            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+            generateSection("resolvers-ddm",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!');
             });
-            }
+          } else {
+            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+            generateSection("resolvers",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          }
             
-
+      /**
+       * Adapters
+       */
       }else if(opts.storageType === 'cenzontle-web-service-adapter'){
         let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
         generateSection("cenz-adapters",opts,file_name).then( ()=>{

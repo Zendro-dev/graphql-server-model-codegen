@@ -128,9 +128,21 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- namePl -%>Connection: async function({search, order, pagination}, context){
-    //check: adapters auth
+    //check: adapters
+    let registeredAdapters = Object.values(<%- nameLc _%>.<%- name _%>.registeredAdapters);
+    if(registeredAdapters.length === 0) {
+      throw new Error('No adapters registered for data model "<%- name %>"');
+    }//else
+
     try {
-      let authorizationCheck = await helper.authorizedAdapters(context, <%- nameLc _%>.<%- name _%>.registeredAdapters, 'read');
+      //exclude adapters
+      let adapters = await helper.removeExcludedAdapters(search, registeredAdapters);
+      if(adapters.length === 0) {
+        throw new Error('All adapters was excluded for data model "<%- name %>"');
+      }//else
+
+      //check: auth adapters
+      let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
       if (authorizationCheck.authorizedAdapters.length > 0) {
         let connectionObj = <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters);
           if (authorizationCheck.authorizationErrors.length > 0) {
@@ -279,23 +291,36 @@ module.exports = {
    */
 
   count<%-namePlCp-%>: async function({search}, context){
-  try {
-    let authorizationCheck = await helper.authorizedAdapters(context, <%- nameLc _%>.<%- name _%>.registeredAdapters, 'read');
-    if (authorizationCheck.authorizedAdapters.length > 0) {
-      return <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters);
-    } else { //adapters not auth || errors
-        // else new Error
-        if (authorizationCheck.authorizationErrors.length > 0) {
-            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-        } else {
-            throw new Error('No available adapters for data model "<%- name %>" ');
-        }
+    //check: adapters
+    let registeredAdapters = = Object.values(<%- nameLc _%>.<%- name _%>.registeredAdapters);
+    if(registeredAdapters.length === 0) {
+      throw new Error('No adapters registered for data model "<%- name %>"');
+    }//else
+
+    try {
+      //exclude adapters
+      let adapters = await helper.removeExcludedAdapters(search, registeredAdapters);
+      if(adapters.length === 0) {
+        throw new Error('All adapters was excluded for data model "<%- name %>"');
+      }//else
+
+      //check: auth adapters
+      let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+        return <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters);
+      } else { //adapters not auth || errors
+          // else new Error
+          if (authorizationCheck.authorizationErrors.length > 0) {
+              throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+          } else {
+              throw new Error('No available adapters for data model "<%- name %>"');
+          }
+      }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
     }
-  } catch (error) {
-      console.error(error);
-      handleError(error);
-  }
-},
+  },
 
   /**
    * csvTableTemplate<%- nameCp-%> - Returns table's template

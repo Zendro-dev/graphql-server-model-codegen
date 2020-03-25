@@ -16,6 +16,10 @@ module.exports = class <%- adapterName -%>{
     return "<%- adapterName -%>";
   }
 
+  static get type(){
+    return "<%- adapterType -%>";
+  }
+
   static recognizeId(iri){
     return iriRegex.test(iri);
   }
