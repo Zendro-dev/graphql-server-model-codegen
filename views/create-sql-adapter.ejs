@@ -25,7 +25,7 @@ const definition = <%- definition -%>;
  * @return {object}           Sequelize model with associations defined
  */
 
-module.exports = class <%- name -%> extends Sequelize.Model{
+module.exports = class <%- adapterName -%> extends Sequelize.Model{
 
   static init(sequelize, DataTypes){
     return super.init({
@@ -64,27 +64,15 @@ module.exports = class <%- name -%> extends Sequelize.Model{
      } );
   }
 
-  static associate(models){
-    <% for(var key in associations){ -%>
-      <%for(let i=0; i< associations[key].length; i++){-%>
-        <%if(associations[key][i].targetStorageType === 'sql'){-%>
-        <%- name -%>.<%= key %>(models.<%= associations[key][i].target_lc -%>
-        <% if(key === 'belongsToMany'){ -%> ,{as: '<%= associations[key][i].name -%>',
-        foreignKey:'<%= associations[key][i].sourceKey -%>',
-        through : '<%= associations[key][i].keysIn -%>',
-        onDelete: 'CASCADE'}  <%}else{ -%>
-          ,{as: '<%= associations[key][i].name -%>', foreignKey:'<%= associations[key][i].targetKey -%>' }
-          <%}-%>);
-        <%}-%>
-      <%}-%>
-    <% } -%>
+  static recognizeId(iri){
+    return iriRegex.test(iri);
   }
 
   static readById(id){
     let options = {};
     options['where'] = {};
     options['where'][this.idAttribute()] = id;
-    return <%- name -%>.findOne(options);
+    return <%- adapterName -%>.findOne(options);
   }
 
   static countRecords(search){
