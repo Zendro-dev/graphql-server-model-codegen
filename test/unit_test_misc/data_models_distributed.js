@@ -132,7 +132,8 @@ module.exports.dog_ddm =  {
 
   module.exports.person_adapter_sql = {
       "model": "Person",
-      "storageType": "sql-adapter",
+      "storageType": "cenzontle-web-service-adapter",
+      "adapterType": "local",
       "adapterName": "peopleLocalSql",
       "regex": "peopleLocal",
       "url": "http://localhost:3030/graphql",

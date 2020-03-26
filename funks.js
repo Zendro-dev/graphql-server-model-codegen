@@ -431,7 +431,8 @@ module.exports.getOptions = function(dataModel){
       regex: dataModel.regex || "",
       adapterName: dataModel.adapterName || "",
       registry: dataModel.registry || [],
-      idAttribute: getIdAttribute(dataModel)
+      idAttribute: getIdAttribute(dataModel),
+      adapterType: dataModel.adapterType || ""
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
@@ -761,15 +762,20 @@ module.exports.generateCode = function(json_dir, dir_write){
             });
 
       }else if(opts.storageType === 'cenzontle-web-service-adapter'){
-        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
-        generateSection("cenz-adapters",opts,file_name).then( ()=>{
-          console.log(file_name + ' written successfully!');
-        });
-      }else if(opts.storageType === 'sql-adapter'){
-        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
-        generateSection("sql-adapter",opts,file_name).then( ()=>{
-          console.log(file_name + ' written successfully!');
-        });
+
+        if(opts.adapterType === 'remote'){
+          let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+          generateSection("cenz-adapters",opts,file_name).then( ()=>{
+            console.log(file_name + ' written successfully!');
+          });
+        }
+
+        if(opts.adapterType === 'local'){
+          let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+          generateSection("sql-adapter",opts,file_name).then( ()=>{
+            console.log(file_name + ' written successfully!');
+          });
+        }
       }
     }
   });
