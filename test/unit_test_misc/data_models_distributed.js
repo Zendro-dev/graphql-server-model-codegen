@@ -156,3 +156,30 @@ module.exports.dog_ddm =  {
       },
       "internalId": "internalPersonId"
   }
+
+
+  module.exports.book_ddm_association = {
+    "model": "Book",
+    "storageType": "distributed-data-model",
+    "registry": [
+      "booksRemote",
+      "booksLocalSql"
+    ],
+    "attributes": {
+      "title": "String",
+      "genre": "String",
+      "internalPersonId": "String",
+      "internalBookId": "String"
+    },
+    "associations": {
+      "author": {
+        "type": "to_one",
+        "target": "Person",
+        "targetKey": "internalPersonId",
+        "keyIn": "Book",
+        "targetStorageType": "cenz_server",
+        "label": "email"
+      }
+    },
+    "internalId": "internalBookId"
+  }

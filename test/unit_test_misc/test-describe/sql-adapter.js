@@ -367,3 +367,13 @@ static get type(){
   return 'local';
 }
 `
+
+module.exports.targetKey_ddm =`
+async set_internalPersonId(value) {
+  let input = {
+    [Book.idAttribute()] : this.getIdValue(),
+    "addAuthor": value
+  };
+  return await Book.updateOne( input);
+}
+`
