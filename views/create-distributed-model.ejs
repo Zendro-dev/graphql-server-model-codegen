@@ -29,7 +29,7 @@ module.exports = class <%- name -%>{
   }
 
   static get registeredAdapters() {
-    [<%- registry.map( x => '"'+x+'"') %>].reduce( (a,c) => { a[c] = adapters[c]; return a; }, {} );
+    return [<%- registry.map( x => '"'+x+'"') %>].reduce( (a,c) => { a[c] = adapters[c]; return a; }, {} );
   }
 
   static adapterForIri(iri) {

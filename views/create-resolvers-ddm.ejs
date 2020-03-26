@@ -129,7 +129,7 @@ module.exports = {
    */
   <%- namePl -%>Connection: async function({search, order, pagination}, context){
     //check: adapters
-    let registeredAdapters = Object.values(<%- nameLc _%>.<%- name _%>.registeredAdapters);
+    let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
     if(registeredAdapters.length === 0) {
       throw new Error('No adapters registered for data model "<%- name %>"');
     }//else
@@ -292,7 +292,7 @@ module.exports = {
 
   count<%-namePlCp-%>: async function({search}, context){
     //check: adapters
-    let registeredAdapters = Object.values(<%- nameLc _%>.<%- name _%>.registeredAdapters);
+    let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
     if(registeredAdapters.length === 0) {
       throw new Error('No adapters registered for data model "<%- name %>"');
     }//else
