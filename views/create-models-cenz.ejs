@@ -83,7 +83,7 @@ module.exports = class <%- name -%>{
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
-    
+
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
 
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
@@ -109,12 +109,13 @@ module.exports = class <%- name -%>{
 
   static addOne(input){
 
-    let query = `mutation add<%- nameCp -%>(<%if(!defaultId){-%> $<%=idAttribute%>:ID <%}-%> <%for(var key in attributes){-%>
-       $<%=key %>:<%= attributes[key]%>
-     <%}-%>){
-       add<%- nameCp -%>(<%if(!defaultId){-%> <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in attributes){-%>
+    let query = `mutation add<%- nameCp -%>(<%if(!defaultId){-%> $<%=idAttribute%>:ID <%}-%> <%for(var key in editableAttributes){-%>
+       $<%=key %>:<%= editableAttributes[key]%>
+     <%}-%> <%for(var key in associations.schema_attributes.one){-%> $add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%> $add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ){
+       add<%- nameCp -%>(<%if(!defaultId){-%> <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){-%>
           <%=key %>:$<%= key%>
-        <%}-%>){<%- idAttribute -%> <%for(var key in attributes){-%>
+        <%}-%> <%for(var key in associations.schema_attributes.one){-%> add<%= associations.schema_attributes.one[key][2]%>:$add<%= associations.schema_attributes.one[key][2]%><%}-%> <%for(var key in associations.schema_attributes.many){-%> add<%= associations.schema_attributes.many[key][2]%>:$add<%= associations.schema_attributes.many[key][2]%><%}-%>){
+          <%- idAttribute -%> <%for(var key in attributes){-%>
            <%=key %>
          <%}-%>}
      }`;
@@ -141,12 +142,13 @@ module.exports = class <%- name -%>{
   }
 
   static updateOne(input){
-    let query = `mutation update<%- nameCp-%>($<%- idAttribute -%>:ID! <%for(var key in attributes){-%>
-       $<%=key %>:<%= attributes[key]%>
-     <%}-%> ){
-       update<%- nameCp-%>(<%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in attributes){-%>
+    let query = `mutation update<%- nameCp-%>($<%- idAttribute -%>:ID! <%for(var key in editableAttributes){-%>
+       $<%=key %>:<%= editableAttributes[key]%>
+     <%}-%> <%for(var key in associations.schema_attributes.one){-%> $add<%= associations.schema_attributes.one[key][2]%>:ID $remove<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%> $add<%= associations.schema_attributes.many[key][2]%>:[ID] $remove<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ){
+       update<%- nameCp-%>(<%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){-%>
           <%=key %>:$<%= key%>
-        <%}-%> ){<%- idAttribute -%> <%for(var key in attributes){-%>
+        <%}-%> <%for(var key in associations.schema_attributes.one){-%> add<%= associations.schema_attributes.one[key][2]%>:$add<%= associations.schema_attributes.one[key][2]%> remove<%= associations.schema_attributes.one[key][2]%>:$remove<%= associations.schema_attributes.one[key][2]%> <%}-%> <%for(var key in associations.schema_attributes.many){-%> add<%= associations.schema_attributes.many[key][2]%>:$add<%= associations.schema_attributes.many[key][2]%> remove<%= associations.schema_attributes.many[key][2]%>:$remove<%= associations.schema_attributes.many[key][2]%> <%}-%>){
+          <%- idAttribute -%> <%for(var key in attributes){-%>
            <%=key %>
          <%}-%>}
      }`

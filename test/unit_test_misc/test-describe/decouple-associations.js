@@ -229,7 +229,7 @@ AuthorsFilterImpl({
               });
           } else if (pagination !== undefined) {
               options['order'] = [
-                  ["id", "ASC"]
+                  [models.person.idAttribute(), "ASC"]
               ];
           }
 

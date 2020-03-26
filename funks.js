@@ -443,6 +443,7 @@ module.exports.getOptions = function(dataModel){
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
+  opts['editableAttributes'] = getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel));
   opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
   dataModel['id'] = {
@@ -452,7 +453,7 @@ module.exports.getOptions = function(dataModel){
 
   opts['definition'] = stringify_obj(dataModel);
   delete opts.attributes[opts.idAttribute];
-  
+
   return opts;
 };
 
@@ -841,6 +842,11 @@ module.exports.generateCode = function(json_dir, dir_write){
       }else if(opts.storageType === 'cenzontle-web-service-adapter'){
         let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
         generateSection("cenz-adapters",opts,file_name).then( ()=>{
+          console.log(file_name + ' written successfully!');
+        });
+      }else if(opts.storageType === 'sql-adapter'){
+        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+        generateSection("sql-adapter",opts,file_name).then( ()=>{
           console.log(file_name + ' written successfully!');
         });
       }
