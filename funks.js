@@ -764,6 +764,9 @@ module.exports.generateCode = function(json_dir, dir_write){
         //console.log(opts.associations);
 
         if(opts.storageType === 'sql'){
+          /**
+           * Migrations
+           */
           sections.forEach((section) =>{
               let file_name = "";
               if(section==='migrations')
@@ -781,7 +784,7 @@ module.exports.generateCode = function(json_dir, dir_write){
                           console.log(file_name + ' written successfully!');
                       });
               }
-        });
+          });
         //generateAssociationsMigrations(opts, dir_write);
       }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server' || opts.storageType === 'distributed-data-model'){
           let file_name = "";
@@ -836,19 +839,56 @@ module.exports.generateCode = function(json_dir, dir_write){
             });
           }
             
-      /**
-       * Adapters
-       */
       }else if(opts.storageType === 'cenzontle-web-service-adapter'){
-        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
-        generateSection("cenz-adapters",opts,file_name).then( ()=>{
-          console.log(file_name + ' written successfully!');
-        });
-      }else if(opts.storageType === 'sql-adapter'){
-        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
-        generateSection("sql-adapter",opts,file_name).then( ()=>{
-          console.log(file_name + ' written successfully!');
-        });
+        /**
+         * Adapters
+         */
+        if(opts.adapterType === 'remote') {
+          let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+          generateSection("cenz-adapters",opts,file_name).then( ()=>{
+            console.log(file_name + ' written successfully!');
+          });
+        } else if(opts.adapterType === 'local'){
+          let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+          generateSection("sql-adapter",opts,file_name).then( ()=>{
+            console.log(file_name + ' written successfully!');
+          });
+
+          /**
+           * Migrations
+           */
+          file_name = createNameMigration(dir_write,opts.nameLc);
+          generateSection('migrations', opts, file_name)
+              .then( () => {
+                  console.log(file_name + ' written successfully!');
+              });
+
+          /**
+           * Validations
+           */
+          file_name = dir_write + '/'+ 'validations' +'/' + opts.nameLc + '.js';
+          if( fs.existsSync(file_name)){
+              console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
+          }else{
+              generateSection('validations', opts, file_name)
+                  .then( () => {
+                      console.log(file_name + ' written successfully!');
+                  });
+          }
+
+          /**
+           * Patches
+           */
+          file_name = dir_write + '/'+ 'patches' +'/' + opts.nameLc + '.js';
+          if( fs.existsSync(file_name)){
+              console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
+          }else{
+              generateSection('patches', opts, file_name)
+                  .then( () => {
+                      console.log(file_name + ' written successfully!');
+                  });
+          }
+        }
       }
     }
   });

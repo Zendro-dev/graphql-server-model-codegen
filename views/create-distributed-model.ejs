@@ -58,7 +58,7 @@ module.exports = class <%- name -%>{
        */
       if(adapter.type === 'local'){
 
-        return adapters[adapter].countRecords(search);
+        return adapter.countRecords(search);
       } else if(adapter.type === 'remote'){
         
         //check: @search.excludeAdapterNames
@@ -73,14 +73,14 @@ module.exports = class <%- name -%>{
          * append all registeredAdapters, except the current <adapter>, 
          * to search.excludeAdapterNames array.
          */
-        adapters.array.forEach(a => {
+        Object.values(adapters).forEach(a => {
           if(a.name !== adapter.name && !nsearch.excludeAdapterNames.includes(a.name)) {
             //add adapter name to exclude list
             nsearch.excludeAdapterNames.push(a.name);
           }
         });
         //use new search
-        return adapters[adapter].countRecords(nsearch);
+        return adapter.countRecords(nsearch);
       } else {
 
         throw Error(`Adapter of type '${adapter.type}' is not supported.`)
@@ -109,7 +109,7 @@ module.exports = class <%- name -%>{
        */
       if(adapter.type === 'local'){
 
-        return adapters[adapter].readAllCursor(search, order, pagination);
+        return adapter.readAllCursor(search, order, pagination);
       } else if(adapter.type === 'remote'){
         
         //check: @search.excludeAdapterNames
@@ -124,14 +124,14 @@ module.exports = class <%- name -%>{
          * append all registeredAdapters, except the current <adapter>, 
          * to search.excludeAdapterNames array.
          */
-        adapters.array.forEach(a => {
+        Object.values(adapters).forEach(a => {
           if(a.name !== adapter.name && !nsearch.excludeAdapterNames.includes(a.name)) {
             //add adapter name to exclude list
             nsearch.excludeAdapterNames.push(a.name);
           }
         });
         //use new search
-        return adapters[adapter].readAllCursor(nsearch, order, pagination);
+        return adapter.readAllCursor(nsearch, order, pagination);
       } else {
 
         throw Error(`Adapter of type '${adapter.type}' is not supported.`)

@@ -64,6 +64,14 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
      } );
   }
 
+  static get name(){
+    return "<%- adapterName -%>";
+  }
+
+  static get type(){
+    return "<%- adapterType -%>";
+  }
+
   static recognizeId(iri){
     return iriRegex.test(iri);
   }
