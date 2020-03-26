@@ -1300,4 +1300,28 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
+  it('addOne - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.addOne.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('count - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.count.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+  
+  it('readAllCursor - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.readAllCursor.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });
