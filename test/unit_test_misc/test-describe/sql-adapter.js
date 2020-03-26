@@ -70,7 +70,7 @@ static addOne(input) {
                     if (wrong_ids.length > 0) {
                         throw new Error(\`Ids \${wrong_ids.join(",")} in model book were not found.\`);
                     } else {
-                        await result._addWorks(input.addWorks); 
+                        await result._addWorks(input.addWorks);
                     }
                 }
 
@@ -245,3 +245,73 @@ static readAllCursor(search, order, pagination) {
       throw error;
   });
 }`
+
+
+module.exports.deleteOne = `
+    static deleteOne(id) {
+        return super.findByPk(id)
+            .then(item => {
+
+                if (item === null) return new Error(\`Record with ID = \${id} not exist\`);
+
+                return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
+                    .then((valSuccess) => {
+                        return item
+                            .destroy()
+                            .then(() => {
+                                return 'Item successfully deleted';
+                            });
+                    }).catch((err) => {
+                        return err
+                    })
+            });
+
+    }`
+
+module.exports.updateOne = `
+    static updateOne(input) {
+        return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
+            .then(async (valSuccess) => {
+                try {
+
+                    let result = await sequelize.transaction(async (t) => {
+                        let promises_associations = [];
+                        let item = await super.findByPk(input[this.idAttribute()], {
+                            transaction: t
+                        });
+                        let updated = await item.update(input, {
+                            transaction: t
+                        });
+
+                        return Promise.all(promises_associations).then(() => {
+                            return updated;
+                        });
+                    });
+
+
+
+                    if (input.addWorks) {
+                        let wrong_ids = await helper.checkExistence(input.addWorks, models.book);
+                        if (wrong_ids.length > 0) {
+                            throw new Error(\`Ids \${wrong_ids.join(",")} in model book were not found.\`);
+                        } else {
+                           await result._addWorks(input.addWorks);
+                        }
+                    }
+
+                    if (input.removeWorks) {
+                        let ids_associated = await result.worksImpl().map(t => \`\${t[models.book.idAttribute()]}\`);
+                        await helper.asyncForEach(input.removeWorks, async id => {
+                            if (!ids_associated.includes(id)) {
+                                throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\`);
+                            }
+                        });
+                        await result._removeWorks(input.removeWorks);
+                    }
+
+                    return result;
+                } catch (error) {
+                    throw error;
+                }
+            });
+    }`
