@@ -1225,7 +1225,7 @@ describe('Create and update transaction', function(){
     let test_resolvers = data_test.update_transcript_count.replace(/\s/g, '');
     expect(g_resolvers).to.have.string(test_resolvers);
   });
-});  
+});
 
 describe('extended ids', function(){
   let data_test = require('./unit_test_misc/test-describe/extended-internal-ids');
@@ -1260,6 +1260,20 @@ describe('extended ids', function(){
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.book_sequelize_primaryKey.replace(/\s/g, '');
     expect(g_model).to.have.string(test_model);
+  });
+
+});
+
+
+describe('SQL-adapter', function(){
+  let data_test = require('./unit_test_misc/test-describe/sql-adapter');
+
+  it('regex - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.url_regex.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
   });
 
 });

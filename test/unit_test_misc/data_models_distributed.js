@@ -128,3 +128,30 @@ module.exports.dog_ddm =  {
       }
     }
   }
+
+
+  module.exports.person_adapter_sql = {
+      "model": "Person",
+      "storageType": "sql-adapter",
+      "adapterName": "peopleLocalSql",
+      "regex": "peopleLocal",
+      "url": "http://localhost:3030/graphql",
+      "attributes": {
+          "firstName": "String",
+          "lastName": "String",
+          "email": "String",
+          "companyId": "Int",
+          "internalPersonId": "String"
+      },
+      "associations": {
+          "works": {
+              "type": "to_many",
+              "target": "Book",
+              "targetKey": "internalPersonId",
+              "keyIn": "Book",
+              "targetStorageType": "sql",
+              "label": "title"
+          }
+      },
+      "internalId": "internalPersonId"
+  }

@@ -765,6 +765,11 @@ module.exports.generateCode = function(json_dir, dir_write){
         generateSection("cenz-adapters",opts,file_name).then( ()=>{
           console.log(file_name + ' written successfully!');
         });
+      }else if(opts.storageType === 'sql-adapter'){
+        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+        generateSection("sql-adapter",opts,file_name).then( ()=>{
+          console.log(file_name + ' written successfully!');
+        });
       }
     }
   });
