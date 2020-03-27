@@ -100,6 +100,11 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
 
+    /**
+     * Debug
+     */
+    console.log("@@@adapter: ", this.adapterName, "@ on: readAllCursor: search: ", search, "  order: ", order, "  pagination: ", pagination);
+
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let options = {};
     options['where'] = {};
@@ -107,10 +112,15 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     /*
      * Search conditions
      */
-    if(search !== undefined){
+    if (search !== undefined) {
+      //check
+      if(typeof search !== 'object') {
+        throw new Error('Illegal "search" argument type, it must be an object.');
+      }
+
       let arg = new searchArg(search);
       let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;
+      options['where'] = arg_sequelize; 
     }
 
     /*
@@ -224,6 +234,11 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
               endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
             }
           }
+
+          /**
+           * Debug
+           */
+          console.log("@@@adapter ", this.adapterName, "@ return: edges: ", edges, " pageInfo: ", pageInfo);
 
           return { edges, pageInfo };
 

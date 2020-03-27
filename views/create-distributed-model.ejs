@@ -60,18 +60,23 @@ module.exports = class <%- name -%>{
 
         return adapter.countRecords(search);
       } else if(adapter.adapterType === 'remote'){
-        
         //check: @search.excludeAdapterNames
         let nsearch;
-        if ((!search || typeof search !== 'object')) { //has not search object
+
+        if((!search || typeof search !== 'object')) { //has not search object
           nsearch = {};
           nsearch.excludeAdapterNames = [];
+
         } else {
           if(search.excludeAdapterNames === undefined) { //search object has not exclusions
             nsearch.excludeAdapterNames = [];
-          } else if (!Array.isArray(search.excludeAdapterNames)){ //invalid
-            throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+
           } else {
+            //check
+            if(!Array.isArray(search.excludeAdapterNames)){ //invalid
+              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+            }
+
             nsearch = {
                 ...search
             };
@@ -95,7 +100,6 @@ module.exports = class <%- name -%>{
         throw Error(`Adapter of type '${adapter.type}' is not supported.`)
       }
     });
-
 
     return Promise.all(promises).then( results =>{
       return results.reduce( (total, current)=> {
@@ -127,18 +131,23 @@ module.exports = class <%- name -%>{
 
         return adapter.readAllCursor(search, order, pagination);
       } else if(adapter.adapterType === 'remote'){
-        
         //check: @search.excludeAdapterNames
         let nsearch;
-        if ((!search || typeof search !== 'object')) { //has not search object
+
+        if((!search || typeof search !== 'object')) { //has not search object
           nsearch = {};
           nsearch.excludeAdapterNames = [];
+
         } else {
           if(search.excludeAdapterNames === undefined) { //search object has not exclusions
             nsearch.excludeAdapterNames = [];
-          } else if (!Array.isArray(search.excludeAdapterNames)){ //invalid
-            throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+
           } else {
+            //check
+            if(!Array.isArray(search.excludeAdapterNames)){ //invalid
+              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+            }
+
             nsearch = {
                 ...search
             };
@@ -163,9 +172,11 @@ module.exports = class <%- name -%>{
     });
     let someHasNextPage = false;
     let someHasPreviousPage = false;
-    return Promise.all(promises).then( results => {
+    return Promise.all(promises)
+    //phase 1: reduce
+    .then( results => {
       return results.reduce( (total, current)=> {
-        //check current result
+        //check
         if(current && current.pageInfo && current.edges) {
           someHasNextPage |= current.pageInfo.hasNextPage;
           someHasPreviousPage |= current.pageInfo.hasPreviousPage;
@@ -173,22 +184,26 @@ module.exports = class <%- name -%>{
         } else {
           return total;
         }
-      }).then( nodes => {
-        if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
-        if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
-        
-        let ordered_records = helper.orderRecords(nodes, order);
-        let paginated_records =[];
-        if(isForwardPagination){
-          paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
-        } else {
-          paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
-        }
-        
-        let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-        let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
-        return helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
-      });
+      }, []);
+    })
+    //phase 2: order & paginate
+    .then( nodes => {
+      if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
+      if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
+      
+      let ordered_records = helper.orderRecords(nodes, order);
+      let paginated_records =[];
+
+      if(isForwardPagination){
+        paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
+      } else {
+        paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
+      }
+      
+      let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+      let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
+      
+      return helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
     });
   }
 
