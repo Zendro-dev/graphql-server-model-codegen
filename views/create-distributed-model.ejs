@@ -63,15 +63,17 @@ module.exports = class <%- name -%>{
         
         //check: @search.excludeAdapterNames
         let nsearch;
-        if ((!search || typeof search !== 'object') //has not search object
-          || (!search.excludeAdapterNames //or has search object but has not exclusions
-              || !Array.isArray(search.excludeAdapterNames))) {
+        if ((!search || typeof search !== 'object')) { //has not search object
           nsearch = {};
           nsearch.excludeAdapterNames = [];
         } else {
-          nsearch = {
-              ...search
-          };
+          if(!search.excludeAdapterNames || !Array.isArray(search.excludeAdapterNames)) {//search object has not exclusions
+            throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+          } else {
+            nsearch = {
+                ...search
+            };
+          }
         }
 
         /*
@@ -126,15 +128,17 @@ module.exports = class <%- name -%>{
         
         //check: @search.excludeAdapterNames
         let nsearch;
-        if ((!search || typeof search !== 'object') //has not search object
-          || (!search.excludeAdapterNames //or has search object but has not exclusions
-              || !Array.isArray(search.excludeAdapterNames))) {
+        if ((!search || typeof search !== 'object')) { //has not search object
           nsearch = {};
           nsearch.excludeAdapterNames = [];
         } else {
-          nsearch = {
-              ...search
-          };
+          if(!search.excludeAdapterNames || !Array.isArray(search.excludeAdapterNames)) {//search object has not exclusions
+            throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+          } else {
+            nsearch = {
+                ...search
+            };
+          }
         }
         /*
          * append all registeredAdapters, except the current <adapter>, 
