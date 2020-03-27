@@ -67,14 +67,16 @@ module.exports = class <%- name -%>{
           nsearch = {};
           nsearch.excludeAdapterNames = [];
         } else {
-          if(!search.excludeAdapterNames || !Array.isArray(search.excludeAdapterNames)) {//search object has not exclusions
+          if(search.excludeAdapterNames === undefined) { //search object has not exclusions
+            nsearch.excludeAdapterNames = [];
+          } else if (!Array.isArray(search.excludeAdapterNames)){ //invalid
             throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
           } else {
             nsearch = {
                 ...search
             };
           }
-        }
+        }  
 
         /*
          * append all registeredAdapters, except the current <adapter>, 
@@ -132,7 +134,9 @@ module.exports = class <%- name -%>{
           nsearch = {};
           nsearch.excludeAdapterNames = [];
         } else {
-          if(!search.excludeAdapterNames || !Array.isArray(search.excludeAdapterNames)) {//search object has not exclusions
+          if(search.excludeAdapterNames === undefined) { //search object has not exclusions
+            nsearch.excludeAdapterNames = [];
+          } else if (!Array.isArray(search.excludeAdapterNames)){ //invalid
             throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
           } else {
             nsearch = {
