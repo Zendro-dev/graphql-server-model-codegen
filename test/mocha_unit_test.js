@@ -1340,4 +1340,61 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
+  it('addAssociation - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.addWorks.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('removeAssociation - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.removeWorks.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+
+  it('stripAssociations - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.stripAssociations.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('getIdValue - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.getIdValue.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('idAttribute - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.idAttribute.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('type - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.type.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('targetKey - book ddm', async function(){
+    let opts = funks.getOptions(models_distributed.book_ddm_association);
+    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.targetKey_ddm.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });

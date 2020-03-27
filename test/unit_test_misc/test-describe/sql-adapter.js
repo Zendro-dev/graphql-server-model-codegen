@@ -315,3 +315,65 @@ module.exports.updateOne = `
                 }
             });
     }`
+
+
+
+module.exports.removeWorks = `
+  async _removeWorks(ids) {
+      await helper.asyncForEach(ids, async id => {
+          let record = await models.book.readById(id);
+          await record.set_internalPersonId(null);
+      });
+  }
+`
+
+module.exports.addWorks = `
+  async _addWorks(ids) {
+       await  helper.asyncForEach(ids, async id => {
+          let record = await models.book.readById(id);
+          await record.set_internalPersonId(this.getIdValue());
+      });
+  }
+`
+
+module.exports.stripAssociations = `
+stripAssociations() {
+    let attributes = Object.keys(peopleLocalSql.definition.attributes);
+    let data_values = _.pick(this, attributes);
+    return data_values;
+}
+`
+
+module.exports.getIdValue = `
+getIdValue() {
+    return this[peopleLocalSql.idAttribute()]
+}
+`
+
+module.exports.idAttribute = `
+static idAttribute() {
+    return peopleLocalSql.definition.id.name;
+}
+`
+
+module.exports.name = `
+static get name() {
+    return "peopleLocalSql";
+}
+`
+
+module.exports.type = `
+static get type(){
+  return 'local';
+}
+`
+
+module.exports.targetKey_ddm =`
+async set_internalPersonId(value) {
+  let input = {
+    [Book.idAttribute()] : this.getIdValue(),
+    "addAuthor": value
+  };
+  return await Book.updateOne( input);
+}
+`

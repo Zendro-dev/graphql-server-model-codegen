@@ -99,7 +99,7 @@ module.exports = class <%- name -%>{
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
-    
+
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authorizedAdapters.map(adapter => {
       /**
@@ -180,6 +180,15 @@ module.exports = class <%- name -%>{
 
   <%let associations_one = associations["belongsTo"]-%>
   <% for(let i=0; i < associations_one.length; i++){ -%>
+
+    async set_<%=associations_one[i].targetKey %>(value){
+      let input = {
+        [<%= name %>.idAttribute()] : this.getIdValue(),
+        "add<%= associations_one[i].name_cp %>": value
+      };
+
+      return await <%= name%>.updateOne(input);
+    }
 
   <%=associations_one[i].name%>Impl (search){
       if(search === undefined){
