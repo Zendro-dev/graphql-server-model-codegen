@@ -63,12 +63,17 @@ module.exports = class <%- name -%>{
         
         //check: @search.excludeAdapterNames
         let nsearch;
-        if(!search || !search.hasOwnProperty('excludeAdapterNames')) {
+        if ((!search || typeof search !== 'object') //has not search object
+          || (!search.excludeAdapterNames //or has search object but has not exclusions
+              || !Array.isArray(search.excludeAdapterNames))) {
           nsearch = {};
           nsearch.excludeAdapterNames = [];
         } else {
-          nsearch = {...search};
+          nsearch = {
+              ...search
+          };
         }
+
         /*
          * append all registeredAdapters, except the current <adapter>, 
          * to search.excludeAdapterNames array.
@@ -121,11 +126,15 @@ module.exports = class <%- name -%>{
         
         //check: @search.excludeAdapterNames
         let nsearch;
-        if(!search || !search.hasOwnProperty('excludeAdapterNames')) {
+        if ((!search || typeof search !== 'object') //has not search object
+          || (!search.excludeAdapterNames //or has search object but has not exclusions
+              || !Array.isArray(search.excludeAdapterNames))) {
           nsearch = {};
           nsearch.excludeAdapterNames = [];
         } else {
-          nsearch = {...search};
+          nsearch = {
+              ...search
+          };
         }
         /*
          * append all registeredAdapters, except the current <adapter>, 
@@ -156,19 +165,22 @@ module.exports = class <%- name -%>{
         } else {
           return total;
         }
-    }).then( nodes => {
-      if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
-      if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
-       let ordered_records = helper.orderRecords(nodes, order);
-      let paginated_records =[];
-      if(isForwardPagination){
-        paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
-      } else {
-        paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
-      }
-      let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-      let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
-      return helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
+      }).then( nodes => {
+        if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
+        if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
+        
+        let ordered_records = helper.orderRecords(nodes, order);
+        let paginated_records =[];
+        if(isForwardPagination){
+          paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
+        } else {
+          paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
+        }
+        
+        let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+        let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
+        return helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
+      });
     });
   }
 
