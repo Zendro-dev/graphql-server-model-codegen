@@ -56,10 +56,10 @@ module.exports = class <%- name -%>{
        *   local: resolve with current parameters.
        *   remote: add exclusions to search.excludeAdapterNames
        */
-      if(adapter.type === 'local'){
+      if(adapter.adapterType === 'local'){
 
         return adapter.countRecords(search);
-      } else if(adapter.type === 'remote'){
+      } else if(adapter.adapterType === 'remote'){
         
         //check: @search.excludeAdapterNames
         let nsearch;
@@ -73,10 +73,10 @@ module.exports = class <%- name -%>{
          * append all registeredAdapters, except the current <adapter>, 
          * to search.excludeAdapterNames array.
          */
-        Object.values(adapters).forEach(a => {
-          if(a.name !== adapter.name && !nsearch.excludeAdapterNames.includes(a.name)) {
+        Object.values(this.registeredAdapters).forEach(a => {
+          if(a.adapterName !== adapter.adapterName && !nsearch.excludeAdapterNames.includes(a.adapterName)) {
             //add adapter name to exclude list
-            nsearch.excludeAdapterNames.push(a.name);
+            nsearch.excludeAdapterNames.push(a.adapterName);
           }
         });
         //use new search
@@ -89,7 +89,14 @@ module.exports = class <%- name -%>{
 
 
     return Promise.all(promises).then( results =>{
-      return results.reduce( (total, current)=> total+current, 0);
+      return results.reduce( (total, current)=> {
+        //check current result
+        if(current) {
+          return total+current;
+        } else {
+          return total;
+        }
+      }, 0);
     });
   }
 
@@ -107,10 +114,10 @@ module.exports = class <%- name -%>{
        *   local: resolve with current parameters.
        *   remote: add exclusions to search.excludeAdapterNames parameter.
        */
-      if(adapter.type === 'local'){
+      if(adapter.adapterType === 'local'){
 
         return adapter.readAllCursor(search, order, pagination);
-      } else if(adapter.type === 'remote'){
+      } else if(adapter.adapterType === 'remote'){
         
         //check: @search.excludeAdapterNames
         let nsearch;
@@ -124,25 +131,31 @@ module.exports = class <%- name -%>{
          * append all registeredAdapters, except the current <adapter>, 
          * to search.excludeAdapterNames array.
          */
-        Object.values(adapters).forEach(a => {
-          if(a.name !== adapter.name && !nsearch.excludeAdapterNames.includes(a.name)) {
+        Object.values(this.registeredAdapters).forEach(a => {
+          if(a.adapterName !== adapter.adapterName && !nsearch.excludeAdapterNames.includes(a.adapterName)) {
             //add adapter name to exclude list
-            nsearch.excludeAdapterNames.push(a.name);
+            nsearch.excludeAdapterNames.push(a.adapterName);
           }
         });
         //use new search
         return adapter.readAllCursor(nsearch, order, pagination);
       } else {
 
-        throw Error(`Adapter of type '${adapter.type}' is not supported.`)
+        throw Error(`Adapter of type '${adapter.adapterType}' is not supported.`)
       }
     });
     let someHasNextPage = false;
     let someHasPreviousPage = false;
     return Promise.all(promises).then( results => {
-      return results.reduce( (total, current)=> {someHasNextPage |=  current.pageInfo.hasNextPage;
-        someHasPreviousPage |= current.pageInfo.hasPreviousPage;
-        return total.concat(current.edges.map( e =>  e.node))}, [] );
+      return results.reduce( (total, current)=> {
+        //check current result
+        if(current && current.pageInfo && current.edges) {
+          someHasNextPage |= current.pageInfo.hasNextPage;
+          someHasPreviousPage |= current.pageInfo.hasPreviousPage;
+          return total.concat(current.edges.map(e => e.node))
+        } else {
+          return total;
+        }
     }).then( nodes => {
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}

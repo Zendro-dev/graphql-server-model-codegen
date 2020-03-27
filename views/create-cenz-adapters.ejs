@@ -12,12 +12,12 @@ const iriRegex = new RegExp('<%- regex -%>');
 
 module.exports = class <%- adapterName -%>{
 
-  static get name(){
-    return "<%- adapterName -%>";
+  static get adapterName(){
+    return '<%- adapterName -%>';
   }
 
-  static get type(){
-    return "<%- adapterType -%>";
+  static get adapterType(){
+    return '<%- adapterType -%>';
   }
 
   static recognizeId(iri){
