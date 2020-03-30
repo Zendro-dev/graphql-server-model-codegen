@@ -28,6 +28,12 @@ module.exports = class <%- name -%>{
     return "<%- nameLc -%>";
   }
 
+  /**
+   * registeredAdapters - Returns an object which has a key for each
+   * adapter on adapter/index.js. Each key of the object will have 
+   *
+   * @return {string}     baseUrl from request.
+   */
   static get registeredAdapters() {
     return [<%- registry.map( x => '"'+x+'"') %>].reduce( (a,c) => { a[c] = adapters[c]; return a; }, {} );
   }
@@ -39,17 +45,27 @@ module.exports = class <%- name -%>{
     } else if (responsibleAdapter.length === 0) {
       throw new Error("IRI has no match WS");
     }
-    return responsibleAdapter;
+    return responsibleAdapter[0];
   }
 
   static readById(id) {
+    /**
+     * Debug
+     */
+    console.log("-@@---- ddm.readById \nid: ", id);
+
     if (id !== null) {
-      let responsibleAdapter = this.adapterForIri(id)
-      return adapters[responsibleAdapter[0]].readById(id).then(result => new <%- name -%>(result));
+      let responsibleAdapter = this.adapterForIri(id);
+      return adapters[responsibleAdapter].readById(id);
     }
   }
 
   static countRecords(search, authorizedAdapters){
+    /**
+     * Debug
+     */
+    console.log("-@@---- ddm.countRecords \nauth.adapters: ", authorizedAdapters.reduce((a,c)=>{a.push(c.adapterName); return a;}, []));
+
     let promises = authorizedAdapters.map( adapter => {
       /**
        * Differentiated cases:
@@ -58,30 +74,38 @@ module.exports = class <%- name -%>{
        */
       if(adapter.adapterType === 'local'){
 
-        return adapter.countRecords(search);
+        return adapter.countRecords(search).then(r => {
+          /**
+           * Debug
+           */
+          console.log("-@@-------- ddm: rx:\nlocal.adapter: ", adapter.adapterName, "\n result[", typeof r,"]: \n\n", r, "\n---------- @@@");
+          return r;
+        });
       } else if(adapter.adapterType === 'remote'){
         //check: @search.excludeAdapterNames
-        let nsearch;
+        let nsearch = {};
 
         if((!search || typeof search !== 'object')) { //has not search object
-          nsearch = {};
           nsearch.excludeAdapterNames = [];
 
         } else {
           if(search.excludeAdapterNames === undefined) { //search object has not exclusions
-            nsearch.excludeAdapterNames = [];
-
-          } else {
-            //check
-            if(!Array.isArray(search.excludeAdapterNames)){ //invalid
-              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
-            }
-
             nsearch = {
-                ...search
+              ...search
+            };
+            nsearch.excludeAdapterNames = [];
+            
+          } else {//exclusions are defined
+
+            if(!Array.isArray(search.excludeAdapterNames)){ //defined but invalid
+              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+            }//else
+            
+            nsearch = {
+              ...search
             };
           }
-        }  
+        }
 
         /*
          * append all registeredAdapters, except the current <adapter>, 
@@ -94,10 +118,16 @@ module.exports = class <%- name -%>{
           }
         });
         //use new search
-        return adapter.countRecords(nsearch);
+        return adapter.countRecords(nsearch).then(r => {
+          /**
+           * Debug
+           */
+          console.log("-@@-------- ddm: rx:\nremote.adapter: ", adapter.adapterName, "\n result[", typeof r,"]: \n\n", r, "\n---------- @@@");
+          return r;
+        });
       } else {
 
-        throw Error(`Adapter of type '${adapter.type}' is not supported.`)
+        throw Error(`Adapter of type '${adapter.type}' is not supported.`);
       }
     });
 
@@ -114,6 +144,11 @@ module.exports = class <%- name -%>{
   }
 
   static readAllCursor(search, order, pagination, authorizedAdapters) {
+    /**
+     * Debug
+     */
+    console.log("-@@---- ddm.readAllCursor \nauth.adapters: ", authorizedAdapters.reduce((a,c)=>{a.push(c.adapterName); return a;}, []));
+
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -129,30 +164,39 @@ module.exports = class <%- name -%>{
        */
       if(adapter.adapterType === 'local'){
 
-        return adapter.readAllCursor(search, order, pagination);
+        return adapter.readAllCursor(search, order, pagination).then(r => {
+          /**
+           * Debug
+           */
+          console.log("-@@-------- ddm: rx:\nlocal.adapter: ", adapter.adapterName, "\n result[", typeof r,"]: \n\n", r, "\n---------- @@@");
+          return r;
+        });
       } else if(adapter.adapterType === 'remote'){
         //check: @search.excludeAdapterNames
-        let nsearch;
+        let nsearch = {};
 
         if((!search || typeof search !== 'object')) { //has not search object
-          nsearch = {};
           nsearch.excludeAdapterNames = [];
 
         } else {
           if(search.excludeAdapterNames === undefined) { //search object has not exclusions
+            nsearch = {
+              ...search
+            };
             nsearch.excludeAdapterNames = [];
 
-          } else {
-            //check
-            if(!Array.isArray(search.excludeAdapterNames)){ //invalid
-              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
-            }
+          } else {//exclusions are defined
 
+            if(!Array.isArray(search.excludeAdapterNames)){ //defined but invalid
+              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
+            }//else
+            
             nsearch = {
-                ...search
+              ...search
             };
           }
         }
+
         /*
          * append all registeredAdapters, except the current <adapter>, 
          * to search.excludeAdapterNames array.
@@ -164,7 +208,13 @@ module.exports = class <%- name -%>{
           }
         });
         //use new search
-        return adapter.readAllCursor(nsearch, order, pagination);
+        return adapter.readAllCursor(nsearch, order, pagination).then(r => {
+          /**
+           * Debug
+           */
+          console.log("-@@-------- ddm: rx:\nremote.adapter: ", adapter.adapterName, "\n result[", typeof r,"]: \n\n", r, "\n---------- @@@");
+          return r;
+        });
       } else {
 
         throw Error(`Adapter of type '${adapter.adapterType}' is not supported.`)
@@ -175,12 +225,17 @@ module.exports = class <%- name -%>{
     return Promise.all(promises)
     //phase 1: reduce
     .then( results => {
+      /**
+       * Debug
+       */
+      console.log("@@---------- phase1:\n", "\n results[", typeof results,"]", "\n---------- @@@");
+
       return results.reduce( (total, current)=> {
         //check
         if(current && current.pageInfo && current.edges) {
           someHasNextPage |= current.pageInfo.hasNextPage;
           someHasPreviousPage |= current.pageInfo.hasPreviousPage;
-          return total.concat(current.edges.map(e => e.node))
+          return total.concat(current.edges.map(e => e.node));
         } else {
           return total;
         }
@@ -188,11 +243,16 @@ module.exports = class <%- name -%>{
     })
     //phase 2: order & paginate
     .then( nodes => {
+      /**
+       * Debug
+       */
+      console.log("@@---------- phase2:\n", "\n nodes[", typeof nodes,"]", "\n---------- @@@");
+      
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
       
       let ordered_records = helper.orderRecords(nodes, order);
-      let paginated_records =[];
+      let paginated_records = [];
 
       if(isForwardPagination){
         paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
@@ -380,17 +440,35 @@ module.exports = class <%- name -%>{
   static addOne(input) {
     this.assertInputHasId(input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
+    
+    /**
+     * Debug
+     */
+    console.log("-@@---- ddm.addOne: \nresponsibleAdapter: ", responsibleAdapter);
+    
     return adapters[responsibleAdapter].addOne(input);
   }
 
   static deleteOne(id) {
     let responsibleAdapter = this.adapterForIri(id);
+
+    /**
+     * Debug
+     */
+    console.log("-@@---- ddm.deleteOne: \nresponsibleAdapter: ", responsibleAdapter);
+    
     return adapters[responsibleAdapter].deleteOne(id);
   }
 
   static updateOne(input) {
     this.assertInputHasId(input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
+
+    /**
+     * Debug
+     */
+    console.log("-@@---- ddm.updateOne: \nresponsibleAdapter: ", responsibleAdapter);
+
     return adapters[responsibleAdapter].updateOne(input);
   }
 

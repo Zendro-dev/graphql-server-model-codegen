@@ -128,6 +128,11 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- namePl -%>Connection: async function({search, order, pagination}, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: <%- namePl -%>Connection");
+    
     //check: adapters
     let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
     if(registeredAdapters.length === 0) {
@@ -172,9 +177,14 @@ module.exports = {
    * @return {object}         Record with <%- idAttribute -%> requested
    */
   readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: readOne<%- nameCp -%>");
+
     //check: adapters auth
     try {
-      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>).name, 'read');
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
       if (authorizationCheck === true) {
         return <%- nameLc _%>.readById(<%- idAttribute _%>);
       } else {//adapter not auth
@@ -194,6 +204,11 @@ module.exports = {
    * @return {object}         New record created
    */
   add<%- nameCp -%>: async function(input, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: add<%- nameCp -%>");
+
     //check: input has idAttribute
     if (! input.<%- idAttribute _%>) {
       throw new Error(`Illegal argument. Provided input requires attribute '<%- idAttribute _%>'.`);
@@ -201,7 +216,7 @@ module.exports = {
 
     //check: adapters auth
     try {
-      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>).name, 'create');
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>), 'create');
       if (authorizationCheck === true) {
         return <%- nameLc _%>.addOne(input);
       } else {//adapter not auth
@@ -241,9 +256,14 @@ module.exports = {
    * @return {string}         Message indicating if deletion was successfull.
    */
   delete<%- nameCp -%>: async function({<%- idAttribute -%>}, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: delete<%- nameCp -%>");
+
     //check: adapters auth
     try {
-      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>).name, 'delete');
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'delete');
       if (authorizationCheck === true) {
         return <%- nameLc _%>.deleteOne(<%- idAttribute _%>);
       } else {//adapter not auth
@@ -263,6 +283,11 @@ module.exports = {
    * @return {object}         Updated record
    */
   update<%- nameCp-%>: async function(input, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: update<%- nameCp -%>");
+
     //check: input has idAttribute
     if (! input.<%- idAttribute _%>) {
       throw new Error(`Illegal argument. Provided input requires attribute '<%- idAttribute _%>'.`);
@@ -270,7 +295,7 @@ module.exports = {
 
     //check: adapters auth
     try {
-      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>).name, 'update');
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>), 'update');
       if (authorizationCheck === true) {
         return <%- nameLc _%>.updateOne(input);
       } else {//adapter not auth
@@ -291,6 +316,11 @@ module.exports = {
    */
 
   count<%-namePlCp-%>: async function({search}, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: count<%- nameCp -%>");
+
     //check: adapters
     let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
     if(registeredAdapters.length === 0) {
