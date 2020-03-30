@@ -490,9 +490,22 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     }
 
     async _add<%=associations_temp[i].name_cp%>(ids){
-      await helper.asyncForEach(ids, async id =>{
-        let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
-        await record.set_<%=associations_temp[i].targetKey%>(this.getIdValue());
+      await helper.asyncForEach(ids, async id => {
+        let responsibleAdapter = models.<%=associations_temp[i].target_lc%>.registeredAdapters[models.<%=associations_temp[i].target_lc%>.adapterForIri(id)];
+        /**
+         * Diferentiated cases:
+         * 
+         *   local: get Sequelize model by readById() and calls its non-static set_ method.
+         *   remote: calls the adapter static set_ method to resolve remotely.
+         */
+        if(responsibleAdapter.adapterType === 'remote') {
+          await responsibleAdapter.set_<%=associations_temp[i].targetKey%>(id, this.getIdValue());
+        } else if(responsibleAdapter.adapterType === 'local'){
+          let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
+          await record.set_<%=associations_temp[i].targetKey%>(this.getIdValue());
+        } else {
+          throw Error(`Adapter of type '${responsibleAdapter.adapterType}' is not supported.`);
+        }
       });
     }
 
