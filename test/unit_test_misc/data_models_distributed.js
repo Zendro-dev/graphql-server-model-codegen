@@ -1,6 +1,6 @@
 module.exports.book = {
   "model" : "Book",
-  "storageType" : "cenzontle-web-service-adapter",
+  "storageType" : "cenzontle-webservice-adapter",
   "adapterName": "BooksOne",
   "regex": "one",
   "url": "http://localhost:3000/graphql",
@@ -26,7 +26,7 @@ module.exports.book = {
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "cenz_server",
+        "targetStorageType" : "cenz-server",
         "label" : "name"
         }
   }
@@ -60,7 +60,7 @@ module.exports.book_ddm =
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "cenz_server",
+        "targetStorageType" : "cenz-server",
         "label" : "name"
         }
   }
@@ -93,7 +93,7 @@ module.exports.person_ddm =  {
         "target": "publi_sher",
         "targetKey": "companyId",
         "keyIn": "Person",
-        "targetStorageType": "cenz_server"
+        "targetStorageType": "cenz-server"
       },
 
       "dogs" :{
@@ -132,8 +132,7 @@ module.exports.dog_ddm =  {
 
   module.exports.person_adapter_sql = {
       "model": "Person",
-      "storageType": "cenzontle-web-service-adapter",
-      "adapterType": "local",
+      "storageType": "sql-adapter",
       "adapterName": "peopleLocalSql",
       "regex": "peopleLocal",
       "url": "http://localhost:3030/graphql",
@@ -177,7 +176,7 @@ module.exports.dog_ddm =  {
         "target": "Person",
         "targetKey": "internalPersonId",
         "keyIn": "Book",
-        "targetStorageType": "cenz_server",
+        "targetStorageType": "cenz-server",
         "label": "email"
       }
     },

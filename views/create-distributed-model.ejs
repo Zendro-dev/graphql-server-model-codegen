@@ -75,11 +75,14 @@ module.exports = class <%- name -%>{
     
     let authAdapters = [];
     /**
-     * Cases
-     *   authorizedAdapters : called from resolved
-     *      - will contains only those authorized adapters.
-     *  !authorizedAdapters : called internally 
-     *      - will be null, and will be set to registered adapters.
+     * Differentiated cases:
+     *    if authorizedAdapters is defined: 
+     *      - called from resolver.
+     *      - authorizedAdapters will no be modified.
+     * 
+     *    if authorizedAdapters is not defined: 
+     *      - called internally 
+     *      - authorizedAdapters will be set to registered adapters.
      */
     if(authorizedAdapters === undefined) {
       authAdapters = Object.values(this.registeredAdapters);
@@ -90,58 +93,26 @@ module.exports = class <%- name -%>{
     let promises = authAdapters.map( adapter => {
       /**
        * Differentiated cases:
-       *   local: resolve with current parameters.
-       *   remote: add exclusions to search.excludeAdapterNames
+       *   sql-adapter: 
+       *      resolve with current parameters.
+       *   
+       *   ddm-adapter:
+       *   cenzontle-webservice-adapter:
+       *   generic-adapter:
+       *      add exclusions to search.excludeAdapterNames parameter.
        */
-      if(adapter.adapterType === 'local'){
-        return adapter.countRecords(search);
-      } else if(adapter.adapterType === 'remote'){
-        //check: @search.excludeAdapterNames
-        let nsearch = {};
-
-        if((!search || typeof search !== 'object')) { //has not search object
-          nsearch.excludeAdapterNames = [];
-
-        } else {
-          if(search.excludeAdapterNames === undefined) { //search object has not exclusions
-            nsearch = {
-              ...search
-            };
-            nsearch.excludeAdapterNames = [];
-            
-          } else {//exclusions are defined
-
-            if(!Array.isArray(search.excludeAdapterNames)){ //defined but invalid
-              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
-            }//else
-            
-            nsearch = {
-              ...search
-            };
-          }
-        }
-
-        /*
-         * append all registeredAdapters, except the current <adapter>, 
-         * to search.excludeAdapterNames array.
-         */
-        Object.values(this.registeredAdapters).forEach(a => {
-          if(a.adapterName !== adapter.adapterName && !nsearch.excludeAdapterNames.includes(a.adapterName)) {
-            //add adapter name to exclude list
-            nsearch.excludeAdapterNames.push(a.adapterName);
-          }
-        });
-        //use new search
-        return adapter.countRecords(nsearch).then(r => {
-          /**
-           * Debug
-           */
-          console.log("-@@-------- ddm: rx:\nremote.adapter: ", adapter.adapterName, "\n result[", typeof r,"]: \n\n", r, "\n---------- @@@");
-          return r;
-        });
-      } else {
-
-        throw Error(`Adapter of type '${adapter.type}' is not supported.`);
+      switch(adapter.adapterType) {
+        case 'ddm-adapter':
+        case 'generic-adapter':
+          let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
+          return adapter.countRecords(nsearch);
+  
+        case 'sql-adapter':
+        case 'cenzontle-webservice-adapter':
+          return adapter.countRecords(search);
+        
+        case 'default':
+          throw new Error(`Adapter type: '${adapter.adapterType}' is not supported`);
       }
     });
 
@@ -165,11 +136,14 @@ module.exports = class <%- name -%>{
 
     let authAdapters = [];
     /**
-     * Cases
-     *   authorizedAdapters : called from resolved
-     *      - will contains only those authorized adapters.
-     *  !authorizedAdapters : called internally 
-     *      - will be null, and will be set to registered adapters.
+     * Differentiated cases:
+     *    if authorizedAdapters is defined: 
+     *      - called from resolver.
+     *      - authorizedAdapters will no be modified.
+     * 
+     *    if authorizedAdapters is not defined: 
+     *      - called internally 
+     *      - authorizedAdapters will be set to registered adapters.
      */
     if(authorizedAdapters === undefined) {
       authAdapters = Object.values(this.registeredAdapters);
@@ -187,59 +161,26 @@ module.exports = class <%- name -%>{
     let promises = authAdapters.map(adapter => {
       /**
        * Differentiated cases:
-       *   local: resolve with current parameters.
-       *   remote: add exclusions to search.excludeAdapterNames parameter.
+       *   sql-adapter: 
+       *      resolve with current parameters.
+       *   
+       *   ddm-adapter:
+       *   cenzontle-webservice-adapter:
+       *   generic-adapter:
+       *      add exclusions to search.excludeAdapterNames parameter.
        */
-      if(adapter.adapterType === 'local'){
-
-        return adapter.readAllCursor(search, order, pagination).then(r => {
-          /**
-           * Debug
-           */
-          console.log("-@@-------- ddm: rx:\nlocal.adapter: ", adapter.adapterName, "\n result[", typeof r,"]: \n\n", r, "\n---------- @@@");
-          return r;
-        });
-      } else if(adapter.adapterType === 'remote'){
-        //check: @search.excludeAdapterNames
-        let nsearch = {};
-
-        if((!search || typeof search !== 'object')) { //has not search object
-          nsearch.excludeAdapterNames = [];
-
-        } else {
-          if(search.excludeAdapterNames === undefined) { //search object has not exclusions
-            nsearch = {
-              ...search
-            };
-            nsearch.excludeAdapterNames = [];
-
-          } else {//exclusions are defined
-
-            if(!Array.isArray(search.excludeAdapterNames)){ //defined but invalid
-              throw new Error('Illegal excludeAdapterNames parameter in search object, it should be an array.');
-            }//else
-            
-            nsearch = {
-              ...search
-            };
-          }
-        }
-
-        /*
-         * append all registeredAdapters, except the current <adapter>, 
-         * to search.excludeAdapterNames array.
-         */
-        Object.values(this.registeredAdapters).forEach(a => {
-          if(a.adapterName !== adapter.adapterName && !nsearch.excludeAdapterNames.includes(a.adapterName)) {
-            //add adapter name to exclude list
-            nsearch.excludeAdapterNames.push(a.adapterName);
-          }
-        });
-        //use new search
-        return adapter.readAllCursor(nsearch, order, pagination);
-      } else {
-
-        throw Error(`Adapter of type '${adapter.adapterType}' is not supported.`)
+      switch(adapter.adapterType) {
+        case 'ddm-adapter':
+        case 'generic-adapter':
+          let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
+          return adapter.readAllCursor(nsearch, order, pagination);
+  
+        case 'sql-adapter':
+        case 'cenzontle-webservice-adapter':
+          return adapter.readAllCursor(search, order, pagination);
+        
+        case 'default':
+          throw new Error(`Adapter tuype '${adapter.adapterType}' is not supported`);
       }
     });
     let someHasNextPage = false;
@@ -495,7 +436,7 @@ module.exports = class <%- name -%>{
   }
 
   static bulkAddCsv(context) {
-    throw Error("<%- name -%>.bulkAddCsv is not implemented.")
+    throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
   }
 
   static csvTableTemplate() {

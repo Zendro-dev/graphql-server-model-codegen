@@ -17,7 +17,7 @@ module.exports = class <%- adapterName -%>{
   }
 
   static get adapterType(){
-    return '<%- adapterType -%>';
+    return '<%- storageType -%>';
   }
 
   static recognizeId(iri){
@@ -258,7 +258,7 @@ module.exports = class <%- adapterName -%>{
   }
 
   static bulkAddCsv(context) {
-    throw Error("<%- name -%>.bulkAddCsv is not implemented.")
+    throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
   }
 
   static  csvTableTemplate(){

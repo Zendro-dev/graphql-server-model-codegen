@@ -141,7 +141,7 @@ module.exports = {
 
     try {
       //exclude adapters
-      let adapters = await helper.removeExcludedAdapters(search, registeredAdapters);
+      let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
       if(adapters.length === 0) {
         throw new Error('All adapters was excluded for data model "<%- name %>"');
       }//else
@@ -329,7 +329,7 @@ module.exports = {
 
     try {
       //exclude adapters
-      let adapters = await helper.removeExcludedAdapters(search, registeredAdapters);
+      let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
       if(adapters.length === 0) {
         throw new Error('All adapters was excluded for data model "<%- name %>"');
       }//else
