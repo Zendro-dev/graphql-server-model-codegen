@@ -180,7 +180,7 @@ module.exports = class <%- name -%>{
           return adapter.readAllCursor(search, order, pagination);
         
         case 'default':
-          throw new Error(`Adapter tuype '${adapter.adapterType}' is not supported`);
+          throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
       }
     });
     let someHasNextPage = false;
