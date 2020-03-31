@@ -86,7 +86,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     let options = {};
     options['where'] = {};
     options['where'][this.idAttribute()] = id;
-    return super.findOne(options);
+    return <%- adapterName -%>.findOne(options);
   }
 
   static countRecords(search){
@@ -446,14 +446,13 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return helper.csvTableTemplate(<%- name -%>);
   }
 
-  <%let associations_one = associations["belongsTo"]-%>
-  <% for(let i=0; i < associations_one.length; i++){ -%>
+<%let associations_one = associations["belongsTo"]-%>
+<% for(let i=0; i < associations_one.length; i++){ -%>
 
-    set_<%=associations_one[i].targetKey%>( value ){
-      this.<%=associations_one[i].targetKey%> = value;
-      return super.save();
-    }
-
+  set_<%=associations_one[i].targetKey%>( value ){
+    this.<%=associations_one[i].targetKey%> = value;
+    return super.save();
+  }
 
   _add<%=associations_one[i].name_cp%>(id){
     return this.set_<%=associations_one[i].targetKey%>(id);
@@ -462,55 +461,39 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   _remove<%=associations_one[i].name_cp%>(id){
     return this.set_<%=associations_one[i].targetKey%>(null);
   }
-  <%}-%>
+<%}-%>
 
+<%associations_one = associations["hasOne"]-%>
+<% for(let i=0; i < associations_one.length; i++){ -%>
 
-  <%associations_one = associations["hasOne"]-%>
-  <% for(let i=0; i < associations_one.length; i++){ -%>
+  async _add<%=associations_one[i].name_cp%>(id){
+    let record = await models.<%=associations_one[i].target_lc%>.readById(id);
+    await record.set_<%=associations_one[i].targetKey%>(this.getIdValue());
+  }
 
-    async _add<%=associations_one[i].name_cp%>(id){
-      let record = await models.<%=associations_one[i].target_lc%>.readById(id);
-      await record.set_<%=associations_one[i].targetKey%>(this.getIdValue());
-    }
+  async _remove<%=associations_one[i].name_cp%>(id){
+    let record = await models.<%=associations_one[i].target_lc%>.readById(id);
+    await record.set_<%=associations_one[i].targetKey%>(null);
+  }
+<%}-%>
 
-    async _remove<%=associations_one[i].name_cp%>(id){
-      let record = await models.<%=associations_one[i].target_lc%>.readById(id);
-      await record.set_<%=associations_one[i].targetKey%>(null);
-    }
-  <%}-%>
+<% associations_temp = associations["hasMany"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
 
-  <% associations_temp = associations["hasMany"]-%>
-  <% for(let i=0; i < associations_temp.length; i++){ -%>
+  async _remove<%=associations_temp[i].name_cp%>(ids){
+    await helper.asyncForEach(ids, async id =>{
+      let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
+      await record.set_<%=associations_temp[i].targetKey%>(null);
+    });
+  }
 
-    async _remove<%=associations_temp[i].name_cp%>(ids){
-      await helper.asyncForEach(ids, async id =>{
-        let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
-        await record.set_<%=associations_temp[i].targetKey%>(null);
-      });
-    }
-
-    async _add<%=associations_temp[i].name_cp%>(ids){
-      await helper.asyncForEach(ids, async id => {
-        let responsibleAdapter = models.<%=associations_temp[i].target_lc%>.registeredAdapters[models.<%=associations_temp[i].target_lc%>.adapterForIri(id)];
-        /**
-         * Diferentiated cases:
-         * 
-         *   local: get Sequelize model by readById() and calls its non-static set_ method.
-         *   remote: calls the adapter static set_ method to resolve remotely.
-         */
-        if(responsibleAdapter.adapterType === 'remote') {
-          await responsibleAdapter.set_<%=associations_temp[i].targetKey%>(id, this.getIdValue());
-        } else if(responsibleAdapter.adapterType === 'local'){
-          let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
-          await record.set_<%=associations_temp[i].targetKey%>(this.getIdValue());
-        } else {
-          throw Error(`Adapter of type '${responsibleAdapter.adapterType}' is not supported.`);
-        }
-      });
-    }
-
-  <%}-%>
-
+  async _add<%=associations_temp[i].name_cp%>(ids){
+    await helper.asyncForEach(ids, async id =>{	
+      let record = await models.<%=associations_temp[i].target_lc%>.readById(id);	
+      await record.set_<%=associations_temp[i].targetKey%>(this.getIdValue());
+    });
+  }
+<%}-%>
 
   <% associations_temp = associations["belongsToMany"]-%>
 
