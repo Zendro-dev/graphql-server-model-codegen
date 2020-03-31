@@ -82,7 +82,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
      */
     console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: readById \nid: ", id);
 
-   
+
     let options = {};
     options['where'] = {};
     options['where'][this.idAttribute()] = id;
@@ -107,7 +107,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
 
       let arg = new searchArg(search);
       let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize; 
+      options['where'] = arg_sequelize;
     }
     return super.count(options);
   }
@@ -139,7 +139,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
 
       let arg = new searchArg(search);
       let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize; 
+      options['where'] = arg_sequelize;
     }
 
     /*
@@ -272,7 +272,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       * Debug
       */
     console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: addOne: \n- input: ", input);
-    
+
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
           try{
@@ -285,12 +285,12 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
             <%associations_temp = associations["belongsTo"].concat(associations["hasOne"]).concat(associations["hasMany"]).concat(associations["belongsToMany"])-%>
             <%for(let i=0; i < associations_temp.length; i++){-%>
                 if(input.add<%=associations_temp[i].name_cp-%> ){
-                  let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                  if(wrong_ids.length > 0){
-                    throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                  }else{
+                  //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                  //if(wrong_ids.length > 0){
+                  //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                  //}else{
                     await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
-                  }
+                  //}
                 }
               <%}-%>
             return result;
@@ -305,7 +305,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       * Debug
       */
     console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: deleteOne: id: ", id);
-    
+
     return super.findByPk(id)
         .then(item => {
 
@@ -344,20 +344,22 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
             <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
             <%for(let i=0; i < associations_temp.length; i++){-%>
                 if(input.add<%=associations_temp[i].name_cp-%> ){
-                  let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                  if(wrong_ids.length > 0){
-                    throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                  }else{
+                  //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                  //if(wrong_ids.length > 0){
+                  //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                  //}else{
                     await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
-                  }
+                  //}
                 }
 
                 if(input.remove<%=associations_temp[i].name_cp-%>){
-                  let <%=associations_temp[i].name-%> = await result.<%=associations_temp[i].name-%>Impl();
-                  if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`){await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);}
-                  else{
-                    throw new Error("The association you're trying to remove it doesn't exists");
-                  }
+                  //let <%=associations_temp[i].name-%> = await result.<%=associations_temp[i].name-%>Impl();
+                  //if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`){
+                    await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
+                  //}
+                  //else{
+                  //  throw new Error("The association you're trying to remove it doesn't exists");
+                  //}
                 }
               <%}-%>
 
@@ -365,21 +367,21 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
               <%associations_temp =  associations["hasMany"].concat(associations["belongsToMany"])-%>
               <%for(let i=0; i < associations_temp.length; i++){-%>
                   if(input.add<%=associations_temp[i].name_cp-%> ){
-                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                    if(wrong_ids.length > 0){
-                      throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                    }else{
+                    //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    //if(wrong_ids.length > 0){
+                    //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    //}else{
                       await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
-                    }
+                    //}
                   }
 
                   if(input.remove<%=associations_temp[i].name_cp-%>){
-                    let ids_associated = await result.<%=associations_temp[i].name-%>Impl().map(t => `${t[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`);
-                    await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, async id =>{
-                      if(!ids_associated.includes(id)){
-                        throw new Error(`The association with id ${id} that you're trying to remove desn't exist`);
-                      }
-                    });
+                    //let ids_associated = await result.<%=associations_temp[i].name-%>Impl().map(t => `${t[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`);
+                    //await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, async id =>{
+                    //  if(!ids_associated.includes(id)){
+                    //    throw new Error(`The association with id ${id} that you're trying to remove desn't exist`);
+                    //  }
+                    //});
                     await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
                   }
                 <%}-%>
@@ -488,8 +490,8 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   async _add<%=associations_temp[i].name_cp%>(ids){
-    await helper.asyncForEach(ids, async id =>{	
-      let record = await models.<%=associations_temp[i].target_lc%>.readById(id);	
+    await helper.asyncForEach(ids, async id =>{
+      let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
       await record.set_<%=associations_temp[i].targetKey%>(this.getIdValue());
     });
   }
