@@ -105,11 +105,11 @@ module.exports = class <%- name -%>{
         case 'ddm-adapter':
         case 'generic-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.countRecords(nsearch);
+          return adapter.countRecords(nsearch).catch(benignErrors => benignErrors);
   
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.countRecords(search);
+          return adapter.countRecords(search).catch(benignErrors => benignErrors);
         
         case 'default':
           throw new Error(`Adapter type: '${adapter.adapterType}' is not supported`);
@@ -176,11 +176,11 @@ module.exports = class <%- name -%>{
         case 'ddm-adapter':
         case 'generic-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.readAllCursor(nsearch, order, pagination);
+          return adapter.readAllCursor(nsearch, order, pagination).catch(benignErrors => benignErrors);
   
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.readAllCursor(search, order, pagination);
+          return adapter.readAllCursor(search, order, pagination).catch(benignErrors => benignErrors);
         
         case 'default':
           throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
@@ -344,12 +344,12 @@ module.exports = class <%- name -%>{
       }
     }
 
-    <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
+    <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination, authorizedAdapters}){
       if(search === undefined)
       {
-        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination, authorizedAdapters);
       }else{
-        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
+        return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination, authorizedAdapters )
       }
     }
   <%}-%>
