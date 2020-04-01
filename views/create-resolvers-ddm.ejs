@@ -34,6 +34,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
       let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
 
       let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
+      let authorizedAdapters = authorizationCheck.authorizedAdapters;
       if (authorizationCheck.authorizedAdapters.length > 0) {
         let <%=associations_temp[i].name%>ConnectionObj = await this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination,authorizedAdapters});
         //check adapter authorization Errors
@@ -159,6 +160,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
       let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
 
       let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
+      let authorizedAdapters = authorizationCheck.authorizedAdapters;
       if (authorizationCheck.authorizedAdapters.length > 0) {
         let <%=associations_temp[i].name%>ConnectionObj = await this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination,authorizedAdapters});
         //check adapter authorization Errors
