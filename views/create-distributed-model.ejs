@@ -118,13 +118,16 @@ module.exports = class <%- name -%>{
 
     return Promise.all(promises).then( results =>{
       return results.reduce( (total, current)=> {
-        //check current result
-        if(current) {
-          return total+current;
-        } else {
-          return total;
+        //check if current is Error
+        if (current instanceof Error) {
+          total.errors.push(current);
         }
-      }, 0);
+        //check current result
+        else if(current) {
+          total.sum += current;
+        }
+        return total;
+      }, {sum:0, errors:[]});
     });
   }
 
@@ -194,23 +197,29 @@ module.exports = class <%- name -%>{
       console.log("@@---------- phase1:\n", "\n results[", typeof results,"]", "\n---------- @@@");
 
       return results.reduce( (total, current)=> {
-        //check
-        if(current && current.pageInfo && current.edges) {
+        //check if current is Error
+        if (current instanceof Error) {
+          total.errors.push(current);
+        }
+        //check current
+        else if(current && current.pageInfo && current.edges) {
           someHasNextPage |= current.pageInfo.hasNextPage;
           someHasPreviousPage |= current.pageInfo.hasPreviousPage;
-          return total.concat(current.edges.map(e => e.node));
-        } else {
-          return total;
+          total.nodes =  total.nodes.concat(current.edges.map(e => e.node));
         }
-      }, []);
+        return total;
+      }, {nodes: [], errors: []});
     })
     //phase 2: order & paginate
-    .then( nodes => {
+    .then( nodesAndErrors => {
       /**
        * Debug
        */
-      console.log("@@---------- phase2:\n", "\n nodes[", typeof nodes,"]", "\n---------- @@@");
+      console.log("@@---------- phase2:\n", "\n nodes[", typeof nodesAndErrors.nodes,"]", "\n---------- @@@");
       
+      let nodes = nodesAndErrors.nodes;
+      let errors = nodesAndErrors.errors;
+
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
       
@@ -226,7 +235,9 @@ module.exports = class <%- name -%>{
       let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
       let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
       
-      return helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
+      graphQLConnection['errors'] = errors;
+      return graphQLConnection;
     });
   }
 
