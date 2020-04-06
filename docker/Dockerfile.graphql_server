@@ -1,10 +1,10 @@
-FROM node:11.9.0-stretch-slim
+FROM node:11.12.0-stretch-slim
 
 # Create app directory
 WORKDIR /usr/src/app
 
 # Clone the skeleton project and install dependencies
-RUN apt-get update && apt-get install -y git && apt-get install -y procps &&\
+RUN apt-get update && apt-get install -y git procps autoconf libtool make &&\
   git clone https://github.com/ScienceDb/graphql-server.git . && \
   chmod u+x ./migrateDbAndStartServer.sh
 
