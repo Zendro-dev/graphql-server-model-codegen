@@ -12,44 +12,95 @@ const iriRegex = new RegExp('<%- regex -%>');
 
 module.exports = class <%- adapterName -%>{
 
+  static get adapterName(){
+    return '<%- adapterName -%>';
+  }
+
+  static get adapterType(){
+    return '<%- storageType -%>';
+  }
 
   static recognizeId(iri){
     return iriRegex.test(iri);
   }
 
   static readById(iri){
-    let query = `query readOne<%- nameCp -%>{readOne<%- nameCp -%>(<%- idAttribute -%>: "${iri}"){ <%- idAttribute -%> <%for(var key in attributes){-%>
-       <%=key %>
-     <%}-%> }}  `;
+    /**
+     * Debug
+     */
+    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: readById \niri: ", iri, "\nremoteCenzontleURL: ", remoteCenzontleURL);
 
-     return axios.post(remoteCenzontleURL,{query: query}).then(res =>{
-       let data = res.data.data.readOne<%- nameCp -%>;
-       return data;
-     }).catch(error =>{
-       error['url'] = remoteCenzontleURL;
-       handleError(error);
-     });
+    let query = `
+          query 
+            readOne<%- nameCp %>
+            {
+              readOne<%- nameCp -%>(<%- idAttribute -%>:"${iri}")
+              { 
+                <%- idAttribute -%> <%for(var key in attributes){ %>
+                <%= key %> <%}%>
+              }
+            }`;
+
+    /**
+     * Debug
+     */
+    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n");
+
+    return axios.post( remoteCenzontleURL, {
+      query: query
+    }).then(res =>{
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.readOne<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
   }
 
-    static countRecords(search){
-      let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
-    count<%- namePlCp -%>(search: $search)
-    }`
+  static countRecords(search){
+    /**
+     * Debug
+     */
+    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: countRecords \nsearch: ", search, "\nremoteCenzontleURL: ", remoteCenzontleURL);
+    
+    let query = `
+      query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
+        count<%- namePlCp -%>(search: $search)
+      }`
 
-      return axios.post(remoteCenzontleURL, {
-          query: query,
-          variables: {
-              search: search
-          }
-      }).then(res => {
-          return res.data.data.count<%- namePlCp -%>;
-      }).catch(error => {
-          error['url'] = remoteCenzontleURL;
-          handleError(error);
-      });
-    }
+    /**
+     * Debug
+     */
+    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", {search: search});
+
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: {
+            search: search
+        }
+    }).then(res => {
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.count<%- namePlCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+  }
 
   static readAllCursor(search, order, pagination){
+    /**
+     * Debug
+     */
+    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: readAllCursor \search: ", search, "\norder: ", order, "\npagination: ", pagination, "\nremoteCenzontleURL: ", remoteCenzontleURL);
+    
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -59,15 +110,169 @@ module.exports = class <%- adapterName -%>{
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
 
-    return axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
-      return res.data.data.<%- namePl -%>Connection;
+      /**
+       * Debug
+       */
+      console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", {search: search, order:order, pagination: pagination});
+    
+      return axios.post(remoteCenzontleURL, {
+        query:query, 
+        variables: {
+          search: search, 
+          order:order, 
+          pagination: pagination
+        }
+      }).then(res =>{
+        //check
+        if(res&&res.data&&res.data.data) {
+          return res.data.data.<%- namePl -%>Connection;
+        } else {
+          throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+        }
     }).catch(error=>{
       error['url'] = remoteCenzontleURL;
       handleError(error);
     });
   }
 
-  static get name(){
-    return "<%- adapterName -%>";
+  static addOne(input){
+    /**
+     * Debug
+     */
+    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: addOne \ninput: ", input, "\nremoteCenzontleURL: ", remoteCenzontleURL);
+    
+    let query = `
+        mutation add<%- nameCp _%>(
+<%if(!defaultId){-%>
+          $<%=idAttribute%>:ID! <%}-%> <%for(var key in editableAttributes){%>
+          $<%=key %>:<%= editableAttributes[key]%><%}-%>
+<%for(var key in associations.schema_attributes.one){-%> 
+          $add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%><%for(var key in associations.schema_attributes.many){-%> 
+          $add<%= associations.schema_attributes.many[key][2]%>:[ID]
+<%}-%> 
+        ){
+          add<%- nameCp -%>(<%if(!defaultId){-%> 
+          <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){%>
+          <%=key %>:$<%= key%><%}-%> <%for(var key in associations.schema_attributes.one){-%> 
+          add<%= associations.schema_attributes.one[key][2]%>:$add<%= associations.schema_attributes.one[key][2]%><%}-%> <%for(var key in associations.schema_attributes.many){-%> add<%= associations.schema_attributes.many[key][2]%>:$add<%= associations.schema_attributes.many[key][2]%><%}-%>){
+            <%- idAttribute -%> 
+<%for(var key in attributes){-%>
+            <%=key %>
+<%}-%>
+          }
+        }`;
+      
+    /**
+      * Debug
+      */
+    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", input);
+
+    return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res =>{
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.add<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
+  }
+
+  static deleteOne(id){
+    /**
+     * Debug
+     */
+    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: deleteOne \nid: ", id, "\nremoteCenzontleURL: ", remoteCenzontleURL);
+
+    let query = `
+          mutation 
+            delete<%- nameCp -%>{ 
+              delete<%- nameCp -%>(
+                <%- idAttribute -%>: "${id}" )}`;
+
+    /**
+     * Debug
+     */
+    console.log("\nquery: gql:\n", query, "\nvariables: \n");
+    
+    return axios.post(remoteCenzontleURL, {query: query}).then(res =>{
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.delete<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
+  }
+
+  static updateOne(input){
+    /**
+     * Debug
+     */
+    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: updateOne \ninput: ", input, "\nremoteCenzontleURL: ", remoteCenzontleURL);
+
+    let query = `
+          mutation 
+            update<%- nameCp-%>(
+              $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
+              $<%=key %>:<%= editableAttributes[key]%> <%}-%> <%for(var key in associations.schema_attributes.one){ %>
+              $add<%= associations.schema_attributes.one[key][2]%>:ID 
+              $remove<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%> 
+              $add<%= associations.schema_attributes.many[key][2]%>:[ID] 
+              $remove<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> 
+            ){
+              update<%- nameCp-%>(
+                <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
+                <%=key %>:$<%= key%> <%}-%> <%for(var key in associations.schema_attributes.one){-%> 
+                add<%= associations.schema_attributes.one[key][2]%>:$add<%= associations.schema_attributes.one[key][2]%> 
+                remove<%= associations.schema_attributes.one[key][2]%>:$remove<%= associations.schema_attributes.one[key][2]%> <%}-%> <%for(var key in associations.schema_attributes.many){%> 
+                add<%= associations.schema_attributes.many[key][2]%>:$add<%= associations.schema_attributes.many[key][2]%> 
+                remove<%= associations.schema_attributes.many[key][2]%>:$remove<%= associations.schema_attributes.many[key][2]%> <%}%>
+              ){
+                <%- idAttribute -%> <%for(var key in attributes){%>
+                <%=key %> <%}%>
+              }
+            }`
+        
+    /**
+     * Debug
+     */
+    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", input);
+
+    return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res => {
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.update<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
+  }
+
+  static bulkAddCsv(context) {
+    throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
+  }
+
+  static  csvTableTemplate(){
+    let query = `query { csvTableTemplate<%- nameCp-%> }`;
+    return axios.post(remoteCenzontleURL, {query:query}).then(res =>{
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.csvTableTemplate<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
   }
 }

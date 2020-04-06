@@ -363,6 +363,8 @@ writeIndexAdapters = function(dir_write){
   let index = `
   const fs = require('fs');
   const path = require('path');
+  const Sequelize = require('sequelize');
+  sequelize = require('../connection');
 
   let adapters = {};
   module.exports = adapters;
@@ -372,15 +374,30 @@ writeIndexAdapters = function(dir_write){
   }).forEach( file =>{
 
     let adapter = require(path.join(__dirname, file));
-    if( adapters[adapter.name] ){
-      throw Error(\`Duplicated adapter name \${adapter.name}\`);
+    if( adapters[adapter.adapterName] ){
+      throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
     }
-    adapters[adapter.name] = adapter;
+    
+    switch(adapter.adapterType) {
+      case 'ddm-adapter':
+      case 'cenzontle-webservice-adapter':
+      case 'generic-adapter':
+        adapters[adapter.adapterName] = adapter; 
+        break;
+
+      case 'sql-adapter':
+        adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
+        break;
+      
+      case 'default':
+        throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
+    }
   });
+  
   `
   fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {
     if (err)
-      throw Error(err);
+      throw new Error(err);
     });
 
 }
@@ -416,7 +433,7 @@ module.exports.getOptions = function(dataModel){
   let opts = {
       name : dataModel.model,
       nameCp: capitalizeString(dataModel.model),
-      storageType : dataModel.storageType.toLowerCase(),
+      storageType : getStorageType(dataModel),
       table: inflection.pluralize(uncapitalizeString(dataModel.model)),
       nameLc: uncapitalizeString(dataModel.model),
       namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
@@ -656,6 +673,53 @@ getIdAttribute = function(dataModel){
   return dataModel.internalId === undefined ? "id" : dataModel.internalId;
 }
 
+getStorageType = function(dataModel) {
+  let valid = true;
+  
+  /**
+   * Checks for 'storageType'.
+   */
+  //check 'storageType' existence
+  if(!dataModel.hasOwnProperty('storageType')) {
+    valid = false;
+    console.error(colors.red(`ERROR: 'storageType' is a mandatory field, but has not been declared in the attributes of model '${dataModel.dataModel.model}'`));
+  } else {
+    //check 'storageType' type
+    if(!dataModel.storageType || typeof dataModel.storageType !== 'string') {
+      valid = false;
+      console.error(colors.red(`ERROR: 'storageType' field must be a non-empty string.`));
+    } else {
+      //check for valid storageType
+      switch(dataModel.storageType.toLowerCase()) {
+        //models
+        case 'sql':
+        case 'distributed-data-model':
+        case 'webservice':
+        case 'cenz-server':
+        //adapters
+        case 'sql-adapter':
+        case 'ddm-adapter':
+        case 'cenzontle-webservice-adapter':
+        case 'generic-adapter':
+          //ok
+          break;
+        
+        default:
+          //not ok
+          valid = false;
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
+          break;
+      }
+    }
+  }
+
+  if(valid) {
+    return dataModel.storageType.toLowerCase();
+  } else {
+    return "";
+  }
+}
+
 
  /**
   * generateCode - Given a set of json files, describing each of them a data model, this
@@ -714,6 +778,9 @@ module.exports.generateCode = function(json_dir, dir_write){
         //console.log(opts.associations);
 
         if(opts.storageType === 'sql'){
+          /**
+           * Migrations
+           */
           sections.forEach((section) =>{
               let file_name = "";
               if(section==='migrations')
@@ -731,21 +798,35 @@ module.exports.generateCode = function(json_dir, dir_write){
                           console.log(file_name + ' written successfully!');
                       });
               }
-        });
-        //generateAssociationsMigrations(opts, dir_write);
-      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz_server' || opts.storageType === 'distributed-data-model'){
-          let file_name = "";
-          file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
-          generateSection("schemas",opts,file_name).then( ()=>{
-            console.log(file_name + ' written successfully!');
           });
+        //generateAssociationsMigrations(opts, dir_write);
+      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz-server' || opts.storageType === 'distributed-data-model'){
+          let file_name = "";
+          
+          /**
+           * Schemas
+           */
+          if (opts.storageType === 'distributed-data-model') {
+            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+            generateSection("schemas-ddm",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          } else {
+            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+            generateSection("schemas",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          }
 
+          /**
+           * Models
+           */
           if(opts.storageType === 'webservice'){
             file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
             generateSection("models-webservice",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!(from webservice)');
             });
-          }else if(opts.storageType === 'cenz_server'){
+          }else if(opts.storageType === 'cenz-server'){
             file_name = dir_write + '/models-cenz-server/' + opts.nameLc + '.js';
             generateSection("models-cenz",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!(from cenz server)');
@@ -757,16 +838,76 @@ module.exports.generateCode = function(json_dir, dir_write){
             });
           }
 
+          /**
+           * Resolvers
+           */
+          if (opts.storageType === 'distributed-data-model') {
+            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+            generateSection("resolvers-ddm",opts,file_name).then( ()=>{
+              console.log(file_name + ' written successfully!');
+            });
+          } else {
             file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
             generateSection("resolvers",opts,file_name).then( ()=>{
               console.log(file_name + ' written successfully!');
             });
-
-      }else if(opts.storageType === 'cenzontle-web-service-adapter'){
+          }
+          
+      /**
+       * Adapters
+       */
+      }else if(opts.storageType === 'cenzontle-webservice-adapter'
+              || opts.storageType === 'ddm-adapter'){
+        /**
+         * Adapters
+         */
         let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
         generateSection("cenz-adapters",opts,file_name).then( ()=>{
           console.log(file_name + ' written successfully!');
         });
+      }else if(opts.storageType === 'sql-adapter') {
+        /**
+         * Adapters
+         */
+        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
+        generateSection("sql-adapter",opts,file_name).then( ()=>{
+          console.log(file_name + ' written successfully!');
+        });
+
+        /**
+         * Migrations
+         */
+        file_name = createNameMigration(dir_write,opts.nameLc);
+        generateSection('migrations', opts, file_name)
+            .then( () => {
+                console.log(file_name + ' written successfully!');
+            });
+
+        /**
+         * Validations
+         */
+        file_name = dir_write + '/'+ 'validations' +'/' + opts.nameLc + '.js';
+        if( fs.existsSync(file_name)){
+            console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
+        }else{
+            generateSection('validations', opts, file_name)
+                .then( () => {
+                    console.log(file_name + ' written successfully!');
+                });
+        }
+
+        /**
+         * Patches
+         */
+        file_name = dir_write + '/'+ 'patches' +'/' + opts.nameLc + '.js';
+        if( fs.existsSync(file_name)){
+            console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
+        }else{
+            generateSection('patches', opts, file_name)
+                .then( () => {
+                    console.log(file_name + ' written successfully!');
+                });
+        }
       }
     }
   });

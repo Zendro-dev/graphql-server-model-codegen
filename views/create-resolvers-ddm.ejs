@@ -1,0 +1,459 @@
+/*
+    Resolvers for basic CRUD operations
+*/
+
+const path = require('path');
+const <%-  nameLc  -%> = require(path.join(__dirname, '..', 'models_index.js')).<%- nameLc -%>;
+const helper = require('../utils/helper');
+const checkAuthorization = require('../utils/check-authorization');
+const fs = require('fs');
+const {handleError} = require('../utils/errors');
+const os = require('os');
+const models = require(path.join(__dirname, '..', 'models_index.js'));
+
+<% associations_temp = associations["belongsToMany"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+  
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection - Check user authorization and return certain number, specified in pagination argument, of records
+   * associated with the current instance, this records should also
+   * holds the condition of search argument, all of them sorted as specified by the order argument.
+   *
+   * @param  {object} search     Search argument for filtering associated records
+   * @param  {array} order       Type of sorting (ASC, DESC) for each field
+   * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
+   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
+   */
+   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = async function({
+       search,
+       order,
+       pagination
+   }, context) {
+     try{
+      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
+
+      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
+      let authorizedAdapters = authorizationCheck.authorizedAdapters;
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+        let <%=associations_temp[i].name%>ConnectionObj = await this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination,authorizedAdapters});
+        //check adapter authorization Errors
+        [<%=associations_temp[i].name%>ConnectionObj,context] = helper.writeBenignErrors(authorizationCheck,context,<%=associations_temp[i].name%>ConnectionObj)
+        return <%=associations_temp[i].name%>ConnectionObj;
+      } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+        } else {
+          throw new Error('No available adapters for data model "Book" ');
+        }
+      }
+      
+      
+      
+     }catch(error){
+       console.error(error);
+       handleError(error);
+     };
+   }
+
+  /**
+   * <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> - Count number of associated records that holds the conditions specified in the search argument
+   *
+   * @param  {object} {search} description
+   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {type}          Number of associated records that holds the conditions specified in the search argument
+   */
+  <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = async function({search}, context){
+    try{
+      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
+
+      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+        let countFiltered<%=associations_temp[i].name_cp%>Obj = await this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
+        [countFiltered<%=associations_temp[i].name_cp%>Obj,context] = helper.writeBenignErrors(authorizationCheck,context, countFiltered<%=associations_temp[i].name_cp%>Obj);
+        return countFiltered<%=associations_temp[i].name_cp%>Obj.sum;
+      } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+          throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+        } else {
+          throw new Error('No available adapters for data model "Book"');
+        }
+      }
+
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
+  }
+<%}-%>
+
+
+<%let associations_one = associations["belongsTo"].concat( associations["hasOne"])-%>
+<% for(let i=0; i < associations_one.length; i++){ -%>
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
+   *
+   * @param  {object} search       Search argument to match the associated record
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {type}         Associated record
+   */
+  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = function({search}, context){
+    try{
+      return this.<%=associations_one[i].name%>Impl(search);
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
+  }
+<%}-%>
+
+<% associations_temp = associations["hasMany"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+
+   /**
+   * <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> - Count number of associated records that holds the conditions specified in the search argument
+   *
+   * @param  {object} {search} description
+   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {type}          Number of associated records that holds the conditions specified in the search argument
+   */
+  <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = async function({search}, context){
+    try{
+      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
+
+      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+        let countFiltered<%=associations_temp[i].name_cp%>Obj = await this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
+        [countFiltered<%=associations_temp[i].name_cp%>Obj,context] = helper.writeBenignErrors(authorizationCheck,context, countFiltered<%=associations_temp[i].name_cp%>Obj);
+        return countFiltered<%=associations_temp[i].name_cp%>Obj.sum;
+      } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+          throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+        } else {
+          throw new Error('No available adapters for data model "Book"');
+        }
+      }
+
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
+  }
+
+
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection - Check user authorization and return certain number, specified in pagination argument, of records
+   * associated with the current instance, this records should also
+   * holds the condition of search argument, all of them sorted as specified by the order argument.
+   *
+   * @param  {object} search     Search argument for filtering associated records
+   * @param  {array} order       Type of sorting (ASC, DESC) for each field
+   * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
+   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
+   */
+  <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = async function({search,order,pagination}, context){
+    try{
+      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
+
+      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
+      let authorizedAdapters = authorizationCheck.authorizedAdapters;
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+        let <%=associations_temp[i].name%>ConnectionObj = await this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination,authorizedAdapters});
+        //check adapter authorization Errors
+        [<%=associations_temp[i].name%>ConnectionObj,context] = helper.writeBenignErrors(authorizationCheck,context,<%=associations_temp[i].name%>ConnectionObj)
+        return <%=associations_temp[i].name%>ConnectionObj;
+      } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+        } else {
+          throw new Error('No available adapters for data model "Book" ');
+        }
+      }
+
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
+  }
+<%}-%>
+
+module.exports = {
+  
+  /**
+   * <%- namePl -%>Connection - Check user authorization and return certain number, specified in pagination argument, of records that
+   * holds the condition of search argument, all of them sorted as specified by the order argument.
+   *
+   * @param  {object} search     Search argument for filtering records
+   * @param  {array} order       Type of sorting (ASC, DESC) for each field
+   * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
+   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
+   */
+  <%- namePl -%>Connection: async function({search, order, pagination}, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: <%- namePl -%>Connection");
+    
+    //check: adapters
+    let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
+    if(registeredAdapters.length === 0) {
+      throw new Error('No adapters registered for data model "<%- name %>"');
+    }//else
+
+    try {
+      //exclude adapters
+      let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
+      if(adapters.length === 0) {
+        throw new Error('All adapters was excluded for data model "<%- name %>"');
+      }//else
+
+      //check: auth adapters
+      let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+        let connectionObj = await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters);
+        //check adapter authorization Errors
+        if (authorizationCheck.authorizationErrors.length > 0) {
+          context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
+        }
+        //check Errors returned by the model layer (time-outs, unreachable, etc...)
+        if ( connectionObj.errors !== undefined && Array.isArray(connectionObj.errors) && connectionObj.errors.length > 0 ) {
+          context.benignErrors = context.benignErrors.concat(connectionObj.errors)
+          delete connectionObj['errors']
+        }
+        return connectionObj;
+      } else { //adapters not auth || errors
+          // else new Error
+          if (authorizationCheck.authorizationErrors.length > 0) {
+              throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+          } else {
+              throw new Error('No available adapters for data model "<%- name %>" ');
+          }
+      }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    }
+  },
+
+
+  /**
+   * readOne<%- nameCp -%> - Check user authorization and return one record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
+   *
+   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {object}         Record with <%- idAttribute -%> requested
+   */
+  readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: readOne<%- nameCp -%>");
+
+    //check: adapters auth
+    try {
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
+      if (authorizationCheck === true) {
+        return <%- nameLc _%>.readById(<%- idAttribute _%>);
+      } else {//adapter not auth
+        throw new Error("You don't have authorization to perform this action on adapter");
+      }
+    } catch (error) {
+      console.error(error);
+      handleError(error);
+    }
+  },
+
+  /**
+   * add<%- nameCp -%> - Check user authorization and creates a new record with data specified in the input argument
+   *
+   * @param  {object} input   Info of each field to create the new record
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {object}         New record created
+   */
+  add<%- nameCp -%>: async function(input, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: add<%- nameCp -%>");
+
+    //check: input has idAttribute
+    if (! input.<%- idAttribute _%>) {
+      throw new Error(`Illegal argument. Provided input requires attribute '<%- idAttribute _%>'.`);
+    }
+
+    //check: adapters auth
+    try {
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>), 'create');
+      if (authorizationCheck === true) {
+        return <%- nameLc _%>.addOne(input);
+      } else {//adapter not auth
+        throw new Error("You don't have authorization to perform this action on adapter");
+      }
+    } catch (error) {
+      console.error(error);
+      handleError(error);
+    }
+  },
+
+
+  /**
+   * bulkAdd<%- nameCp -%>Csv - Load csv file of records
+   *
+   * @param  {string} _       First parameter is not used
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   */
+  bulkAdd<%- nameCp -%>Csv: function(_, context) {
+    return checkAuthorization(context, '<%- name -%>', 'create').then(authorization => {
+      if (authorization === true) {
+        return <%- nameLc -%>.bulkAddCsv(context);
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch(error => {
+      console.error(error);
+      handleError( error);
+    })
+  },
+
+  /**
+   * delete<%- nameCp -%> - Check user authorization and delete a record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
+   *
+   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to delete
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {string}         Message indicating if deletion was successfull.
+   */
+  delete<%- nameCp -%>: async function({<%- idAttribute -%>}, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: delete<%- nameCp -%>");
+
+    //check: adapters auth
+    try {
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'delete');
+      if (authorizationCheck === true) {
+        return <%- nameLc _%>.deleteOne(<%- idAttribute _%>);
+      } else {//adapter not auth
+        throw new Error("You don't have authorization to perform this action on adapter");
+      }
+    } catch (error) {
+      console.error(error);
+      handleError(error);
+    }
+  },
+
+  /**
+   * update<%- nameCp-%> - Check user authorization and update the record specified in the input argument
+   *
+   * @param  {object} input   record to update and new info to update
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {object}         Updated record
+   */
+  update<%- nameCp-%>: async function(input, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: update<%- nameCp -%>");
+
+    //check: input has idAttribute
+    if (! input.<%- idAttribute _%>) {
+      throw new Error(`Illegal argument. Provided input requires attribute '<%- idAttribute _%>'.`);
+    }
+
+    //check: adapters auth
+    try {
+      let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>), 'update');
+      if (authorizationCheck === true) {
+        return <%- nameLc _%>.updateOne(input);
+      } else {//adapter not auth
+        throw new Error("You don't have authorization to perform this action on adapter");
+      }
+    } catch (error) {
+      console.error(error);
+      handleError(error);
+    }
+  },
+
+  /**
+   * count<%-namePlCp-%> - Counts number of records that holds the conditions specified in the search argument
+   *
+   * @param  {object} {search} Search argument for filtering records
+   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {number}          Number of records that holds the conditions specified in the search argument
+   */
+
+  count<%-namePlCp-%>: async function({search}, context){
+    /**
+      * Debug
+      */
+    console.log("\n-@--resolver: on: count<%- nameCp -%>");
+
+    //check: adapters
+    let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
+    if(registeredAdapters.length === 0) {
+      throw new Error('No adapters registered for data model "<%- name %>"');
+    }//else
+
+    try {
+      //exclude adapters
+      let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
+      if(adapters.length === 0) {
+        throw new Error('All adapters was excluded for data model "<%- name %>"');
+      }//else
+
+      //check: auth adapters
+      let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+      if (authorizationCheck.authorizedAdapters.length > 0) {
+
+        let countObj = await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters);
+        //check adapter authorization Errors
+        if (authorizationCheck.authorizationErrors.length > 0) {
+          context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
+        }
+        //check Errors returned by the model layer (time-outs, unreachable, etc...)
+        if ( countObj.errors !== undefined && Array.isArray(countObj.errors) && countObj.errors.length > 0 ) {
+          context.benignErrors = context.benignErrors.concat(countObj.errors)
+          delete countObj['errors']
+        }
+        return countObj.sum;
+      } else { //adapters not auth || errors
+          // else new Error
+          if (authorizationCheck.authorizationErrors.length > 0) {
+              throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+          } else {
+              throw new Error('No available adapters for data model "<%- name %>"');
+          }
+      }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    }
+  },
+
+  /**
+   * csvTableTemplate<%- nameCp-%> - Returns table's template
+   *
+   * @param  {string} _       First parameter is not used
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {Array}         Strings, one for header and one columns types
+   */
+  csvTableTemplate<%- nameCp-%>: function(_, context){
+    return checkAuthorization(context, '<%- name -%>', 'read').then(authorization => {
+        if (authorization === true) {
+            return <%- nameLc -%>.csvTableTemplate();
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
+      console.error(error);
+        handleError(error);
+    })
+  }
+
+}

@@ -1,6 +1,6 @@
 module.exports.book = {
   "model" : "Book",
-  "storageType" : "cenzontle-web-service-adapter",
+  "storageType" : "cenzontle-webservice-adapter",
   "adapterName": "BooksOne",
   "regex": "one",
   "url": "http://localhost:3000/graphql",
@@ -26,7 +26,7 @@ module.exports.book = {
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "cenz_server",
+        "targetStorageType" : "cenz-server",
         "label" : "name"
         }
   }
@@ -60,7 +60,7 @@ module.exports.book_ddm =
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "cenz_server",
+        "targetStorageType" : "cenz-server",
         "label" : "name"
         }
   }
@@ -93,7 +93,7 @@ module.exports.person_ddm =  {
         "target": "publi_sher",
         "targetKey": "companyId",
         "keyIn": "Person",
-        "targetStorageType": "cenz_server"
+        "targetStorageType": "cenz-server"
       },
 
       "dogs" :{
@@ -127,4 +127,58 @@ module.exports.dog_ddm =  {
         "targetStorageType" : "sql"
       }
     }
+  }
+
+
+  module.exports.person_adapter_sql = {
+      "model": "Person",
+      "storageType": "sql-adapter",
+      "adapterName": "peopleLocalSql",
+      "regex": "peopleLocal",
+      "url": "http://localhost:3030/graphql",
+      "attributes": {
+          "firstName": "String",
+          "lastName": "String",
+          "email": "String",
+          "companyId": "Int",
+          "internalPersonId": "String"
+      },
+      "associations": {
+          "works": {
+              "type": "to_many",
+              "target": "Book",
+              "targetKey": "internalPersonId",
+              "keyIn": "Book",
+              "targetStorageType": "sql",
+              "label": "title"
+          }
+      },
+      "internalId": "internalPersonId"
+  }
+
+
+  module.exports.book_ddm_association = {
+    "model": "Book",
+    "storageType": "distributed-data-model",
+    "registry": [
+      "booksRemote",
+      "booksLocalSql"
+    ],
+    "attributes": {
+      "title": "String",
+      "genre": "String",
+      "internalPersonId": "String",
+      "internalBookId": "String"
+    },
+    "associations": {
+      "author": {
+        "type": "to_one",
+        "target": "Person",
+        "targetKey": "internalPersonId",
+        "keyIn": "Book",
+        "targetStorageType": "cenz-server",
+        "label": "email"
+      }
+    },
+    "internalId": "internalBookId"
   }
