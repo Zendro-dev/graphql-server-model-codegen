@@ -97,17 +97,7 @@ describe(
 
     });
 
-    it('08. Individual vue table', function() {
-
-        let res = itHelpers.request_graph_ql_post('{vueTableIndividual {total}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.vueTableIndividual.total).equal(2);
-
-    });
-
-    it('09. Individual sort', function() {
+    it('08. Individual sort', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(pagination: {limit:2}, order: [{field: name, order: DESC}]) {name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -124,7 +114,7 @@ describe(
 
     });
 
-    it('10. Individual delete all', function() {
+    it('09. Individual delete all', function() {
 
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
@@ -141,7 +131,7 @@ describe(
     });
 
     // transcript_count model tests start here:
-    it('11. TranscriptCount table is empty', function() {
+    it('10. TranscriptCount table is empty', function() {
 
         let res = itHelpers.request_graph_ql_post('{countTranscript_counts}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -152,7 +142,7 @@ describe(
     });
 
 
-    it('12. TranscriptCount add', function() {
+    it('11. TranscriptCount add', function() {
 
         let res = itHelpers.request_graph_ql_post('mutation ' +
             '{ addTranscript_count(gene: "Gene A", ' +
@@ -167,7 +157,7 @@ describe(
     });
 
 
-    it('13. TranscriptCount update', function() {
+    it('12. TranscriptCount update', function() {
 
         let res = itHelpers.request_graph_ql_post('mutation { updateTranscript_count(id: 1, gene: "Gene B") {id gene} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -184,7 +174,7 @@ describe(
 
     });
 
-    it('14. TranscriptCount add one more and find both', function() {
+    it('13. TranscriptCount add one more and find both', function() {
 
         itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene C", ' +
                                                                        'variable: "RPKM", ' +
@@ -199,7 +189,7 @@ describe(
     });
 
 
-    it('15. TranscriptCount read one', function() {
+    it('14. TranscriptCount read one', function() {
 
         let res = itHelpers.request_graph_ql_post('{readOneTranscript_count(id : 2) { id gene variable count tissue_or_condition}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -219,7 +209,7 @@ describe(
 
     });
 
-    it('16. TranscriptCount search with like', function() {
+    it('15. TranscriptCount search with like', function() {
 
         let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:{value:"%ene%"},operator: like}) {gene}}`);
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -229,7 +219,7 @@ describe(
 
     });
 
-    it('17. TranscriptCount paginate', function() {
+    it('16. TranscriptCount paginate', function() {
 
         let res = itHelpers.request_graph_ql_post('{transcript_counts(pagination:{limit:1}) {id gene}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -239,17 +229,7 @@ describe(
 
     });
 
-    it('18. TranscriptCount vue table', function() {
-
-        let res = itHelpers.request_graph_ql_post('{ vueTableTranscript_count {total} }');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.vueTableTranscript_count.total).equal(2);
-
-    });
-
-    it('19. TranscriptCount sort', function() {
+    it('17. TranscriptCount sort', function() {
 
         let res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination: {limit:2}, order: [{field: gene, order: DESC}]) {gene} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -265,10 +245,38 @@ describe(
         })
     });
 
+    it('18. Extended search and regular expressions', function() {
+        let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazanaza") { id name } }');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.addIndividual.name).equal("Zazanaza");
+
+        res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazaniza") { id name } }');
+        resBody = JSON.parse(res.body.toString('utf8'));
+
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.addIndividual.name).equal("Zazaniza");
+
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: {value: "Zazan[ai]za"}}) {name}}`);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+                individuals: [
+                    {name: "Zazanaza"},
+                    {name: "Zazaniza"}
+                ]
+            }
+        });
+    });
+
+
+
 
     // Test belongs-to relation between transcript_count and individual data
     // model:
-    it('20. TranscriptCount assign new Individual', function() {
+    it('19. TranscriptCount assign new Individual', function() {
 
         // Create Plant to subjected to RNA-Seq analysis from which the transcript_counts result
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "IncredibleMaizePlantOne") { id name } }');
@@ -294,7 +302,7 @@ describe(
                 id: "3",
                 gene: "Gene D",
                 individual: {
-                  id: "3",
+                  id: "5",
                   name: "IncredibleMaizePlantOne"
                 }
               }
@@ -302,7 +310,7 @@ describe(
         })
     });
 
-  it('21. TranscriptCount delete all', function() {
+  it('20. TranscriptCount delete all', function() {
 
       let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
       let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
