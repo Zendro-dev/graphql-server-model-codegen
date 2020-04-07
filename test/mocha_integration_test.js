@@ -245,7 +245,7 @@ describe(
         })
     });
 
-    it('18. Extended search and regular expressions', function() {
+    it('18. Extended search and regular expressions', async () => {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazanaza") { id name } }');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
@@ -280,6 +280,78 @@ describe(
                     {name: "Zazaniza"}
                 ]
             }
+        });
+
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', null);
+
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: [
+              {
+                  firstPerson: [
+                      {
+                          name: "Zazanaza"
+                      }
+                  ]
+              },
+              {
+                  secondPerson: [
+                      {
+                          name: "Zazaniza"
+                      }
+                  ]
+              }
+          ],
+          errors: []
+        });
+
+
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$');
+
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: [
+              {
+                  firstPerson: [
+                      {
+                          name: "Zazanaza"
+                      }
+                  ]
+              },
+              {
+                  secondPerson: [
+                      {
+                          name: "Zazaniza"
+                      }
+                  ]
+              }
+          ],
+          errors: []
+        });
+
+
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', '$');
+
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: null,
+            errors: [{message: "State either 'jq' or 'jsonPath' expressions, never both. - jq is . and jsonPath is $"}]
+        });
+
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, null);
+
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: null,
+            errors: [{message: "State either 'jq' or 'jsonPath' expressions, never both. - both are null or undefined"}]
         });
     });
 

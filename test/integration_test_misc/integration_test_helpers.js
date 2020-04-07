@@ -33,9 +33,9 @@ module.exports.request_graph_ql_post = function (query){
 module.exports.request_metaquery_post = async function(queries, jq, jsonPath) {
     return await request('POST', metaqueryUrl, {
         json: {
-            queries:  `${queries}`,
-            jq:       `${jq}`,
-            jsonPath: `${jsonPath}`
+            queries:  queries,
+            jq:       jq != null ? `${jq}` : null,
+            jsonPath: jsonPath != null ? `${jsonPath}` : null
         }
     });
 };
