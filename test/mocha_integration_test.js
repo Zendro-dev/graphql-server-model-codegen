@@ -258,7 +258,19 @@ describe(
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.addIndividual.name).equal("Zazaniza");
 
-        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: {value: "Zazan[ai]za"}}) {name}}`);
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: {value: "Zazan[aeiou]za"}}) {name}}`);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+                individuals: [
+                    {name: "Zazanaza"},
+                    {name: "Zazaniza"}
+                ]
+            }
+        });
+
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: notRegexp, value: {value: "^[A-Ya-z].*"}}) {name}}`);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
