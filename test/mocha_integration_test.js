@@ -248,6 +248,7 @@ describe(
     it('18. Extended search and regular expressions', async () => {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazanaza") { id name } }');
         let resBody = JSON.parse(res.body.toString('utf8'));
+        // let plantId = resBody.data.addIndividual.id;
 
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.addIndividual.name).equal("Zazanaza");
@@ -257,6 +258,39 @@ describe(
 
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.addIndividual.name).equal("Zazaniza");
+
+        /*res = itHelpers.request_graph_ql_post('mutation ' +
+        '{ addTranscript_count(gene: "Gene D", ' +
+                              'variable: "RPKM", ' +
+                              'count: 444.44, ' +
+                              'tissue_or_condition: "Root", ' +
+                              'addIndividual: ' + plantId + ') { id } }');
+        res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+        resBody = JSON.parse(res.body.toString('utf8'));
+
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.transcript_counts.length).equal(3);
+
+        res = itHelpers.request_metaquery_post([`{ transcript_counts(search: {field: gene, operator: eq, value: {value: "Gene D"}}) {gene}}`,
+                            `{individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', null);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data: [
+                {
+                    transcript_counts: [
+                        {gene: "Gene D"}
+                    ]
+                },
+                {
+                    individuals: [
+                        {name: "Zazaniza"}
+                    ]
+                }
+            ]
+        });*/
+
 
         res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: {value: "Zazan[aeiou]za"}}) {name}}`);
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -453,7 +487,7 @@ describe(
         expect(tcResBody).to.deep.equal({
             data: {
               addTranscript_count: {
-                id: "3",
+                id: "3", // Change to 4
                 gene: "Gene D",
                 individual: {
                   id: "5",
