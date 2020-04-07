@@ -375,23 +375,23 @@ writeIndexAdapters = function(dir_write){
     if( adapters[adapter.adapterName] ){
       throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
     }
-    
+
     switch(adapter.adapterType) {
       case 'ddm-adapter':
       case 'cenzontle-webservice-adapter':
       case 'generic-adapter':
-        adapters[adapter.adapterName] = adapter; 
+        adapters[adapter.adapterName] = adapter;
         break;
 
       case 'sql-adapter':
         adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
         break;
-      
+
       case 'default':
         throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
     }
   });
-  
+
   `
   fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {
     if (err)
@@ -440,7 +440,7 @@ module.exports.getOptions = function(dataModel){
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
       associations: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
-      indices: dataModel.indices,
+      //indices: dataModel.indices,
       definitionObj : dataModel,
       attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
       url: dataModel.url || "",
@@ -459,7 +459,7 @@ module.exports.getOptions = function(dataModel){
     name: opts.idAttribute,
     type: opts.idAttributeType
   }
-
+  opts['indices'] = setDefaultIndices(dataModel.indices, opts.associations.belongsTo, getIdAttribute(dataModel));
   opts['definition'] = stringify_obj(dataModel);
   delete opts.attributes[opts.idAttribute];
 
@@ -506,6 +506,29 @@ validateJsonFile =  function(opts){
     return editable_attributes;
   }
 
+
+  /**
+   * setDefaultIndices - This functions sets default indices for being proccesed by migrations
+   *
+   * @param  {Array} indices           Array of strings, each one an attribute to which an index in the DB will be added.
+   * @param  {Array} foreignsKeysAssoc Array of associations with foreign keys in the current model
+   * @param  {String} idAttribute       Id attribute
+   * @return {Array}                   Array of attributes to which an index in the DB will be added
+   */
+  setDefaultIndices = function(indices, foreignsKeysAssoc, idAttribute){
+    let indices_result = indices === undefined ? [] : indices;
+    let foreign_keys = foreignsKeysAssoc.map( assoc => assoc.targetKey );
+    if(!indices_result.includes(idAttribute)){
+        indices_result.push(idAttribute);
+    }
+
+    for( let i in foreign_keys ){
+      if(!indices_result.includes(i)){
+        indices_result.push(i);
+      }
+    }
+    return indices_result;
+  }
 
   /**
    * parseAssociations - Parse associations of a given data model.
@@ -673,7 +696,7 @@ getIdAttribute = function(dataModel){
 
 getStorageType = function(dataModel) {
   let valid = true;
-  
+
   /**
    * Checks for 'storageType'.
    */
@@ -701,7 +724,7 @@ getStorageType = function(dataModel) {
         case 'generic-adapter':
           //ok
           break;
-        
+
         default:
           //not ok
           valid = false;
@@ -800,7 +823,7 @@ module.exports.generateCode = function(json_dir, dir_write){
         //generateAssociationsMigrations(opts, dir_write);
       }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz-server' || opts.storageType === 'distributed-data-model'){
           let file_name = "";
-          
+
           /**
            * Schemas
            */
@@ -850,7 +873,7 @@ module.exports.generateCode = function(json_dir, dir_write){
               console.log(file_name + ' written successfully!');
             });
           }
-          
+
       /**
        * Adapters
        */

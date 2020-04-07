@@ -30,9 +30,11 @@ return queryInterface.createTable('project_to_researcher', {
 `
 
 module.exports.person_indices_migration = `
-.then(()=>{
+then(()=>{
   queryInterface.addIndex('people', ['email'])
 }).then(()=>{
   queryInterface.addIndex('people', ['phone'])
+}).then(()=>{
+  queryInterface.addIndex('people', ['id'])
 });
 `
