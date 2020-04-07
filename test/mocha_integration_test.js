@@ -307,6 +307,31 @@ describe(
           errors: []
         });
 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.data', null);
+
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+            [
+                {
+                    firstPerson: [
+                        {
+                            name: "Zazanaza"
+                        }
+                    ]
+                },
+                {
+                    secondPerson: [
+                        {
+                            name: "Zazaniza"
+                        }
+                    ]
+                }
+            ]
+        );
+
+
 
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$');
@@ -332,6 +357,30 @@ describe(
           ],
           errors: []
         });
+
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$.data');
+
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+            [
+                {
+                    firstPerson: [
+                        {
+                            name: "Zazanaza"
+                        }
+                    ]
+                },
+                {
+                    secondPerson: [
+                        {
+                            name: "Zazaniza"
+                        }
+                    ]
+                }
+            ]
+        );
 
 
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
