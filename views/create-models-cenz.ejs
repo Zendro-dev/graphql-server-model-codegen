@@ -213,20 +213,16 @@ module.exports = class <%- name -%>{
         if(search === undefined){
           return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
         }else if(this.<%=associations_one[i].targetKey%> !== null){
-          let id_search = {
-              "field": models.<%=associations_one[i].target_lc%>.idAttribute(),
-              "value": {
-                "value": this.<%=associations_one[i].targetKey%>
-              },
-              "operator": "eq"
-          }
 
-          let ext_search = {
-            "operator": "and",
-            "search": [id_search, search]
-          }
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search, 
+            "field": models.<%=associations_one[i].target_lc%>.idAttribute(), 
+            "value": {"value": this.<%=associations_one[i].targetKey%>}, 
+            "operator": "eq"
+          });
 
-          return models.<%=associations_one[i].target_lc%>.readAll(ext_search)
+          return models.<%=associations_one[i].target_lc%>.readAll(nsearch)
           .then( found =>{
               if(found){
                 return found[0]
@@ -249,34 +245,23 @@ module.exports = class <%- name -%>{
     }
 
     <%=associations_one[i].name%>Impl (search){
-        if(search === undefined){
-          let simple_search = {
-            "field": "<%=associations_one[i].targetKey%>",
-            "value": {
-              "value": this.getIdValue()
-            },
-            "operator": "eq"
-          }
 
-      let ext_search = simple_search;
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_one[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
 
-      if(search !== undefined){
-        ext_search = {
-          "operator": "and",
-          "search": [simple_search, search]
-        }
-      }
-
-      return models.<%=associations_one[i].target_lc%>.readAll(ext_search)
+      return models.<%=associations_one[i].target_lc%>.readAll(nsearch)
       .then( found => { if(found){
         return found[0];
       }
         return found;
       })
-      }
+    }
     <%}-%>
-
-
 
       <% associations_temp = associations["hasMany"]-%>
       <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -290,32 +275,42 @@ module.exports = class <%- name -%>{
         }
 
         <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
-          if(search === undefined)
-          {
-            return models.<%=associations_temp[i].target_lc%>.readAll({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
-          }else{
-            return models.<%=associations_temp[i].target_lc%>.readAll({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
-          }
+          
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search, 
+            "field": "<%=associations_temp[i].targetKey%>", 
+            "value": {"value": this.getIdValue()}, 
+            "operator": "eq"
+          });
+
+          return models.<%=associations_temp[i].target_lc%>.readAll(nsearch, order, pagination);
         }
 
         countFiltered<%=associations_temp[i].name_cp%>Impl ({search}){
 
-          if(search === undefined)
-          {
-            return models.<%=associations_temp[i].target_lc%>.countRecords({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} );
-          }else{
-            return models.<%=associations_temp[i].target_lc%>.countRecords({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
-          }
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search, 
+            "field": "<%=associations_temp[i].targetKey%>", 
+            "value": {"value": this.getIdValue()}, 
+            "operator": "eq"
+          });
 
+          return models.<%=associations_temp[i].target_lc%>.countRecords(nsearch);
         }
 
         <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
-          if(search === undefined)
-          {
-            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"}, order, pagination);
-          }else{
-            return models.<%=associations_temp[i].target_lc%>.readAllCursor({"operator":"and", "search":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] }, order, pagination )
-          }
+
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search, 
+            "field": "<%=associations_temp[i].targetKey%>", 
+            "value": {"value": this.getIdValue()}, 
+            "operator": "eq"
+          });
+
+          return models.<%=associations_temp[i].target_lc%>.readAllCursor(nsearch, order, pagination);
         }
       <%}-%>
 
