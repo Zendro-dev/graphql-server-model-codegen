@@ -260,6 +260,8 @@ writeSchemaCommons = function(dir_write){
     lt
     lte
     ne
+    regexp
+    notRegexp
   }
 
   enum Order{

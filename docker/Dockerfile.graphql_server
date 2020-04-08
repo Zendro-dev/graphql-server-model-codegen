@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 
 # Clone the skeleton project and install dependencies
 RUN apt-get update && apt-get install -y git procps autoconf libtool make &&\
-  git clone https://github.com/ScienceDb/graphql-server.git . && \
+  git clone https://github.com/ScienceDb/graphql-server.git --branch issue103-regex-operator . && \
   chmod u+x ./migrateDbAndStartServer.sh
 
 EXPOSE 3000
