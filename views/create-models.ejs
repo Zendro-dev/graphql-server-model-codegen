@@ -559,31 +559,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   _remove<%=associations_one[i].name_cp%>(id){
     return this.set_<%=associations_one[i].targetKey%>(null);
   }
-
-  <%=associations_one[i].name%>Impl (search){
-      if(search === undefined){
-        return models.<%=associations_one[i].target_lc%>.readById(this.<%=associations_one[i].targetKey%>);
-      }else{
-        
-        //build new search filter
-        let nsearch = helper.addSearchField({
-          "search": search, 
-          "field": models.<%=associations_one[i].target_lc%>.idAttribute(), 
-          "value": {"value": this.<%=associations_one[i].targetKey%>}, 
-          "operator": "eq"
-        });
-
-        return models.<%=associations_one[i].target_lc%>.readAll(nsearch)
-        .then( found =>{
-            if(found){
-              return found[0]
-            }
-            return found;
-        });
-
-      }
-    }
-  <%}-%>
+<%}-%>
 
 
   <%associations_one = associations["hasOne"]-%>
@@ -599,23 +575,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       await record.set_<%=associations_one[i].targetKey%>(null);
     }
 
-    <%=associations_one[i].name%>Impl(search){
-
-      //build new search filter
-      let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_one[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
-        "operator": "eq"
-      });
-
-      return models.<%=associations_one[i].target_lc%>.readAll(nsearch)
-      .then( found => { if(found){
-        return found[0];
-      }
-        return found;
-      })
-    }
   <%}-%>
 
   <% associations_temp = associations["hasMany"]-%>
@@ -633,45 +592,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         let record = await models.<%=associations_temp[i].target_lc%>.readById(id);
         await record.set_<%=associations_temp[i].targetKey%>(this.getIdValue());
       });
-    }
-
-    <%=associations_temp[i].name%>FilterImpl({search,order,pagination}){
-
-      //build new search filter
-      let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
-        "operator": "eq"
-      });
-
-      return models.<%=associations_temp[i].target_lc%>.readAll(nsearch, order, pagination);
-    }
-
-    countFiltered<%=associations_temp[i].name_cp%>Impl ({search}){
-
-      //build new search filter
-      let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
-        "operator": "eq"
-      });
-
-      return models.<%=associations_temp[i].target_lc%>.countRecords(nsearch);
-    }
-
-    <%=associations_temp[i].name%>ConnectionImpl({search,order,pagination}){
-
-      //build new search filter
-      let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
-        "operator": "eq"
-      });
-
-      return models.<%=associations_temp[i].target_lc%>.readAllCursor(nsearch, order, pagination);
     }
   <%}-%>
 
