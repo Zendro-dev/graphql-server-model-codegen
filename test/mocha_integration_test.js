@@ -341,6 +341,37 @@ describe(
           errors: []
         });
 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {names}}`, 
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {names}}`], '.', null);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data:[
+                null, null
+            ],
+            errors:[
+                {
+                    message:'Cannot query field "names" on type "individual". Did you mean "name"?',
+                    locations:[
+                        {
+                            line:1,
+                            column:95
+                        }
+                    ]
+                },
+                {
+                    message:'Cannot query field "names" on type "individual". Did you mean "name"?',
+                    locations:[
+                        {
+                            line:1,
+                            column:95
+                        }
+                    ]
+                }
+            ]
+        });
+
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.data', null);
 
