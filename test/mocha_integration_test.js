@@ -248,7 +248,6 @@ describe(
     it('18. Extended search and regular expressions', async () => {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazanaza") { id name } }');
         let resBody = JSON.parse(res.body.toString('utf8'));
-        // let plantId = resBody.data.addIndividual.id;
 
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.addIndividual.name).equal("Zazanaza");
@@ -264,7 +263,6 @@ describe(
                               'variable: "RPKM", ' +
                               'count: 444.44, ' +
                               'tissue_or_condition: "Root"' +
-                              //', addIndividual: ' + plantId + 
                               ') { id } }');
         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
         resBody = JSON.parse(res.body.toString('utf8'));
