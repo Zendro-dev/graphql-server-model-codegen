@@ -17,7 +17,7 @@ static addOne(input) {
               if (input.addUnique_pet) {
                 let wrong_ids = await helper.checkExistence(input.addUnique_pet, models.dog);
                 if(wrong_ids.length > 0 ){
-                  throw new Error(\`Ids \${wrong_ids.join(",")} in model dog were not found.\`);
+                  throw new Error(\`Ids: \${wrong_ids.join(",")} in model dog were not found.\`);
                 }else{
                   promises_associations.push(item.setUnique_pet(input.addUnique_pet, {transaction:t}));
                 }

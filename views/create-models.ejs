@@ -289,12 +289,12 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               <%for(let i=0; i < associations_temp.length; i++){-%>
                 <%if(associations_temp[i].targetStorageType === 'sql'){-%>
                   if(input.add<%=associations_temp[i].name_cp-%>){
-                    //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                    //if(wrong_ids.length > 0){
-                    //    throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                    //}else{
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                        throw new Error(`Ids: ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
                       promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction:t}));
-                    //}
+                    }
                   }
                 <%}-%>
                 <%}-%>
@@ -303,12 +303,12 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 <%for(let i=0; i < associations_temp.length; i++){-%>
                   <%if(associations_temp[i].targetStorageType === 'sql'){-%>
                     if(input.add<%=associations_temp[i].name_cp-%> ){
-                      //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                      //if(wrong_ids.length > 0){
-                      //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                      //}else{
+                      let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                      if(wrong_ids.length > 0){
+                        throw new Error(`Ids: ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                      }else{
                         promises_associations.push( item.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction:t}));
-                      //}
+                      }
                     }
                   <%}-%>
                   <%}-%>
@@ -319,12 +319,12 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             <%for(let i=0; i < associations_temp.length; i++){-%>
               <%if(associations_temp[i].targetStorageType !== 'sql'){-%>
                 if(input.add<%=associations_temp[i].name_cp-%> ){
-                  //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                  //if(wrong_ids.length > 0){
-                  //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                  //}else{
+                  let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                  if(wrong_ids.length > 0){
+                    throw new Error(`Ids: ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                  }else{
                     await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
-                  //}
+                  }
                 }
               <%}-%>
               <%}-%>
@@ -368,21 +368,21 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 <%if(associations_temp[i].targetStorageType === 'sql'){-%>
 
                   if(input.add<%=associations_temp[i].name_cp-%> ){
-                    //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                    //if(wrong_ids.length > 0){
-                    //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                    //}else{
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                      throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
                       promises_associations.push(updated.add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction:t}));
-                    //}
+                    }
                   }
 
                   if(input.remove<%=associations_temp[i].name_cp-%>){
-                    //let ids_associated = await item.get<%=associations_temp[i].name_cp-%>().map(t => `${t[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`);
-                    //await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, id =>{
-                    //  if(!ids_associated.includes(id)){
-                    //    throw new Error(`The association with id ${id} that you're trying to remove desn't exists`);
-                    //  }
-                    //});
+                    let ids_associated = await item.get<%=associations_temp[i].name_cp-%>().map(t => `${t[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`);
+                    await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, id =>{
+                      if(!ids_associated.includes(id)){
+                        throw new Error(`The association with id ${id} that you're trying to remove desn't exists`);
+                      }
+                    });
                     promises_associations.push(updated.remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>, {transaction:t}));
                   }
                 <%}-%>
@@ -391,12 +391,12 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               <%for(let i=0; i < associations_temp.length; i++){-%>
                 <%if(associations_temp[i].targetStorageType === 'sql'){-%>
                   if(input.add<%=associations_temp[i].name_cp-%> ){
-                    //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                    //if(wrong_ids.length > 0){
-                    //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                    //}else{
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                      throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
                       promises_associations.push( updated.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction: t}));
-                    //}
+                    }
                   }else if(input.add<%=associations_temp[i].name_cp-%> === null ){
                     promises_associations.push(updated.set<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction: t}));
                   }
@@ -420,20 +420,20 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 if(input.add<%=associations_temp[i].name_cp-%> ){
                   let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
                   if(wrong_ids.length > 0){
-                    throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    throw new Error(`Ids: ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
                   }else{
                     await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
                   }
                 }
 
                 if(input.remove<%=associations_temp[i].name_cp-%>){
-                  //let <%=associations_temp[i].name-%> = await result.<%=associations_temp[i].name-%>Impl();
-                  //if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`){
+                  let <%=associations_temp[i].name-%> = await result.<%=associations_temp[i].name-%>({});
+                  if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`){
                     await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
-                  //}
-                  //else{
-                  //  throw new Error("The association you're trying to remove it doesn't exists");
-                  //}
+                  }
+                  else{
+                    throw new Error("The association you're trying to remove it doesn't exists");
+                  }
                 }
               <%}-%>
               <%}-%>
@@ -443,22 +443,23 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               <%for(let i=0; i < associations_temp.length; i++){-%>
                 <%if(associations_temp[i].targetStorageType !== 'sql'){-%>
                   if(input.add<%=associations_temp[i].name_cp-%> ){
-                    //let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
-                    //if(wrong_ids.length > 0){
-                    //  throw new Error(`Ids ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
-                    //}else{
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                      throw new Error(`Ids: ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
                       await result._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>);
-                    //}
+                    }
                   }
 
                   if(input.remove<%=associations_temp[i].name_cp-%>){
-                    //let ids_associated = await result.<%=associations_temp[i].name-%>Impl().map(t => `${t[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`);
-                    //await helper.asyncForEach(input.remove<%=associations_temp[i].name_cp-%>, async id =>{
-                    //  if(!ids_associated.includes(id)){
-                    //    throw new Error(`The association with id ${id} that you're trying to remove desn't exist`);
-                    //  }
-                    //});
-                    await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
+                    helper.checkIdsToRemove(result, 'worksConnection', input.removeWorks, models.book.idAttribute());
+                    let wrong_ids = await helper.checkIdsToRemove(result, '<%=associations_temp[i].name-%>Connection', input.remove<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+                    if(wrong_ids.length > 0){
+                      throw new Error(`Ids: ${wrong_ids.map(i=> `"${i}"`).join(",")} that you are trying to remove are not assciated with the this record.` )
+                    }else{
+                        await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
+                    }
+
                   }
                 <%}-%>
                 <%}-%>
