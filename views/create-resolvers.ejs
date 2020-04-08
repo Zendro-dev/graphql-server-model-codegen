@@ -87,9 +87,24 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {type}         Associated record
    */
-  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = function({search}, context){
+  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
     try{
-      return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+      if (search === undefined) {
+        return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+      } else {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+          "search": search, 
+          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(), 
+          "value": {"value": this.<%= associations_one[i].targetKey -%> }, 
+          "operator": "eq"
+        });
+        let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+        if (found) {
+          return found[0]
+        }
+        return found;
+      }
     }catch(error){
       console.error(error);
       handleError(error);
@@ -121,7 +136,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
         "operator": "eq"
       });
       
-      return resolvers.<%=associations_temp[i].target_lc_pl%>({nsearch,order,pagination},context);
+      return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -146,7 +161,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
         "operator": "eq"
       });
 
-      return resolvers.count<%=associations_temp[i].target_cp_pl%>({nsearch},context);
+      return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -176,7 +191,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
         "operator": "eq"
       });
 
-      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({nsearch,order,pagination},context);
+      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);
