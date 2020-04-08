@@ -113,8 +113,15 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
     try{
-      search = helper.To_manyAdjustFieldResolverSearch(search,this);
-      return resolvers.<%=associations_temp[i].target_lc_pl%>({search,order,pagination},context);
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
+      
+      return resolvers.<%=associations_temp[i].target_lc_pl%>({nsearch,order,pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -130,8 +137,16 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
     try{
-      search = helper.To_manyAdjustFieldResolverSearch(search,this);
-      return resolvers.count<%=associations_temp[i].target_cp_pl%>({search},context);
+
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
+
+      return resolvers.count<%=associations_temp[i].target_cp_pl%>({nsearch},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -152,8 +167,16 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
     try{
-      search = helper.To_manyAdjustFieldResolverSearch(search,this);
-      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search,order,pagination},context);
+
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
+
+      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({nsearch,order,pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);
