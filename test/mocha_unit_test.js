@@ -520,9 +520,6 @@ describe('Update sequelize model to class', function(){
     let test_model = data_test.book_model_read_by_id.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
-
-
-
 });
 
 describe('Model Layer', function(){

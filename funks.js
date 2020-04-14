@@ -459,7 +459,7 @@ module.exports.getOptions = function(dataModel){
     name: opts.idAttribute,
     type: opts.idAttributeType
   }
-  opts['indices'] = setDefaultIndices(dataModel.indices, opts.associations.belongsTo, getIdAttribute(dataModel));
+  opts['indices'] = setDefaultIndices(dataModel.indices, opts.associations.belongsTo);
   opts['definition'] = stringify_obj(dataModel);
   delete opts.attributes[opts.idAttribute];
 
@@ -515,16 +515,14 @@ validateJsonFile =  function(opts){
    * @param  {String} idAttribute       Id attribute
    * @return {Array}                   Array of attributes to which an index in the DB will be added
    */
-  setDefaultIndices = function(indices, foreignsKeysAssoc, idAttribute){
+  setDefaultIndices = function(indices, foreignsKeysAssoc){
     let indices_result = indices === undefined ? [] : indices;
     let foreign_keys = foreignsKeysAssoc.map( assoc => assoc.targetKey );
-    if(!indices_result.includes(idAttribute)){
-        indices_result.push(idAttribute);
-    }
 
     for( let i in foreign_keys ){
-      if(!indices_result.includes(i)){
-        indices_result.push(i);
+
+      if(!indices_result.includes(foreign_keys[i])){
+        indices_result.push(foreign_keys[i]);
       }
     }
     return indices_result;

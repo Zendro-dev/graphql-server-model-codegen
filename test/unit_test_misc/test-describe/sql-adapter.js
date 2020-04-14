@@ -357,14 +357,14 @@ static idAttribute() {
 `
 
 module.exports.name = `
-static get name() {
+static get adapterName() {
     return "peopleLocalSql";
 }
 `
 
 module.exports.type = `
-static get type(){
-  return 'local';
+static get adapterType(){
+  return 'sql-adapter';
 }
 `
 

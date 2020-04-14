@@ -13,6 +13,7 @@ static init(sequelize, DataTypes){
       }
     },
     {
+      indexes: ['publisherId'],
       modelName: "book",
       tableName: "books",
       sequelize

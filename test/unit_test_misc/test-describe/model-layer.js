@@ -122,7 +122,7 @@ static addOne(input){
             if (input.addAuthors) {
               let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
               if(wrong_ids.length > 0){
-                throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+                throw new Error(\`Ids: \${wrong_ids.join(",")} in model person were not found.\`);
               }else{
                   promises_associations.push( item.setAuthors(input.addAuthors, {transaction:t}) );
               }
@@ -134,7 +134,7 @@ static addOne(input){
         if(input.addPublisher){
           let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
           if(wrong_ids.length > 0){
-            throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
+            throw new Error(\`Ids: \${wrong_ids.join(",")} in model publisher were not found.\`);
           }else{
             await result._addPublisher(input.addPublisher);
           }
@@ -229,7 +229,7 @@ static updateOne(input){
               if (input.addAuthors) {
                 let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
                 if(wrong_ids.length > 0){
-                  throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
+                  throw new Error(\`Ids: \${wrong_ids.join(",")} in model person were not found.\`);
                 }else{
                   promises_associations.push(updated.addAuthors(input.addAuthors, {transaction: t}));
                 }
@@ -249,14 +249,14 @@ static updateOne(input){
           if(input.addPublisher){
             let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
             if(wrong_ids.length > 0){
-              throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
+              throw new Error(\`Ids: \${wrong_ids.join(",")} in model publisher were not found.\`);
             }else{
               await result._addPublisher(input.addPublisher);
             }
           }
 
           if(input.removePublisher){
-            let publisher = await result.publisherImpl();
+            let publisher = await result.publisher({});
             if(publisher && input.removePublisher === \`\${publisher[models.publisher.idAttribute()]}\`){
               await result._removePublisher(input.removePublisher);
             }else{

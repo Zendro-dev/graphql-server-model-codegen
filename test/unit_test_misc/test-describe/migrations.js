@@ -34,7 +34,5 @@ then(()=>{
   queryInterface.addIndex('people', ['email'])
 }).then(()=>{
   queryInterface.addIndex('people', ['phone'])
-}).then(()=>{
-  queryInterface.addIndex('people', ['id'])
 });
 `

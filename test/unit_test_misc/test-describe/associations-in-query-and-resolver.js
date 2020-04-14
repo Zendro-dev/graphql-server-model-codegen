@@ -9,7 +9,7 @@ module.exports.person_model = `
     if (input.addDogs) {
       let wrong_ids = await helper.checkExistence(input.addDogs, models.dog);
       if(wrong_ids.length > 0){
-        throw new Error(\`Ids \${wrong_ids.join(",")} in model dog were not found.\`);
+        throw new Error(\`Ids: \${wrong_ids.join(",")} in model dog were not found.\`);
       }else{
         promises_associations.push(  item.setDogs(input.addDogs, {transaction:t}));
       }
@@ -18,7 +18,7 @@ module.exports.person_model = `
     if (input.addBooks) {
       let wrong_ids = await helper.checkExistence(input.addBooks, models.book);
       if(wrong_ids.length > 0){
-        throw new Error(\`Ids \${wrong_ids.join(",")} in model book were not found.\`);
+        throw new Error(\`Ids: \${wrong_ids.join(",")} in model book were not found.\`);
       }else{
         promises_associations.push( item.setBooks(input.addBooks, {transaction:t}));
       }
