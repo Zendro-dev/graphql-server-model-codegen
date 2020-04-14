@@ -158,7 +158,7 @@ const globals = require('../config/globals');
 <%}-%>
 
 /*
-* errorMessageForRecordsLimit(fullRecordsRequested, context) - returns error message in case the record limit is exceeded.
+* errorMessageForRecordsLimit(context) - returns error message in case the record limit is exceeded.
 *
 * @param {string} query The query that failed
 */
@@ -167,7 +167,7 @@ function errorMessageForRecordsLimit(query) {
 }
 
 /**
-* checkCount(search, context, fullRecordsRequested) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
+* checkCount(search, context) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
 *
 * @param {object} search  Search argument for filtering records
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
@@ -191,7 +191,7 @@ function checkCountForOne(context) {
 }
 
 /**
-* checkCountAgainAndAdaptLimit(context, numberOfFoundItems, fullRecordsRequested) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
+* checkCountAgainAndAdaptLimit(context, numberOfFoundItems) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
 *
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 * @param (number) numberOfFoundItems number of items that were found, to be subtracted from the current record limit
