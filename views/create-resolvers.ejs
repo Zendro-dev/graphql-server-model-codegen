@@ -160,11 +160,9 @@ const globals = require('../config/globals');
 /*
 * errorMessageForRecordsLimit(fullRecordsRequested, context) - returns error message in case the record limit is exceeded.
 *
-* @param {boolean} fullRecordsRequested true if a full set of records is requested, false if a count of records is requested
 * @param {string} query The query that failed
 */
-function errorMessageForRecordsLimit(fullRecordsRequested, query) {
-  let type = fullRecordsRequested ? "result records" : "count of records";
+function errorMessageForRecordsLimit(query) {
   return "Max record limit of " + globals.LIMIT_RECORDS + " exceeded in " + query;
 }
 
@@ -173,12 +171,11 @@ function errorMessageForRecordsLimit(fullRecordsRequested, query) {
 *
 * @param {object} search  Search argument for filtering records
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-* @param {boolean} fullRecordsRequested true if a full set of records is requested, false if a count of records is requested
 * @param {string} query The query that makes this check
 */
-async function checkCount(search, context, fullRecordsRequested, query) {
+async function checkCount(search, context, query) {
   if (await <%- nameLc -%>.countRecords(search) > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit(fullRecordsRequested, query));
+      throw new Error(errorMessageForRecordsLimit(query));
   }
 }
 
@@ -189,7 +186,7 @@ async function checkCount(search, context, fullRecordsRequested, query) {
 */
 function checkCountForOne(context) {
   if (1 > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit(true, "readOne<%- nameCp -%>"));
+      throw new Error(errorMessageForRecordsLimit("readOne<%- nameCp -%>"));
   }
 }
 
@@ -198,12 +195,11 @@ function checkCountForOne(context) {
 *
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 * @param (number) numberOfFoundItems number of items that were found, to be subtracted from the current record limit
-* @param {boolean} fullRecordsRequested true if a full set of records is requested, false if a count of records is requested
 * @param {string} query The query that makes this check
 */
-function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, fullRecordsRequested, query) {
+function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
   if (numberOfFoundItems > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit(fullRecordsRequested, query));
+      throw new Error(errorMessageForRecordsLimit(query));
   }
   context.recordsLimit -= numberOfFoundItems;
 }
@@ -226,9 +222,9 @@ module.exports = {
   <%- namePl -%>: function({search, order, pagination}, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
         if (authorization === true) {
-          await checkCount(search, context, true, "<%- namePl -%>");
+          await checkCount(search, context, "<%- namePl -%>");
           let resultRecords = await <%- nameLc -%>.readAll(search, order, pagination);
-          checkCountAgainAndAdaptLimit(context, resultRecords.length, true, "<%- namePl -%>");
+          checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%- namePl -%>");
           return resultRecords;
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -254,7 +250,7 @@ module.exports = {
          if (authorization === true) {
            await checkCount(search, context, "<%- namePl -%>Connection");
            let resultRecords = await <%- nameLc -%>.readAll(search, order, pagination);
-           checkCountAgainAndAdaptLimit(context, resultRecords.length, false, "<%- namePl -%>Connection");
+           checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%- namePl -%>Connection");
            return <%- nameLc -%>.readAllCursor(search, order, pagination);
        } else {
            throw new Error("You don't have authorization to perform this action");
