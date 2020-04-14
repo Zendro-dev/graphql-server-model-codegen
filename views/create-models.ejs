@@ -452,10 +452,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                   }
 
                   if(input.remove<%=associations_temp[i].name_cp-%>){
-                    helper.checkIdsToRemove(result, 'worksConnection', input.removeWorks, models.book.idAttribute());
                     let wrong_ids = await helper.checkIdsToRemove(result, '<%=associations_temp[i].name-%>Connection', input.remove<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
                     if(wrong_ids.length > 0){
-                      throw new Error(`Ids: ${wrong_ids.map(i=> `"${i}"`).join(",")} that you are trying to remove are not assciated with the this record.` )
+                      throw new Error(`Ids: ${wrong_ids.map(i=> `"${i}"`).join(",")} that you are trying to remove are not assciated with this record.` )
                     }else{
                         await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
                     }

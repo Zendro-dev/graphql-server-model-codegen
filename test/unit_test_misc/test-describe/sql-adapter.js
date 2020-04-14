@@ -68,7 +68,7 @@ static addOne(input) {
                 if (input.addWorks) {
                     let wrong_ids = await helper.checkExistence(input.addWorks, models.book);
                     if (wrong_ids.length > 0) {
-                        throw new Error(\`Ids \${wrong_ids.join(",")} in model book were not found.\`);
+                        throw new Error(\`Ids: \${wrong_ids.join(",")} in model book were not found.\`);
                     } else {
                         await result._addWorks(input.addWorks);
                     }
@@ -293,20 +293,20 @@ module.exports.updateOne = `
                     if (input.addWorks) {
                         let wrong_ids = await helper.checkExistence(input.addWorks, models.book);
                         if (wrong_ids.length > 0) {
-                            throw new Error(\`Ids \${wrong_ids.join(",")} in model book were not found.\`);
+                            throw new Error(\`Ids: \${wrong_ids.join(",")} in model book were not found.\`);
                         } else {
                            await result._addWorks(input.addWorks);
                         }
                     }
 
                     if (input.removeWorks) {
-                        let ids_associated = await result.worksImpl().map(t => \`\${t[models.book.idAttribute()]}\`);
-                        await helper.asyncForEach(input.removeWorks, async id => {
-                            if (!ids_associated.includes(id)) {
-                                throw new Error(\`The association with id \${id} that you're trying to remove desn't exist\`);
-                            }
-                        });
-                        await result._removeWorks(input.removeWorks);
+                      let result_model_instance = new models.person(result);
+                      let wrong_ids = await helper.checkIdsToRemove( result_model_instance, 'worksConnection', input.removeWorks, models.book.idAttribute());
+                      if(wrong_ids.length > 0){
+                        throw new Error(\`Ids: \${wrong_ids.map(i=> \`"\${i}"\`).join(",")} that you are trying to remove are not assciated with this record.\` )
+                      }else{
+                          await result._removeWorks(input.removeWorks);
+                      }
                     }
 
                     return result;
