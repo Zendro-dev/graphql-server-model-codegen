@@ -12,7 +12,7 @@ const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 
-<% associations_temp = associations["belongsToMany"]-%>
+<% associations_temp = associations["to_many_through_sql_cross_table"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
 
   /**
@@ -28,7 +28,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
     try{
-        return resolvers.<%=associations_temp[i].target_lc_pl%>({search,order,pagination},context);
+        return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
     }catch(error){
       console.error(error);
       handleError(error);
@@ -53,7 +53,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
        pagination
    }, context) {
      try{
-      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search,order,pagination},context);
+       return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
      }catch(error){
        console.error(error);
        handleError(error);
@@ -69,7 +69,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
     try{
-      return resolvers.count<%=associations_temp[i].target_cp_pl%>({search},context);
+      return this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
     }catch(error){
       console.error(error);
       handleError(error);
@@ -78,7 +78,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
 <%}-%>
 
 
-<%let associations_one = associations["belongsTo"].concat( associations["hasOne"])-%>
+<%let associations_one = associations["to_one"]-%>
 <% for(let i=0; i < associations_one.length; i++){ -%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
@@ -112,7 +112,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
   }
 <%}-%>
 
-<% associations_temp = associations["hasMany"]-%>
+<% associations_temp = associations["to_many"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
 
   /**
