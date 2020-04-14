@@ -165,7 +165,7 @@ const globals = require('../config/globals');
 */
 function errorMessageForRecordsLimit(fullRecordsRequested, context) {
   let type = fullRecordsRequested ? "result records" : "count of records";
-  return "Attempt to fetch " + type + " with <%- nameLc -%> exceeds current limit of " + context.recordsLimit + ". Total cumulative limit for all records is " + config.LIMIT_RECORDS;
+  return "Attempt to fetch " + type + " with <%- nameLc -%> exceeds current limit of " + context.recordsLimit + ". Total cumulative limit for all records is " + globals.LIMIT_RECORDS;
 }
 
 /**
