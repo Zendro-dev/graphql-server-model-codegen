@@ -71,7 +71,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       <%for(let i=0; i< associations[key].length; i++){-%>
         <%if(associations[key][i].targetStorageType === 'sql'){-%>
         <%- name -%>.<%= key %>(models.<%= associations[key][i].target_lc -%>
-        <% if(key === 'belongsToMany'){ -%> ,{as: '<%= associations[key][i].name -%>',
+        <% if(key === 'to_many_through_sql_cross_table'){ -%> ,{as: '<%= associations[key][i].name -%>',
         foreignKey:'<%= associations[key][i].sourceKey -%>',
         through : '<%= associations[key][i].keysIn -%>',
         onDelete: 'CASCADE'}  <%}else{ -%>
@@ -303,7 +303,31 @@ module.exports = class <%- name -%> extends Sequelize.Model{
             const result = await sequelize.transaction( async(t) =>{
               let item = await super.create(input, {transaction:t});
               let promises_associations = [];
-              <%associations_temp = associations["hasMany"].concat(associations["belongsToMany"])-%>
+
+
+
+
+
+
+              <%associations_temp = associations["to_one"].concat(associations["to_many"]).concat(associations["to_many_through_sql_cross_table"])-%>
+              <%for(let i=0; i < associations_temp.length; i++){-%>
+                  if(input.add<%=associations_temp[i].name_cp-%>){
+                    let wrong_ids =  await helper.checkExistence(input.add<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>);
+                    if(wrong_ids.length > 0){
+                      throw new Error(`Ids: ${wrong_ids.join(",")} in model <%=associations_temp[i].target_lc-%> were not found.`);
+                    }else{
+                      promises_associations.push( item._add<%=associations_temp[i].name_cp-%>(input.add<%=associations_temp[i].name_cp-%>, {transaction:t}));
+                    }
+                  }
+              <%}-%>
+
+
+
+
+
+
+
+              <%associations_temp = associations["to_many"].concat(associations["belongsToMany"])-%>
               <%for(let i=0; i < associations_temp.length; i++){-%>
                 <%if(associations_temp[i].targetStorageType === 'sql'){-%>
                   if(input.add<%=associations_temp[i].name_cp-%>){
@@ -317,7 +341,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 <%}-%>
                 <%}-%>
 
-                <%associations_temp = associations["belongsTo"].concat(associations["hasOne"])-%>
+                <%associations_temp = associations["to_one"]-%>
                 <%for(let i=0; i < associations_temp.length; i++){-%>
                   <%if(associations_temp[i].targetStorageType === 'sql'){-%>
                     if(input.add<%=associations_temp[i].name_cp-%> ){
@@ -542,6 +566,44 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static csvTableTemplate(){
     return helper.csvTableTemplate(<%- name -%>);
   }
+
+
+
+
+
+
+  <% let associations_temp = associations["to_one"].concat(associations["to_many"]).concat(associations["to_many_through_sql_cross_table]) -%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <%if(association_temp[i].keyIn === association.target){-%>
+      async _add<%=associations_temp[i].name_cp%>(ids) {
+        ids.forEach(id => {
+          return models.<%=associations_temp[i].target_lc%>.updateOne({id, add<%=associations_temp[i].name_cp-%>: this.idAttribute()})
+        })
+      }
+
+      async _remove<%=associations_one[i].name_cp%>(ids) {
+        ids.forEach(id => {
+          return models.<%=associations_temp[i].target_lc%>.deleteOne({id, add<%=associations_temp[i].name_cp-%>: this.idAttribute()})
+        })
+      }
+    <%}-%>
+    <%if(association_temp[i].keyIn !== association.target){-%>
+      _add<%=associations_one[i].name_cp%>(id){ <%# how to pass the transaction? %> 
+        this.<%=associations_one[i].targetKey%> = id;
+        return super.save(); <%# use sequelize setter? %> 
+      }
+
+      _remove<%=associations_one[i].name_cp%>()){ <%# how to pass the transaction? %> 
+        this.<%=associations_one[i].targetKey%> = null;
+        return super.save(); <%# use sequelize setter? %> 
+      }
+    <%}-%>
+  <%}-%>    
+
+
+
+
+
 
   <%let associations_one = associations["belongsTo"]-%>
   <% for(let i=0; i < associations_one.length; i++){ -%>
