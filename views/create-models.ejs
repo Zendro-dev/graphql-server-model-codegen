@@ -427,12 +427,11 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 }
 
                 if(input.remove<%=associations_temp[i].name_cp-%>){
-                  let <%=associations_temp[i].name-%> = await result.<%=associations_temp[i].name-%>({});
-                  if(<%=associations_temp[i].name-%> && input.remove<%=associations_temp[i].name_cp-%> === `${<%=associations_temp[i].name-%>[models.<%=associations_temp[i].target_lc-%>.idAttribute()]}`){
-                    await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
-                  }
-                  else{
-                    throw new Error("The association you're trying to remove it doesn't exists");
+                  let wrong_ids = await helper.checkIdsToRemove(result, '<%=associations_temp[i].name-%>', input.remove<%=associations_temp[i].name_cp-%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+                  if(wrong_ids.length > 0){
+                    throw new Error(`Ids: ${wrong_ids.map(i=> `"${i}"`).join(",")} that you are trying to remove are not assciated with this record.` )
+                  }else{
+                      await result._remove<%=associations_temp[i].name_cp-%>(input.remove<%=associations_temp[i].name_cp-%>);
                   }
                 }
               <%}-%>

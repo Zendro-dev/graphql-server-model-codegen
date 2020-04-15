@@ -256,11 +256,11 @@ static updateOne(input){
           }
 
           if(input.removePublisher){
-            let publisher = await result.publisher({});
-            if(publisher && input.removePublisher === \`\${publisher[models.publisher.idAttribute()]}\`){
-              await result._removePublisher(input.removePublisher);
+            let wrong_ids = await helper.checkIdsToRemove(result, 'publisher', input.removePublisher, models.publisher.idAttribute());
+            if(wrong_ids.length > 0){
+              throw new Error(\`Ids: \${wrong_ids.map(i=> \`"\${i}"\`).join(",")} that you are trying to remove are not assciated with this record.\` )
             }else{
-              throw new Error("The association you're trying to remove it doesn't exists");
+                await result._removePublisher(input.removePublisher);
             }
           }
 
