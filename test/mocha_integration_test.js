@@ -545,65 +545,82 @@ describe(
   });
 
   it('21. Limit check', function() {
-      for (let k = 1; k <= 100; k++)
-      {
-        let mutationText = `mutation {`;
-        for (let i = 1; i <= 60; i++) {
-            mutationText += `individual${i}: addIndividual (name: "CountIndividual") { name } `;
-        }
-        mutationText += `}`;
-        let res = itHelpers.request_graph_ql_post(mutationText);
-        expect(res.statusCode).to.equal(200);
-      }
-      res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: {value: "CountIndividual"}}) {name}}`);
-      resBody = JSON.parse(res.body.toString('utf8'));
+    let res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: {value: "CountIndividual"}}) {name}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
 
-      expect(res.statusCode).to.equal(200);
-      expect(resBody.data.individuals.length).equal(6000);
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.individuals.length).equal(15);
 
-      let transcript_count_gene = "Gene Z";
-      for (let k = 1; k <= 100; k++) {
-        let mutationText = `mutation {`;
-          for (let i = 1; i <= 60; i++) {
-            mutationText += `transcript${i}: addTranscript_count(gene: "${transcript_count_gene}", variable: "RPKM", count: 555.55, tissue_or_condition: "Root") { id } `;
-          }
-          mutationText += `}`;
-          res = itHelpers.request_graph_ql_post(mutationText);
-          expect(res.statusCode).to.equal(200);
-        }
-     res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
-     resBody = JSON.parse(res.body.toString('utf8'));
+    let transcript_count_gene = "Gene Z";
+    let transcript_count_adding = `mutation { addTranscript_count(gene: "${transcript_count_gene}", variable: "RPKM", count: 555.55, tissue_or_condition: "Root") { id } }`;
 
-     expect(res.statusCode).to.equal(200);
-     expect(resBody.data.transcript_counts.length).equal(6000);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(transcript_count_adding);
+    res = itHelpers.request_graph_ql_post(`{ transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
 
-     res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: {value: "CountIndividual"}}) { name } transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
-     resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.transcript_counts.length).equal(11);
 
-     expect(res.statusCode).to.equal(200);
-     expect(resBody.data).to.exist;
-     if (resBody.data.transcript_counts == null) {
-         expect(resBody.data.individuals).to.have.length(6000);
-         expect(resBody.errors).to.deep.equal([
-            {
-               message:"Error: Max record limit of 10000 exceeded in transcript_counts",
-               details:"",
-               path:["transcript_counts"]
-            }
-        ]);
-     } else {
-         expect(resBody.data.individuals).to.be.null;
-         expect(resBody.data.transcript_counts).to.have.length(6000);
-         expect(resBody.errors).to.deep.equal([
-             {
-                message:"Error: Max record limit of 10000 exceeded in individuals",
-                details:"",
-                path:["individuals"]
-             }
-         ])
-     }
-    
-  }).timeout(120000);
+    res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: {value: "CountIndividual"}}) { name } transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+        errors:[{
+            message:"Error: Max record limit of 25 exceeded in transcript_counts",
+            details:"",
+            path:["transcript_counts"]
+        }],
+        data:{
+            individuals:[
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"},
+                {name:"CountIndividual"}
+            ],
+            transcript_counts:null
+        }});
+
+  });
 
 });
 
