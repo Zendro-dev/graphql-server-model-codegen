@@ -9,9 +9,10 @@ const checkAuthorization = require('../utils/check-authorization');
 const fs = require('fs');
 const {handleError} = require('../utils/errors');
 const os = require('os');
-const globals = require('../config/globals');
+const resolvers = require(path.join(__dirname,'index.js'));
+const models = require(path.join(__dirname, '..', 'models_index.js'));
 
-<% associations_temp = associations["belongsToMany"]-%>
+<% associations_temp = associations["to_many_through_sql_cross_table"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
 
   /**
@@ -77,7 +78,7 @@ const globals = require('../config/globals');
 <%}-%>
 
 
-<%let associations_one = associations["belongsTo"].concat( associations["hasOne"])-%>
+<%let associations_one = associations["to_one"]-%>
 <% for(let i=0; i < associations_one.length; i++){ -%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
@@ -86,9 +87,24 @@ const globals = require('../config/globals');
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {type}         Associated record
    */
-  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = function({search}, context){
+  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
     try{
-      return this.<%=associations_one[i].name%>Impl(search);
+      if (search === undefined) {
+        return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+      } else {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+          "search": search, 
+          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(), 
+          "value": {"value": this.<%= associations_one[i].targetKey -%> }, 
+          "operator": "eq"
+        });
+        let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+        if (found) {
+          return found[0]
+        }
+        return found;
+      }
     }catch(error){
       console.error(error);
       handleError(error);
@@ -96,7 +112,7 @@ const globals = require('../config/globals');
   }
 <%}-%>
 
-<% associations_temp = associations["hasMany"]-%>
+<% associations_temp = associations["to_many"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
 
   /**
@@ -112,7 +128,15 @@ const globals = require('../config/globals');
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
     try{
-      return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
+      
+      return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -128,7 +152,16 @@ const globals = require('../config/globals');
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
     try{
-      return this.countFiltered<%=associations_temp[i].name_cp%>Impl ({search});
+
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
+
+      return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -149,7 +182,16 @@ const globals = require('../config/globals');
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
     try{
-      return this.<%=associations_temp[i].name%>ConnectionImpl({search, order, pagination});
+
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
+
+      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);

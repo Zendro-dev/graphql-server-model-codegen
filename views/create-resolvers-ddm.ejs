@@ -9,88 +9,11 @@ const checkAuthorization = require('../utils/check-authorization');
 const fs = require('fs');
 const {handleError} = require('../utils/errors');
 const os = require('os');
+const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 
-<% associations_temp = associations["belongsToMany"]-%>
-<% for(let i=0; i < associations_temp.length; i++){ -%>
-  
-  /**
-   * <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection - Check user authorization and return certain number, specified in pagination argument, of records
-   * associated with the current instance, this records should also
-   * holds the condition of search argument, all of them sorted as specified by the order argument.
-   *
-   * @param  {object} search     Search argument for filtering associated records
-   * @param  {array} order       Type of sorting (ASC, DESC) for each field
-   * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
-   */
-   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = async function({
-       search,
-       order,
-       pagination
-   }, context) {
-     try{
-      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
 
-      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
-      let authorizedAdapters = authorizationCheck.authorizedAdapters;
-      if (authorizationCheck.authorizedAdapters.length > 0) {
-        let <%=associations_temp[i].name%>ConnectionObj = await this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination,authorizedAdapters});
-        //check adapter authorization Errors
-        [<%=associations_temp[i].name%>ConnectionObj,context] = helper.writeBenignErrors(authorizationCheck,context,<%=associations_temp[i].name%>ConnectionObj)
-        return <%=associations_temp[i].name%>ConnectionObj;
-      } else { //adapters not auth || errors
-        // else new Error
-        if (authorizationCheck.authorizationErrors.length > 0) {
-            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-        } else {
-          throw new Error('No available adapters for data model "Book" ');
-        }
-      }
-      
-      
-      
-     }catch(error){
-       console.error(error);
-       handleError(error);
-     };
-   }
-
-  /**
-   * <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> - Count number of associated records that holds the conditions specified in the search argument
-   *
-   * @param  {object} {search} description
-   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {type}          Number of associated records that holds the conditions specified in the search argument
-   */
-  <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = async function({search}, context){
-    try{
-      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
-
-      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
-      if (authorizationCheck.authorizedAdapters.length > 0) {
-        let countFiltered<%=associations_temp[i].name_cp%>Obj = await this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
-        [countFiltered<%=associations_temp[i].name_cp%>Obj,context] = helper.writeBenignErrors(authorizationCheck,context, countFiltered<%=associations_temp[i].name_cp%>Obj);
-        return countFiltered<%=associations_temp[i].name_cp%>Obj.sum;
-      } else { //adapters not auth || errors
-        // else new Error
-        if (authorizationCheck.authorizationErrors.length > 0) {
-          throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-        } else {
-          throw new Error('No available adapters for data model "Book"');
-        }
-      }
-
-    }catch(error){
-      console.error(error);
-      handleError(error);
-    };
-  }
-<%}-%>
-
-
-<%let associations_one = associations["belongsTo"].concat( associations["hasOne"])-%>
+<%let associations_one = associations["to_one"]-%>
 <% for(let i=0; i < associations_one.length; i++){ -%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
@@ -99,9 +22,24 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {type}         Associated record
    */
-  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = function({search}, context){
+  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
     try{
-      return this.<%=associations_one[i].name%>Impl(search);
+      if (search === undefined) {
+        return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+      } else {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+          "search": search, 
+          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(), 
+          "value": {"value": this.<%= associations_one[i].targetKey -%> }, 
+          "operator": "eq"
+        });
+        let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context);
+        if (found) {
+          return found[0]
+        }
+        return found;
+      }
     }catch(error){
       console.error(error);
       handleError(error);
@@ -109,7 +47,7 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
   }
 <%}-%>
 
-<% associations_temp = associations["hasMany"]-%>
+<% associations_temp = associations["to_many"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
 
    /**
@@ -119,24 +57,18 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
-  <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = async function({search}, context){
+   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
     try{
-      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
 
-      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
-      if (authorizationCheck.authorizedAdapters.length > 0) {
-        let countFiltered<%=associations_temp[i].name_cp%>Obj = await this.countFiltered<%=associations_temp[i].name_cp%>Impl({search});
-        [countFiltered<%=associations_temp[i].name_cp%>Obj,context] = helper.writeBenignErrors(authorizationCheck,context, countFiltered<%=associations_temp[i].name_cp%>Obj);
-        return countFiltered<%=associations_temp[i].name_cp%>Obj.sum;
-      } else { //adapters not auth || errors
-        // else new Error
-        if (authorizationCheck.authorizationErrors.length > 0) {
-          throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-        } else {
-          throw new Error('No available adapters for data model "Book"');
-        }
-      }
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
 
+      return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
     }catch(error){
       console.error(error);
       handleError(error);
@@ -155,26 +87,18 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
    * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
-  <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = async function({search,order,pagination}, context){
+   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
     try{
-      let registeredAdapters = Object.values(models.<%=associations_temp[i].target_lc%>.registeredAdapters);
 
-      let authorizationCheck = await helper.authorizedAdapters(context, registeredAdapters, 'read');
-      let authorizedAdapters = authorizationCheck.authorizedAdapters;
-      if (authorizationCheck.authorizedAdapters.length > 0) {
-        let <%=associations_temp[i].name%>ConnectionObj = await this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination,authorizedAdapters});
-        //check adapter authorization Errors
-        [<%=associations_temp[i].name%>ConnectionObj,context] = helper.writeBenignErrors(authorizationCheck,context,<%=associations_temp[i].name%>ConnectionObj)
-        return <%=associations_temp[i].name%>ConnectionObj;
-      } else { //adapters not auth || errors
-        // else new Error
-        if (authorizationCheck.authorizationErrors.length > 0) {
-            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-        } else {
-          throw new Error('No available adapters for data model "Book" ');
-        }
-      }
+      //build new search filter
+      let nsearch = helper.addSearchField({
+        "search": search, 
+        "field": "<%=associations_temp[i].targetKey%>", 
+        "value": {"value": this.getIdValue()}, 
+        "operator": "eq"
+      });
 
+      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
       handleError(error);

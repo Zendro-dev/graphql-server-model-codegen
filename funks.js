@@ -453,8 +453,8 @@ module.exports.getOptions = function(dataModel){
       idAttribute: getIdAttribute(dataModel)
   };
 
-  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel)));
-  opts['editableAttributes'] = getEditableAttributes(opts.attributes, opts.associations.belongsTo, getIdAttribute(dataModel));
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associations), getIdAttribute(dataModel)));
+  opts['editableAttributes'] = getEditableAttributes(opts.attributes,  getEditableAssociations(opts.associations), getIdAttribute(dataModel));
   opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
   dataModel['id'] = {
@@ -496,6 +496,15 @@ validateJsonFile =  function(opts){
     }
   }
 
+  getEditableAssociations = function(associations) {
+    let editableAssociations = [];
+    associations['to_one'].forEach(association => {
+      if (association.keyIn !== association.target){
+        editableAssociations.push(association);
+      }
+    })
+    return editableAssociations;
+  }
 
   getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
     let editable_attributes = {};
@@ -517,63 +526,64 @@ validateJsonFile =  function(opts){
    * @param  {string} storageType  Storage type(i.e. sql, webservice) where source model is stored.
    * @return {object}              Object containing explicit information needed for generating files with templates.
    */
-  parseAssociations = function(associations, storageType){
+    parseAssociations = function(associations, storageType){
 
+      associations_info = {
+        "schema_attributes" : {
+          "many" : {},
+          "one" : {}
+        },
+        //"mutations_attributes" : {},
+        "to_one": [],
+        "to_many": [],
+        "to_many_through_sql_cross_table": []
 
-    associations_info = {
-      "schema_attributes" : {
-        "many" : {},
-        "one" : {}
-      },
-      //"mutations_attributes" : {},
-      "belongsTo" : [],
-      "hasOne" : [],
-      "hasMany" : [],
-      "belongsToMany" : []
-    };
-
-    if(associations!==undefined){
-      Object.entries(associations).forEach(([name, association]) => {
-          association.targetStorageType = association.targetStorageType.toLowerCase();
-          let type = association.type;
-
-          //if(associations_type["many"].includes(association.type) )
-          if(association.type === 'to_many')
-          {
-            //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
-            associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
-          //}else if(associations_type["one"].includes(association.type))
-        }else if(association.type === 'to_one')
-          {
-            associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
-          }else{
-            console.log("Association type "+ association.type + " not supported.");
-            return;
-          }
-
-          let assoc = association;
-          assoc["name"] = name;
-          assoc["name_lc"] = uncapitalizeString(name);
-          assoc["name_cp"] = capitalizeString(name);
-          assoc["target_lc"] = uncapitalizeString(association.target);
-          assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
-          assoc["target_pl"] = inflection.pluralize(association.target);
-          assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
-          assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
-          if(association.keyIn){
-              assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
-          }
-
-
-          let sql_type = getSqlType(assoc);
-          associations_info[sql_type].push(assoc);
-          //associations_info[type].push(assoc);
-        });
-
-      }
-      associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
-      return associations_info;
-    };
+      };
+  
+      if(associations!==undefined){
+        Object.entries(associations).forEach(([name, association]) => {
+            association.targetStorageType = association.targetStorageType.toLowerCase();
+            let type = association.type;
+  
+            //if(associations_type["many"].includes(association.type) )
+            if(association.type === 'to_many') {
+              //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
+              associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+            //}else if(associations_type["one"].includes(association.type))
+            } else if(association.type === 'to_one') {
+              associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+            } else if(association.type === 'to_many_through_sql_cross_table') {
+              if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
+                console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
+              }
+              associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+            } else { 
+              console.error(colors.red("Association type "+ association.type + " not supported."));
+            }
+  
+            let assoc = association;
+            assoc["name"] = name;
+            assoc["name_lc"] = uncapitalizeString(name);
+            assoc["name_cp"] = capitalizeString(name);
+            assoc["target_lc"] = uncapitalizeString(association.target);
+            assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
+            assoc["target_pl"] = inflection.pluralize(association.target);
+            assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
+            assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
+            assoc["targetKey"] = association.targetKey;
+            if(association.keyIn){
+                assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
+            }
+  
+  
+            associations_info[type].push(assoc);
+            //associations_info[type].push(assoc);
+          });
+  
+        }
+        associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
+        return associations_info;
+      };
 
 
 
