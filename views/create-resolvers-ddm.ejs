@@ -12,6 +12,16 @@ const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 
+<% associations_temp = associations["to_one"].concat(associations["to_many"]).concat(associations["to_many_through_sql_cross_table"])-%>
+const associationArgsDef = {
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <%if( i == associations_temp.length - 1 ){-%>
+      'add<%=associations_temp[i].name_cp-%>': '<%=associations_temp[i].target_cp-%>'
+    <%}else {-%>
+      'add<%=associations_temp[i].name_cp-%>': '<%=associations_temp[i].target_cp-%>',
+    <%}-%>
+  <%}-%>
+}
 
 <%let associations_one = associations["to_one"]-%>
 <% for(let i=0; i < associations_one.length; i++){ -%>
