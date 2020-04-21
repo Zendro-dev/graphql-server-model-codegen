@@ -16,9 +16,9 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%if( i == associations_temp.length - 1 ){-%>
-      'add<%=associations_temp[i].name_cp-%>': '<%=associations_temp[i].target_cp-%>'
+      'add<%=associations_temp[i].name_cp-%>': '<%=associations_temp[i].target_lc-%>'
     <%}else {-%>
-      'add<%=associations_temp[i].name_cp-%>': '<%=associations_temp[i].target_cp-%>',
+      'add<%=associations_temp[i].name_cp-%>': '<%=associations_temp[i].target_lc-%>',
     <%}-%>
   <%}-%>
 }
