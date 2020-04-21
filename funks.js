@@ -26,7 +26,27 @@ associations_type = {
  */
 parseFile = function(jFile){
   let data=fs.readFileSync(jFile, 'utf8');
-  let words=JSON.parse(data);
+  let words = null;
+
+  //read
+  try {
+    data=fs.readFileSync(jFile, 'utf8');
+  } catch (e) {
+    //msg
+    console.log(colors.red('! Error:'), 'Reading JSON model definition file:', colors.dim(jFile));
+    console.log(colors.red('! Error name: ' + e.name +':'), e.message);
+    throw new Error(e);
+  }
+
+  //parse
+  try {
+    words=JSON.parse(data);
+  } catch (e) {
+    //msg
+    console.log(colors.red('! Error:'), 'Parsing JSON model definition file:', colors.dim(jFile));
+    console.log(colors.red('! Error name: ' + e.name + ':'), e.message);
+    throw new Error(e);
+  }
   return words;
 };
 
@@ -299,10 +319,18 @@ writeSchemaCommons = function(dir_write){
   scalar DateTime
 \`;`;
 
-  fs.writeFile(dir_write + '/schemas/' +  'commons.js' , commons, function(err) {
-    if (err)
-      return console.log(err);
-    });
+  try {
+    let file_name = dir_write + '/schemas/' +  'commons.js';
+
+    fs.writeFileSync(file_name, commons);
+    //success
+    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+
+  } catch(e) {
+    //error
+    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+    console.log(e);
+  }
 };
 
 
@@ -395,10 +423,35 @@ writeIndexAdapters = function(dir_write){
   });
   
   `
-  fs.writeFile(dir_write + '/adapters/' +  'index.js' , index, function(err) {
-    if (err)
-      throw new Error(err);
-    });
+  try {
+    let file_name = dir_write + '/adapters/' +  'index.js';
+
+    fs.writeFileSync(file_name, index);
+    //success
+    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+
+  } catch(e) {
+    //error
+    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+    console.log(e);
+  }
+}
+
+writeIndexResolvers = async function(dir_write, models){
+  //set file name
+  let file_name = dir_write + '/resolvers/index.js';
+  //generate
+  await generateSection('resolvers-index', {models: models}, file_name)
+  .then(() => {
+    //success
+    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+  })
+  .catch((e) => {
+    //error
+    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+    console.log(e);
+  });
+
 
 }
 
@@ -470,18 +523,23 @@ module.exports.getOptions = function(dataModel){
 
 
 validateJsonFile =  function(opts){
+  let check = {
+    pass : true,
+    errors: []
+  }
 
-  let valid = true;
-
-  //validate external ids declare in attributes
+  //check: validate external ids declare in attributes
   opts.externalIds.forEach( x => {
-    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String' || opts.attributes[x] === 'Float' || opts.attributes[x] === 'Int'  ) ){
-      valid = false;
-      console.error(colors.red(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`) );
+    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String' 
+        || opts.attributes[x] === 'Float' || opts.attributes[x] === 'Int'  ) ) {
+      
+          //error
+          check.pass = false;
+          check.errors.push(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`);
     }
   });
 
-  return valid;
+  return check;
 }
 
   getSqlType = function(association, model_name){
@@ -632,25 +690,6 @@ generateAssociationsMigrations =  function( opts, dir_write){
     });
 };
 
-
- /**
-  * generateSection - Writes a file which contains a generated section. Each seaction has its own template.
-  *
-  * @param  {string} section   Name of section that will be generated (i.e. schemas, models, migrations, resolvers)
-  * @param  {object} opts      Object with options needed for the template that will generate the section
-  * @param  {string} dir_write Path (including name of the file) where the generated section will be written as a file.
-  */
-generateSection = async function(section, opts, dir_write ){
-  let generatedSection = await module.exports.generateJs('create-'+section ,opts);
-  fs.writeFile(dir_write, generatedSection, function(err) {
-    if (err)
-    {
-      return console.log(err);
-    }
-  });
-};
-
-
 /**
  * createNameMigration - Creates the name for the migration file accordingly to the time and date
  * that the migration is created.
@@ -666,15 +705,97 @@ createNameMigration = function(dir_write, model_name){
   return dir_write + '/migrations/' + date + '-'+model_name +'.js';
 };
 
+ /**
+  * generateSection - Writes a file which contains a generated section. Each seaction has its own template.
+  *
+  * @param  {string} section   Name of section that will be generated (i.e. schemas, models, migrations, resolvers)
+  * @param  {object} opts      Object with options needed for the template that will generate the section
+  * @param  {string} dir_write Path (including name of the file) where the generated section will be written as a file.
+  */
+generateSection = async function(section, opts, dir_write ){
+  let generatedSection = await module.exports.generateJs('create-'+section ,opts);
+  fs.writeFileSync(dir_write, generatedSection);
+};
+
+/**
+  * generateSections - Receives an array of sections, and for each one invokes generateSection() after handling 
+  * particular sections checks.
+  *
+  * @param  {array} sections    Array of sections that will be generated; each section is an object with 'dir' and 'template' keys.
+  * @param  {object} opts        Object with options needed for the template that will generate the section.
+  * @param  {string} dir_write   Path (including name of the file) where the generated section will be written as a file.
+  * @param  {string} modelNameLc Model name in lowercase, used to generate the file name that will be written.
+  */
+generateSections = async function(sections, opts, dir_write, modelNameLc) {
+  /**
+   * For each section (dir and template), set the output file name,
+   * and do an additional existence check for validations and patches.
+   */
+  for(let i=0; i<sections.length; i++) {
+    let section = sections[i];
+    let file_name = "";
+
+    switch(section.template) {
+      //schemas
+      case 'schemas':
+      case 'schemas-ddm':
+      //resolvers
+      case 'resolvers':
+      case 'resolvers-ddm':
+      //models
+      case 'models':  
+      case 'models-webservice':
+      case 'models-cenz':
+      case 'distributed-model':
+      //adapters
+      case 'sql-adapter':
+      case 'cenz-adapters':
+        file_name = dir_write + '/'+ section.dir +'/' + modelNameLc + '.js';
+        break;
+      //migrations
+      case 'migrations':
+        file_name = createNameMigration(dir_write, modelNameLc);
+        break;
+      //validations & patches 
+      case 'validations':
+      case 'patches':
+        //set file name
+        file_name = dir_write + '/'+ section.dir +'/' + modelNameLc + '.js';
+        //check
+        if (fs.existsSync(file_name)) {
+          console.log('@@@ File:', colors.dim(file_name), colors.yellow('not written'), '- already exist and shall be redacted manually');
+          continue;
+        }
+        break;
+
+      default:
+        continue;
+    }
+
+    //generate
+    await generateSection(section.template, opts, file_name)
+    .then(() => {
+      //success
+      console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+    })
+    .catch((e) => {
+      //error
+      console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+      console.log(e);
+    });
+  }
+}
 
 /**
  * writeCommons - Write static files
  *
  * @param  {string} dir_write directory where code is being generated.
+ * @param  {array}  models arrays of entries of the form [opts.name , opts.namePl].
  */
-writeCommons = function(dir_write){
+writeCommons = async function(dir_write, models){
   writeSchemaCommons(dir_write);
   writeIndexAdapters(dir_write);
+  await writeIndexResolvers(dir_write, models);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
@@ -731,202 +852,210 @@ getStorageType = function(dataModel) {
 }
 
 
- /**
-  * generateCode - Given a set of json files, describing each of them a data model, this
-  * functions generate the code for a graphql server that will handle CRUD operations.
-  * The generated code consists of four sections: sequelize models, migrations, resolvers and
-  * graphql schemas.
-  *
-  * @param  {string} json_dir  Directory where the json files are stored.
-  * @param  {string} dir_write Directory where the generated code will be written.
-  */
-module.exports.generateCode = function(json_dir, dir_write){
-  console.log("Generating files...");
-  dir_write = (dir_write===undefined) ? __dirname : dir_write;
-  let sections = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
+/** 
+ * generateCode - Given a set of json files, describing each of them a data model, this
+ * functions generate the code for a graphql server that will handle CRUD operations.
+ * The generated code consists of four sections: sequelize models, migrations, resolvers and
+ * graphql schemas.
+ *
+ * @param  {string} json_dir  Directory where the json files are stored.
+ * @param  {string} dir_write Directory where the generated code will be written.
+ * @param  {object} options   Object with additional options.
+ */
+module.exports.generateCode = async function(json_dir, dir_write, options){
+  let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
+  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
+  //set output dir
+  dir_write = (dir_write===undefined) ? __dirname : dir_write;
+  //msg
+  console.log(colors.white('\n@ Starting code generation in: \n', colors.dim(path.resolve(dir_write))), "\n");
+  //op: verbose
+  let verbose = (options && typeof options === 'object' && typeof options.verbose === 'boolean') ? options.verbose : false;
 
-  // creates one folder for each of schemas, resolvers, models
-  sections.forEach( (section) => {
-    if(!fs.existsSync(dir_write+'/'+section))
-    {
-      fs.mkdirSync(dir_write+'/'+section);
-    }
-  });
-
-  if(!fs.existsSync(dir_write+'/models-webservice'))
-  {
-    fs.mkdirSync(dir_write+'/models-webservice');
-  }
-
-  if(!fs.existsSync(dir_write+'/models-cenz-server'))
-  {
-    fs.mkdirSync(dir_write+'/models-cenz-server');
-  }
-
-  if(!fs.existsSync(dir_write+'/adapters'))
-  {
-    fs.mkdirSync(dir_write+'/adapters');
-  }
-
-  if(!fs.existsSync(dir_write+'/models-distributed'))
-  {
-    fs.mkdirSync(dir_write+'/models-distributed');
-  }
-
-  //test
-  fs.readdirSync(json_dir).forEach((json_file) => {
-      console.log("Reading...", json_file);
-      let file_to_object = parseFile(json_dir+'/'+json_file);
-      let opts = module.exports.getOptions(file_to_object);
-
-      if(validateJsonFile(opts) ){
-        models.push([opts.name , opts.namePl]);
-        console.log(opts.name);
-        //console.log(opts.associations);
-
-        if(opts.storageType === 'sql'){
-          /**
-           * Migrations
-           */
-          sections.forEach((section) =>{
-              let file_name = "";
-              if(section==='migrations')
-              {
-                file_name = createNameMigration(dir_write,opts.nameLc);
-              }else{
-                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
-              }
-
-              if( (section == 'validations' || section == 'patches') && fs.existsSync(file_name)){
-                  console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
-              }else{
-                  generateSection(section, opts, file_name)
-                      .then( () => {
-                          console.log(file_name + ' written successfully!');
-                      });
-              }
-          });
-        //generateAssociationsMigrations(opts, dir_write);
-      }else if(opts.storageType === 'webservice' || opts.storageType === 'cenz-server' || opts.storageType === 'distributed-data-model'){
-          let file_name = "";
-          
-          /**
-           * Schemas
-           */
-          if (opts.storageType === 'distributed-data-model') {
-            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
-            generateSection("schemas-ddm",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!');
-            });
-          } else {
-            file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
-            generateSection("schemas",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!');
-            });
-          }
-
-          /**
-           * Models
-           */
-          if(opts.storageType === 'webservice'){
-            file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
-            generateSection("models-webservice",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!(from webservice)');
-            });
-          }else if(opts.storageType === 'cenz-server'){
-            file_name = dir_write + '/models-cenz-server/' + opts.nameLc + '.js';
-            generateSection("models-cenz",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!(from cenz server)');
-            });
-          }else if(opts.storageType === 'distributed-data-model'){
-            file_name = dir_write + '/models-distributed/' + opts.nameLc + '.js';
-            generateSection("distributed-model",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!');
-            });
-          }
-
-          /**
-           * Resolvers
-           */
-          if (opts.storageType === 'distributed-data-model') {
-            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-            generateSection("resolvers-ddm",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!');
-            });
-          } else {
-            file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-            generateSection("resolvers",opts,file_name).then( ()=>{
-              console.log(file_name + ' written successfully!');
-            });
-          }
-          
-      /**
-       * Adapters
-       */
-      }else if(opts.storageType === 'cenzontle-webservice-adapter'
-              || opts.storageType === 'ddm-adapter'){
-        /**
-         * Adapters
-         */
-        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
-        generateSection("cenz-adapters",opts,file_name).then( ()=>{
-          console.log(file_name + ' written successfully!');
-        });
-      }else if(opts.storageType === 'sql-adapter') {
-        /**
-         * Adapters
-         */
-        let file_name = dir_write + '/adapters/' + opts.adapterName + '.js';
-        generateSection("sql-adapter",opts,file_name).then( ()=>{
-          console.log(file_name + ' written successfully!');
-        });
-
-        /**
-         * Migrations
-         */
-        file_name = createNameMigration(dir_write,opts.nameLc);
-        generateSection('migrations', opts, file_name)
-            .then( () => {
-                console.log(file_name + ' written successfully!');
-            });
-
-        /**
-         * Validations
-         */
-        file_name = dir_write + '/'+ 'validations' +'/' + opts.nameLc + '.js';
-        if( fs.existsSync(file_name)){
-            console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
-        }else{
-            generateSection('validations', opts, file_name)
-                .then( () => {
-                    console.log(file_name + ' written successfully!');
-                });
-        }
-
-        /**
-         * Patches
-         */
-        file_name = dir_write + '/'+ 'patches' +'/' + opts.nameLc + '.js';
-        if( fs.existsSync(file_name)){
-            console.error(`Warning: ${file_name} already exist and shell be redacted manually`);
-        }else{
-            generateSection('patches', opts, file_name)
-                .then( () => {
-                    console.log(file_name + ' written successfully!');
-                });
-        }
+  /**
+   * Create sections dirs
+   */
+  //msg
+  if(verbose) console.log(colors.white('\n@@ Creating required directories...'));
+  sectionsDirsA.concat(sectionsDirsB).forEach( (section) => {
+    let dir = dir_write+'/'+section;
+    if(!fs.existsSync(dir)) {
+      try {
+        fs.mkdirSync(dir);
+        //msg
+        if(verbose) console.log("@@@ dir created: ", colors.dim(dir));
+      } catch(e) {
+        //err
+        console.log(colors.red("! mkdir.error: "), "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS");
+        console.log(colors.red("!@ mkdir.error: "), e);
+        console.log(colors.red("\done"));
+        process.exit(1);
       }
+    } else {
+      //msg
+      if(verbose) console.log("@@@ dir already exists: ", colors.dim(dir));
     }
   });
+  //msg
+  if(verbose)console.log("@@ ", colors.green('done'));
 
-  let index_resolvers_file = dir_write + '/resolvers/index.js';
-  generateSection('resolvers-index',{models: models} ,index_resolvers_file)
-  .then( () => {
-    console.log('resolvers-index written successfully!');
-  });
+  let totalFiles = 0;
+  let totalExcludedFiles = 0;
+  let totalWrongFiles = 0; //errors on reading or parsing
+  let totalWrongModels = 0; //semantic errors
 
-  writeCommons(dir_write);
+  /**
+   * Processes each JSON file on input directory.
+   */
+  let json_files = fs.readdirSync(json_dir)
+  for(let i=0; i<json_files.length; i++)
+  {
+    let json_file = json_files[i];
+    let file_to_object = null;
+    totalFiles++;
+
+    //msg
+    console.log("@@ Reading file... ", colors.blue(json_file));
+
+    //Parse JSON file
+    try {
+      file_to_object = parseFile(json_dir+'/'+json_file);
+      //check
+      if(file_to_object === null) {
+        totalExcludedFiles++;
+        return;
+      }
+    } catch(e) {
+      //msg
+      console.log(e);
+      console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
+      totalExcludedFiles++;
+      return;
+    }
+
+    //Do semantic validations on JSON object
+    //to do...
+
+    //Get options
+    let opts = module.exports.getOptions(file_to_object);
+
+    //Do semantic validations on opts
+    let check = validateJsonFile(opts);
+    if(!check.pass) {
+      totalWrongModels++;
+      totalExcludedFiles++;
+
+      //msgs
+      console.log("@@@ Error on model: ", colors.blue(json_file));
+      check.errors.forEach( (error) =>{
+        //err
+        console.log("@@@", colors.red(error));
+      });
+      console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
+      return;
+  
+    } else { //valid model
+      //done
+    }
+
+    /**
+     * Generate code
+     */
+    //msg
+    console.log("@@ Generating code for model... ", colors.blue(opts.name), '-', colors.dim(opts.storageType) );
+
+    //set sections
+    let sections = []; //schemas, resolvers, models, migrations, validations, patches
+    switch(opts.storageType) {
+      case 'sql':
+        sections = [
+          {dir: 'schemas', template: 'schemas'},
+          {dir: 'resolvers', template: 'resolvers'},
+          {dir: 'models', template: 'models'},
+          {dir: 'migrations', template: 'migrations'},
+          {dir: 'validations', template: 'validations'},
+          {dir: 'patches', template: 'patches'},
+        ]
+        break;
+
+      case 'webservice':
+        sections = [
+          {dir: 'schemas', template: 'schemas'},
+          {dir: 'resolvers', template: 'resolvers'},
+          {dir: 'models-webservice', template: 'models-webservice'},
+        ]
+        break;
+
+      case 'cenz-server':
+        sections = [
+          {dir: 'schemas', template: 'schemas'},
+          {dir: 'resolvers', template: 'resolvers'},
+          {dir: 'models-cenz-server', template: 'models-cenz'},
+        ]
+        break;
+
+      case 'distributed-data-model':
+        sections = [
+          {dir: 'schemas', template: 'schemas-ddm'},
+          {dir: 'resolvers', template: 'resolvers-ddm'},
+          {dir: 'models-distributed', template: 'distributed-model'},
+        ]
+        break;
+
+      case 'cenzontle-webservice-adapter':
+        sections = [
+          {dir: 'adapters', template: 'cenz-adapters'},
+        ]
+        break;
+
+      case 'ddm-adapter':
+        sections = [
+          {dir: 'adapters', template: 'cenz-adapters'},
+        ]
+        break;
+
+      case 'sql-adapter':
+        sections = [
+          {dir: 'adapters', template: 'sql-adapter'},
+          {dir: 'migrations', template: 'migrations'},
+          {dir: 'validations', template: 'validations'},
+          {dir: 'patches', template: 'patches'},
+        ]
+        break;
+
+      default:
+        break;
+    }
+
+    //generate sections
+    await generateSections(sections, opts, dir_write, opts.nameLc);
+    //msg
+    console.log("@@ ", colors.green('done'));
+
+    //save data for writeCommons
+    models.push([opts.name , opts.namePl]);
+  };
+
+  //msg
+  console.log("@@ Generating code for... ", colors.blue("commons & index's"));
+  //generate commons & index's
+  await writeCommons(dir_write, models);
+  //msg
+  console.log("@@ ", colors.green('done'));
+
+  //Final report
+  //msg
+  console.log("\n@@ Total JSON files processed: ", colors.blue(totalFiles));
+  //msg
+  console.log("@@ Total JSON files excluded: ", (totalExcludedFiles>0) ? colors.yellow(totalExcludedFiles) : colors.green(totalExcludedFiles));
+  //msg
+  if(verbose) console.log("@@ Total JSON files with errors: ", (totalWrongFiles>0) ? colors.red(totalWrongFiles) : colors.green(totalWrongFiles));
+  //msg
+  if(verbose) console.log("@@ Total models with errors: ", (totalWrongModels>0) ? colors.red(totalWrongModels) : colors.green(totalWrongModels));
+
+  //msg
+  console.log(colors.white('@ Code generation...'), colors.green('done'));
 };
