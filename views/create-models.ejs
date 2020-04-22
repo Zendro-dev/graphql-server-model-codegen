@@ -69,7 +69,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static associate(models){
     <% for(var key in associations){ -%>
       <%for(let i=0; i< associations[key].length; i++){-%>
-        <%if(associations[key][i].targetStorageType === 'sql'){-%>        
+        <%if(associations[key][i].targetStorageType === 'sql'){-%>
           <%if (associations[key][i].type === 'to_one' && associations[key][i].keyIn !== associations[key][i].target){-%>
             <%- name -%>.belongsTo(models.<%= associations[key][i].target_lc -%>
           <%}-%>
@@ -103,7 +103,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static countRecords(search){
     let options = {};
     if (search !== undefined) {
-      
+
       //check
       if(typeof search !== 'object') {
         throw new Error('Illegal "search" argument type, it must be an object.');
@@ -659,5 +659,37 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
     };
   }
+
+  /**
+   * @static countAllAssociatedRecords - Count records associated with another given record
+   *
+   * @param  {ID} id      Id of the record which the associations will be counted
+   * @param  {objec} context Default context by resolver
+   * @return {Int}         Number of associated records
+   */
+  static async countAllAssociatedRecords(id, context ){
+
+    let <%- nameLc %> = await this.readById(id);
+    //check that record actually exists
+    if (<%- nameLc %> === null) throw new Error(`Record with ID = ${id} does not exist`);
+    let promises_to_many = [];
+    let promises_to_one = [];
+
+    <%associations_temp = associations["to_many"] -%>
+    <% for(let i=0; i < associations_temp.length; i++){ -%>
+      promises_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+    <%}-%>
+    <%associations_temp = associations["to_one"] -%>
+    <% for(let i=0; i < associations_temp.length; i++){ -%>
+      promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+    <%}-%>
+
+    let result_to_many = await Promise.all(promises_to_many);
+    let result_to_one = await Promise.all(promises_to_one);
+
+    let get_to_many_associated = result_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
+    let get_to_one_associated = result_to_one.filter( (r, index) => r !== null ).length;
+
+    return get_to_one_associated + get_to_many_associated;
 
 }

@@ -5,6 +5,7 @@ const funks = require('../funks');
 const models_webservice = require('./unit_test_misc/data_models_webservice');
 const models_cenz = require('./unit_test_misc/data_models_cenz');
 const models_distributed = require('./unit_test_misc/data_models_distributed');
+const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const requireFromString = require('require-from-string');
 
 //const components_code = require('./unit_test_misc/components_code');
@@ -1395,6 +1396,20 @@ describe('SQL-adapter', function(){
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.targetKey_ddm.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
+  });
+
+});
+
+
+describe('Refactor associations - delete', function(){
+  let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
+
+  it('coun associations - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.count_associations.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
   });
 
 });
