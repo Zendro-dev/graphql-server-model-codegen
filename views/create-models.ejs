@@ -675,6 +675,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     let promises_to_many = [];
     let promises_to_one = [];
 
+    <%# check associations to_one and to_many are counted in diferent variable -%>
     <%associations_temp = associations["to_many"] -%>
     <% for(let i=0; i < associations_temp.length; i++){ -%>
       promises_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
@@ -691,5 +692,20 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     let get_to_one_associated = result_to_one.filter( (r, index) => r !== null ).length;
 
     return get_to_one_associated + get_to_many_associated;
+  }
+
+  /**
+   * @static validForDeletion - Checks wether a record is allowed to be deleted
+   *
+   * @param  {ID} id      Id of record to check if it can be deleted
+   * @param  {object} context Default context by resolver
+   * @return {boolean}         True if it is allowed to be deleted and false otherwise
+   */
+  static async validForDeletion(id, context){
+    if( await this.countAllAssociatedRecords(id, context) > 0 ){
+      throw new Error(`Accession with accession_id ${id} has associated records and is NOT valid for deletion. Please clean up before you delete.`);
+    }
+    return true;
+  }
 
 }
