@@ -105,9 +105,9 @@ const associationArgsDef = {
       } else {
         //build new search filter
         let nsearch = helper.addSearchField({
-          "search": search, 
-          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(), 
-          "value": {"value": this.<%= associations_one[i].targetKey -%> }, 
+          "search": search,
+          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
+          "value": {"value": this.<%= associations_one[i].targetKey -%> },
           "operator": "eq"
         });
         let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
@@ -141,12 +141,12 @@ const associationArgsDef = {
     try{
       //build new search filter
       let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
+        "search": search,
+        "field": "<%=associations_temp[i].targetKey%>",
+        "value": {"value": this.getIdValue()},
         "operator": "eq"
       });
-      
+
       return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
@@ -166,9 +166,9 @@ const associationArgsDef = {
 
       //build new search filter
       let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
+        "search": search,
+        "field": "<%=associations_temp[i].targetKey%>",
+        "value": {"value": this.getIdValue()},
         "operator": "eq"
       });
 
@@ -196,9 +196,9 @@ const associationArgsDef = {
 
       //build new search filter
       let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
+        "search": search,
+        "field": "<%=associations_temp[i].targetKey%>",
+        "value": {"value": this.getIdValue()},
         "operator": "eq"
       });
 
@@ -234,7 +234,7 @@ async function checkCount(search, context, query) {
 
 /**
 * checkCountForOne(context) - Make sure that the record limit is not exhausted before requesting a single record
-* 
+*
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 */
 function checkCountForOne(context) {
@@ -386,9 +386,11 @@ module.exports = {
    * @return {string}         Message indicating if deletion was successfull.
    */
   delete<%- nameCp -%>: function({<%- idAttribute -%>}, context){
-    return checkAuthorization(context, '<%- name -%>', 'delete').then( authorization =>{
+    return checkAuthorization(context, '<%- name -%>', 'delete').then( async authorization =>{
       if (authorization === true) {
-        return <%- nameLc -%>.deleteOne(<%- idAttribute -%>);
+        if(await <%- nameLc -%>.validForDeletion(<%- idAttribute -%>, context) ){
+            return <%- nameLc -%>.deleteOne(<%- idAttribute -%>);
+        }
       } else {
         throw new Error("You don't have authorization to perform this action");
       }

@@ -47,3 +47,29 @@ static async validForDeletion(id, context){
   return true;
 }
 `
+
+module.exports.delete_resolver = `
+/**
+ * deleteAccession - Check user authorization and delete a record with the specified accession_id in the accession_id argument.
+ *
+ * @param  {number} {accession_id}    accession_id of the record to delete
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {string}         Message indicating if deletion was successfull.
+ */
+deleteAccession: function({
+    accession_id
+}, context) {
+    return checkAuthorization(context, 'Accession', 'delete').then(async authorization => {
+        if (authorization === true) {
+            if(await accession.validForDeletion(accession_id, context )){
+              return accession.deleteOne(accession_id);
+            }
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
+        console.error(error);
+        handleError(error);
+    })
+}
+`

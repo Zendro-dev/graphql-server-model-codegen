@@ -1412,12 +1412,20 @@ describe('Refactor associations - delete', function(){
     expect(g_model).to.have.string(test_model);
   });
 
-  it('validate for deletion - accession', async function(){
+  it('validate for deletion model - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.validate_for_deletion.replace(/\s/g, '');
     expect(g_model).to.have.string(test_model);
+  });
+
+  it('validate for deletion resolver - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.delete_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
   });
 
 });
