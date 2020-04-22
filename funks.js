@@ -330,6 +330,7 @@ writeSchemaCommons = function(dir_write){
     //error
     console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
     console.log(e);
+    throw e;
   }
 };
 
@@ -434,6 +435,7 @@ writeIndexAdapters = function(dir_write){
     //error
     console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
     console.log(e);
+    throw e;
   }
 }
 
@@ -450,6 +452,7 @@ writeIndexResolvers = async function(dir_write, models){
     //error
     console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
     console.log(e);
+    throw e;
   });
 
 
@@ -782,6 +785,7 @@ generateSections = async function(sections, opts, dir_write, modelNameLc) {
       //error
       console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
       console.log(e);
+      throw e;
     });
   }
 }
@@ -906,6 +910,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   let totalExcludedFiles = 0;
   let totalWrongFiles = 0; //errors on reading or parsing
   let totalWrongModels = 0; //semantic errors
+  let totalGenErrors = 0; //errors in codegen process
 
   /**
    * Processes each JSON file on input directory.
@@ -1031,9 +1036,16 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
     }
 
     //generate sections
-    await generateSections(sections, opts, dir_write, opts.nameLc);
-    //msg
-    console.log("@@ ", colors.green('done'));
+    await generateSections(sections, opts, dir_write, opts.nameLc)
+    .then(()=>{//success
+      //msg
+      console.log("@@ ", colors.green('done'));
+    })
+    .catch((e) => {//error
+      //msg
+      console.log("@@ ", colors.red('done'));
+      totalGenErrors++;
+    });
 
     //save data for writeCommons
     models.push([opts.name , opts.namePl]);
@@ -1042,9 +1054,16 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
   //generate commons & index's
-  await writeCommons(dir_write, models);
-  //msg
-  console.log("@@ ", colors.green('done'));
+  await writeCommons(dir_write, models)
+  .then(()=>{//success
+    //msg
+    console.log("@@ ", colors.green('done'));
+  })
+  .catch((e) => {//error
+    //msg
+    console.log("@@ ", colors.red('done'));
+    totalGenErrors++;
+  })
 
   //Final report
   //msg
@@ -1052,10 +1071,12 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   //msg
   console.log("@@ Total JSON files excluded: ", (totalExcludedFiles>0) ? colors.yellow(totalExcludedFiles) : colors.green(totalExcludedFiles));
   //msg
+  console.log("@@ Total codegen errors: ", (totalGenErrors>0) ? colors.red(totalGenErrors) : colors.green(totalGenErrors));
+  //msg
   if(verbose) console.log("@@ Total JSON files with errors: ", (totalWrongFiles>0) ? colors.red(totalWrongFiles) : colors.green(totalWrongFiles));
   //msg
   if(verbose) console.log("@@ Total models with errors: ", (totalWrongModels>0) ? colors.red(totalWrongModels) : colors.green(totalWrongModels));
-
+  
   //msg
-  console.log(colors.white('@ Code generation...'), colors.green('done'));
+  console.log(colors.white('@ Code generation...'), (totalWrongModels>0 || totalGenErrors>0) ? colors.red('done') : colors.green('done'));
 };
