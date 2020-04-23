@@ -210,6 +210,51 @@ const associationArgsDef = {
   }
 <%}-%>
 
+
+/**
+* handleAssociations - handles the given associations in the create and update case.
+*
+* @param {object} input   Info of each field to create the new record
+* @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+*/
+<%- nameLc -%>.prototype.handleAssociations = async function(input, context){
+  try {
+    let promises = [];
+
+    <%for(let i=0; i < associations["to_many"].length; i++){-%>
+      if (helper.isNonEmptyArray(input.add<%=associations["to_many"][i].name_cp-%>)) {
+        promises.push(...this.add<%=associations["to_many"][i].name_cp-%>(input, context));
+      }
+    <%}-%>
+
+    <%for(let i=0; i < associations["to_one"].length; i++){-%>
+      if (helper.isNotUndefinedAndNotNull(input.add<%=associations["to_one"][i].name_cp-%>)) {
+        promises.push(this.add<%=associations["to_one"][i].name_cp-%>(input, context));
+      }
+    <%}-%>
+
+    await Promise.all(promises);
+  } catch (error) {
+      throw error
+  }
+}
+
+<%for(let i=0; i < associations["to_many"].length; i++){-%>
+  <%- nameLc -%>.prototype.add<%-associations["to_one"][i].name_cp-%> = function(input) {
+    let results = [];
+    input.add<%-associations["to_one"][i].name_cp-%>.forEach(associatedRecordId => {
+       results.push(models.<%-associations["to_one"][i].target_lc-%>._add<%- nameCp -%> (associatedRecordId, input.<%- idAttribute %>));
+    })
+    return results;
+  }
+<%}-%>
+
+<%for(let i=0; i < associations["to_many"].length; i++){-%>
+  <%- nameLc -%>.prototype.add<%-associations["to_one"][i].name_cp-%> = async function(input) {
+    
+  }
+<%}-%>
+
 /**
 * errorMessageForRecordsLimit(query) - returns error message in case the record limit is exceeded.
 *
