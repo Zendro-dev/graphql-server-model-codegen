@@ -597,13 +597,16 @@ validateJsonFile =  function(opts){
         //"mutations_attributes" : {},
         "to_one": [],
         "to_many": [],
-        "to_many_through_sql_cross_table": []
+        "to_many_through_sql_cross_table": [],
+        foreignKeyAssociations: {},
+        associations: associations.slice()
 
       };
   
       if(associations!==undefined){
         Object.entries(associations).forEach(([name, association]) => {
             association.targetStorageType = association.targetStorageType.toLowerCase();
+            associations_info.foreignKeyAssociations[association.targetKey] = name;
             let type = association.type;
   
             //if(associations_type["many"].includes(association.type) )
