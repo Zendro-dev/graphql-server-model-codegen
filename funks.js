@@ -608,7 +608,7 @@ validateJsonFile =  function(opts){
             association.targetStorageType = association.targetStorageType.toLowerCase();
             associations_info.foreignKeyAssociations[association.targetKey] = name;
             let type = association.type;
-            associations.push(association);
+            associations_info.associations.push(association);
   
             //if(associations_type["many"].includes(association.type) )
             if(association.type === 'to_many') {
