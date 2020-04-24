@@ -599,7 +599,7 @@ validateJsonFile =  function(opts){
         "to_many": [],
         "to_many_through_sql_cross_table": [],
         foreignKeyAssociations: {},
-        associations: associations.slice()
+        associations: []
 
       };
   
@@ -608,6 +608,7 @@ validateJsonFile =  function(opts){
             association.targetStorageType = association.targetStorageType.toLowerCase();
             associations_info.foreignKeyAssociations[association.targetKey] = name;
             let type = association.type;
+            associations.push(association);
   
             //if(associations_type["many"].includes(association.type) )
             if(association.type === 'to_many') {
