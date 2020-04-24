@@ -1428,4 +1428,12 @@ describe('Refactor associations - delete', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+  it('validate for deletion ddm - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.valid_for_deletion_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
 });
