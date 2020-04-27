@@ -609,6 +609,7 @@ validateJsonFile =  function(opts){
             associations_info.foreignKeyAssociations[name] = association.targetKey;
             let type = association.type;
             associations_info.associations.push(association);
+            let holdsTheForeignKey = false;
   
             //if(associations_type["many"].includes(association.type) )
             if(association.type === 'to_many') {
@@ -617,6 +618,7 @@ validateJsonFile =  function(opts){
             //}else if(associations_type["one"].includes(association.type))
             } else if(association.type === 'to_one') {
               associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+              holdsTheForeignKey = true;
             } else if(association.type === 'to_many_through_sql_cross_table') {
               if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
                 console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
@@ -639,6 +641,7 @@ validateJsonFile =  function(opts){
             if(association.keyIn){
                 assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
             }
+            assoc["holdsForeignKey"] = holdsTheForeignKey;
   
   
             associations_info[type].push(assoc);
