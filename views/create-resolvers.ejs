@@ -210,51 +210,9 @@ const associationArgsDef = {
   }
 <%}-%>
 
-
-/**
-* handleAssociations - handles the given associations in the create and update case.
-*
-* @param {object} input   Info of each field to create the new record
-* @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-*/
-<%- nameLc -%>.prototype.handleAssociations = async function(input, context){
-  try {
-    let promises = [];
-
-    <%for(let i=0; i < associations["to_many"].length; i++){-%>
-      if (helper.isNonEmptyArray(input.add<%=associations["to_many"][i].name_cp-%>)) {
-        promises.push(...this.add<%=associations["to_many"][i].name_cp-%>(input, context));
-      }
-    <%}-%>
-
-    <%for(let i=0; i < associations["to_one"].length; i++){-%>
-      if (helper.isNotUndefinedAndNotNull(input.add<%=associations["to_one"][i].name_cp-%>)) {
-        promises.push(this.add<%=associations["to_one"][i].name_cp-%>(input, context));
-      }
-    <%}-%>
-
-    await Promise.all(promises);
-  } catch (error) {
-      throw error
-  }
-}
-
-<%for(let i=0; i < associations["to_many"].length; i++){-%>
-  <%- nameLc -%>.prototype.add<%-associations["to_one"][i].name_cp-%> = function(input) {
-    let results = [];
-    input.add<%-associations["to_one"][i].name_cp-%>.forEach(associatedRecordId => {
-       results.push(models.<%-associations["to_one"][i].target_lc-%>._add<%- nameCp -%> (associatedRecordId, input.<%- idAttribute %>));
-    })
-    return results;
-  }
-<%}-%>
-
-<%for(let i=0; i < associations["to_many"].length; i++){-%>
-  <%- nameLc -%>.prototype.add<%-associations["to_one"][i].name_cp-%> = async function(input) {
-    
-  }
-<%}-%>
-
+<%- include('./includes/handleAssociations'); %>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); %> 
+<%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); %> 
 /**
 * errorMessageForRecordsLimit(query) - returns error message in case the record limit is exceeded.
 *
@@ -385,23 +343,32 @@ module.exports = {
   },
 
   /**
-   * add<%- nameCp -%> - Check user authorization and creates a new record with data specified in the input argument
+   * add<%- nameCp -%> - Check user authorization and creates a new record with data specified in the input argument.
+   * This function only handles attributes, not associations.
+   * @see handleAssociations for further information.
    *
    * @param  {object} input   Info of each field to create the new record
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {object}         New record created
    */
-  add<%- nameCp -%>: function(input, context){
-    return checkAuthorization(context, '<%- name -%>', 'create').then( authorization =>{
-      if (authorization === true) {
-          return <%- nameLc -%>.addOne(input);
-    } else {
-        throw new Error("You don't have authorization to perform this action");
+  add<%- nameCp -%>: async function(input, context) {
+    try {
+        let authorization = await checkAuthorization(context, '<%- name -%>', 'create');
+        if (authorization === true) {
+            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+            helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
+            helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+            let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized);
+            await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            return created<%- nameCp -%>;
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
     }
-  }).catch( error =>{
-      console.error(error);
-      handleError( error);
-  })
   },
 
   /**
@@ -445,22 +412,31 @@ module.exports = {
 
   /**
    * update<%- nameCp-%> - Check user authorization and update the record specified in the input argument
+   * This function only handles attributes, not associations.
+   * @see handleAssociations for further information.
    *
    * @param  {object} input   record to update and new info to update
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {object}         Updated record
    */
-  update<%- nameCp-%>: function(input, context){
-    return checkAuthorization(context, '<%- name -%>', 'update').then( authorization =>{
-      if (authorization === true) {
-          return <%- nameLc -%>.updateOne(input);
+   update<%- nameCp -%>: async function(input, context) {
+    try {
+        let authorization = await checkAuthorization(context, '<%- name -%>', 'update');
+        if (authorization === true) {
+            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+            helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
+            helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+            let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized);
+            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            return updated<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-      }).catch( error =>{
-            console.error(error);
-            handleError( error);
-      })
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    }
   },
 
   /**
