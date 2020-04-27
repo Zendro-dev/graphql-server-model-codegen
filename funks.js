@@ -496,7 +496,7 @@ module.exports.getOptions = function(dataModel){
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
-      associationsArguments: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
+      associationsArguments: module.exports.parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definitionObj : dataModel,
@@ -587,7 +587,7 @@ validateJsonFile =  function(opts){
    * @param  {string} storageType  Storage type(i.e. sql, webservice) where source model is stored.
    * @return {object}              Object containing explicit information needed for generating files with templates.
    */
-    parseAssociations = function(associations, storageType){
+    module.exports.parseAssociations = function(associations, storageType){
 
       associations_info = {
         "schema_attributes" : {
