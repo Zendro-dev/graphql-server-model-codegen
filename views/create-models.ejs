@@ -67,27 +67,29 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   }
 
   static associate(models){
-    <% for(var key in associations){ -%>
-      <%for(let i=0; i< associations[key].length; i++){-%>
-        <%if(associations[key][i].targetStorageType === 'sql'){-%>        
-          <%if (associations[key][i].type === 'to_one' && associations[key][i].keyIn !== associations[key][i].target){-%>
-            <%- name -%>.belongsTo(models.<%= associations[key][i].target_lc -%>
+    <% for(var key in associationsArguments){ -%>
+      <%for(let i=0; i< associationsArguments[key].length; i++){-%>
+        <%if (key !== 'associations'){-%>
+          <%if(associationsArguments[key][i].targetStorageType === 'sql'){-%>        
+            <%if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
+              <%- name -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
+            <%}-%>
+            <% if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn === associationsArguments[key][i].target){-%>
+              <%- name -%>.hasOne(models.<%= associationsArguments[key][i].target_lc -%>
+            <%}-%>
+            <% if (associationsArguments[key][i].type === 'to_many' && associationsArguments[key][i].keyIn === associationsArguments[key][i].target){-%>
+              <%- name -%>.hasMany(models.<%= associationsArguments[key][i].target_lc -%>
+            <%}-%>
+            <% if (associationsArguments[key][i].type === 'to_many_through_sql_cross_table' ){-%>
+              <%- name -%>.belongsToMany(models.<%= associationsArguments[key][i].target_lc -%>
+            <%}-%>
+            <% if(key === 'to_many_through_sql_cross_table'){ -%> ,{as: '<%= associationsArguments[key][i].name -%>',
+            foreignKey:'<%= associationsArguments[key][i].sourceKey -%>',
+            through : '<%= associationsArguments[key][i].keysIn -%>',
+            onDelete: 'CASCADE'}  <%}else{ -%>
+            ,{as: '<%= associationsArguments[key][i].name -%>', foreignKey:'<%= associationsArguments[key][i].targetKey -%>' }
+            <%}-%>);
           <%}-%>
-          <% if (associations[key][i].type === 'to_one' && associations[key][i].keyIn === associations[key][i].target){-%>
-            <%- name -%>.hasOne(models.<%= associations[key][i].target_lc -%>
-          <%}-%>
-          <% if (associations[key][i].type === 'to_many' && associations[key][i].keyIn === associations[key][i].target){-%>
-            <%- name -%>.hasMany(models.<%= associations[key][i].target_lc -%>
-          <%}-%>
-          <% if (associations[key][i].type === 'to_many_through_sql_cross_table' ){-%>
-            <%- name -%>.belongsToMany(models.<%= associations[key][i].target_lc -%>
-          <%}-%>
-          <% if(key === 'to_many_through_sql_cross_table'){ -%> ,{as: '<%= associations[key][i].name -%>',
-          foreignKey:'<%= associations[key][i].sourceKey -%>',
-          through : '<%= associations[key][i].keysIn -%>',
-          onDelete: 'CASCADE'}  <%}else{ -%>
-          ,{as: '<%= associations[key][i].name -%>', foreignKey:'<%= associations[key][i].targetKey -%>' }
-          <%}-%>);
         <%}-%>
       <%}-%>
     <% } -%>
