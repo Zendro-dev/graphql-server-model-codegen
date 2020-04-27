@@ -606,7 +606,7 @@ validateJsonFile =  function(opts){
       if(associations!==undefined){
         Object.entries(associations).forEach(([name, association]) => {
             association.targetStorageType = association.targetStorageType.toLowerCase();
-            associations_info.foreignKeyAssociations[association.targetKey] = name;
+            associations_info.foreignKeyAssociations[name] = association.targetKey;
             let type = association.type;
             associations_info.associations.push(association);
   
