@@ -111,10 +111,10 @@ module.exports = class <%- name -%>{
 
     let query = `mutation add<%- nameCp -%>(<%if(!defaultId){-%> $<%=idAttribute%>:ID <%}-%> <%for(var key in editableAttributes){-%>
        $<%=key %>:<%= editableAttributes[key]%>
-     <%}-%> <%for(var key in associations.schema_attributes.one){-%> $add<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%> $add<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ){
+     <%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%> $add<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> $add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%> ){
        add<%- nameCp -%>(<%if(!defaultId){-%> <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){-%>
           <%=key %>:$<%= key%>
-        <%}-%> <%for(var key in associations.schema_attributes.one){-%> add<%= associations.schema_attributes.one[key][2]%>:$add<%= associations.schema_attributes.one[key][2]%><%}-%> <%for(var key in associations.schema_attributes.many){-%> add<%= associations.schema_attributes.many[key][2]%>:$add<%= associations.schema_attributes.many[key][2]%><%}-%>){
+        <%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%> add<%= associationsArguments.schema_attributes.one[key][2]%>:$add<%= associationsArguments.schema_attributes.one[key][2]%><%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> add<%= associationsArguments.schema_attributes.many[key][2]%>:$add<%= associationsArguments.schema_attributes.many[key][2]%><%}-%>){
           <%- idAttribute -%> <%for(var key in attributes){-%>
            <%=key %>
          <%}-%>}
@@ -144,10 +144,10 @@ module.exports = class <%- name -%>{
   static updateOne(input){
     let query = `mutation update<%- nameCp-%>($<%- idAttribute -%>:ID! <%for(var key in editableAttributes){-%>
        $<%=key %>:<%= editableAttributes[key]%>
-     <%}-%> <%for(var key in associations.schema_attributes.one){-%> $add<%= associations.schema_attributes.one[key][2]%>:ID $remove<%= associations.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associations.schema_attributes.many){-%> $add<%= associations.schema_attributes.many[key][2]%>:[ID] $remove<%= associations.schema_attributes.many[key][2]%>:[ID]<%}-%> ){
+     <%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%> $add<%= associationsArguments.schema_attributes.one[key][2]%>:ID $remove<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> $add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID] $remove<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%> ){
        update<%- nameCp-%>(<%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){-%>
           <%=key %>:$<%= key%>
-        <%}-%> <%for(var key in associations.schema_attributes.one){-%> add<%= associations.schema_attributes.one[key][2]%>:$add<%= associations.schema_attributes.one[key][2]%> remove<%= associations.schema_attributes.one[key][2]%>:$remove<%= associations.schema_attributes.one[key][2]%> <%}-%> <%for(var key in associations.schema_attributes.many){-%> add<%= associations.schema_attributes.many[key][2]%>:$add<%= associations.schema_attributes.many[key][2]%> remove<%= associations.schema_attributes.many[key][2]%>:$remove<%= associations.schema_attributes.many[key][2]%> <%}-%>){
+        <%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%> add<%= associationsArguments.schema_attributes.one[key][2]%>:$add<%= associationsArguments.schema_attributes.one[key][2]%> remove<%= associationsArguments.schema_attributes.one[key][2]%>:$remove<%= associationsArguments.schema_attributes.one[key][2]%> <%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> add<%= associationsArguments.schema_attributes.many[key][2]%>:$add<%= associationsArguments.schema_attributes.many[key][2]%> remove<%= associationsArguments.schema_attributes.many[key][2]%>:$remove<%= associationsArguments.schema_attributes.many[key][2]%> <%}-%>){
           <%- idAttribute -%> <%for(var key in attributes){-%>
            <%=key %>
          <%}-%>}

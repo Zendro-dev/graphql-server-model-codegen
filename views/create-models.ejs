@@ -415,7 +415,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return helper.csvTableTemplate(<%- name -%>);
   }
 
-  <% associations_temp = associations["to_many_through_sql_cross_table"]-%>
+  <% associations_temp = associationsArguments["to_many_through_sql_cross_table"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
 
     <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
