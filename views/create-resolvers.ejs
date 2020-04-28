@@ -18,9 +18,6 @@ const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 
-<<<<<<< HEAD
-<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
-=======
 <%# 
 /**
  * Section 2
@@ -30,8 +27,8 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
  * name (key) with the name of the corresponding association (value).
  */
 -%> 
-<% associations_temp = associations["to_one"].concat(associations["to_many"]).concat(associations["to_many_through_sql_cross_table"])-%>
->>>>>>> d162251113e483fb6f3b6f1e1681d55b8d30c536
+
+<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%if( i == associations_temp.length - 1 ){-%>
@@ -42,9 +39,6 @@ const associationArgsDef = {
   <%}-%>
 }
 
-<<<<<<< HEAD
-<% associations_temp = associationsArguments["to_many_through_sql_cross_table"]-%>
-=======
 <%# 
 /**
  * Section 3
@@ -68,8 +62,8 @@ const associationArgsDef = {
  * 
  */
 -%>
-<% associations_temp = associations["to_many_through_sql_cross_table"]-%>
->>>>>>> d162251113e483fb6f3b6f1e1681d55b8d30c536
+
+<% associations_temp = associationsArguments["to_many_through_sql_cross_table"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter - Check user authorization and return certain number, specified in pagination argument, of records
