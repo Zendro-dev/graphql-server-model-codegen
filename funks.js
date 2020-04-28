@@ -836,6 +836,7 @@ getStorageType = function(dataModel) {
         case 'distributed-data-model':
         case 'webservice':
         case 'cenz-server':
+        case 'generic':
         //adapters
         case 'sql-adapter':
         case 'ddm-adapter':
@@ -847,7 +848,7 @@ getStorageType = function(dataModel) {
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
           break;
       }
     }
