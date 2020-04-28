@@ -731,12 +731,11 @@ generateSection = async function(section, opts, dir_write ){
   * generateSections - Receives an array of sections, and for each one invokes generateSection() after handling 
   * particular sections checks.
   *
-  * @param  {array} sections    Array of sections that will be generated; each section is an object with 'dir' and 'template' keys.
+  * @param  {array} sections     Array of sections that will be generated; each section is an object with 'dir' and 'template' keys.
   * @param  {object} opts        Object with options needed for the template that will generate the section.
   * @param  {string} dir_write   Path (including name of the file) where the generated section will be written as a file.
-  * @param  {string} modelNameLc Model name in lowercase, used to generate the file name that will be written.
   */
-generateSections = async function(sections, opts, dir_write, modelNameLc) {
+generateSections = async function(sections, opts, dir_write) {
   /**
    * For each section (dir and template), set the output file name,
    * and do an additional existence check for validations and patches.
@@ -760,17 +759,17 @@ generateSections = async function(sections, opts, dir_write, modelNameLc) {
       //adapters
       case 'sql-adapter':
       case 'cenz-adapters':
-        file_name = dir_write + '/'+ section.dir +'/' + modelNameLc + '.js';
+        file_name = dir_write + '/'+ section.dir +'/' + section.fileName + '.js';
         break;
       //migrations
       case 'migrations':
-        file_name = createNameMigration(dir_write, modelNameLc);
+        file_name = createNameMigration(dir_write, section.fileName);
         break;
       //validations & patches 
       case 'validations':
       case 'patches':
         //set file name
-        file_name = dir_write + '/'+ section.dir +'/' + modelNameLc + '.js';
+        file_name = dir_write + '/'+ section.dir +'/' + section.fileName + '.js';
         //check
         if (fs.existsSync(file_name)) {
           console.log('@@@ File:', colors.dim(file_name), colors.yellow('not written'), '- already exist and shall be redacted manually');
@@ -984,57 +983,57 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
     switch(opts.storageType) {
       case 'sql':
         sections = [
-          {dir: 'schemas', template: 'schemas'},
-          {dir: 'resolvers', template: 'resolvers'},
-          {dir: 'models', template: 'models'},
-          {dir: 'migrations', template: 'migrations'},
-          {dir: 'validations', template: 'validations'},
-          {dir: 'patches', template: 'patches'},
+          {dir: 'schemas',    template: 'schemas',    fileName: opts.nameLc},
+          {dir: 'resolvers',  template: 'resolvers',  fileName: opts.nameLc},
+          {dir: 'models',     template: 'models',     fileName: opts.nameLc},
+          {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
         break;
 
       case 'webservice':
         sections = [
-          {dir: 'schemas', template: 'schemas'},
-          {dir: 'resolvers', template: 'resolvers'},
-          {dir: 'models-webservice', template: 'models-webservice'},
+          {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
+          {dir: 'models-webservice', template: 'models-webservice', fileName: opts.nameLc},
         ]
         break;
 
       case 'cenz-server':
         sections = [
-          {dir: 'schemas', template: 'schemas'},
-          {dir: 'resolvers', template: 'resolvers'},
-          {dir: 'models-cenz-server', template: 'models-cenz'},
+          {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
+          {dir: 'models-cenz-server', template: 'models-cenz', fileName: opts.nameLc},
         ]
         break;
 
       case 'distributed-data-model':
         sections = [
-          {dir: 'schemas', template: 'schemas-ddm'},
-          {dir: 'resolvers', template: 'resolvers-ddm'},
-          {dir: 'models-distributed', template: 'distributed-model'},
+          {dir: 'schemas',    template: 'schemas-ddm',   fileName: opts.nameLc},
+          {dir: 'resolvers',  template: 'resolvers-ddm', fileName: opts.nameLc},
+          {dir: 'models-distributed', template: 'distributed-model', fileName: opts.nameLc},
         ]
         break;
 
       case 'cenzontle-webservice-adapter':
         sections = [
-          {dir: 'adapters', template: 'cenz-adapters'},
+          {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
         ]
         break;
 
       case 'ddm-adapter':
         sections = [
-          {dir: 'adapters', template: 'cenz-adapters'},
+          {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
         ]
         break;
 
       case 'sql-adapter':
         sections = [
-          {dir: 'adapters', template: 'sql-adapter'},
-          {dir: 'migrations', template: 'migrations'},
-          {dir: 'validations', template: 'validations'},
-          {dir: 'patches', template: 'patches'},
+          {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
+          {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
+          {dir: 'validations',  template: 'validations',  fileName: opts.nameLc},
+          {dir: 'patches', template: 'patches', fileName: opts.nameLc},
         ]
         break;
 
@@ -1043,7 +1042,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
     }
 
     //generate sections
-    await generateSections(sections, opts, dir_write, opts.nameLc)
+    await generateSections(sections, opts, dir_write)
     .then(()=>{//success
       //msg
       console.log("@@ ", colors.green('done'));

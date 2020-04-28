@@ -5,6 +5,7 @@ const funks = require('../funks');
 const models_webservice = require('./unit_test_misc/data_models_webservice');
 const models_cenz = require('./unit_test_misc/data_models_cenz');
 const models_distributed = require('./unit_test_misc/data_models_distributed');
+const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const requireFromString = require('require-from-string');
 
 //const components_code = require('./unit_test_misc/components_code');
@@ -1768,5 +1769,42 @@ describe('Parse associations', function() {
       mutations_attributes:""
     });
   })
+
+});
+
+describe('Refactor associations - delete', function(){
+  let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
+
+  it('count associations - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.count_associations.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('validate for deletion  - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.validate_for_deletion.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('delete resolver - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.delete_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('validate for deletion ddm - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.valid_for_deletion_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
 
 });

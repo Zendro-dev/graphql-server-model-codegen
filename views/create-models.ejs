@@ -105,7 +105,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static countRecords(search){
     let options = {};
     if (search !== undefined) {
-      
+
       //check
       if(typeof search !== 'object') {
         throw new Error('Illegal "search" argument type, it must be an object.');
@@ -597,6 +597,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       return this.count<%- associations_temp[i].name_cp%>(options);
     }
   <%}-%>
+
+  <%- include('./includes/create-models-fieldMutations', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations', {op: "remove"}); %> 
 
   /**
    * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
