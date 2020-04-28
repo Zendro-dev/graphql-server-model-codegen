@@ -506,7 +506,7 @@ describe('Update sequelize model to class', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
-  xit('Model associations - Book', async function(){
+  it('Model associations - Book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');

@@ -12,9 +12,11 @@ module.exports.person_model = `
             foreignKey: 'personId'
         });
 
-        , {
+        Person.belongsToMany(models.book, {
             as: 'books',
-            foreignKey: 'bookId'
-        }
-    );
+            foreignKey: 'personId',
+            through: 'books_to_people',
+            onDelete: 'CASCADE'
+        });
+    }
 `

@@ -73,7 +73,7 @@ module.exports.person = {
     },
 
     "books":{
-      "type" : "to_many",
+      "type" : "to_many_through_sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -94,7 +94,7 @@ module.exports.book = {
   "associations":{
 
       "people" : {
-          "type" : "to_many",
+          "type" : "to_many_through_sql_cross_table",
           "target" : "Person",
           "targetKey" : "personId",
           "sourceKey" : "bookId",
@@ -121,7 +121,7 @@ module.exports.researcher = {
   },
   "associations":{
     "projects":{
-      "type" : "to_many",
+      "type" : "to_many_through_sql_cross_table",
       "target" : "Project",
       "targetKey" : "projectId",
       "sourceKey" : "researcherId",
@@ -189,7 +189,7 @@ module.exports.dog = {
 }
 
 module.exports.assoc_through_project_researcher = {
-  "type" : "to_many",
+  "type" : "to_many_through_sql_cross_table",
   "target" : "Project",
   "targetKey" : "projectId",
   "sourceKey" : "researcherId",
@@ -341,7 +341,7 @@ module.exports.person_indices = {
     },
 
     "books":{
-      "type" : "to_many",
+      "type" : "to_many_through_sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -374,7 +374,7 @@ module.exports.person_externalIds = {
       },
 
       "books":{
-        "type" : "to_many",
+        "type" : "to_many_through_sql_cross_table",
         "target" : "Book",
         "targetKey" : "bookId",
         "sourceKey" : "personId",
@@ -439,7 +439,7 @@ module.exports.person_date = {
     },
 
     "books":{
-      "type" : "to_many",
+      "type" : "to_many_through_sql_cross_table",
       "target" : "Book",
       "targetKey" : "book_Id",
       "sourceKey" : "person_Id",
@@ -462,7 +462,7 @@ module.exports.book_authors = {
   "associations":{
 
       "Authors" : {
-          "type" : "to_many",
+          "type" : "to_many_through_sql_cross_table",
           "target" : "Person",
           "targetKey" : "person_Id",
           "sourceKey" : "book_Id",
@@ -506,7 +506,7 @@ module.exports.person_description = {
     },
 
     "books":{
-      "type" : "to_many",
+      "type" : "to_many_through_sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -539,7 +539,7 @@ module.exports.person_description_optional = {
     },
 
     "books":{
-      "type" : "to_many",
+      "type" : "to_many_through_sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
