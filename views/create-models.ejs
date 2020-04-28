@@ -69,7 +69,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static associate(models){
     <% for(var key in associations){ -%>
       <%for(let i=0; i< associations[key].length; i++){-%>
-        <%if(associations[key][i].targetStorageType === 'sql'){-%>        
+        <%if(associations[key][i].targetStorageType === 'sql'){-%>
           <%if (associations[key][i].type === 'to_one' && associations[key][i].keyIn !== associations[key][i].target){-%>
             <%- name -%>.belongsTo(models.<%= associations[key][i].target_lc -%>
           <%}-%>
@@ -103,7 +103,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static countRecords(search){
     let options = {};
     if (search !== undefined) {
-      
+
       //check
       if(typeof search !== 'object') {
         throw new Error('Illegal "search" argument type, it must be an object.');
