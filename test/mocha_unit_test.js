@@ -202,12 +202,12 @@ describe('Migrations', function(){
 
 describe('Model naming cases ', function(){
   let data_test = require('./unit_test_misc/test-describe/model-naming-cases');
-  xit('Resolvers - aminoAcidSequence', async function(){
+  it('Resolvers - aminoAcidSequence', async function(){
     let opts = funks.getOptions(models.aminoAcidSequence);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.resolvers_webservice_aminoAcid.replace(/\s/g, '');
-      expect(g_resolvers).to.have.string(test_resolvers);
+    expect(g_resolvers).to.have.string(test_resolvers);
   });
 
   it('GraphQL Schema - aminoAcidSequence', async function(){
@@ -226,12 +226,12 @@ describe('Model naming cases ', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
-  xit('Resolvers - inDiVIdual', async function(){
+  it('Resolvers - inDiVIdual', async function(){
     let opts = funks.getOptions(models.inDiVIdual_camelcase);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.individual_resolvers_camelcase.replace(/\s/g, '');
-      expect(g_resolvers).to.have.string(test_resolvers);
+    expect(g_resolvers).to.have.string(test_resolvers);
   });
 
   it('GraphQL Schema - inDiVIdual', async function(){
@@ -258,12 +258,12 @@ describe('Model naming cases ', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Resolvers - transcriptCount', async function(){
+  it('Resolvers - transcriptCount', async function(){
     let opts = funks.getOptions(models.transcriptCount_indiv);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.transcriptCount_resolvers_camelcase.replace(/\s/g, '');
-      expect(g_resolvers).to.have.string(test_resolvers);
+    expect(g_resolvers).to.have.string(test_resolvers);
   });
 
 });
@@ -272,7 +272,7 @@ describe('Association naming', function(){
 
   let data_test = require('./unit_test_misc/test-describe/association-naming');
 
-  xit('Resolvers - Dog', async function(){
+  it('Resolvers - Dog', async function(){
     let opts = funks.getOptions(models.dog_owner);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -296,7 +296,7 @@ describe('Association naming', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
-  xit('Resolvers - academicTeam', async function(){
+  it('Resolvers - academicTeam', async function(){
     let opts = funks.getOptions(models.academicTeam);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -377,7 +377,7 @@ describe('All webservice models', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Resolvers - book', async function(){
+  it('Resolvers - book', async function(){
     let opts = funks.getOptions(models_webservice.book);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -401,7 +401,7 @@ describe('All webservice models', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Resolvers - person', async function(){
+  it('Resolvers - person', async function(){
     let opts = funks.getOptions(models_webservice.person);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
