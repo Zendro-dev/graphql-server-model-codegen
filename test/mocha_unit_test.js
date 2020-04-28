@@ -529,7 +529,7 @@ describe('Update sequelize model to class', function(){
 describe('Model Layer', function(){
 
   let data_test = require('./unit_test_misc/test-describe/model-layer');
-  xit('Count method in sequelize model - individual', async function(){
+  it('Count method in sequelize model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -553,7 +553,7 @@ describe('Model Layer', function(){
     expect(g_resolvers, 'No count method found').to.have.string(test_resolver);
   });
 
-  xit('Read all model - dog', async function(){
+  it('Read all model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -561,7 +561,7 @@ describe('Model Layer', function(){
     expect(g_model, 'No read all method found').to.have.string(test_model);
   })
 
-  xit('Read all resolver - dog', async function(){
+  it('Read all resolver - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -569,7 +569,7 @@ describe('Model Layer', function(){
     expect(g_resolvers, 'No read all method found').to.have.string(test_resolver);
   });
 
-  xit('Add one model - book', async function(){
+  it('Add one model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -601,7 +601,7 @@ describe('Model Layer', function(){
     expect(g_resolvers, 'No add one method found').to.have.string(test_resolver);
   });
 
-  xit('Update one model - book', async function(){
+  it('Update one model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');

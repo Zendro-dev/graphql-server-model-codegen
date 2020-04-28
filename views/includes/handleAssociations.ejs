@@ -9,15 +9,15 @@
   try {
     let promises = [];
 
-    <%for(let i=0; i < associations["to_many"].length; i++){-%>
-      if (helper.isNonEmptyArray(input.add<%=associations["to_many"][i].name_cp-%>)) {
-        promises.push(this.add<%=associations["to_many"][i].name_cp-%>(input, context));
+    <%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+      if (helper.isNonEmptyArray(input.add<%=associationsArguments["to_many"][i].name_cp-%>)) {
+        promises.push(this.add<%=associationsArguments["to_many"][i].name_cp-%>(input, context));
       }
     <%}-%>
 
-    <%for(let i=0; i < associations["to_one"].length; i++){-%>
-      if (helper.isNotUndefinedAndNotNull(input.add<%=associations["to_one"][i].name_cp-%>)) {
-        promises.push(this.add<%=associations["to_one"][i].name_cp-%>(input, context));
+    <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+      if (helper.isNotUndefinedAndNotNull(input.add<%=associationsArguments["to_one"][i].name_cp-%>)) {
+        promises.push(this.add<%=associationsArguments["to_one"][i].name_cp-%>(input, context));
       }
     <%}-%>
 

@@ -367,11 +367,11 @@ function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
   let promises_to_one = [];
 
   <%# check associations to_one and to_many are counted in diferent variable -%>
-  <%associations_temp = associations["to_many"] -%>
+  <%associations_temp = associationsArguments["to_many"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     promises_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
   <%}-%>
-  <%associations_temp = associations["to_one"] -%>
+  <%associations_temp = associationsArguments["to_one"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
   <%}-%>
