@@ -25,11 +25,6 @@ module.exports = class <%- adapterName -%>{
   }
 
   static readById(iri){
-    /**
-     * Debug
-     */
-    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: readById \niri: ", iri, "\nremoteCenzontleURL: ", remoteCenzontleURL);
-
     let query = `
           query 
             readOne<%- nameCp %>
@@ -40,11 +35,6 @@ module.exports = class <%- adapterName -%>{
                 <%= key %> <%}%>
               }
             }`;
-
-    /**
-     * Debug
-     */
-    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n");
 
     return axios.post( remoteCenzontleURL, {
       query: query
@@ -61,21 +51,11 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static countRecords(search){
-    /**
-     * Debug
-     */
-    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: countRecords \nsearch: ", search, "\nremoteCenzontleURL: ", remoteCenzontleURL);
-    
+  static countRecords(search){    
     let query = `
       query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
         count<%- namePlCp -%>(search: $search)
       }`
-
-    /**
-     * Debug
-     */
-    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", {search: search});
 
     return axios.post(remoteCenzontleURL, {
         query: query,
@@ -95,12 +75,7 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination){
-    /**
-     * Debug
-     */
-    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: readAllCursor \search: ", search, "\norder: ", order, "\npagination: ", pagination, "\nremoteCenzontleURL: ", remoteCenzontleURL);
-    
+  static readAllCursor(search, order, pagination){    
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -109,11 +84,6 @@ module.exports = class <%- adapterName -%>{
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
-
-      /**
-       * Debug
-       */
-      console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", {search: search, order:order, pagination: pagination});
     
       return axios.post(remoteCenzontleURL, {
         query:query, 
@@ -135,12 +105,7 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static addOne(input){
-    /**
-     * Debug
-     */
-    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: addOne \ninput: ", input, "\nremoteCenzontleURL: ", remoteCenzontleURL);
-    
+  static addOne(input){    
     let query = `
         mutation add<%- nameCp _%>(
 <%if(!defaultId){-%>
@@ -162,11 +127,6 @@ module.exports = class <%- adapterName -%>{
           }
         }`;
       
-    /**
-      * Debug
-      */
-    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", input);
-
     return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res =>{
       //check
       if(res&&res.data&&res.data.data) {
@@ -181,21 +141,11 @@ module.exports = class <%- adapterName -%>{
   }
 
   static deleteOne(id){
-    /**
-     * Debug
-     */
-    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: deleteOne \nid: ", id, "\nremoteCenzontleURL: ", remoteCenzontleURL);
-
     let query = `
           mutation 
             delete<%- nameCp -%>{ 
               delete<%- nameCp -%>(
                 <%- idAttribute -%>: "${id}" )}`;
-
-    /**
-     * Debug
-     */
-    console.log("\nquery: gql:\n", query, "\nvariables: \n");
     
     return axios.post(remoteCenzontleURL, {query: query}).then(res =>{
       //check
@@ -211,11 +161,6 @@ module.exports = class <%- adapterName -%>{
   }
 
   static updateOne(input){
-    /**
-     * Debug
-     */
-    console.log("-@@@------ adapter: (", this.adapterType, ") : ", this.adapterName, "\n- on: updateOne \ninput: ", input, "\nremoteCenzontleURL: ", remoteCenzontleURL);
-
     let query = `
           mutation 
             update<%- nameCp-%>(
@@ -238,11 +183,6 @@ module.exports = class <%- adapterName -%>{
                 <%=key %> <%}%>
               }
             }`
-        
-    /**
-     * Debug
-     */
-    console.log("\nquery: gql:\n", query, "\nvariables: gql:\n", input);
 
     return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res => {
       //check
