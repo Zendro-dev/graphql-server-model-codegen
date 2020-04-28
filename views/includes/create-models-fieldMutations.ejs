@@ -1,9 +1,9 @@
 <%for(let i=0; i < associations["to_one"].length; i++){-%>
   /**
-  * _<%- op %><%-associations["to_one"][i].name_cp-%> - field Mutation (model-leyer) for to_one associations to <%- op %> 
+  * _<%- op %><%-associations["to_one"][i].name_cp-%> - field Mutation (model-layer) for to_one associations to <%- op %> 
   *
-  * @param {Id} <%- idAttribute-%>   IdAttribute of the root model to be updated
-  * @param {Id}  <%-associations["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associations["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
   */
   static async _<%- op -%><%-associations["to_one"][i].name_cp-%>(<%- idAttribute-%>, <%-associations["to_one"][i].targetKey-%>) {
     let updated = await sequelize.transaction(async transaction => {
