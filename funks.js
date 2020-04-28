@@ -496,7 +496,7 @@ module.exports.getOptions = function(dataModel){
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
-      associations: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
+      associationsArguments: module.exports.parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definitionObj : dataModel,
@@ -509,8 +509,8 @@ module.exports.getOptions = function(dataModel){
       idAttribute: getIdAttribute(dataModel)
   };
 
-  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associations), getIdAttribute(dataModel)));
-  opts['editableAttributes'] = getEditableAttributes(opts.attributes,  getEditableAssociations(opts.associations), getIdAttribute(dataModel));
+  opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
+  opts['editableAttributes'] = getEditableAttributes(opts.attributes,  getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel));
   opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
   dataModel['id'] = {
@@ -587,7 +587,7 @@ validateJsonFile =  function(opts){
    * @param  {string} storageType  Storage type(i.e. sql, webservice) where source model is stored.
    * @return {object}              Object containing explicit information needed for generating files with templates.
    */
-    parseAssociations = function(associations, storageType){
+    module.exports.parseAssociations = function(associations, storageType){
 
       associations_info = {
         "schema_attributes" : {
@@ -597,14 +597,19 @@ validateJsonFile =  function(opts){
         //"mutations_attributes" : {},
         "to_one": [],
         "to_many": [],
-        "to_many_through_sql_cross_table": []
+        "to_many_through_sql_cross_table": [],
+        foreignKeyAssociations: {},
+        associations: []
 
       };
   
       if(associations!==undefined){
         Object.entries(associations).forEach(([name, association]) => {
             association.targetStorageType = association.targetStorageType.toLowerCase();
+            associations_info.foreignKeyAssociations[name] = association.targetKey;
             let type = association.type;
+            associations_info.associations.push(association);
+            let holdsTheForeignKey = false;
   
             //if(associations_type["many"].includes(association.type) )
             if(association.type === 'to_many') {
@@ -613,6 +618,7 @@ validateJsonFile =  function(opts){
             //}else if(associations_type["one"].includes(association.type))
             } else if(association.type === 'to_one') {
               associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+              holdsTheForeignKey = true;
             } else if(association.type === 'to_many_through_sql_cross_table') {
               if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
                 console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
@@ -635,6 +641,7 @@ validateJsonFile =  function(opts){
             if(association.keyIn){
                 assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
             }
+            assoc["holdsForeignKey"] = holdsTheForeignKey;
   
   
             associations_info[type].push(assoc);

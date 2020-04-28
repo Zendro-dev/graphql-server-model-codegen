@@ -1,18 +1,32 @@
+<<<<<<< HEAD
 <%# creates the field Mutations for adding/removing associated records -%> 
 <%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
   /**
   * <%- op %><%-associationsArguments["to_many"][i].name_cp-%> - field Mutation for to_many associationsArguments to <%- op %> 
+=======
+
+<%# creates the field Mutations for adding/removing associated records %> 
+
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+  /**
+  * <%- op %><%-associationsArguments["to_many"][i].name_cp-%> - field Mutation for to_many associations to <%- op %> 
+>>>>>>> issue107-refactoring
   *
   * @param {object} input   Info of input Ids to <%- op %>  the association
   */
   <%- nameLc -%>.prototype.<%- op %><%-associationsArguments["to_many"][i].name_cp-%> = async function(input) {
     let results = [];
     input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.forEach(associatedRecordId => {
+<<<<<<< HEAD
       results.push(models.<%-associationsArguments["to_many"][i].target_lc-%>._<%- op %><%- nameCp -%> (associatedRecordId, this.getIdValue()));
+=======
+      results.push(models.<%-associationsArguments["to_many"][i].target_lc-%>._<%- op %><%- nameCp -%> (associatedRecordId, input.<%- idAttribute %>));
+>>>>>>> issue107-refactoring
     })
     await Promise.all(results);
   }
 
+<<<<<<< HEAD
 <%}-%>
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
   /**
@@ -34,4 +48,16 @@
     }
   <%}-%>
 
+=======
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  /**
+  * <%- op %><%-associationsArguments["to_one"][i].name_cp-%> - field Mutation for to_one associations to <%- op %> 
+  *
+  * @param {object} input   Info of input Ids to <%- op %>  the association
+  */
+  <%- nameLc -%>.prototype.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> = async function(input) {
+    await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].name_cp-%>(input.<%- idAttribute %> %>, input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+    this.<%-associationsArguments["to_one"][i].targetKey-%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>;
+  }
+>>>>>>> issue107-refactoring
 <%}-%>

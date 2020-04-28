@@ -74,13 +74,36 @@ module.exports.resolvers_book = `
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {type}         Associated record
  */
-book.prototype.publisher = function({search}, context) {
-  try{
-    return this.publisherImpl( search);
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+book.prototype.publisher = async function({
+    search
+}, context) {
+    try {
+        if (search === undefined) {
+            return resolvers.readOnePubli_sher({
+                [models.publi_sher.idAttribute()]: this.publisher_id
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.publi_sher.idAttribute(),
+                "value": {
+                    "value": this.publisher_id
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.publi_shers({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
+            }
+            return found;
+        }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 
 `
@@ -114,18 +137,42 @@ static readById( id ){
 `
 
 module.exports.resolvers_person = `
+/**
+ * person.prototype.worksFilter - Check user authorization and return certain number, specified in pagination argument, of records
+ * associated with the current instance, this records should also
+ * holds the condition of search argument, all of them sorted as specified by the order argument.
+ *
+ * @param  {object} search     Search argument for filtering associated records
+ * @param  {array} order       Type of sorting (ASC, DESC) for each field
+ * @param  {object} pagination Offset and limit to get the records from and to respectively
+ * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
+ */
 person.prototype.worksFilter = function({
     search,
     order,
     pagination
 }, context) {
-  try{
-    return this.worksFilterImpl({search, order, pagination});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    try {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+            "search": search,
+            "field": "book_id",
+            "value": {
+                "value": this.getIdValue()
+            },
+            "operator": "eq"
+        });
 
+        return resolvers.books({
+            search: nsearch,
+            order: order,
+            pagination: pagination
+        }, context);
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 
 `

@@ -23,6 +23,9 @@ module.exports = `
     """
     @search-request
     """
+<<<<<<< HEAD
+    <%=key%>Connection(search: search<%= associations.schema_attributes.many[key][1] -%>Input, order: [ order<%= associations.schema_attributes.many[key][1] -%>Input ], pagination: paginationCursorInput): <%= associations.schema_attributes.many[key][1]-%>Connection
+=======
     <%=key%>Filter(search: search<%= associationsArguments.schema_attributes.many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.many[key][1] -%>Input ], pagination: paginationInput): [<%= associationsArguments.schema_attributes.many[key][0]-%>]
 
 
@@ -30,6 +33,7 @@ module.exports = `
     @search-request
     """
     <%=key%>Connection(search: search<%= associationsArguments.schema_attributes.many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.many[key][1] -%>Input ], pagination: paginationCursorInput): <%= associationsArguments.schema_attributes.many[key][1]-%>Connection
+>>>>>>> issue107-refactoring
 
     """
     @count-request
@@ -71,6 +75,7 @@ type <%- nameCp -%>Edge{
     field: <%- name -%>Field
     value: typeValue
     operator: Operator
+    excludeAdapterNames: [String]
     search: [search<%- nameCp-%>Input]
   }
 

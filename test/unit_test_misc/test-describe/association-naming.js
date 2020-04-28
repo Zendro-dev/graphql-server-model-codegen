@@ -6,13 +6,36 @@ module.exports.dog_owner_resolvers = `
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {type}         Associated record
  */
-dog.prototype.owner = function({search }, context) {
-  try{
-    return this.ownerImpl(search);
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+dog.prototype.owner = async function({
+    search
+}, context) {
+    try {
+        if (search === undefined) {
+            return resolvers.readOnePerson({
+                [models.person.idAttribute()]: this.owner_id_test
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.person.idAttribute(),
+                "value": {
+                    "value": this.owner_id_test
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.people({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
+            }
+            return found;
+        }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 `
 
@@ -44,12 +67,26 @@ academicTeam.prototype.membersFilter = function({
     order,
     pagination
 }, context) {
-  try{
-    return this.membersFilterImpl({search,order,pagination});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    try {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+            "search": search,
+            "field": "academicTeamId",
+            "value": {
+                "value": this.getIdValue()
+            },
+            "operator": "eq"
+        });
+
+        return resolvers.researchers({
+            search: nsearch,
+            order: order,
+            pagination: pagination
+        }, context);
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 `
 

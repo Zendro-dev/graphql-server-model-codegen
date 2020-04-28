@@ -1,5 +1,4 @@
 module.exports.belongsTo_resolver  = `
-
 /**
  * dog.prototype.researcher - Return associated record
  *
@@ -7,43 +6,58 @@ module.exports.belongsTo_resolver  = `
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {type}         Associated record
  */
-dog.prototype.researcher = function({search }, context) {
-  try{
-    return this.researcherImpl(search);
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+dog.prototype.researcher = async function({
+    search
+}, context) {
+    try {
+        if (search === undefined) {
+            return resolvers.readOneResearcher({
+                [models.researcher.idAttribute()]: this.researcherId
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.researcher.idAttribute(),
+                "value": {
+                    "value": this.researcherId
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.researchers({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
+            }
+            return found;
+        }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 `
 
 module.exports.belongsTo_model = `
-researcherImpl(search){
- if(search === undefined){
-   return models.researcher.readById( this.researcherId );
- }else{
-   let id_search = {
-       "field":  models.researcher.idAttribute(),
-       "value": {
-         "value": this.researcherId
-       },
-       "operator": "eq"
-   }
-
-   let ext_search = {
-     "operator": "and",
-     "search": [id_search, search]
-   }
-
-   return models.researcher.readAll(ext_search)
-   .then( found =>{
-       if(found){
-         return found[0]
-       }
-       return found;
-   });
- }
-}
+static async _addResearcher(id, researcherId) {
+        let updated = await sequelize.transaction(async transaction => {
+            try {
+                return Dog.update({
+                    researcherId: researcherId
+                }, {
+                    where: {
+                        id: id
+                    }
+                }, {
+                    transaction: transaction
+                })
+            } catch (error) {
+                throw error;
+            }
+        });
+        return updated;
+    }
 `
 
 module.exports.hasOne_resolver = `
@@ -54,44 +68,57 @@ module.exports.hasOne_resolver = `
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {type}         Associated record
  */
-researcher.prototype.dog = function({search}, context) {
- try{
-   return this.dogImpl(search);
- }catch(error){
-   console.error(error);
-   handleError(error);
- };
+researcher.prototype.dog = async function({
+    search
+}, context) {
+    try {
+        if (search === undefined) {
+            return resolvers.readOneDog({
+                [models.dog.idAttribute()]: this.researcherId
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.dog.idAttribute(),
+                "value": {
+                    "value": this.researcherId
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.dogs({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
+            }
+            return found;
+        }
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
-
 `
 module.exports.hasOne_model = `
-dogImpl(search){
-
-  let simple_search = {
-        "field": "researcherId",
-        "value": {
-        "value": this.getIdValue()
-          },
-        "operator": "eq"
-      }
-  let ext_search = simple_search;
-
-  if(search !== undefined){
-    ext_search = {
-      "operator": "and",
-      "search": [simple_search, search]
+static async _addDog(id, researcherId) {
+        let updated = await sequelize.transaction(async transaction => {
+            try {
+                return Researcher.update({
+                    researcherId: researcherId
+                }, {
+                    where: {
+                        id: id
+                    }
+                }, {
+                    transaction: transaction
+                })
+            } catch (error) {
+                throw error;
+            }
+        });
+        return updated;
     }
-  }
-
-  return models.dog.readAll(ext_search)
-  .then(found =>{ if(found){
-    return found[0];
-  }
-    return found;
-  })
-
-}
-
 `
 
 module.exports.belongsTo_schema = `

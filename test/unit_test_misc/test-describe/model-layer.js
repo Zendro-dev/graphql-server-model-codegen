@@ -1,13 +1,19 @@
 module.exports.count_in_sequelize_model = `
-static countRecords(search){
-  let options = {};
-  if (search !== undefined) {
-      let arg = new searchArg(search);
-      let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;
-  }
-  return super.count(options);
-}
+static countRecords(search) {
+        let options = {};
+        if (search !== undefined) {
+
+            //check
+            if (typeof search !== 'object') {
+                throw new Error('Illegal "search" argument type, it must be an object.');
+            }
+
+            let arg = new searchArg(search);
+            let arg_sequelize = arg.toSequelize();
+            options['where'] = arg_sequelize;
+        }
+        return super.count(options);
+    }
 `
 
 module.exports.count_in_webservice_model = `
@@ -44,131 +50,128 @@ countDogs: function({
 }
 `
 module.exports.read_all = `
-static readAll(search, order, pagination){
-  let options = {};
-  if (search !== undefined) {
-      let arg = new searchArg(search);
-      let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;
-  }
+static readAll(search, order, pagination) {
+        let options = {};
+        if (search !== undefined) {
 
-  return super.count(options).then(items => {
-      if (order !== undefined) {
-          options['order'] = order.map((orderItem) => {
-              return [orderItem.field, orderItem.order];
-          });
-      } else if (pagination !== undefined) {
-          options['order'] = [
-              ["id", "ASC"]
-          ];
-      }
+            //check
+            if (typeof search !== 'object') {
+                throw new Error('Illegal "search" argument type, it must be an object.');
+            }
 
-      if (pagination !== undefined) {
-          options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
-          options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
-      } else {
-          options['offset'] = 0;
-          options['limit'] = items;
-      }
+            let arg = new searchArg(search);
+            let arg_sequelize = arg.toSequelize();
+            options['where'] = arg_sequelize;
+        }
 
-      if (globals.LIMIT_RECORDS < options['limit']) {
-          throw new Error(\`Request of total dogs exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-      }
-      return super.findAll(options);
-  });
-}
+        return super.count(options).then(items => {
+            if (order !== undefined) {
+                options['order'] = order.map((orderItem) => {
+                    return [orderItem.field, orderItem.order];
+                });
+            } else if (pagination !== undefined) {
+                options['order'] = [
+                    ["id", "ASC"]
+                ];
+            }
+
+            if (pagination !== undefined) {
+                options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
+                options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
+            } else {
+                options['offset'] = 0;
+                options['limit'] = items;
+            }
+
+            if (globals.LIMIT_RECORDS < options['limit']) {
+                throw new Error(\`Request of total dogs exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
+            }
+            return super.findAll(options);
+        });
+    }
 
 `
 
 module.exports.read_all_resolver = `
 /**
- * dogs - Check user authorization and return certain number, specified in pagination argument, of records that
- * holds the condition of search argument, all of them sorted as specified by the order argument.
- *
- * @param  {object} search     Search argument for filtering records
- * @param  {array} order       Type of sorting (ASC, DESC) for each field
- * @param  {object} pagination Offset and limit to get the records from and to respectively
- * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {array}             Array of records holding conditions specified by search, order and pagination argument
- */
-dogs: function({
-    search,
-    order,
-    pagination
-}, context) {
-    return checkAuthorization(context, 'Dog', 'read').then(authorization => {
-        if (authorization === true) {
-            return dog.readAll(search, order, pagination);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+     * dogs - Check user authorization and return certain number, specified in pagination argument, of records that
+     * holds the condition of search argument, all of them sorted as specified by the order argument.
+     *
+     * @param  {object} search     Search argument for filtering records
+     * @param  {array} order       Type of sorting (ASC, DESC) for each field
+     * @param  {object} pagination Offset and limit to get the records from and to respectively
+     * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {array}             Array of records holding conditions specified by search, order and pagination argument
+     */
+    dogs: function({
+        search,
+        order,
+        pagination
+    }, context) {
+        return checkAuthorization(context, 'Dog', 'read').then(async authorization => {
+            if (authorization === true) {
+                await checkCount(search, context, "dogs");
+                let resultRecords = await dog.readAll(search, order, pagination);
+                checkCountAgainAndAdaptLimit(context, resultRecords.length, "dogs");
+                return resultRecords;
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        }).catch(error => {
+            console.error(error);
+            handleError(error);
+        })
+    },
 `
 
 module.exports.add_one_model = `
-static addOne(input){
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-      .then(async (valSuccess) => {
-
-        try{
-          const result = await sequelize.transaction( async (t) =>{
-
-            let item = await super.create(input, {transaction : t});
-            let promises_associations = [];
-            if (input.addAuthors) {
-              let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
-              if(wrong_ids.length > 0){
-                throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
-              }else{
-                  promises_associations.push( item.setAuthors(input.addAuthors, {transaction:t}) );
-              }
-
+static addOne(input) {
+    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
+        .then(async (valSuccess) => {
+            try {
+                const result = await sequelize.transaction(async (t) => {
+                    let item = await super.create(input, {
+                        transaction: t
+                    });
+                    return item;
+                });
+                return result;
+            } catch (error) {
+                throw error;
             }
-          return  Promise.all(promises_associations).then( () => { return item } );
         });
-
-        if(input.addPublisher){
-          let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
-          if(wrong_ids.length > 0){
-            throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
-          }else{
-            await result._addPublisher(input.addPublisher);
-          }
-        }
-
-         return result;
-        }catch(error){
-          throw error;
-        }
-      });
 }
 `
 
 module.exports.add_one_resolver = `
 /**
- * addBook - Check user authorization and creates a new record with data specified in the input argument
- *
- * @param  {object} input   Info of each field to create the new record
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {object}         New record created
- */
-addBook: function(input, context) {
-    return checkAuthorization(context, 'Book', 'create').then(authorization => {
-        if (authorization === true) {
-
-          return book.addOne(input);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
+     * addBook - Check user authorization and creates a new record with data specified in the input argument.
+     * This function only handles attributes, not associations.
+     * @see handleAssociations for further information.
+     *
+     * @param  {object} input   Info of each field to create the new record
+     * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {object}         New record created
+     */
+    addBook: async function(input, context) {
+        try {
+            let authorization = await checkAuthorization(context, 'Book', 'create');
+            if (authorization === true) {
+                let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+                helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
+                helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+                /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+                let createdBook = await book.addOne(inputSanitized);
+                await createdBook.handleAssociations(inputSanitized, context);
+                return createdBook;
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        } catch (error) {
+            console.error(error);
+            handleError(error);
         }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+    },
 `
 
 module.exports.delete_one_model = `
@@ -194,104 +197,81 @@ static deleteOne(id){
 `
 module.exports.delete_one_resolver = `
 /**
- * deleteBook - Check user authorization and delete a record with the specified id in the id argument.
- *
- * @param  {number} {id}    id of the record to delete
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {string}         Message indicating if deletion was successfull.
- */
-deleteBook: function({
-    id
-}, context) {
-    return checkAuthorization(context, 'Book', 'delete').then(authorization => {
-        if (authorization === true) {
-          return book.deleteOne(id);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+     * deleteBook - Check user authorization and delete a record with the specified id in the id argument.
+     *
+     * @param  {number} {id}    id of the record to delete
+     * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {string}         Message indicating if deletion was successfull.
+     */
+    deleteBook: function({
+        id
+    }, context) {
+        return checkAuthorization(context, 'Book', 'delete').then(async authorization => {
+            if (authorization === true) {
+                if (await book.validForDeletion(id, context)) {
+                    return book.deleteOne(id);
+                }
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        }).catch(error => {
+            console.error(error);
+            handleError(error);
+        })
+    },
 `
 module.exports.update_one_model = `
-static updateOne(input){
-
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-      .then(async (valSuccess) => {
-        try{
-          let result = await sequelize.transaction( async(t) =>{
-              let promises_associations = [];
-              let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
-              let updated = await item.update(input, {transaction:t});
-
-              if (input.addAuthors) {
-                let wrong_ids =  await helper.checkExistence(input.addAuthors, models.person);
-                if(wrong_ids.length > 0){
-                  throw new Error(\`Ids \${wrong_ids.join(",")} in model person were not found.\`);
-                }else{
-                  promises_associations.push(updated.addAuthors(input.addAuthors, {transaction: t}));
-                }
-              }
-              if (input.removeAuthors) {
-                let ids_associated = await item.getAuthors().map(t => \`\${t[models.person.idAttribute()]}\`);
-                await helper.asyncForEach(input.removeAuthors, id=>{
-                  if(! ids_associated.includes(id)){
-                    throw new Error(\`The association with id \${id} that you're trying to remove desn't exists\` );
-                  }
+static updateOne(input) {
+    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
+        .then(async (valSuccess) => {
+            try {
+                let result = await sequelize.transaction(async (t) => {
+                    let promises_associations = [];
+                    let item = await super.findByPk(input[this.idAttribute()], {
+                        transaction: t
+                    });
+                    let updated = await item.update(input, {
+                        transaction: t
+                    });
+                    return updated;
                 });
-                  promises_associations.push(updated.removeAuthors(input.removeAuthors, {transaction: t}));
-              }
-              return  Promise.all(promises_associations).then( () => { return updated; } );
-          });
-
-          if(input.addPublisher){
-            let wrong_ids =  await helper.checkExistence(input.addPublisher, models.publisher);
-            if(wrong_ids.length > 0){
-              throw new Error(\`Ids \${wrong_ids.join(",")} in model publisher were not found.\`);
-            }else{
-              await result._addPublisher(input.addPublisher);
+                return result;
+            } catch (error) {
+                throw error;
             }
-          }
-
-          if(input.removePublisher){
-            let publisher = await result.publisherImpl();
-            if(publisher && input.removePublisher === \`\${publisher[models.publisher.idAttribute()]}\`){
-              await result._removePublisher(input.removePublisher);
-            }else{
-              throw new Error("The association you're trying to remove it doesn't exists");
-            }
-          }
-
-          return result;
-        }catch(error){
-          throw error;
-        }
-      });
+        });
 }
 `
 
 module.exports.update_one_resolver = `
 /**
- * updateBook - Check user authorization and update the record specified in the input argument
- *
- * @param  {object} input   record to update and new info to update
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {object}         Updated record
- */
-updateBook: function(input, context) {
-    return checkAuthorization(context, 'Book', 'update').then(authorization => {
-        if (authorization === true) {
-          return book.updateOne(input);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
+     * updateBook - Check user authorization and update the record specified in the input argument
+     * This function only handles attributes, not associations.
+     * @see handleAssociations for further information.
+     *
+     * @param  {object} input   record to update and new info to update
+     * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {object}         Updated record
+     */
+    updateBook: async function(input, context) {
+        try {
+            let authorization = await checkAuthorization(context, 'Book', 'update');
+            if (authorization === true) {
+                let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+                helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
+                helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+                /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+                let updatedBook = await book.updateOne(inputSanitized);
+                await updatedBook.handleAssociations(inputSanitized, context);
+                return updatedBook;
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        } catch (error) {
+            console.error(error);
+            handleError(error);
         }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+    },
 `
 
 module.exports.bulk_add_model = `
