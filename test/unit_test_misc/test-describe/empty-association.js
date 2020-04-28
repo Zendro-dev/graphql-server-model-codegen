@@ -18,8 +18,6 @@ bulkAddTranscript_countCsv: [transcript_count] }
 `
 
 module.exports.individual_no_assoc_resolvers = `
-const os = require('os');
-
 module.exports = {
 
     /**
@@ -37,8 +35,21 @@ module.exports = {
         order,
         pagination
     }, context) {
+        return checkAuthorization(context, 'individual', 'read').then(async authorization => {
+            if (authorization === true) {
+                await checkCount(search, context, "individuals");
+                let resultRecords = await individual.readAll(search, order, pagination);
+                checkCountAgainAndAdaptLimit(context, resultRecords.length, "individuals");
+                return resultRecords;
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        }).catch(error => {
+            console.error(error);
+            handleError(error);
+        })
+    }`
 
-`
 module.exports.transcript_count_no_assoc_model = `
 static associate(models) {
 

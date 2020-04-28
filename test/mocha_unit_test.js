@@ -21,7 +21,7 @@ describe('Lower-case models', function(){
     expect(g_schema, 'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Check correct association name in resolver - individual', async function(){
+  it('Check correct association name in resolver - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -55,7 +55,7 @@ describe('Empty associations', function(){
     expect(g_schema, 'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Check no association in resolvers - individual (no assoc)', async function(){
+  it('Check no association in resolvers - individual (no assoc)', async function(){
     let opts = funks.getOptions(models.individual_no_assoc);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -164,7 +164,7 @@ describe('Associations in query and resolvers', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Models - person', async function(){
+  it('Models - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
