@@ -153,9 +153,9 @@ const associationArgsDef = {
       } else {
         //build new search filter
         let nsearch = helper.addSearchField({
-          "search": search, 
-          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(), 
-          "value": {"value": this.<%= associations_one[i].targetKey -%> }, 
+          "search": search,
+          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
+          "value": {"value": this.<%= associations_one[i].targetKey -%> },
           "operator": "eq"
         });
         let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
@@ -202,12 +202,12 @@ const associationArgsDef = {
     try{
       //build new search filter
       let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
+        "search": search,
+        "field": "<%=associations_temp[i].targetKey%>",
+        "value": {"value": this.getIdValue()},
         "operator": "eq"
       });
-      
+
       return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
       console.error(error);
@@ -227,9 +227,9 @@ const associationArgsDef = {
 
       //build new search filter
       let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
+        "search": search,
+        "field": "<%=associations_temp[i].targetKey%>",
+        "value": {"value": this.getIdValue()},
         "operator": "eq"
       });
 
@@ -256,9 +256,9 @@ const associationArgsDef = {
 
       //build new search filter
       let nsearch = helper.addSearchField({
-        "search": search, 
-        "field": "<%=associations_temp[i].targetKey%>", 
-        "value": {"value": this.getIdValue()}, 
+        "search": search,
+        "field": "<%=associations_temp[i].targetKey%>",
+        "value": {"value": this.getIdValue()},
         "operator": "eq"
       });
 
@@ -298,6 +298,8 @@ const associationArgsDef = {
  * checkCount()
  * checkCountForOne()
  * checkCountAgainAndAdaptLimit()
+ * countAllAssociatedRecords()
+ * validForDeletion()
  */
 -%>
 /**
@@ -324,7 +326,7 @@ async function checkCount(search, context, query) {
 
 /**
 * checkCountForOne(context) - Make sure that the record limit is not exhausted before requesting a single record
-* 
+*
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 */
 function checkCountForOne(context) {
@@ -345,6 +347,54 @@ function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
       throw new Error(errorMessageForRecordsLimit(query));
   }
   context.recordsLimit -= numberOfFoundItems;
+}
+
+/**
+ * countAllAssociatedRecords - Count records associated with another given record
+ *
+ * @param  {ID} id      Id of the record which the associations will be counted
+ * @param  {objec} context Default context by resolver
+ * @return {Int}         Number of associated records
+ */
+  async function countAllAssociatedRecords(id, context ){
+
+  let <%- nameLc %> = await resolvers.readOne<%- nameCp -%>({<%- idAttribute-%>: id}, context);
+  //check that record actually exists
+  if (<%- nameLc %> === null) throw new Error(`Record with ID = ${id} does not exist`);
+  let promises_to_many = [];
+  let promises_to_one = [];
+
+  <%# check associations to_one and to_many are counted in diferent variable -%>
+  <%associations_temp = associations["to_many"] -%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    promises_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+  <%}-%>
+  <%associations_temp = associations["to_one"] -%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+  <%}-%>
+
+  let result_to_many = await Promise.all(promises_to_many);
+  let result_to_one = await Promise.all(promises_to_one);
+
+  let get_to_many_associated = result_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
+  let get_to_one_associated = result_to_one.filter( (r, index) => r !== null ).length;
+
+  return get_to_one_associated + get_to_many_associated;
+}
+
+/**
+ * validForDeletion - Checks wether a record is allowed to be deleted
+ *
+ * @param  {ID} id      Id of record to check if it can be deleted
+ * @param  {object} context Default context by resolver
+ * @return {boolean}         True if it is allowed to be deleted and false otherwise
+ */
+  async function validForDeletion(id, context){
+  if( await countAllAssociatedRecords(id, context) > 0 ){
+    throw new Error(`Accession with accession_id ${id} has associated records and is NOT valid for deletion. Please clean up before you delete.`);
+  }
+  return true;
 }
 
 <%# 
@@ -559,9 +609,11 @@ module.exports = {
    * @return {string}         Message indicating if deletion was successfull.
    */
   delete<%- nameCp -%>: function({<%- idAttribute -%>}, context){
-    return checkAuthorization(context, '<%- name -%>', 'delete').then( authorization =>{
+    return checkAuthorization(context, '<%- name -%>', 'delete').then( async authorization =>{
       if (authorization === true) {
-        return <%- nameLc -%>.deleteOne(<%- idAttribute -%>);
+        if(await <%- nameLc -%>.validForDeletion(<%- idAttribute -%>, context) ){
+            return <%- nameLc -%>.deleteOne(<%- idAttribute -%>);
+        }
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
