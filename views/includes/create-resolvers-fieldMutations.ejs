@@ -25,6 +25,6 @@
   */
   <%- nameLc -%>.prototype.<%- op %><%-associations["to_one"][i].name_cp-%> = async function(input) {
     await <%- nameLc -%>._<%- op %><%-associations["to_one"][i].name_cp-%>(input.<%- idAttribute %> %>, input.<%- op %><%-associations["to_one"][i].name_cp-%>);
-    this.<%-associations["to_one"][i].targetKey-%> = input.<%- op %><%-associations["to_one"][i].name_cp-%>;
+    this.<%-associations["to_one"][i].targetKey%> = <% if (op == 'remove') { %>null;<% } else { %>input.<%- op %><%-associations["to_one"][i].name_cp%>;<%}-%> 
   }
 <%}-%>

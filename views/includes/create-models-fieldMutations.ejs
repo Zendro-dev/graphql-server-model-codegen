@@ -2,7 +2,7 @@
   static async _<%- op -%><%-associations["to_one"][i].name_cp-%>(<%- idAttribute-%>, <%-associations["to_one"][i].targetKey-%>) {
     let updated = await sequelize.transaction(async transaction => {
       try {
-        return <%- nameCp -%> .update({ <%-associations["to_one"][i].targetKey-%>:  <%-associations["to_one"][i].targetKey-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%>}}, {transaction: transaction})
+        return <%- nameCp -%> .update({ <%-associations["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associations["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%>}}, {transaction: transaction})
       } catch (error) {
           throw error;
       }

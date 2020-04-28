@@ -9,17 +9,20 @@
   try {
     let promises = [];
 
-    <%for(let i=0; i < associations["to_many"].length; i++){-%>
-      if (helper.isNonEmptyArray(input.add<%=associations["to_many"][i].name_cp-%>)) {
-        promises.push(this.add<%=associations["to_many"][i].name_cp-%>(input, context));
-      }
-    <%}-%>
+    <% ['add','remove'].forEach(op => { %>
+      <%for(let i=0; i < associations["to_many"].length; i++){-%>
+        if (helper.isNonEmptyArray(input.<%-op%><%=associations["to_many"][i].name_cp-%>)) {
+          promises.push(this.<%-op%><%=associations["to_many"][i].name_cp-%>(input, context));
+        }
+      <%}-%>
 
-    <%for(let i=0; i < associations["to_one"].length; i++){-%>
-      if (helper.isNotUndefinedAndNotNull(input.add<%=associations["to_one"][i].name_cp-%>)) {
-        promises.push(this.add<%=associations["to_one"][i].name_cp-%>(input, context));
-      }
-    <%}-%>
+      <%for(let i=0; i < associations["to_one"].length; i++){-%>
+        if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=associations["to_one"][i].name_cp-%>)) {
+          promises.push(this.<%-op%><%=associations["to_one"][i].name_cp-%>(input, context));
+        }
+      <%}-%>
+    <%}); %> 
+      
 
     await Promise.all(promises);
   } catch (error) {
