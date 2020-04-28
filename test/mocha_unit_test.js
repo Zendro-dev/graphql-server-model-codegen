@@ -21,7 +21,7 @@ describe('Lower-case models', function(){
     expect(g_schema, 'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Check correct association name in resolver - individual', async function(){
+  xit('Check correct association name in resolver - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -55,7 +55,7 @@ describe('Empty associations', function(){
     expect(g_schema, 'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Check no association in resolvers - individual (no assoc)', async function(){
+  xit('Check no association in resolvers - individual (no assoc)', async function(){
     let opts = funks.getOptions(models.individual_no_assoc);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -164,7 +164,7 @@ describe('Associations in query and resolvers', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Models - person', async function(){
+  xit('Models - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -201,7 +201,7 @@ describe('Migrations', function(){
 
 describe('Model naming cases ', function(){
   let data_test = require('./unit_test_misc/test-describe/model-naming-cases');
-  it('Resolvers - aminoAcidSequence', async function(){
+  xit('Resolvers - aminoAcidSequence', async function(){
     let opts = funks.getOptions(models.aminoAcidSequence);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -225,7 +225,7 @@ describe('Model naming cases ', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
-  it('Resolvers - inDiVIdual', async function(){
+  xit('Resolvers - inDiVIdual', async function(){
     let opts = funks.getOptions(models.inDiVIdual_camelcase);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -257,7 +257,7 @@ describe('Model naming cases ', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Resolvers - transcriptCount', async function(){
+  xit('Resolvers - transcriptCount', async function(){
     let opts = funks.getOptions(models.transcriptCount_indiv);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -271,7 +271,7 @@ describe('Association naming', function(){
 
   let data_test = require('./unit_test_misc/test-describe/association-naming');
 
-  it('Resolvers - Dog', async function(){
+  xit('Resolvers - Dog', async function(){
     let opts = funks.getOptions(models.dog_owner);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -295,7 +295,7 @@ describe('Association naming', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
-  it('Resolvers - academicTeam', async function(){
+  xit('Resolvers - academicTeam', async function(){
     let opts = funks.getOptions(models.academicTeam);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -376,7 +376,7 @@ describe('All webservice models', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Resolvers - book', async function(){
+  xit('Resolvers - book', async function(){
     let opts = funks.getOptions(models_webservice.book);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -400,7 +400,7 @@ describe('All webservice models', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Resolvers - person', async function(){
+  xit('Resolvers - person', async function(){
     let opts = funks.getOptions(models_webservice.person);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -505,7 +505,7 @@ describe('Update sequelize model to class', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
-  it('Model associations - Book', async function(){
+  xit('Model associations - Book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -528,7 +528,7 @@ describe('Update sequelize model to class', function(){
 describe('Model Layer', function(){
 
   let data_test = require('./unit_test_misc/test-describe/model-layer');
-  it('Count method in sequelize model - individual', async function(){
+  xit('Count method in sequelize model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -552,7 +552,7 @@ describe('Model Layer', function(){
     expect(g_resolvers, 'No count method found').to.have.string(test_resolver);
   });
 
-  it('Read all model - dog', async function(){
+  xit('Read all model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -560,7 +560,7 @@ describe('Model Layer', function(){
     expect(g_model, 'No read all method found').to.have.string(test_model);
   })
 
-  it('Read all resolver - dog', async function(){
+  xit('Read all resolver - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -568,7 +568,7 @@ describe('Model Layer', function(){
     expect(g_resolvers, 'No read all method found').to.have.string(test_resolver);
   });
 
-  it('Add one model - book', async function(){
+  xit('Add one model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -600,7 +600,7 @@ describe('Model Layer', function(){
     expect(g_resolvers, 'No add one method found').to.have.string(test_resolver);
   });
 
-  it('Update one model - book', async function(){
+  xit('Update one model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -657,7 +657,7 @@ describe('Decouple association from resolvers', function(){
 
   let data_test = require('./unit_test_misc/test-describe/decouple-associations');
 
-  it('BelongsTo implementation in model - dog', async function(){
+  xit('BelongsTo implementation in model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -665,7 +665,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('BelongsTo implementation in resolver - dog', async function(){
+  xit('BelongsTo implementation in resolver - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -673,7 +673,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  it('HasOne implementation in model - researcher', async function(){
+  xit('HasOne implementation in model - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -681,7 +681,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('HasOne implementation in resolver - researcher', async function(){
+  xit('HasOne implementation in resolver - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -705,7 +705,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('HasMany implementation in model - individual', async function(){
+  xit('HasMany implementation in model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -713,7 +713,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('HasMany implementation in resolver - individual', async function(){
+  xit('HasMany implementation in resolver - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -721,7 +721,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  it('Count (association) implementation in model - individual', async function(){
+  xit('Count (association) implementation in model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -729,7 +729,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('HasMany (association) implementation in resolver - individual', async function(){
+  xit('HasMany (association) implementation in resolver - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -738,7 +738,7 @@ describe('Decouple association from resolvers', function(){
   });
 
 
-  it('BelongsToMany implementation in model - book', async function(){
+  xit('BelongsToMany implementation in model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -746,7 +746,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('BelongsToMany implementation in model count - book', async function(){
+  xit('BelongsToMany implementation in model count - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -754,7 +754,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('BelongsToMany implementation in resolver - book', async function(){
+  xit('BelongsToMany implementation in resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -762,7 +762,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  it('BelongsToMany count implementation in resolver - book', async function(){
+  xit('BelongsToMany count implementation in resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -871,7 +871,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Many to many association  - person', async function(){
+  xit('Many to many association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -879,7 +879,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Many to many count association  - person', async function(){
+  xit('Many to many count association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -907,7 +907,7 @@ describe('Cursor based pagination', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Connection read all resolver - book', async function(){
+  xit('Connection read all resolver - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -915,7 +915,7 @@ describe('Cursor based pagination', function(){
     expect(g_resolver, 'No method found').to.have.string(test_resolver);
   });
 
-  it('Connection read all model - book', async function(){
+  xit('Connection read all model - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -931,7 +931,7 @@ describe('Cursor based pagination', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('Association connection resolver - person', async function(){
+  xit('Association connection resolver - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -939,7 +939,7 @@ describe('Cursor based pagination', function(){
     expect(g_resolver, 'No method found').to.have.string(test_resolver);
   });
 
-  it('Many-to-many connection model - person', async function(){
+  xit('Many-to-many connection model - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -955,7 +955,7 @@ describe('Cursor based pagination', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Many to many association connection in cenz server  - person-book', async function(){
+  xit('Many to many association connection in cenz server  - person-book', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -968,7 +968,7 @@ describe('Cursor based pagination', function(){
 describe('Distributed data models', function(){
 
   let data_test = require('./unit_test_misc/test-describe/distributed-models');
-  it('ReadById adapter- book', async function(){
+  xit('ReadById adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -976,7 +976,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-  it('Count Records adapter- book', async function(){
+  xit('Count Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -984,7 +984,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-  it('Read All Records adapter- book', async function(){
+  xit('Read All Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1000,7 +1000,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  it('ReadById distributed data model- book', async function(){
+  xit('ReadById distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1008,7 +1008,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  it('Count distributed data model- book', async function(){
+  xit('Count distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1016,7 +1016,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  it('Read all distributed data model- book', async function(){
+  xit('Read all distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1024,7 +1024,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  it('To-many association distributed data model- person', async function(){
+  xit('To-many association distributed data model- person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1032,7 +1032,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  it('To-one association distributed data model- dog', async function(){
+  xit('To-one association distributed data model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1040,7 +1040,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  it('To-many association distributed data model- person', async function(){
+  xit('To-many association distributed data model- person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1060,7 +1060,7 @@ describe('To-one associations editing', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  it('AddOne with to-one association - person', async function(){
+  xit('AddOne with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -1068,7 +1068,7 @@ describe('To-one associations editing', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Update with to-one association - person', async function(){
+  xit('Update with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -1105,7 +1105,7 @@ describe('External ids', function(){
   })
 });
 
-describe('Extend api model layer associations', function(){
+xdescribe('Extend api model layer associations', function(){
   let data_test = require('./unit_test_misc/test-describe/extended-api-model-layer');
 
   it('Add to-one association foreign key in source', async function(){
@@ -1216,7 +1216,7 @@ describe('Extend api model layer associations', function(){
   })
 });
 
-describe('Create and update transaction', function(){
+xdescribe('Create and update transaction', function(){
   let data_test = require('./unit_test_misc/test-describe/transaction-create-update');
   it('Update - transcript_count', async function(){
     let opts = funks.getOptions(models.transcript_count);
@@ -1292,7 +1292,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('readById - peopleLocal', async function(){
+  xit('readById - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1300,7 +1300,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('addOne - peopleLocal', async function(){
+  xit('addOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1308,7 +1308,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('count - peopleLocal', async function(){
+  xit('count - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1316,7 +1316,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('readAllCursor - peopleLocal', async function(){
+  xit('readAllCursor - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1324,7 +1324,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('deleteOne - peopleLocal', async function(){
+  xit('deleteOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1332,7 +1332,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('updateOne - peopleLocal', async function(){
+  xit('updateOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1340,7 +1340,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('addAssociation - peopleLocal', async function(){
+  xit('addAssociation - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1348,7 +1348,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('removeAssociation - peopleLocal', async function(){
+  xit('removeAssociation - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1381,7 +1381,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('type - peopleLocal', async function(){
+  xit('type - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1389,12 +1389,384 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('targetKey - book ddm', async function(){
+  xit('targetKey - book ddm', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm_association);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.targetKey_ddm.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
+
+});
+
+describe('Parse associations', function() {
+  it('01. Single to_one association', function() {
+      let associations = models.transcript_count.associations;
+      let res = funks.parseAssociations(associations, 'sql');
+      expect(res).to.deep.equal({
+        schema_attributes: {
+          many:{},
+          one:{
+            individual:["individual", "Individual", "Individual"]
+          }
+        },
+        to_one:[
+          {
+            type:"to_one",
+            target:"individual",
+            targetKey:"individual_id",
+            keyIn:"transcript_count",
+            targetStorageType:"sql",
+            name:"individual",
+            name_lc:"individual",
+            name_cp:"Individual",
+            target_lc:"individual",
+            target_lc_pl:"individuals",
+            target_pl:"individuals",
+            target_cp:"Individual",
+            target_cp_pl:"Individuals",
+            keyIn_lc:"transcript_count",
+            holdsForeignKey:true
+          }
+        ],
+        to_many:[],
+        to_many_through_sql_cross_table:[],
+        foreignKeyAssociations:{
+          individual:"individual_id"
+        },
+        associations:[
+          {
+            type:"to_one",
+            target:"individual",
+            targetKey:"individual_id",
+            keyIn:"transcript_count",
+            targetStorageType:"sql",
+            name:"individual",
+            name_lc:"individual",
+            name_cp:"Individual",
+            target_lc:"individual",
+            target_lc_pl:"individuals",
+            target_pl:"individuals",
+            target_cp:"Individual",
+            target_cp_pl:"Individuals",
+            keyIn_lc:"transcript_count",
+            holdsForeignKey:true
+          }
+        ],
+        mutations_attributes:""
+      });
+  });
+
+  it('02. Single to_many association', function() {
+    let associations = models.individual.associations;
+    let res = funks.parseAssociations(associations, 'sql');
+    expect(res).to.deep.equal({
+      schema_attributes:{
+        many:{
+          transcript_counts:["transcript_count","Transcript_count","Transcript_counts"]
+        },
+        one:{}
+      },
+      to_one:[],
+      to_many:[
+        {
+          type:"to_many",
+          target:"transcript_count",
+          keyIn:"transcript_count",
+          targetKey:"individual_id",
+          targetStorageType:"sql",
+          name:"transcript_counts",
+          name_lc:"transcript_counts",
+          name_cp:"Transcript_counts",
+          target_lc:"transcript_count",
+          target_lc_pl:"transcript_counts",
+          target_pl:"transcript_counts",
+          target_cp:"Transcript_count",
+          target_cp_pl:"Transcript_counts",
+          keyIn_lc:"transcript_count",
+          holdsForeignKey:false
+        }
+      ],
+      to_many_through_sql_cross_table:[],
+      foreignKeyAssociations:{
+        transcript_counts:"individual_id"
+      },
+      associations:[
+        {
+          type:"to_many",
+          target:"transcript_count",
+          keyIn:"transcript_count",
+          targetKey:"individual_id",
+          targetStorageType:"sql",
+          name:"transcript_counts",
+          name_lc:"transcript_counts",
+          name_cp:"Transcript_counts",
+          target_lc:"transcript_count",
+          target_lc_pl:"transcript_counts",
+          target_pl:"transcript_counts",
+          target_cp:"Transcript_count",
+          target_cp_pl:"Transcript_counts",
+          keyIn_lc:"transcript_count",
+          holdsForeignKey:false
+        }
+      ],
+      mutations_attributes:""
+    });
+  });
+
+  it('03. Single to_many_through_sql_cross_table', function() {
+    let association = models.assoc_through_project_researcher;
+    association.type = 'to_many_through_sql_cross_table';
+    let associations = {assoc: association};
+    let res = funks.parseAssociations(associations, 'sql');
+    expect(res).to.deep.equal({
+      schema_attributes:{
+        many:{
+          assoc:["Project","Project","Assoc"]
+        },
+        one:{}
+      },
+      to_one:[],
+      to_many:[],
+      to_many_through_sql_cross_table:[
+        {
+          type:"to_many_through_sql_cross_table",
+          target:"Project",
+          targetKey:"projectId",
+          sourceKey:"researcherId",
+          keysIn:"project_to_researcher",
+          targetStorageType:"sql",
+          source:"researchers",
+          target_lc:"project",
+          target_lc_pl:"projects",
+          target_pl:"Projects",
+          target_cp:"Project",
+          target_cp_pl:"Projects",
+          name:"assoc",
+          name_lc:"assoc",
+          name_cp:"Assoc",
+          holdsForeignKey:false
+        }
+      ],
+      foreignKeyAssociations:{
+        assoc:"projectId"
+      },
+      associations:[
+        {
+          type:"to_many_through_sql_cross_table",
+          target:"Project",
+          targetKey:"projectId",
+          sourceKey:"researcherId",
+          keysIn:"project_to_researcher",
+          targetStorageType:"sql",
+          source:"researchers",
+          target_lc:"project",
+          target_lc_pl:"projects",
+          target_pl:"Projects",
+          target_cp:"Project",
+          target_cp_pl:"Projects",
+          name:"assoc",
+          name_lc:"assoc",
+          name_cp:"Assoc",
+          holdsForeignKey:false
+        }
+      ],
+      mutations_attributes:""
+    });
+  });
+
+  it('04. Two associations: to_many and to_many_through_sql_cross_table', function() {
+    let associations = models.person.associations;
+    associations.books.type = "to_many_through_sql_cross_table"
+    let res = funks.parseAssociations(associations, 'sql');
+    expect(res).to.deep.equal({
+      schema_attributes:{
+        many:{
+          dogs:["Dog","Dog","Dogs"],
+          books:["Book","Book","Books"]
+        },
+        one:{}
+      },
+      to_one:[],
+      to_many:[
+        {
+          type:"to_many",
+          target:"Dog",
+          targetKey:"personId",
+          keyIn:"Dog",
+          targetStorageType:"sql",
+          name:"dogs",
+          name_lc:"dogs",
+          name_cp:"Dogs",
+          target_lc:"dog",
+          target_lc_pl:"dogs",
+          target_pl:"Dogs",
+          target_cp:"Dog",
+          target_cp_pl:"Dogs",
+          keyIn_lc:"dog",
+          holdsForeignKey:false
+        }
+      ],
+      to_many_through_sql_cross_table:[
+        {
+          type:"to_many_through_sql_cross_table",
+          target:"Book",
+          targetKey:"bookId",
+          sourceKey:"personId",
+          keysIn:"books_to_people",
+          targetStorageType:"sql",
+          name:"books",
+          name_lc:"books",
+          name_cp:"Books",
+          target_lc:"book",
+          target_lc_pl:"books",
+          target_pl:"Books",
+          target_cp:"Book",
+          target_cp_pl:"Books",
+          holdsForeignKey:false
+        }
+      ],
+      foreignKeyAssociations:{
+        dogs:"personId",
+        books:"bookId"
+      },
+      associations:[
+        {
+          type:"to_many",
+          target:"Dog",
+          targetKey:"personId",
+          keyIn:"Dog",
+          targetStorageType:"sql",
+          name:"dogs",
+          name_lc:"dogs",
+          name_cp:"Dogs",
+          target_lc:"dog",
+          target_lc_pl:"dogs",
+          target_pl:"Dogs",
+          target_cp:"Dog",
+          target_cp_pl:"Dogs",
+          keyIn_lc:"dog",
+          holdsForeignKey:false
+        },
+        {
+          type:"to_many_through_sql_cross_table",
+          target:"Book",
+          targetKey:"bookId",
+          sourceKey:"personId",
+          keysIn:"books_to_people",
+          targetStorageType:"sql",
+          name:"books",
+          name_lc:"books",
+          name_cp:"Books",
+          target_lc:"book",
+          target_lc_pl:"books",
+          target_pl:"Books",
+          target_cp:"Book",
+          target_cp_pl:"Books",
+          holdsForeignKey:false
+        }
+      ],
+      mutations_attributes:""
+    });
+  });
+
+  it('05. Two associations: Twice to_one', function() {
+    let associations = models.dog.associations;
+    let res = funks.parseAssociations(associations, 'sql');
+    expect(res).to.deep.equal({
+      schema_attributes:{
+        many:{},
+        one:{
+          person:["Person","Person","Person"],
+          researcher:["Researcher","Researcher","Researcher"]
+        }
+      },
+      to_one:[
+        {
+          type:"to_one",
+          target:"Person",
+          targetKey:"personId",
+          keyIn:"Dog",
+          targetStorageType:"sql",
+          label:"firstName",
+          sublabel:"lastName",
+          name:"person",
+          name_lc:"person",
+          name_cp:"Person",
+          target_lc:"person",
+          target_lc_pl:"people",
+          target_pl:"People",
+          target_cp:"Person",
+          target_cp_pl:"People",
+          keyIn_lc:"dog",
+          holdsForeignKey:true
+        },
+        {
+          type:"to_one",
+          target:"Researcher",
+          targetKey:"researcherId",
+          keyIn:"Dog",
+          targetStorageType:"sql",
+          label:"firstName",
+          name:"researcher",
+          name_lc:"researcher",
+          name_cp:"Researcher",
+          target_lc:"researcher",
+          target_lc_pl:"researchers",
+          target_pl:"Researchers",
+          target_cp:"Researcher",
+          target_cp_pl:"Researchers",
+          keyIn_lc:"dog",
+          holdsForeignKey:true
+        }
+      ],
+      to_many:[],
+      to_many_through_sql_cross_table:[],
+      foreignKeyAssociations:{
+        person:"personId",
+        researcher:"researcherId"
+      },
+      associations:[
+        {
+          type:"to_one",
+          target:"Person",
+          targetKey:"personId",
+          keyIn:"Dog",
+          targetStorageType:"sql",
+          label:"firstName",
+          sublabel:"lastName",
+          name:"person",
+          name_lc:"person",
+          name_cp:"Person",
+          target_lc:"person",
+          target_lc_pl:"people",
+          target_pl:"People",
+          target_cp:"Person",
+          target_cp_pl:"People",
+          keyIn_lc:"dog",
+          holdsForeignKey:true
+        },
+        {
+          type:"to_one",
+          target:"Researcher",
+          targetKey:"researcherId",
+          keyIn:"Dog",
+          targetStorageType:"sql",
+          label:"firstName",
+          name:"researcher",
+          name_lc:"researcher",
+          name_cp:"Researcher",
+          target_lc:"researcher",
+          target_lc_pl:"researchers",
+          target_pl:"Researchers",
+          target_cp:"Researcher",
+          target_cp_pl:"Researchers",
+          keyIn_lc:"dog",
+          holdsForeignKey:true
+        }
+      ],
+      mutations_attributes:""
+    });
+  })
 
 });
