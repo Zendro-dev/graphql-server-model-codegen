@@ -131,54 +131,76 @@ static bulkAddCsv(context) {
 `
 
 module.exports.many_to_many_association=`
-worksFilterImpl({
-    search,
-    order,
-    pagination
-}) {
-    let association_attributes = models.book.definition.attributes;
-    let string_attrib = '';
-    for(let attrib in association_attributes){
-      string_attrib+= attrib+' ';
+const definition = {
+    model: 'Person',
+    storageType: 'cenz-server',
+    url: 'http://something.other:7000/graphql',
+    attributes: {
+        firstName: 'String',
+        lastName: 'String',
+        email: 'String',
+        companyId: 'Int'
+    },
+    associations: {
+        works: {
+            type: 'to_many',
+            target: 'Book',
+            targetKey: 'bookId',
+            sourceKey: 'personId',
+            keysIn: 'books_to_people',
+            targetStorageType: 'cenz-server',
+            label: 'title',
+            name: 'works',
+            name_lc: 'works',
+            name_cp: 'Works',
+            target_lc: 'book',
+            target_lc_pl: 'books',
+            target_pl: 'Books',
+            target_cp: 'Book',
+            target_cp_pl: 'Books',
+            holdsForeignKey: false
+        },
+        company: {
+            type: 'to_one',
+            target: 'publi_sher',
+            targetKey: 'companyId',
+            keyIn: 'Person',
+            targetStorageType: 'webservice',
+            name: 'company',
+            name_lc: 'company',
+            name_cp: 'Company',
+            target_lc: 'publi_sher',
+            target_lc_pl: 'publi_shers',
+            target_pl: 'publi_shers',
+            target_cp: 'Publi_sher',
+            target_cp_pl: 'Publi_shers',
+            keyIn_lc: 'person',
+            holdsForeignKey: true
+        }
+    },
+    id: {
+        name: 'id',
+        type: 'Int'
     }
-    string_attrib+= 'id';
-
-    let query = \`query worksFilter($search: searchBookInput $order: [orderBookInput] $pagination: paginationInput){
-        readOnePerson(id: \${this.getIdValue()}){ worksFilter(search: $search, order:$order pagination:$pagination){
-          \${string_attrib}
-        }}
-    }\`
-
-    return axios.post(url, {query: query, variables:{ search: search, order: order, pagination: pagination }})
-    .then(res =>{
-
-      let data = res.data.data.readOnePerson.worksFilter;
-
-      return data.map(item => {return new models.book(item)});
-
-    }).catch( error =>{
-        error['url'] = url;
-        handleError(error);
-    });
-}
+};
 `
 
 module.exports.many_to_many_association_count = `
-countFilteredWorksImpl({
-    search
-}) {
-    let query = \`query countWorks($search:searchBookInput){readOnePerson(id:\${this.getIdValue()}){ countFilteredWorks(search: $search) } }\`;
+static countRecords(search) {
+        let query = \`query countPeople(\$search: searchPersonInput){
+      countPeople(search: \$search)
+    }\`
 
-    return axios.post(url, {
-        query: query,
-        variables: {
-          search: search
-        }
-    }).then(res => {
-        return res.data.data.readOnePerson.countFilteredWorks;
-    }).catch(error => {
-      error['url'] = url;
-        handleError(error);
-    });
-}
+        return axios.post(url, {
+            query: query,
+            variables: {
+                search: search
+            }
+        }).then(res => {
+            return res.data.data.countPeople;
+        }).catch(error => {
+            error['url'] = url;
+            handleError(error);
+        });
+    }
 `

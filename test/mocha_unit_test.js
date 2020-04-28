@@ -706,7 +706,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('HasMany implementation in model - individual', async function(){
+  it('HasMany implementation in model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -714,7 +714,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('HasMany implementation in resolver - individual', async function(){
+  it('HasMany implementation in resolver - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -722,7 +722,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  xit('Count (association) implementation in model - individual', async function(){
+  it('Count (association) implementation in model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -730,7 +730,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('HasMany (association) implementation in resolver - individual', async function(){
+  it('HasMany (association) implementation in resolver - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -739,7 +739,7 @@ describe('Decouple association from resolvers', function(){
   });
 
 
-  xit('BelongsToMany implementation in model - book', async function(){
+  it('BelongsToMany implementation in model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -747,7 +747,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('BelongsToMany implementation in model count - book', async function(){
+  it('BelongsToMany implementation in model count - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -755,7 +755,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('BelongsToMany implementation in resolver - book', async function(){
+  it('BelongsToMany implementation in resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -763,7 +763,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  xit('BelongsToMany count implementation in resolver - book', async function(){
+  it('BelongsToMany count implementation in resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -872,7 +872,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('Many to many association  - person', async function(){
+  it('Many to many association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -880,7 +880,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('Many to many count association  - person', async function(){
+  it('Many to many count association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');

@@ -9,33 +9,35 @@ module.exports.dog_owner_resolvers = `
 dog.prototype.owner = async function({
     search
 }, context) {
-    try {
-        if (search === undefined) {
-            return resolvers.readOnePerson({
-                [models.person.idAttribute()]: this.owner_id_test
-            }, context)
-        } else {
-            //build new search filter
-            let nsearch = helper.addSearchField({
-                "search": search,
-                "field": models.person.idAttribute(),
-                "value": {
-                    "value": this.owner_id_test
-                },
-                "operator": "eq"
-            });
-            let found = await resolvers.people({
-                search: nsearch
-            }, context);
-            if (found) {
-                return found[0]
+    if (helper.isNotUndefinedAndNotNull(this.owner_id_test)) {
+        try {
+            if (search === undefined) {
+                return resolvers.readOnePerson({
+                    [models.person.idAttribute()]: this.owner_id_test
+                }, context)
+            } else {
+                //build new search filter
+                let nsearch = helper.addSearchField({
+                    "search": search,
+                    "field": models.person.idAttribute(),
+                    "value": {
+                        "value": this.owner_id_test
+                    },
+                    "operator": "eq"
+                });
+                let found = await resolvers.people({
+                    search: nsearch
+                }, context);
+                if (found) {
+                    return found[0]
+                }
+                return found;
             }
-            return found;
-        }
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
+        } catch (error) {
+            console.error(error);
+            handleError(error);
+        };
+    }
 }
 `
 

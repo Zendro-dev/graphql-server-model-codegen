@@ -9,33 +9,35 @@ module.exports.belongsTo_resolver  = `
 dog.prototype.researcher = async function({
     search
 }, context) {
-    try {
-        if (search === undefined) {
-            return resolvers.readOneResearcher({
-                [models.researcher.idAttribute()]: this.researcherId
-            }, context)
-        } else {
-            //build new search filter
-            let nsearch = helper.addSearchField({
-                "search": search,
-                "field": models.researcher.idAttribute(),
-                "value": {
-                    "value": this.researcherId
-                },
-                "operator": "eq"
-            });
-            let found = await resolvers.researchers({
-                search: nsearch
-            }, context);
-            if (found) {
-                return found[0]
+    if (helper.isNotUndefinedAndNotNull(this.researcherId)) {
+        try {
+            if (search === undefined) {
+                return resolvers.readOneResearcher({
+                    [models.researcher.idAttribute()]: this.researcherId
+                }, context)
+            } else {
+                //build new search filter
+                let nsearch = helper.addSearchField({
+                    "search": search,
+                    "field": models.researcher.idAttribute(),
+                    "value": {
+                        "value": this.researcherId
+                    },
+                    "operator": "eq"
+                });
+                let found = await resolvers.researchers({
+                    search: nsearch
+                }, context);
+                if (found) {
+                    return found[0]
+                }
+                return found;
             }
-            return found;
-        }
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
+        } catch (error) {
+            console.error(error);
+            handleError(error);
+        };
+    }
 }
 `
 
@@ -71,33 +73,35 @@ module.exports.hasOne_resolver = `
 researcher.prototype.dog = async function({
     search
 }, context) {
-    try {
-        if (search === undefined) {
-            return resolvers.readOneDog({
-                [models.dog.idAttribute()]: this.researcherId
-            }, context)
-        } else {
-            //build new search filter
-            let nsearch = helper.addSearchField({
-                "search": search,
-                "field": models.dog.idAttribute(),
-                "value": {
-                    "value": this.researcherId
-                },
-                "operator": "eq"
-            });
-            let found = await resolvers.dogs({
-                search: nsearch
-            }, context);
-            if (found) {
-                return found[0]
+    if (helper.isNotUndefinedAndNotNull(this.researcherId)) {
+        try {
+            if (search === undefined) {
+                return resolvers.readOneDog({
+                    [models.dog.idAttribute()]: this.researcherId
+                }, context)
+            } else {
+                //build new search filter
+                let nsearch = helper.addSearchField({
+                    "search": search,
+                    "field": models.dog.idAttribute(),
+                    "value": {
+                        "value": this.researcherId
+                    },
+                    "operator": "eq"
+                });
+                let found = await resolvers.dogs({
+                    search: nsearch
+                }, context);
+                if (found) {
+                    return found[0]
+                }
+                return found;
             }
-            return found;
-        }
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
+        } catch (error) {
+            console.error(error);
+            handleError(error);
+        };
+    }
 }
 `
 module.exports.hasOne_model = `
@@ -131,37 +135,13 @@ module.exports.hasOne_schema = `
 `
 
 module.exports.hasMany_model = `
-transcript_countsFilterImpl({
-    search,
-    order,
-    pagination
-}){
+static associate(models) {
 
-  if (search === undefined) {
-      return models.transcript_count.readAll( {
-              "field": "individual_id",
-              "value": {
-                  "value": this.getIdValue()
-              },
-              "operator": "eq"
-          },
-          order,
-          pagination);
-  } else {
-      return models.transcript_count.readAll({
-              "operator": "and",
-              "search": [{
-                  "field": "individual_id",
-                  "value": {
-                      "value": this.getIdValue()
-                  },
-                  "operator": "eq"
-              }, search]
-          },
-          order,
-          pagination)
-  }
-}
+        individual.hasMany(models.transcript_count, {
+            as: 'transcript_counts',
+            foreignKey: 'individual_id'
+        });
+    }
 `
 
 module.exports.hasMany_resolver = `
@@ -181,38 +161,44 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-  try{
-    return this.transcript_countsFilterImpl({search, order, pagination});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    try {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+            "search": search,
+            "field": "individual_id",
+            "value": {
+                "value": this.getIdValue()
+            },
+            "operator": "eq"
+        });
+
+        return resolvers.transcript_counts({
+            search: nsearch,
+            order: order,
+            pagination: pagination
+        }, context);
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 `
 module.exports.countAssociated_model = `
-countFilteredTranscript_countsImpl({search}){
-  if (search === undefined) {
-      return models.transcript_count.countRecords( {
-              "field": "individual_id",
-              "value": {
-                  "value": this.getIdValue()
-              },
-              "operator": "eq"
-          });
-  } else {
-      return models.transcript_count.countRecords({
-              "operator": "and",
-              "search": [{
-                  "field": "individual_id",
-                  "value": {
-                      "value": this.getIdValue()
-                  },
-                  "operator": "eq"
-              }, search]
-          })
-  }
+static countRecords(search) {
+        let options = {};
+        if (search !== undefined) {
 
-}
+            //check
+            if (typeof search !== 'object') {
+                throw new Error('Illegal "search" argument type, it must be an object.');
+            }
+
+            let arg = new searchArg(search);
+            let arg_sequelize = arg.toSequelize();
+            options['where'] = arg_sequelize;
+        }
+        return super.count(options);
+    }
 `
 
 module.exports.countAssociated_resolver = `
@@ -226,54 +212,65 @@ module.exports.countAssociated_resolver = `
 individual.prototype.countFilteredTranscript_counts = function({
     search
 }, context) {
-  try{
-    return this.countFilteredTranscript_countsImpl({search});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    try {
+
+        //build new search filter
+        let nsearch = helper.addSearchField({
+            "search": search,
+            "field": "individual_id",
+            "value": {
+                "value": this.getIdValue()
+            },
+            "operator": "eq"
+        });
+
+        return resolvers.countTranscript_counts({
+            search: nsearch
+        }, context);
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 `
 
 module.exports.belongsToMany_model = `
 AuthorsFilterImpl({
-      search,
-      order,
-      pagination
-  }) {
-      let options = {};
+        search,
+        order,
+        pagination
+    }) {
+        let options = {};
 
-      if (search !== undefined) {
-          let arg = new searchArg(search);
-          let arg_sequelize = arg.toSequelize();
-          options['where'] = arg_sequelize;
-      }
+        if (search !== undefined) {
+            let arg = new searchArg(search);
+            let arg_sequelize = arg.toSequelize();
+            options['where'] = arg_sequelize;
+        }
 
-      return this.countAuthors(options).then(items => {
-          if (order !== undefined) {
-              options['order'] = order.map((orderItem) => {
-                  return [orderItem.field, orderItem.order];
-              });
-          } else if (pagination !== undefined) {
-              options['order'] = [
-                  [models.person.idAttribute(), "ASC"]
-              ];
-          }
-
-          if (pagination !== undefined) {
-              options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
-              options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
-          } else {
-              options['offset'] = 0;
-              options['limit'] = items;
-          }
-
-          if (globals.LIMIT_RECORDS < options['limit']) {
-              throw new Error(\`Request of total authorsFilter exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-          }
-          return this.getAuthors(options);
-      });
-  }
+        return this.countAuthors(options).then(items => {
+            if (order !== undefined) {
+                options['order'] = order.map((orderItem) => {
+                    return [orderItem.field, orderItem.order];
+                });
+            } else if (pagination !== undefined) {
+                options['order'] = [
+                    [models.person.idAttribute(), "ASC"]
+                ];
+            }
+            if (pagination !== undefined) {
+                options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
+                options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
+            } else {
+                options['offset'] = 0;
+                options['limit'] = items;
+            }
+            if (globals.LIMIT_RECORDS < options['limit']) {
+                throw new Error(\`Request of total authorsFilter exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
+            }
+            return this.getAuthors(options);
+        });
+    }
 `
 module.exports.belongsToMany_model_count = `
 countFilteredAuthorsImpl({

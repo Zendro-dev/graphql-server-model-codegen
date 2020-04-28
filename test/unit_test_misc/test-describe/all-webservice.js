@@ -77,35 +77,36 @@ module.exports.resolvers_book = `
 book.prototype.publisher = async function({
     search
 }, context) {
-    try {
-        if (search === undefined) {
-            return resolvers.readOnePubli_sher({
-                [models.publi_sher.idAttribute()]: this.publisher_id
-            }, context)
-        } else {
-            //build new search filter
-            let nsearch = helper.addSearchField({
-                "search": search,
-                "field": models.publi_sher.idAttribute(),
-                "value": {
-                    "value": this.publisher_id
-                },
-                "operator": "eq"
-            });
-            let found = await resolvers.publi_shers({
-                search: nsearch
-            }, context);
-            if (found) {
-                return found[0]
+    if (helper.isNotUndefinedAndNotNull(this.publisher_id)) {
+        try {
+            if (search === undefined) {
+                return resolvers.readOnePubli_sher({
+                    [models.publi_sher.idAttribute()]: this.publisher_id
+                }, context)
+            } else {
+                //build new search filter
+                let nsearch = helper.addSearchField({
+                    "search": search,
+                    "field": models.publi_sher.idAttribute(),
+                    "value": {
+                        "value": this.publisher_id
+                    },
+                    "operator": "eq"
+                });
+                let found = await resolvers.publi_shers({
+                    search: nsearch
+                }, context);
+                if (found) {
+                    return found[0]
+                }
+                return found;
             }
-            return found;
-        }
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
+        } catch (error) {
+            console.error(error);
+            handleError(error);
+        };
+    }
 }
-
 `
 
 module.exports.schema_person = `
