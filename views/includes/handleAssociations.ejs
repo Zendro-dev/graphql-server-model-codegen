@@ -8,22 +8,18 @@
 <%- nameLc -%>.prototype.handleAssociations = async function(input, context){
   try {
     let promises = [];
-
-    <% ['add','remove'].forEach(op => { %>
-      <%for(let i=0; i < associations["to_many"].length; i++){-%>
-        if (helper.isNonEmptyArray(input.<%-op%><%=associations["to_many"][i].name_cp-%>)) {
-          promises.push(this.<%-op%><%=associations["to_many"][i].name_cp-%>(input, context));
-        }
-      <%}-%>
-
+    <% ['add','remove'].forEach(op => { -%>
+      <% to_manyAssociations = associations["to_many"].concat(associations["to_many_through_sql_cross_table"])-%>
+      <%for(let i=0; i < to_manyAssociations.length; i++){-%>
+        if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>)) {
+          promises.push(this.<%-op%><%=to_manyAssociations[i].name_cp-%>(input, context));
+        }<%}-%>    
       <%for(let i=0; i < associations["to_one"].length; i++){-%>
         if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=associations["to_one"][i].name_cp-%>)) {
           promises.push(this.<%-op%><%=associations["to_one"][i].name_cp-%>(input, context));
         }
       <%}-%>
-    <%}); %> 
-      
-
+    <%}) -%>  
     await Promise.all(promises);
   } catch (error) {
       throw error

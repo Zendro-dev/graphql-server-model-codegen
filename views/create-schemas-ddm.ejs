@@ -23,12 +23,6 @@ module.exports = `
     """
     @search-request
     """
-    <%=key%>Filter(search: search<%= associations.schema_attributes.many[key][1] -%>Input, order: [ order<%= associations.schema_attributes.many[key][1] -%>Input ], pagination: paginationInput): [<%= associations.schema_attributes.many[key][0]-%>]
-
-
-    """
-    @search-request
-    """
     <%=key%>Connection(search: search<%= associations.schema_attributes.many[key][1] -%>Input, order: [ order<%= associations.schema_attributes.many[key][1] -%>Input ], pagination: paginationCursorInput): <%= associations.schema_attributes.many[key][1]-%>Connection
 
     """

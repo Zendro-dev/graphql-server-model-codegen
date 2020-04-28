@@ -147,27 +147,29 @@ const associationArgsDef = {
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
-    try{
-      if (search === undefined) {
-        return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
-      } else {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-          "search": search,
-          "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
-          "value": {"value": this.<%= associations_one[i].targetKey -%> },
-          "operator": "eq"
-        });
-        let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
-        if (found) {
-          return found[0]
+    if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
+      try{
+        if (search === undefined) {
+          return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+        } else {
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search,
+            "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
+            "value": {"value": this.<%= associations_one[i].targetKey -%> },
+            "operator": "eq"
+          });
+          let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+          if (found) {
+            return found[0]
+          }
+          return found;
         }
-        return found;
-      }
-    }catch(error){
-      console.error(error);
-      handleError(error);
-    };
+      }catch(error){
+        console.error(error);
+        handleError(error);
+      };
+    }  
   }
 <%}-%>
 
@@ -284,9 +286,9 @@ const associationArgsDef = {
  * model.prototype.removeAssoc()
  */
 -%>
-<%- include('./includes/handleAssociations'); %>
-<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); %> 
-<%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); %>
+<%- include('./includes/handleAssociations'); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%> 
+<%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); -%>
 
 <%# 
 /**
