@@ -1107,7 +1107,7 @@ describe('External ids', function(){
   })
 });
 
-xdescribe('Extend api model layer associations', function(){
+describe('Extend api model layer associations', function(){
   let data_test = require('./unit_test_misc/test-describe/extended-api-model-layer');
 
   it('Add to-one association foreign key in source', async function(){
@@ -1126,32 +1126,6 @@ xdescribe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Set foreign key in source', async function(){
-    let opts = funks.getOptions(models.transcript_count);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.set_individual_id.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-
-  it('Add to-many association foreign key in target', async function(){
-    let opts = funks.getOptions(models.individual);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.to_add_transcript_counts.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-
-  it('Add to-many association trough table', async function(){
-    let opts = funks.getOptions(models.book_authors);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.to_add_trough_table.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
   it('Remove to-one association foreign key in source', async function(){
     let opts = funks.getOptions(models.transcript_count);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -1160,62 +1134,15 @@ xdescribe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Remove to-many association foreign key in target', async function(){
-    let opts = funks.getOptions(models.individual);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.remove_transcript_counts.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
   it('Remove to-one association foreign key in target', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.remove_unique_pet.replace(/\s/g, '');
+    //console.log(generated_model);
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Remove to-many association trough table', async function(){
-    let opts = funks.getOptions(models.book_authors);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.remove_trough_table.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-
-  it('Cenz server - Add to-one association foreign key in source', async function(){
-    let opts = funks.getOptions(models_cenz.dog_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_add_owner.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Cenz server - Set foreign key in source', async function(){
-    let opts = funks.getOptions(models_cenz.dog_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_set_personId.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Cenz server - Add to-one association foreign key in target', async function(){
-    let opts = funks.getOptions(models_cenz.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_add_unique_pet.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Cenz server - Add to-many association ', async function(){
-    let opts = funks.getOptions(models_cenz.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_add_works.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
 });
 
 xdescribe('Create and update transaction', function(){
