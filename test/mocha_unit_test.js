@@ -908,7 +908,7 @@ describe('Cursor based pagination', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Connection read all resolver - book', async function(){
+  it('Connection read all resolver - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -916,7 +916,7 @@ describe('Cursor based pagination', function(){
     expect(g_resolver, 'No method found').to.have.string(test_resolver);
   });
 
-  xit('Connection read all model - book', async function(){
+  it('Connection read all model - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -932,7 +932,7 @@ describe('Cursor based pagination', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Association connection resolver - person', async function(){
+  it('Association connection resolver - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -940,7 +940,7 @@ describe('Cursor based pagination', function(){
     expect(g_resolver, 'No method found').to.have.string(test_resolver);
   });
 
-  xit('Many-to-many connection model - person', async function(){
+  it('Many-to-many connection model - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -956,7 +956,7 @@ describe('Cursor based pagination', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('Many to many association connection in cenz server  - person-book', async function(){
+  it('Many to many association connection in cenz server  - person-book', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
