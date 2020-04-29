@@ -1062,7 +1062,7 @@ describe('To-one associations editing', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('AddOne with to-one association - person', async function(){
+  it('AddOne with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -1070,7 +1070,7 @@ describe('To-one associations editing', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('Update with to-one association - person', async function(){
+  it('Update with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
