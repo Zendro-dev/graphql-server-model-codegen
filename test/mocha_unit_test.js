@@ -658,6 +658,7 @@ describe('Decouple association from resolvers', function(){
 
   let data_test = require('./unit_test_misc/test-describe/decouple-associations');
 
+  // Check for changes!
   it('BelongsTo implementation in model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -674,6 +675,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
+  // Check for changes!
   it('HasOne implementation in model - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -872,6 +874,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  // Check for changes!
   it('Many to many association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
@@ -880,6 +883,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  // Check for changes!
   it('Many to many count association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
@@ -956,6 +960,7 @@ describe('Cursor based pagination', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  // Check for changes!
   it('Many to many association connection in cenz server  - person-book', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
@@ -1025,6 +1030,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
+  // Check for changes!
   it('To-many association distributed data model- person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
@@ -1033,6 +1039,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
+  // Check for changes!
   it('To-one association distributed data model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
@@ -1041,14 +1048,6 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  /*it('To-many association distributed data model- person', async function(){
-    let opts = funks.getOptions(models_distributed.person_ddm);
-    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.person_ddm_count_association.replace(/\s/g, '');
-    console.log(generated_adapter);
-    //expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
-  });*/
 });
 
 describe('To-one associations editing', function(){
@@ -1139,7 +1138,6 @@ describe('Extend api model layer associations', function(){
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.remove_unique_pet.replace(/\s/g, '');
-    //console.log(generated_model);
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
