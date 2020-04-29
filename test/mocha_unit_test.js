@@ -1221,7 +1221,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('readById - peopleLocal', async function(){
+  it('readById - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1229,7 +1229,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('addOne - peopleLocal', async function(){
+  it('addOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1237,7 +1237,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('count - peopleLocal', async function(){
+  it('count - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1245,7 +1245,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('readAllCursor - peopleLocal', async function(){
+  it('readAllCursor - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1253,7 +1253,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('deleteOne - peopleLocal', async function(){
+  it('deleteOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1261,30 +1261,13 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('updateOne - peopleLocal', async function(){
+  it('updateOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.updateOne.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
-
-  xit('addAssociation - peopleLocal', async function(){
-    let opts = funks.getOptions(models_distributed.person_adapter_sql);
-    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.addWorks.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
-  });
-
-  xit('removeAssociation - peopleLocal', async function(){
-    let opts = funks.getOptions(models_distributed.person_adapter_sql);
-    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.removeWorks.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
-  });
-
 
   it('stripAssociations - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
@@ -1310,19 +1293,11 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('type - peopleLocal', async function(){
+  it('type - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.type.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
-  });
-
-  xit('targetKey - book ddm', async function(){
-    let opts = funks.getOptions(models_distributed.book_ddm_association);
-    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.targetKey_ddm.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
 
