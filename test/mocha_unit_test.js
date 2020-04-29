@@ -1145,7 +1145,7 @@ describe('Extend api model layer associations', function(){
 
 });
 
-xdescribe('Create and update transaction', function(){
+describe('Create and update transaction', function(){
   let data_test = require('./unit_test_misc/test-describe/transaction-create-update');
   it('Update - transcript_count', async function(){
     let opts = funks.getOptions(models.transcript_count);
