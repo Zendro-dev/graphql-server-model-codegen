@@ -256,8 +256,6 @@ getOnlyDescriptionAttributes = function(attributes){
     return only_description;
 }
 
-
-
 /**
  * writeSchemaCommons - Writes a 'commons.js' file into the given directory. This file contains
  * general parts of the graphql schema that are common for all models.
@@ -333,7 +331,6 @@ writeSchemaCommons = function(dir_write){
     throw e;
   }
 };
-
 
 /**
  * writeIndexModelsCommons - Writes a 'index.js' file of all models stored inside the given directory. This file
@@ -454,8 +451,6 @@ writeIndexResolvers = async function(dir_write, models){
     console.log(e);
     throw e;
   });
-
-
 }
 
 /**
@@ -473,8 +468,6 @@ convertToType = function(many, model_name){
 
   return model_name;
 };
-
-
 
 /**
  * getOptions - Creates object with all extra info and with all data model info.
@@ -496,7 +489,7 @@ module.exports.getOptions = function(dataModel){
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
-      associationsArguments: module.exports.parseAssociations(dataModel.associations),
+      associationsArguments: module.exports.parseAssociations(dataModel),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definitionObj : dataModel,
@@ -524,7 +517,12 @@ module.exports.getOptions = function(dataModel){
   return opts;
 };
 
-
+/**
+ * validateJsonFile - Does semantic validations on model options object 'opts' (EJS options).
+ *
+ * @param  {object} opts    Object with EJS options.
+ * @return {object}         Object 'pass' status & existing errors array.
+ */
 validateJsonFile =  function(opts){
   let check = {
     pass : true,
@@ -545,116 +543,150 @@ validateJsonFile =  function(opts){
   return check;
 }
 
-  getSqlType = function(association, model_name){
-    if(association.type === 'to_one' && association.keyIn !== association.target){
-      return 'belongsTo';
-    }else if(association.type === 'to_one' && association.keyIn === association.target){
-      return 'hasOne';
-    }else if(association.type === 'to_many' && association.hasOwnProperty('sourceKey')){
-      return 'belongsToMany';
-    }else if(association.type === 'to_many' && association.keyIn === association.target){
-      return 'hasMany';
-    }
-  }
-
-  getEditableAssociations = function(associations) {
-    let editableAssociations = [];
-    associations['to_one'].forEach(association => {
-      if (association.keyIn !== association.target){
-        editableAssociations.push(association);
-      }
-    })
-    return editableAssociations;
-  }
-
-  getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
-    let editable_attributes = {};
-    let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
-    for(let attrib in attributes ){
-      if(!target_keys.includes(attrib) && attrib !== idAttribute){
-        editable_attributes[ attrib ] = attributes[attrib];
-      }
-    }
-    return editable_attributes;
-  }
-
-
+/**
+ * validateAssociation - Does semantic validations on associations options object 
+ * 'association' related to 'model' (EJS options).
+ *
+ * @param  {object} dataModel       Object with model EJS options.
+ * @param  {object} association Object with association EJS options.
+ * @return {boolean | throw}    If no errors, this function returns true, otherwise 
+ *                              throws an error.
+ */
+validateAssociation = function(dataModel, association) {
   /**
-   * parseAssociations - Parse associations of a given data model.
-   * Classification of associations will be accordingly to the type of association and storage type of target model.
-   *
-   * @param  {object} associations Description of each association
-   * @return {object}              Object containing explicit information needed for generating files with templates.
+   * Check: 'generic' model associations should have one of following association types: 
+   * - generic_to_one
+   * - generic_to_many.  
    */
-    module.exports.parseAssociations = function(associations){
+  if(dataModel.storageType === 'generic') {
+    switch(association.type) {
+      case 'generic_to_one':
+      case 'generic_to_many':
+        //ok
+        break;
 
-      associations_info = {
-        "schema_attributes" : {
-          "many" : {},
-          "one" : {}
-        },
-        //"mutations_attributes" : {},
-        "to_one": [],
-        "to_many": [],
-        "to_many_through_sql_cross_table": [],
-        foreignKeyAssociations: {},
-        associations: []
+      default:
+        //wrong type
+        console.error(colors.red(`Error: Not valid association type, for 'generic' model, associations should be one of: 'generic_to_one' | 'generic_to_many', but got: '${association.type}' `));
+        throw new Error('Not valid association type.')
+    }
+  }
+  return true;
+}
 
-      };
-  
-      if(associations!==undefined){
-        Object.entries(associations).forEach(([name, association]) => {
-            association.targetStorageType = association.targetStorageType.toLowerCase();
-            associations_info.foreignKeyAssociations[name] = association.targetKey;
-            let type = association.type;
-            associations_info.associations.push(association);
-            let holdsTheForeignKey = false;
-  
-            //if(associations_type["many"].includes(association.type) )
-            if(association.type === 'to_many') {
-              //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
-              associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
-            //}else if(associations_type["one"].includes(association.type))
-            } else if(association.type === 'to_one') {
-              associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
-              holdsTheForeignKey = true;
-            } else if(association.type === 'to_many_through_sql_cross_table') {
-              if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
-                console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
-              }
-              associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
-            } else { 
-              console.error(colors.red("Association type "+ association.type + " not supported."));
-            }
-  
-            let assoc = association;
-            assoc["name"] = name;
-            assoc["name_lc"] = uncapitalizeString(name);
-            assoc["name_cp"] = capitalizeString(name);
-            assoc["target_lc"] = uncapitalizeString(association.target);
-            assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
-            assoc["target_pl"] = inflection.pluralize(association.target);
-            assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
-            assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
-            assoc["targetKey"] = association.targetKey;
-            if(association.keyIn){
-                assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
-            }
-            assoc["holdsForeignKey"] = holdsTheForeignKey;
-  
-  
-            associations_info[type].push(assoc);
-            //associations_info[type].push(assoc);
-          });
-  
+getSqlType = function(association, model_name){
+  if(association.type === 'to_one' && association.keyIn !== association.target){
+    return 'belongsTo';
+  }else if(association.type === 'to_one' && association.keyIn === association.target){
+    return 'hasOne';
+  }else if(association.type === 'to_many' && association.hasOwnProperty('sourceKey')){
+    return 'belongsToMany';
+  }else if(association.type === 'to_many' && association.keyIn === association.target){
+    return 'hasMany';
+  }
+}
+
+getEditableAssociations = function(associations) {
+  let editableAssociations = [];
+  associations['to_one'].forEach(association => {
+    if (association.keyIn !== association.target){
+      editableAssociations.push(association);
+    }
+  })
+  return editableAssociations;
+}
+
+getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
+  let editable_attributes = {};
+  let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
+  for(let attrib in attributes ){
+    if(!target_keys.includes(attrib) && attrib !== idAttribute){
+      editable_attributes[ attrib ] = attributes[attrib];
+    }
+  }
+  return editable_attributes;
+}
+
+/**
+ * parseAssociations - Parse associations of a given data model.
+ * Classification of associations will be accordingly to the type of association and storage type of target model.
+ *
+ * @param  {object} dataModel    Object parsed from JSON model definition. Contains associations.
+ * @return {object}              Object containing explicit information needed for generating files with templates.
+ */
+module.exports.parseAssociations = function(dataModel){
+  let associations = dataModel.associations;
+  associations_info = {
+    "schema_attributes" : {
+      "many" : {},
+      "one" : {}
+    },
+    //"mutations_attributes" : {},
+    "to_one": [],
+    "to_many": [],
+    "to_many_through_sql_cross_table": [],
+    "generic_to_one": [],
+    "generic_to_many": [],
+    foreignKeyAssociations: {},
+    associations: []
+  };
+
+  if(associations!==undefined){
+    Object.entries(associations).forEach(([name, association]) => {
+        association.targetStorageType = association.targetStorageType.toLowerCase();
+        associations_info.foreignKeyAssociations[name] = association.targetKey;
+        let type = association.type;
+        associations_info.associations.push(association);
+        let holdsTheForeignKey = false;
+
+        // Checks (& throw errors)
+        validateAssociation(dataModel, association);
+        
+        // Set: schema_attributes, holdsTheForeignKey
+        if(association.type === 'to_many') {
+          //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
+          associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+        } else if(association.type === 'to_one') {
+          associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+          holdsTheForeignKey = true;
+        } else if(association.type === 'to_many_through_sql_cross_table') {
+          if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
+            console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
+          }
+          associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+        } else if(association.type === 'generic_to_many'){ 
+          //same as 'to_many'
+          associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];              
+        } else if(association.type === 'generic_to_one') {
+          //same as 'to_one'
+          associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+          holdsTheForeignKey = true;
+        } else {
+          console.error(colors.red("Association type "+ association.type + " not supported."));
         }
-        associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
-        return associations_info;
-      };
 
+        let assoc = association;
+        assoc["name"] = name;
+        assoc["name_lc"] = uncapitalizeString(name);
+        assoc["name_cp"] = capitalizeString(name);
+        assoc["target_lc"] = uncapitalizeString(association.target);
+        assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
+        assoc["target_pl"] = inflection.pluralize(association.target);
+        assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
+        assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
+        assoc["targetKey"] = association.targetKey;
+        if(association.keyIn){
+            assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
+        }
+        assoc["holdsForeignKey"] = holdsTheForeignKey;
+        //push
+        associations_info[type].push(assoc);
+      });
 
-
-
+    }
+    associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
+    return associations_info;
+  };
 
 /**
  * generateAssociationsMigrations - Create files for migrations of associations between models. It could be either
@@ -750,14 +782,17 @@ generateSections = async function(sections, opts, dir_write) {
       //resolvers
       case 'resolvers':
       case 'resolvers-ddm':
+      case 'resolvers-generic':
       //models
       case 'models':  
       case 'models-webservice':
       case 'models-cenz':
       case 'distributed-model':
+      case 'models-generic':  
       //adapters
       case 'sql-adapter':
       case 'cenz-adapters':
+      case 'generic-adapter':
         file_name = dir_write + '/'+ section.dir +'/' + section.fileName + '.js';
         break;
       //migrations
@@ -839,7 +874,7 @@ getStorageType = function(dataModel) {
         case 'generic':
         //adapters
         case 'sql-adapter':
-        case 'ddm-adapter':
+        case 'ddm-adapter': 
         case 'cenzontle-webservice-adapter':
         case 'generic-adapter':
           //ok
@@ -848,7 +883,7 @@ getStorageType = function(dataModel) {
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`)); 
           break;
       }
     }
@@ -860,7 +895,6 @@ getStorageType = function(dataModel) {
     return "";
   }
 }
-
 
 /** 
  * generateCode - Given a set of json files, describing each of them a data model, this
@@ -874,7 +908,7 @@ getStorageType = function(dataModel) {
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
-  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed'];
+  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed', 'models-generic'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
@@ -921,7 +955,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   /**
    * Processes each JSON file on input directory.
    */
-  let json_files = fs.readdirSync(json_dir)
+  let json_files = fs.readdirSync(json_dir);
   for(let i=0; i<json_files.length; i++)
   {
     let json_file = json_files[i];
@@ -937,21 +971,31 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       //check
       if(file_to_object === null) {
         totalExcludedFiles++;
-        return;
+        continue;
       }
     } catch(e) {
       //msg
       console.log(e);
       console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
       totalExcludedFiles++;
-      return;
+      continue;
     }
 
     //Do semantic validations on JSON object
     //to do...
 
     //Get options
-    let opts = module.exports.getOptions(file_to_object);
+    let opts = {};
+    try{
+      opts = module.exports.getOptions(file_to_object);
+    } catch(e) {
+      //error msg
+      console.log(e);
+      console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
+      totalWrongModels++;
+      totalExcludedFiles++;
+      continue;
+    }
 
     //Do semantic validations on opts
     let check = validateJsonFile(opts);
@@ -959,14 +1003,14 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       totalWrongModels++;
       totalExcludedFiles++;
 
-      //msgs
+      //error msg
       console.log("@@@ Error on model: ", colors.blue(json_file));
       check.errors.forEach( (error) =>{
         //err
         console.log("@@@", colors.red(error));
       });
       console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
-      return;
+      continue;
   
     } else { //valid model
       //done
@@ -1016,6 +1060,14 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         ]
         break;
 
+      case 'generic':
+        sections = [
+          {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers-generic', fileName: opts.nameLc},
+          {dir: 'models-generic', template: 'models-generic', fileName: opts.nameLc},
+        ]
+        break;
+
       case 'cenzontle-webservice-adapter':
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
@@ -1034,6 +1086,12 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
           {dir: 'validations',  template: 'validations',  fileName: opts.nameLc},
           {dir: 'patches', template: 'patches', fileName: opts.nameLc},
+        ]
+        break;
+
+      case 'generic-adapter':
+        sections = [
+          {dir: 'adapters', template: 'generic-adapter', fileName: opts.adapterName},
         ]
         break;
 
