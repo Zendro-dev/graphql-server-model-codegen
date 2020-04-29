@@ -969,7 +969,7 @@ describe('Cursor based pagination', function(){
 describe('Distributed data models', function(){
 
   let data_test = require('./unit_test_misc/test-describe/distributed-models');
-  xit('ReadById adapter- book', async function(){
+  it('ReadById adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -977,7 +977,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-  xit('Count Records adapter- book', async function(){
+  it('Count Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -985,7 +985,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-  xit('Read All Records adapter- book', async function(){
+  it('Read All Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1001,7 +1001,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('ReadById distributed data model- book', async function(){
+  it('ReadById distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1009,7 +1009,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('Count distributed data model- book', async function(){
+  it('Count distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1017,7 +1017,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('Read all distributed data model- book', async function(){
+  it('Read all distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1025,7 +1025,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('To-many association distributed data model- person', async function(){
+  it('To-many association distributed data model- person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1033,7 +1033,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('To-one association distributed data model- dog', async function(){
+  it('To-one association distributed data model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1041,13 +1041,14 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('To-many association distributed data model- person', async function(){
+  /*it('To-many association distributed data model- person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.person_ddm_count_association.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
-  });
+    console.log(generated_adapter);
+    //expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+  });*/
 });
 
 describe('To-one associations editing', function(){
