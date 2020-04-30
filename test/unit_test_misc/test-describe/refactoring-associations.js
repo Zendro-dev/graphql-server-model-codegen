@@ -94,3 +94,101 @@ async function validForDeletion(id, context){
   return true;
 }
 `
+
+module.exports.handle_associations = `
+/**
+ * handleAssociations - handles the given associations in the create and update case.
+ *
+ * @param {object} input   Info of each field to create the new record
+ * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ */
+accession.prototype.handleAssociations = async function(input, context) {
+    try {
+        let promises = [];
+        if (helper.isNonEmptyArray(input.addIndividuals)) {
+            promises.push(this.add_individuals(input, context));
+        }
+        if (helper.isNonEmptyArray(input.addMeasurements)) {
+            promises.push(this.add_measurements(input, context));
+        }
+        if (helper.isNotUndefinedAndNotNull(input.addLocation)) {
+            promises.push(this.add_location(input, context));
+        }
+        if (helper.isNonEmptyArray(input.removeIndividuals)) {
+            promises.push(this.remove_individuals(input, context));
+        }
+        if (helper.isNonEmptyArray(input.removeMeasurements)) {
+            promises.push(this.remove_measurements(input, context));
+        }
+        if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {
+            promises.push(this.remove_location(input, context));
+        }
+
+        await Promise.all(promises);
+    } catch (error) {
+        throw error
+    }
+}
+
+`
+
+module.exports.to_one_add =`
+/**
+ * add_location - field Mutation for to_one associations to add
+ *
+ * @param {object} input   Info of input Ids to add  the association
+ */
+accession.prototype.add_location = async function(input) {
+
+    await accession._addLocation(this.getIdValue(), input.addLocation);
+    this.locationId = input.addLocation;
+
+}
+`
+
+module.exports.to_one_remove = `
+/**
+ * remove_location - field Mutation for to_one associations to remove
+ *
+ * @param {object} input   Info of input Ids to remove  the association
+ */
+accession.prototype.remove_location = async function(input) {
+   if (input.removeLocation === this.locationId) {
+      await accession._removeLocation(this.getIdValue(), input.removeLocation);
+      this.locationId = null;
+    }
+}
+`
+
+module.exports.to_many_add = `
+/**
+ * add_individuals - field Mutation for to_many associations to add
+ *
+ * @param {object} input   Info of input Ids to add  the association
+ */
+accession.prototype.add_individuals = async function(input) {
+
+    let results = [];
+    for await (associatedRecordId of input.addIndividuals) {
+      results.push(models.individual._addAccession(associatedRecordId, this.getIdValue()));
+    }
+    await Promise.all(results);
+
+}
+`
+
+module.exports.to_many_remove = `
+/**
+ * remove_individuals - field Mutation for to_many associations to remove
+ *
+ * @param {object} input   Info of input Ids to remove  the association
+ */
+accession.prototype.remove_individuals = async function(input) {
+    let results = [];
+    for await (associatedRecordId of input.removeIndividuals) {
+        results.push(models.individual._removeAccession(associatedRecordId, this.getIdValue()));
+    }
+    await Promise.all(results);
+}
+
+`

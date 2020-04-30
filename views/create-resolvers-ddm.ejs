@@ -118,6 +118,23 @@ const associationArgsDef = {
   }
 <%}-%>
 
+<%#
+/**
+ * Mutation resolvers for associations fields.
+ *
+ * These resolvers are implemented by extended the model's protoype
+ * with methods to resolve each association related field.
+ *
+ * Methods:
+ * model.prototype.handleAssociations()
+ * model.prototype.addAssoc()
+ * model.prototype.removeAssoc()
+ */
+-%>
+<%- include('./includes/handleAssociations'); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); -%>
+
 
 /**
  * countAllAssociatedRecords - Count records associated with another given record
