@@ -17,22 +17,26 @@ describe(
         let res = itHelpers.request_graph_ql_post('{ countIndividuals }');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
+        console.log(JSON.stringify(resBody));
+
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.countIndividuals).equal(0);
     });
 
 
-    it('02. Individual add', function() {
+    xit('02. Individual add', function() {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "First") { id } }');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
+
+        console.log(JSON.stringify(resBody));
 
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.addIndividual.id).equal("1");
     });
 
 
-    it('03. Individual update', function() {
+    xit('03. Individual update', function() {
 
         let res = itHelpers.request_graph_ql_post('mutation { updateIndividual(id: 1, name: "FirstToSecondUpdated") {id name} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -48,7 +52,7 @@ describe(
         })
     });
 
-    it('04. Individual add one more and find both', function() {
+    xit('04. Individual add one more and find both', function() {
 
         itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Second") {id} }');
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
@@ -60,7 +64,7 @@ describe(
     });
 
 
-    it('05. Individual read one', function() {
+    xit('05. Individual read one', function() {
 
         let res = itHelpers.request_graph_ql_post('{ readOneIndividual(id : 2) { id name } }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -77,7 +81,7 @@ describe(
 
     });
 
-    it('06. Individual search with like', function() {
+    xit('06. Individual search with like', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, value:{value:"%Second%"}, operator:like}) {name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -87,7 +91,7 @@ describe(
 
     });
 
-    it('07. Individual paginate', function() {
+    xit('07. Individual paginate', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(pagination:{limit:1}) {id name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -97,7 +101,7 @@ describe(
 
     });
 
-    it('08. Individual sort', function() {
+    xit('08. Individual sort', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(pagination: {limit:2}, order: [{field: name, order: DESC}]) {name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -121,6 +125,9 @@ describe(
 
         for(let i = 0; i < individuals.length; i++){
             res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
+            let resBody = JSON.parse(res.body.toString('utf8'));
+
+            console.log(JSON.stringify(resBody));
             expect(res.statusCode).to.equal(200);
         }
 
@@ -142,7 +149,7 @@ describe(
     });
 
 
-    it('11. TranscriptCount add', function() {
+    xit('11. TranscriptCount add', function() {
 
         let res = itHelpers.request_graph_ql_post('mutation ' +
             '{ addTranscript_count(gene: "Gene A", ' +
@@ -157,7 +164,7 @@ describe(
     });
 
 
-    it('12. TranscriptCount update', function() {
+    xit('12. TranscriptCount update', function() {
 
         let res = itHelpers.request_graph_ql_post('mutation { updateTranscript_count(id: 1, gene: "Gene B") {id gene} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -174,7 +181,7 @@ describe(
 
     });
 
-    it('13. TranscriptCount add one more and find both', function() {
+    xit('13. TranscriptCount add one more and find both', function() {
 
         itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene C", ' +
                                                                        'variable: "RPKM", ' +
@@ -189,7 +196,7 @@ describe(
     });
 
 
-    it('14. TranscriptCount read one', function() {
+    xit('14. TranscriptCount read one', function() {
 
         let res = itHelpers.request_graph_ql_post('{readOneTranscript_count(id : 2) { id gene variable count tissue_or_condition}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -209,7 +216,7 @@ describe(
 
     });
 
-    it('15. TranscriptCount search with like', function() {
+    xit('15. TranscriptCount search with like', function() {
 
         let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:{value:"%ene%"},operator: like}) {gene}}`);
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -219,7 +226,7 @@ describe(
 
     });
 
-    it('16. TranscriptCount paginate', function() {
+    xit('16. TranscriptCount paginate', function() {
 
         let res = itHelpers.request_graph_ql_post('{transcript_counts(pagination:{limit:1}) {id gene}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -229,7 +236,7 @@ describe(
 
     });
 
-    it('17. TranscriptCount sort', function() {
+    xit('17. TranscriptCount sort', function() {
 
         let res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination: {limit:2}, order: [{field: gene, order: DESC}]) {gene} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -245,7 +252,7 @@ describe(
         })
     });
 
-    it('18. Extended search and regular expressions', async () => {
+    xit('18. Extended search and regular expressions', async () => {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazanaza") { id name } }');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
@@ -495,7 +502,7 @@ describe(
 
     // Test belongs-to relation between transcript_count and individual data
     // model:
-    it('19. TranscriptCount assign new Individual', function() {
+    xit('19. TranscriptCount assign new Individual', function() {
 
         // Create Plant to subjected to RNA-Seq analysis from which the transcript_counts result
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "IncredibleMaizePlantOne") { id name } }');
@@ -544,7 +551,7 @@ describe(
       });
   });
 
-  it('21. Limit check', function() {
+  xit('21. Limit check', function() {
     let res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
     expect(res.statusCode).to.equal(200);
     res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
@@ -660,7 +667,7 @@ describe(
             });
         });
 
-        it('03. Webservice associate new TranscriptCount', function() {
+        xit('03. Webservice associate new TranscriptCount', function() {
             let res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "new_gene", ' +
                                                                                      'addAminoacidsequence: 63165) { id aminoacidsequence{id }} }');
             let resBody = JSON.parse(res.body.toString('utf8'));
@@ -725,7 +732,7 @@ describe(
 
         });
 
-        it('02. Validate on update', function () {
+        xit('02. Validate on update', function () {
 
             // Add correct record
             let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "ToBeUpdated") { id } }');
@@ -741,7 +748,7 @@ describe(
             expect(resBody).to.have.property('errors');
         });
 
-        it('03. Validate on delete', function () {
+        xit('03. Validate on delete', function () {
 
             // Add a record with a special name that can't be deleted
             let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Undeletable") { id } }');
@@ -799,7 +806,7 @@ describe(
   describe(
         'Date types test',
         function() {
-          it('01. Create and retrieve instance with date type', function() {
+          xit('01. Create and retrieve instance with date type', function() {
 
               // Create Plant to subjected to RNA-Seq analysis from which the transcript_counts result
               let res = itHelpers.request_graph_ql_post('mutation { addSequencingExperiment(name: "Experiment 1" start_date: "2007-12-03" end_date: "2010-12-03") {id name  start_date} }');
