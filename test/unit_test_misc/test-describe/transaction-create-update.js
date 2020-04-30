@@ -8,6 +8,9 @@ static updateOne(input) {
                         let item = await super.findByPk(input[this.idAttribute()], {
                             transaction: t
                         });
+			if (item === null) {
+                            throw new Error(\`Record with ID = \${id} does not exist\`);
+                        }
                         let updated = await item.update(input, {
                             transaction: t
                         });
