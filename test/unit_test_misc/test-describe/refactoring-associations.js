@@ -192,3 +192,30 @@ accession.prototype.remove_individuals = async function(input) {
 }
 
 `
+
+module.exports.add_assoc_ddm_model = `
+/**
+* _addLocation - field Mutation (model-layer) for to_one associationsArguments to add
+*
+* @param {Id}   accession_id   IdAttribute of the root model to be updated
+* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+*/
+static async _addLocation(accession_id, locationId) {
+let responsibleAdapter = this.adapterForIri(accession_id);
+return await adapters[responsibleAdapter]._addLocation(accession_id, locationId);
+
+}
+`
+
+module.exports.remove_assoc_ddm_model = `
+/**
+ * _removeLocation - field Mutation (model-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   accession_id   IdAttribute of the root model to be updated
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static async _removeLocation(accession_id, locationId) {
+  let responsibleAdapter = this.adapterForIri(accession_id);
+  return await adapters[responsibleAdapter]._removeLocation(accession_id, locationId);
+}
+`

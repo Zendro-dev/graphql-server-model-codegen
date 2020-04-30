@@ -1754,5 +1754,21 @@ describe('Refactor associations - add - remove', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+  it('add association model layer - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-distributed-model', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_ddm_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove association model layer - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-distributed-model', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_ddm_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
 
 });
