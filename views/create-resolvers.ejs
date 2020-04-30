@@ -571,9 +571,9 @@ module.exports = {
         let authorization = await checkAuthorization(context, '<%- name -%>', 'create');
         if (authorization === true) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-            helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
-            helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-            /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)
             let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized);
             await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
             return created<%- nameCp -%>;
@@ -641,9 +641,9 @@ module.exports = {
         let authorization = await checkAuthorization(context, '<%- name -%>', 'update');
         if (authorization === true) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-            helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
-            helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-            /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized);
             await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
             return updated<%- nameCp -%>;

@@ -18,9 +18,9 @@
   */
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input) {
     let results = [];
-    input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.forEach(associatedRecordId => {
+    for await(associatedRecordId of input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>) {
       results.push(models.<%-associationsArguments["to_many"][i].target_lc-%>._<%- op %><%- nameCp -%> (associatedRecordId, this.getIdValue()));
-    })
+    }
     await Promise.all(results);
   }
 
