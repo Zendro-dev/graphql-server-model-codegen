@@ -1679,6 +1679,7 @@ describe('Refactor associations - delete', function(){
   it('count associations - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    //console.log(generated_resolver);
     let g_resolver = generated_resolver.replace(/\s/g, '');
     let test_resolver = data_test.count_associations.replace(/\s/g, '');
     expect(g_resolver).to.have.string(test_resolver);
@@ -1708,4 +1709,65 @@ describe('Refactor associations - delete', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+});
+
+describe('Refactor associations - add / update', function(){
+  let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
+
+  it('handleAssociations - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.handleAssociations.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add_location to_one - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_to_one_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove_location to_one - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_to_one_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add_individuals to_many - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_to_many_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove_individuals to_many - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_to_many_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('_addLocation - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-models', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test._addAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('_removeLocation - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-models', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+  
 });
