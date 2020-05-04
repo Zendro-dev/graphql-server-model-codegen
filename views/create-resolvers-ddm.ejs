@@ -11,6 +11,7 @@ const {handleError} = require('../utils/errors');
 const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
+const globals = require('../config/globals');
 
 <% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
 const associationArgsDef = {
@@ -118,7 +119,7 @@ const associationArgsDef = {
   }
 <%}-%>
 
-
+<%- include('./includes/record-limit-helpers'); -%>
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *

@@ -17,8 +17,6 @@ describe(
         let res = itHelpers.request_graph_ql_post('{ countIndividuals }');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
-        console.log(JSON.stringify(resBody));
-
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.countIndividuals).equal(0);
     });
@@ -28,8 +26,6 @@ describe(
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "First") { id } }');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
-
-        console.log(JSON.stringify(resBody));
 
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.addIndividual.id).equal("1");
@@ -118,7 +114,7 @@ describe(
 
     });
 
-    xit('09. Individual delete all', function() {
+    it('09. Individual delete all', function() {
 
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
@@ -127,7 +123,6 @@ describe(
             res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
             let resBody = JSON.parse(res.body.toString('utf8'));
 
-            console.log(JSON.stringify(resBody));
             expect(res.statusCode).to.equal(200);
         }
 
@@ -502,7 +497,7 @@ describe(
 
     // Test belongs-to relation between transcript_count and individual data
     // model:
-    xit('19. TranscriptCount assign new Individual', function() {
+    it('19. TranscriptCount assign new Individual', function() {
 
         // Create Plant to subjected to RNA-Seq analysis from which the transcript_counts result
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "IncredibleMaizePlantOne") { id name } }');
@@ -520,7 +515,7 @@ describe(
                                                                              `addIndividual: ${plantId}) ` +
                                                                              '{id gene individual { id name } } }');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
-
+    
         expect(res.statusCode).to.equal(200);
         expect(tcResBody).to.deep.equal({
             data: {
@@ -539,7 +534,7 @@ describe(
   xit('20. TranscriptCount delete all', function() {
 
       let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-      let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
+      let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
 
       for(let i = 0; i < transcript_counts.length; i++){
           res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
@@ -551,7 +546,7 @@ describe(
       });
   });
 
-  xit('21. Limit check', function() {
+  it('21. Limit check', function() {
     let res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
     expect(res.statusCode).to.equal(200);
     res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
@@ -667,7 +662,7 @@ describe(
             });
         });
 
-        xit('03. Webservice associate new TranscriptCount', function() {
+        it('03. Webservice associate new TranscriptCount', function() {
             let res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "new_gene", ' +
                                                                                      'addAminoacidsequence: 63165) { id aminoacidsequence{id }} }');
             let resBody = JSON.parse(res.body.toString('utf8'));
