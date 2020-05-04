@@ -204,8 +204,8 @@ module.exports = class <%- adapterName -%>{
    * is stored in this model and therefore this adapter is the responsible to update the foreign key.
    */
   -%>
-  <%- include('./includes/create-cenz-adapter-fields-mutations', {op: "add"}); %>
-  <%- include('./includes/create-cenz-adapter-fields-mutations', {op: "remove"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
 
 
   static bulkAddCsv(context) {

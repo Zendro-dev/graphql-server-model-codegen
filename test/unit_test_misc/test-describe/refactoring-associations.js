@@ -221,11 +221,42 @@ static async _removeLocation(accession_id, locationId) {
 `
 
 module.exports.to_one_remove_sql_adapter =  `
-
+/**
+ * _removeLocation - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   accession_id   IdAttribute of the root model to be updated
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static async _removeLocation(accession_id, locationId) {
+    let updated = await sequelize.transaction(async transaction => {
+        try {
+          return super.update({locationId: null},{where: {accession_id: accession_id}}, {transaction: transaction})
+        } catch (error) {
+            throw error;
+        }
+    });
+    return updated;
+}
 `
 
 module.exports.to_one_add_sql_adapter = `
+/**
+* _addLocation - field Mutation (adapter-layer) for to_one associationsArguments to add
+*
+* @param {Id}   accession_id   IdAttribute of the root model to be updated
+* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+*/
+static async _addLocation(accession_id, locationId) {
 
+   let updated = await sequelize.transaction(async transaction => {
+       try {
+         return super.update({locationId: locationId},{where: {accession_id: accession_id}}, {transaction: transaction})
+       } catch (error) {
+           throw error;
+       }
+   });
+   return updated;
+}
 `
 
 module.exports.to_one_add_cenz_adapter = `
