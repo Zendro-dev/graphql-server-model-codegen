@@ -27,7 +27,6 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
  * name (key) with the name of the corresponding association (value).
  */
 -%> 
-
 <% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>

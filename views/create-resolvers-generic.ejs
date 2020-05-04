@@ -26,8 +26,8 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
  * associationArgsDef is an object that relates each add-association methods 
  * name (key) with the name of the corresponding association (value).
  */
--%> 
-<% associations_temp = associationsArguments["generic_to_one"].concat(associationsArguments["generic_to_many"])-%>
+-%>
+<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%if( i == associations_temp.length - 1 ){-%>
@@ -45,21 +45,29 @@ const associationArgsDef = {
  * 
  * These resolvers are implemented by extended the model's protoype
  * with methods to resolve each association related field.
+ * 
+ * This methods are executed as default field resolvers.
  */
 -%>
+/**
+ * Section 3
+ * Query resolvers for associations fields.
+ * Implemented via prototypes on <%- nameLc -%> model layer.
+ * This methods are executed by GraphQL engine as default field resolvers.
+ */
 <%# 
 /**
  * Section 3.b
  * Query resolvers for associations fields for:
  * 
- * < generic_to_one >
+ * < to_one >
  * 
  * Methods:
  * model.prototype.assoc()
  * 
  */
 -%>
-<%let associations_one = associationsArguments["generic_to_one"]-%>
+<%let associations_one = associationsArguments["to_one"]-%>
 <% for(let i=0; i < associations_one.length; i++){ -%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
@@ -69,29 +77,15 @@ const associationArgsDef = {
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
-    if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
-      try{
-        if (search === undefined) {
-          return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
-        } else {
-          //build new search filter
-          let nsearch = helper.addSearchField({
-            "search": search,
-            "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
-            "value": {"value": this.<%= associations_one[i].targetKey -%> },
-            "operator": "eq"
-          });
-          let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
-          if (found) {
-            return found[0]
-          }
-          return found;
-        }
-      }catch(error){
-        console.error(error);
-        handleError(error);
-      };
-    }  
+    //@search should not be used here, because only one associated record can exist on a to_one association.
+    try{
+        let result = resolvers.readOne<%=associations_one[i].target_cp%>({
+        [models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context);
+        return result;
+    }catch(error){
+      console.error(error);
+      handleError(error);
+    };
   }
 <%}-%>
 
@@ -100,7 +94,7 @@ const associationArgsDef = {
  * Section 3.c
  * Query resolvers for associations fields for:
  * 
- * < generic_to_many >
+ * < to_many >
  * 
  * Methods:
  * model.prototype.assocFilter()
@@ -109,7 +103,7 @@ const associationArgsDef = {
  * 
  */
 -%>
-<% associations_temp = associationsArguments["generic_to_many"]-%>
+<% associations_temp = associationsArguments["to_many"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter - Check user authorization and return certain number, specified in pagination argument, of records
@@ -331,22 +325,53 @@ function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
  * root resolvers to resolve root Query and Mutations Types.
  */
 -%>
+/**
+ *
+ * Section 6
+ * Root resolvers.
+ *
+ */
 module.exports = {
 <%# 
 /**
  * Section 6.a
- * Root resolvers for: 
+ * Root resolvers on:
+ * <Query> type.
  * 
- * Query
- * 
- * Methods:
+ * readOneModel()
  * models()
  * modelsConnection()
- * readOneModel()
  * countModels()
- * vueTableAccession()
  */
 -%>
+  /**
+   * readOne<%- nameCp -%> - Returns a single record, the one with the specified <%- idAttribute -%> 
+   * in the <%- idAttribute -%> argument.
+   *
+   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve.
+   * @param  {object} context Provided to every resolver; holds contextual information like the resquest query and user info.
+   * @return {object}         Record with <%- idAttribute -%> requested. This record is a <%- nameLc -%> class instance,
+   * that contains resolved values on properties corresponding to scalar fields, and field-resolver functions as values on
+   * properties corresponding to object fields (@see section 3. Query resolvers for associations fields, on this file).
+   *                           
+   */
+  readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
+    return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
+      if (authorization === true) {
+        checkCountForOne(context);
+        let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
+        checkCountForOne(context);
+        context.recordsLimit = context.recordsLimit - 1;
+        return new <%- name -%>(resultRecords);
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+      console.error(error);
+      handleError( error);
+    });
+  },
+
   /**
    * <%- namePl -%> - Check user authorization and return certain number, specified in pagination argument, of records that
    * holds the condition of search argument, all of them sorted as specified by the order argument.
@@ -398,30 +423,6 @@ module.exports = {
            handleError( error);
      })
    },
-
-  /**
-   * readOne<%- nameCp -%> - Check user authorization and return one record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
-   *
-   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {object}         Record with <%- idAttribute -%> requested
-   */
-  readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
-    return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
-      if (authorization === true) {
-        checkCountForOne(context);
-        let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
-        checkCountForOne(context);
-        context.recordsLimit = context.recordsLimit - 1;
-        return resultRecords;
-      } else {
-          throw new Error("You don't have authorization to perform this action");
-      }
-    }).catch( error =>{
-          console.error(error);
-          handleError( error);
-    })
-  },
 
   /**
    * count<%-namePlCp-%> - Counts number of records that holds the conditions specified in the search argument

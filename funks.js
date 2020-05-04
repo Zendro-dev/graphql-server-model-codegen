@@ -554,23 +554,25 @@ validateJsonFile =  function(opts){
  */
 validateAssociation = function(dataModel, association) {
   /**
-   * Check: 'generic' model associations should have one of following association types: 
-   * - generic_to_one
-   * - generic_to_many.  
+   * Check: model associations should have one of following types: 
+   * - to_one
+   * - to_many
+   * - to_many_through_sql_cross_table
    */
-  if(dataModel.storageType === 'generic') {
-    switch(association.type) {
-      case 'generic_to_one':
-      case 'generic_to_many':
-        //ok
-        break;
+  switch(association.type) {
+    case 'to_one':
+    case 'to_many':
+    case 'to_many_through_sql_cross_table':
+      //ok
+      break;
 
-      default:
-        //wrong type
-        console.error(colors.red(`Error: Not valid association type, for 'generic' model, associations should be one of: 'generic_to_one' | 'generic_to_many', but got: '${association.type}' `));
-        throw new Error('Not valid association type.')
-    }
+    default:
+      //wrong association type
+      console.error(colors.red(`Error: Not valid association type, model associations should be one of: 'to_one' | 'to_many' | 'to_many_through_sql_cross_table', but got: '${association.type}'`));
+      throw new Error('Not valid association type.')
   }
+
+  //done
   return true;
 }
 
@@ -625,8 +627,6 @@ module.exports.parseAssociations = function(dataModel){
     "to_one": [],
     "to_many": [],
     "to_many_through_sql_cross_table": [],
-    "generic_to_one": [],
-    "generic_to_many": [],
     foreignKeyAssociations: {},
     associations: []
   };
@@ -654,13 +654,6 @@ module.exports.parseAssociations = function(dataModel){
             console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
           }
           associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
-        } else if(association.type === 'generic_to_many'){ 
-          //same as 'to_many'
-          associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];              
-        } else if(association.type === 'generic_to_one') {
-          //same as 'to_one'
-          associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
-          holdsTheForeignKey = true;
         } else {
           console.error(colors.red("Association type "+ association.type + " not supported."));
         }
