@@ -8,7 +8,7 @@ module.exports.to_add_individual = `
     static async _addIndividual(id, individual_id) {
         let updated = await sequelize.transaction(async transaction => {
             try {
-                return Transcript_count.update({
+                return transcript_count.update({
                     individual_id: individual_id
                 }, {
                     where: {
@@ -94,7 +94,7 @@ module.exports.remove_individual = `
     static async _removeIndividual(id, individual_id) {
         let updated = await sequelize.transaction(async transaction => {
             try {
-                return Transcript_count.update({
+                return transcript_count.update({
                     individual_id: null
                 }, {
                     where: {

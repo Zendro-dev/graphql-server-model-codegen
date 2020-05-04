@@ -208,7 +208,7 @@ module.exports.delete_one_resolver = `
     }, context) {
         return checkAuthorization(context, 'Book', 'delete').then(async authorization => {
             if (authorization === true) {
-                if (await book.validForDeletion(id, context)) {
+                if (await validForDeletion(id, context)) {
                     return book.deleteOne(id);
                 }
             } else {
