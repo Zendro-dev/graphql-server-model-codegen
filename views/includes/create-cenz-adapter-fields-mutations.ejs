@@ -1,0 +1,35 @@
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  /**
+  * _<%- op %><%-associationsArguments["to_one"][i].name_cp-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+  */
+  static _<%- op -%><%-associationsArguments["to_one"][i].name_cp-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+
+    let query = `
+          mutation
+            update<%- nameCp-%>{
+              update<%- nameCp-%>(
+                <%- idAttribute -%>:"${<%- idAttribute -%>}"
+                <%- op %><%= associationsArguments["to_one"][i].name_cp%>:"${<%-associationsArguments["to_one"][i].targetKey-%>}"
+
+              ){
+                <%- idAttribute -%>
+                <%-associationsArguments["to_one"][i].targetKey-%>
+              }
+            }`
+
+    return axios.post(remoteCenzontleURL, {query:query}).then(res => {
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.update<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
+    });
+  }
+<%}-%>

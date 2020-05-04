@@ -219,3 +219,85 @@ static async _removeLocation(accession_id, locationId) {
   return await adapters[responsibleAdapter]._removeLocation(accession_id, locationId);
 }
 `
+
+module.exports.to_one_remove_sql_adapter =  `
+
+`
+
+module.exports.to_one_add_sql_adapter = `
+
+`
+
+module.exports.to_one_add_cenz_adapter = `
+/**
+* _addLocation - field Mutation (adapter-layer) for to_one associationsArguments to add
+*
+* @param {Id}   accession_id   IdAttribute of the root model to be updated
+* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+*/
+static _addLocation(accession_id, locationId){
+
+let query = \`
+  mutation
+    updateAccession{
+      updateAccession(
+        accession_id:"\${accession_id}"
+        addLocation:"\${locationId}"
+      ){
+        accession_id
+        locationId
+      }
+    }\`
+
+    return axios.post(remoteCenzontleURL, {
+        query: query
+    }).then(res => {
+        //check
+        if (res && res.data && res.data.data) {
+            return res.data.data.updateAccession;
+        } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+}
+`
+
+module.exports.to_one_remove_cenz_adapter = `
+/**
+ * _removeLocation - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   accession_id   IdAttribute of the root model to be updated
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+
+static _removeLocation(accession_id, locationId){
+
+  let query = \`
+    mutation
+      updateAccession{
+        updateAccession(
+          accession_id:"\${accession_id}"
+          removeLocation:"\${locationId}"
+        ){
+          accession_id
+          locationId
+        }
+      }\`
+      return axios.post(remoteCenzontleURL, {
+          query: query
+      }).then(res => {
+          //check
+          if (res && res.data && res.data.data) {
+              return res.data.data.updateAccession;
+          } else {
+              throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+          }
+      }).catch(error => {
+          error['url'] = remoteCenzontleURL;
+          handleError(error);
+      });
+}
+`
