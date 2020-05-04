@@ -593,7 +593,7 @@ describe('Model Layer', function(){
     expect(g_model, 'No add one method found').to.have.string(test_model);
   })
 
-  it('Add one resolver - book', async function(){
+  it('Delete one resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
