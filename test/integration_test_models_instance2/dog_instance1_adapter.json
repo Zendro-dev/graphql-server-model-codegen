@@ -1,0 +1,21 @@
+{
+    "model" : "dog",
+    "storageType" : "cenzontle-webservice-adapter",
+    "adapterName": "dog_instance1",
+    "regex": "instance1",
+    "url": "",
+    "attributes" : {
+        "name": "String",
+      "dog_id": "String"
+    },
+    "associations": {
+      "person": {
+        "type" : "to_one",
+        "target" : "person",
+        "targetKey" : "person_id",
+        "keyIn": "dog",
+        "targetStorageType" : "distributed-data-model"
+      }
+    },
+    "internalId": "dog_id"
+  }
