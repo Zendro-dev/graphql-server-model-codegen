@@ -77,16 +77,31 @@ const associationArgsDef = {
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
-    //@search should not be used here, because only one associated record can exist on a to_one association.
-    try{
-        let result = resolvers.readOne<%=associations_one[i].target_cp%>({
-        [models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context);
-        return result;
-    }catch(error){
-      console.error(error);
-      handleError(error);
-    };
-  }
+    if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
+      try{
+        if (search === undefined) {
+          return resolvers.readOne<%=associations_one[i].target_cp%>({
+            [models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context);
+        } else {
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search,
+            "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
+            "value": {"value": this.<%= associations_one[i].targetKey -%> },
+            "operator": "eq"
+          });
+          let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+          if (found) {
+            return found[0];
+          }
+          return found;
+        }
+      }catch(error){
+        console.error(error);
+        handleError(error);
+      };
+    }
+  } 
 <%}-%>
 
 <%# 
@@ -362,7 +377,7 @@ module.exports = {
         let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
         checkCountForOne(context);
         context.recordsLimit = context.recordsLimit - 1;
-        return new <%- name -%>(resultRecords);
+        return resultRecords;
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -596,5 +611,4 @@ module.exports = {
         handleError(error);
     })
   }
-
 }
