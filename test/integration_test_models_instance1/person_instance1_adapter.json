@@ -1,0 +1,20 @@
+{
+    "model" : "person",
+    "storageType" : "sql-adapter",
+    "adapterName": "person_instance1",
+    "regex": "instance1",
+    "attributes" : {
+      "name" : "String",
+      "person_id": "String"
+    },
+    "associations": {
+      "dogs": {
+        "type" : "to_many",
+        "target" : "dog",
+        "targetKey" : "person_id",
+        "keyIn": "dog",
+        "targetStorageType" : "distributed-data-model"
+      }
+    },
+    "internalId": "person_id"
+  }

@@ -1,0 +1,19 @@
+{
+    "model" : "person",
+    "storageType" : "distributed-data-model",
+    "registry": ["person_instance1", "person_instance2"],
+    "attributes" : {
+      "name" : "String",
+      "person_id": "String"
+    },
+    "associations": {
+      "dogs": {
+        "type" : "to_many",
+        "target" : "dog",
+        "targetKey" : "person_id",
+        "keyIn": "dog",
+        "targetStorageType" : "distributed-data-model"
+      }
+    },
+    "internalId": "person_id"
+  }
