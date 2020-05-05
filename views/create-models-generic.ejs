@@ -210,19 +210,12 @@ module.exports = class <%- name -%>{
         }
 
         /*
-         * Order conditions
-         */
-        //set order to undefined, because it is already included
-        //on paginationSearch filters.
-        let paginationOrder = undefined;
-
-        /*
          * Get records
          * 
          * paginationSearch: includes order.
          *
          */
-        return <%- name -%>.readAll(paginationSearch, paginationOrder, paginationLimitOffset).then(records =>{
+        return <%- name -%>.readAll(paginationSearch, order, paginationLimitOffset).then(records =>{
           let edges = [];
           let pageInfo = {
             hasPreviousPage: false,
