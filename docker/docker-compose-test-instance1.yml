@@ -28,7 +28,7 @@ services:
       - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance1/validations:/usr/src/app/validations
       - ./integration_test_run/instance1/patches:/usr/src/app/patches
-      - ./sequelize_config.json:/usr/src/app/config/config.json
+      - ./sequelize_config_instance1.json:/usr/src/app/config/config.json
 
     ports:
       - "3000:3000"
@@ -39,8 +39,9 @@ services:
       LIMIT_RECORDS: 25
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
-     - integrationtest
-     - instance1
+      - integrationtest
+      - instance1
+
     command:
       - /bin/sh
       - -c
@@ -49,6 +50,7 @@ services:
         ./migrateDbAndStartServer.sh
 
   gql_ncbi_sim_srv1:
+    container_name: gql_ncbi_sim_srv
     depends_on:
       - gql_postgres1
       - gql_science_db_graphql_server1
@@ -66,7 +68,7 @@ services:
         BASE_URL: /aminoAcidSequence
 
     networks:
-    - instance1
+      - instance1
 
     command:
       - /bin/sh
@@ -80,7 +82,7 @@ services:
       context: .
       dockerfile: Dockerfile.postgres
     ports:
-     - 1235:5432
+     - 1235:5431
     networks:
       - instance2
 
@@ -102,7 +104,7 @@ services:
       - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance2/validations:/usr/src/app/validations
       - ./integration_test_run/instance2/patches:/usr/src/app/patches
-      - ./sequelize_config.json:/usr/src/app/config/config.json
+      - ./sequelize_config_instance2.json:/usr/src/app/config/config.json
 
     ports:
       - "3030:3030"
@@ -113,21 +115,14 @@ services:
       LIMIT_RECORDS: 25
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
-     - integrationtest
-     - instance2
+      - integrationtest
+      - instance2
     command:
       - /bin/sh
       - -c
       - |
         npm install
         ./migrateDbAndStartServer.sh
-
-    command:
-      - /bin/sh
-      - -c
-      - |
-        npm install
-        npm start
 
 networks:
   instance1:

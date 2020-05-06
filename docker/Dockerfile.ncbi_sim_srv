@@ -3,9 +3,13 @@ FROM node:11.6.0-alpine
 # Create app directory
 WORKDIR /usr/src/app
 
+# enable pre-installation of dependencies
+COPY ./ncbi_sim_srv/package.json .
+
 # Install the app dependencies
 RUN apk update && \
- apk add bash
+ apk add bash && \
+ npm install --save
 
 # Map the port
 EXPOSE 3344
