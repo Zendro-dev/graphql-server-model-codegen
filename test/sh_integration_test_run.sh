@@ -258,7 +258,6 @@ restartContainers() {
 
   # Soft down
   docker-compose -f ./docker/docker-compose-test-instance1.yml down
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml down
   # Msg
   echo -e "@@ Containers down ... ${LGREEN}done${NC}"
 
@@ -269,13 +268,11 @@ restartContainers() {
 
   # Up
   docker-compose -f ./docker/docker-compose-test-instance1.yml up -d
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml up -d
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
 
   # List
   docker-compose -f ./docker/docker-compose-test-instance1.yml ps
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml ps
 
   # Msg
   echo -e "@@ Containers restarted ... ${LGREEN}done${NC}"
@@ -296,7 +293,6 @@ cleanup() {
 
   # Hard down
   docker-compose -f ./docker/docker-compose-test-instance1.yml down -v --rmi all
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml down -v --rmi all
 
   # Delete code
   deleteGenCode
@@ -319,7 +315,6 @@ softCleanup() {
 
   # Down
   docker-compose -f ./docker/docker-compose-test-instance1.yml down
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml down
   # Msg
   echo -e "@@ Containers down ... ${LGREEN}done${NC}"
 
@@ -425,13 +420,11 @@ upContainers() {
 
   # Up
   docker-compose -f ./docker/docker-compose-test-instance1.yml up -d
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml up -d
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
 
   # List
   docker-compose -f ./docker/docker-compose-test-instance1.yml ps
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml ps
 
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
@@ -638,5 +631,4 @@ else
   echo -e "@@ Keeping containers running ... ${LGREEN}done${NC}"
   # List
   docker-compose -f ./docker/docker-compose-test-instance1.yml ps
-  #docker-compose -f ./docker/docker-compose-test-instance2.yml ps
 fi
