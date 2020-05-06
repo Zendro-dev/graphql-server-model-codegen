@@ -257,7 +257,7 @@ restartContainers() {
   echo -e "${LGRAY}@@ Restarting containers...${NC}"
 
   # Soft down
-  docker-compose -f ./docker/docker-compose-test-instance1.yml down
+  docker-compose -f ./docker/docker-compose-test.yml down
   # Msg
   echo -e "@@ Containers down ... ${LGREEN}done${NC}"
 
@@ -267,12 +267,12 @@ restartContainers() {
   echo -e "@@ Installing ... ${LGREEN}done${NC}"
 
   # Up
-  docker-compose -f ./docker/docker-compose-test-instance1.yml up -d
+  docker-compose -f ./docker/docker-compose-test.yml up -d
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
 
   # List
-  docker-compose -f ./docker/docker-compose-test-instance1.yml ps
+  docker-compose -f ./docker/docker-compose-test.yml ps
 
   # Msg
   echo -e "@@ Containers restarted ... ${LGREEN}done${NC}"
@@ -292,7 +292,7 @@ cleanup() {
   echo -e "${LGRAY}@@ Starting cleanup...${NC}"
 
   # Hard down
-  docker-compose -f ./docker/docker-compose-test-instance1.yml down -v --rmi all
+  docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
 
   # Delete code
   deleteGenCode
@@ -314,7 +314,7 @@ softCleanup() {
   echo -e "${LGRAY}@@ Starting soft cleanup...${NC}"
 
   # Down
-  docker-compose -f ./docker/docker-compose-test-instance1.yml down
+  docker-compose -f ./docker/docker-compose-test.yml down
   # Msg
   echo -e "@@ Containers down ... ${LGREEN}done${NC}"
 
@@ -419,12 +419,12 @@ upContainers() {
   echo -e "@@ Installing ... ${LGREEN}done${NC}"
 
   # Up
-  docker-compose -f ./docker/docker-compose-test-instance1.yml up -d
+  docker-compose -f ./docker/docker-compose-test.yml up -d
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
 
   # List
-  docker-compose -f ./docker/docker-compose-test-instance1.yml ps
+  docker-compose -f ./docker/docker-compose-test.yml ps
 
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
@@ -630,5 +630,5 @@ else
   # Msg
   echo -e "@@ Keeping containers running ... ${LGREEN}done${NC}"
   # List
-  docker-compose -f ./docker/docker-compose-test-instance1.yml ps
+  docker-compose -f ./docker/docker-compose-test.yml ps
 fi
