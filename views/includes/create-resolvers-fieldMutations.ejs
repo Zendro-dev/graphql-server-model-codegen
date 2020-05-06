@@ -34,13 +34,13 @@
   <% if (op === 'remove') { -%>
     <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
       if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> === this.<%-associationsArguments["to_one"][i].targetKey%>) {
-        await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].name_cp-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+        await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].target_cp-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
         this.<%-associationsArguments["to_one"][i].targetKey%> = null;
       }
     }
   <%} else { -%>
     <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
-      await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].name_cp-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+      await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].target_cp-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
       this.<%-associationsArguments["to_one"][i].targetKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>;
     }
   <%}-%>
