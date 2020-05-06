@@ -35,7 +35,7 @@ module.exports = class <%- name -%>{
   }
 
   static readById( id ){
-    let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(<%- idAttribute -%>: ${id}){<%- idAttribute -%> <%for(var key in attributes){-%>
+    let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(<%- idAttribute -%>: "${id}"){<%- idAttribute -%> <%for(var key in attributes){-%>
        <%=key %>
      <%}-%> } }`
 
