@@ -18,12 +18,12 @@
 <%}-%>
 <%for(let i=0; i < associationsArguments["to_many_through_sql_cross_table"].length; i++){-%>
   /**
-  * _<%- op %><%-associationsArguments["to_many_through_sql_cross_table"][i].target_cp-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+  * _<%- op %><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
   *
   * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
   * @param {Id}   <%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
   */
-  static async _<%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].target_cp-%>(record, <%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>){
+  static async _<%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>(record, <%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>){
     const updated = await sequelize.transaction(async (transaction) => {
     return await record.<% if (op === 'remove') { %> <%-op-%><% } else { %>set<%}%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>(<%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>, {transaction: transaction});
     });
