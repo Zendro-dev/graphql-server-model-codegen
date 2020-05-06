@@ -225,15 +225,16 @@ checkCode() {
   do
     # Check if directory exists
     if [ -d $i ]; then
+      echo -e "Code directory ${LGREEN}$i${NC} exists."
 
       # Check if directory is empty
-      if [ -n "$(ls -A ${i} 2>/dev/null)" ]; then
-        echo -e "@@ Code at: $i ... ${LGREEN}ok${NC}"
-      else
-        echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} exists but is empty!, please try -T option ... ${YEL}exit${NC}"
-        echo -e "${LGRAY}---------------------------- @@${NC}\n"
-        exit 0
-      fi
+      #if [ -n "$(ls -A ${i} 2>/dev/null)" ]; then
+      #  echo -e "@@ Code at: $i ... ${LGREEN}ok${NC}"
+      #else
+      #  echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} exists but is empty!, please try -T option ... ${YEL}exit${NC}"
+      #  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+      #  exit 0
+      #fi
     else
       echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} does not exists!, please try -T option ... ${YEL}exit${NC}"
       echo -e "${LGRAY}---------------------------- @@${NC}\n"
