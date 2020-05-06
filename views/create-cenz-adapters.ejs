@@ -111,15 +111,10 @@ module.exports = class <%- adapterName -%>{
 <%if(!defaultId){-%>
           $<%=idAttribute%>:ID! <%}-%> <%for(var key in editableAttributes){%>
           $<%=key %>:<%= editableAttributes[key]%><%}-%>
-<%for(var key in associationsArguments.schema_attributes.one){-%>
-          $add<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%><%for(var key in associationsArguments.schema_attributes.many){-%>
-          $add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]
-<%}-%>
         ){
           add<%- nameCp -%>(<%if(!defaultId){-%>
           <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){%>
-          <%=key %>:$<%= key%><%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%>
-          add<%= associationsArguments.schema_attributes.one[key][2]%>:$add<%= associationsArguments.schema_attributes.one[key][2]%><%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> add<%= associationsArguments.schema_attributes.many[key][2]%>:$add<%= associationsArguments.schema_attributes.many[key][2]%><%}-%>){
+          <%=key %>:$<%= key%><%}-%>){
             <%- idAttribute -%>
 <%for(var key in attributes){-%>
             <%=key %>
@@ -165,19 +160,11 @@ module.exports = class <%- adapterName -%>{
           mutation
             update<%- nameCp-%>(
               $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
-              $<%=key %>:<%= editableAttributes[key]%> <%}-%> <%for(var key in associationsArguments.schema_attributes.one){ %>
-              $add<%= associationsArguments.schema_attributes.one[key][2]%>:ID
-              $remove<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%>
-              $add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]
-              $remove<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%>
+              $<%=key %>:<%= editableAttributes[key]%> <%}-%>
             ){
               update<%- nameCp-%>(
                 <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
-                <%=key %>:$<%= key%> <%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%>
-                add<%= associationsArguments.schema_attributes.one[key][2]%>:$add<%= associationsArguments.schema_attributes.one[key][2]%>
-                remove<%= associationsArguments.schema_attributes.one[key][2]%>:$remove<%= associationsArguments.schema_attributes.one[key][2]%> <%}-%> <%for(var key in associationsArguments.schema_attributes.many){%>
-                add<%= associationsArguments.schema_attributes.many[key][2]%>:$add<%= associationsArguments.schema_attributes.many[key][2]%>
-                remove<%= associationsArguments.schema_attributes.many[key][2]%>:$remove<%= associationsArguments.schema_attributes.many[key][2]%> <%}%>
+                <%=key %>:$<%= key%> <%}-%>
               ){
                 <%- idAttribute -%> <%for(var key in attributes){%>
                 <%=key %> <%}%>

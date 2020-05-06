@@ -1819,4 +1819,20 @@ describe('Refactor associations - add - remove', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+  it('add one in cenzontle-webservice-adapter - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.add_one_cenz_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('update one in cenzontle-webservice-adapter - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.update_one_cenz_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });

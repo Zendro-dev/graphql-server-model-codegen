@@ -403,3 +403,82 @@ module.exports.update_one_resolver = `
    }
 
 `
+
+module.exports.add_one_cenz_adapter = `
+static addOne(input) {
+    let query = \`
+    mutation addAccession(
+      $accession_id:ID!
+      $collectors_name:String
+      $collectors_initials:String
+      $sampling_date:Date
+    ){
+      addAccession(
+      accession_id:$accession_id
+      collectors_name:$collectors_name
+      collectors_initials:$collectors_initials
+      sampling_date:$sampling_date){
+        accession_id
+        collectors_name
+        collectors_initials
+        sampling_date
+        locationId
+      }
+    }\`;
+
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: input
+    }).then(res => {
+        //check
+        if (res && res.data && res.data.data) {
+            return res.data.data.addAccession;
+        } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+}
+`
+
+module.exports.update_one_cenz_adapter = `
+static updateOne(input) {
+    let query = \`
+      mutation
+        updateAccession(
+          $accession_id:ID!
+          $collectors_name:String
+          $collectors_initials:String
+          $sampling_date:Date){
+          updateAccession(
+            accession_id:$accession_id
+            collectors_name:$collectors_name
+            collectors_initials:$collectors_initials
+            sampling_date:$sampling_date
+          ){
+            accession_id
+            collectors_name
+            collectors_initials
+            sampling_date
+            locationId
+          }
+        }\`
+
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: input
+    }).then(res => {
+        //check
+        if (res && res.data && res.data.data) {
+            return res.data.data.updateAccession;
+        } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+}
+`
