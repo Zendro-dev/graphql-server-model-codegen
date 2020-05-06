@@ -597,8 +597,7 @@ describe(
     res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: {value: "CountIndividual"}}) { name } transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
-    expect(res.statusCode).to.equal(200);
-    expect(resBody).to.deep.equal({
+    const errorObject_TranscriptCount = {
         errors:[{
             message:"Error: Max record limit of 25 exceeded in transcript_counts",
             details:"",
@@ -623,7 +622,41 @@ describe(
                 {name:"CountIndividual"}
             ],
             transcript_counts:null
-        }});
+        }};
+
+    const errorObject_Individual = {
+        errors:[{
+            message:"Error: Max record limit of 25 exceeded in individuals",
+            details:"",
+            path:["individuals"]
+        }],
+        data:{
+            individuals:null,
+            transcript_counts:[
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"},
+                {gene:"Gene Z"}
+            ]
+        }
+
+    };
+
+    expect(res.statusCode).to.equal(200);
+    expect((resBody.data.individuals === null) !== (resBody.data.transcript_counts === null)).to.be.true;
+
+    if (resBody.data.individuals === null) {
+        expect(resBody).to.deep.equal(errorObject_Individual);
+    } else {
+        expect(resBody).to.deep.equal(errorObject_TranscriptCount);
+    }
 
   });
 
