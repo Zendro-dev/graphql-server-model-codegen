@@ -11,6 +11,7 @@ services:
      - instance1
 
   gql_science_db_graphql_server1:
+    container_name: server1
     depends_on:
       - gql_postgres1
     build:
@@ -87,6 +88,7 @@ services:
       - instance2
 
   gql_science_db_graphql_server2:
+    container_name: server2
     depends_on:
       - gql_postgres2
     build:
@@ -128,4 +130,3 @@ networks:
   instance1:
   instance2:
   integrationtest:
-    external: true
