@@ -332,3 +332,74 @@ static _removeLocation(accession_id, locationId){
       });
 }
 `
+module.exports.add_one_resolver = `
+/**
+ * addAccession - Check user authorization and creates a new record with data specified in the input argument
+ *
+ * @param  {object} input   Info of each field to create the new record
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {object}         New record created
+ */
+ addAccession: async function(input, context) {
+     //check: input has idAttribute
+     if (!input.accession_id) {
+         throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
+     }
+
+     //check: adapters auth
+     try {
+         let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'create');
+         if (authorizationCheck === true) {
+           let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+           let createdRecord = await accession.addOne(inputSanitized);
+           await createdRecord.handleAssociations(inputSanitized, context);
+           return createdRecord;
+         } else { //adapter not auth
+             throw new Error("You don't have authorization to perform this action on adapter");
+         }
+     } catch (error) {
+         console.error(error);
+         handleError(error);
+     }
+ }
+
+`
+
+module.exports.update_one_resolver = `
+/**
+ * updateAccession - Check user authorization and update the record specified in the input argument
+ *
+ * @param  {object} input   record to update and new info to update
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {object}         Updated record
+ */
+ updateAccession: async function(input, context) {
+   //check: input has idAttribute
+   if (! input.accession_id) {
+     throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
+   }
+
+      //check: adapters auth
+       try {
+           let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'update');
+           if (authorizationCheck === true) {
+             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+              await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
+              await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+              await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+               let updatedRecord = await accession.updateOne(inputSanitized);
+               await updatedRecord.handleAssociations(inputSanitized, context);
+               return updatedRecord;
+           } else {//adapter not auth
+               throw new Error("You don't have authorization to perform this action on adapter");
+           }
+       } catch (error) {
+           console.error(error);
+           handleError(error);
+       }
+   }
+
+`
