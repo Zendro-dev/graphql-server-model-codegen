@@ -158,9 +158,9 @@ module.exports.add_one_resolver = `
             let authorization = await checkAuthorization(context, 'Book', 'create');
             if (authorization === true) {
                 let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-                helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
-                helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-                /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+                await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
+                await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)
                 let createdBook = await book.addOne(inputSanitized);
                 await createdBook.handleAssociations(inputSanitized, context);
                 return createdBook;
@@ -179,7 +179,7 @@ static deleteOne(id){
   return super.findByPk(id)
       .then(item => {
 
-          if (item === null) return new Error(\`Record with ID = \${id} not exist\`);
+          if (item === null) return new Error(\`Record with ID = \${id} does not exist\`);
 
           return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
               .then((valSuccess) => {
@@ -208,7 +208,7 @@ module.exports.delete_one_resolver = `
     }, context) {
         return checkAuthorization(context, 'Book', 'delete').then(async authorization => {
             if (authorization === true) {
-                if (await book.validForDeletion(id, context)) {
+                if (await validForDeletion(id, context)) {
                     return book.deleteOne(id);
                 }
             } else {
@@ -230,6 +230,9 @@ static updateOne(input) {
                     let item = await super.findByPk(input[this.idAttribute()], {
                         transaction: t
                     });
+		    if (item === null) {
+                            throw new Error(\`Record with ID = \${id} does not exist\`);
+                        }
                     let updated = await item.update(input, {
                         transaction: t
                     });
@@ -244,34 +247,34 @@ static updateOne(input) {
 `
 
 module.exports.update_one_resolver = `
-/**
-     * updateBook - Check user authorization and update the record specified in the input argument
-     * This function only handles attributes, not associations.
-     * @see handleAssociations for further information.
-     *
-     * @param  {object} input   record to update and new info to update
-     * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-     * @return {object}         Updated record
-     */
-    updateBook: async function(input, context) {
-        try {
-            let authorization = await checkAuthorization(context, 'Book', 'update');
-            if (authorization === true) {
-                let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-                helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
-                helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-                /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
-                let updatedBook = await book.updateOne(inputSanitized);
-                await updatedBook.handleAssociations(inputSanitized, context);
-                return updatedBook;
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        } catch (error) {
-            console.error(error);
-            handleError(error);
-        }
-    },
+/**                                                                                                                                                                                                            
+ * updateBook - Check user authorization and update the record specified in the input argument                                                                                                                 
+ * This function only handles attributes, not associations.                                                                                                                                                    
+ * @see handleAssociations for further information.                                                                                                                                                            
+ *                                                                                                                                                                                                             
+ * @param  {object} input   record to update and new info to update                                                                                                                                            
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.                                                                                     
+ * @return {object}         Updated record                                                                                                                                                                     
+ */                                                                                                                                                                                                            
+updateBook: async function(input, context) {                                                                                                                                                                   
+    try {                                                                                                                                                                                                      
+        let authorization = await checkAuthorization(context, 'Book', 'update');                                                                                                                               
+        if (authorization === true) {                                                                                                                                                                          
+            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);                                                                                                
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);                                                                               
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);                                                                                                
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);                                                                                                        
+            let updatedBook = await book.updateOne(inputSanitized);                                                                                                                                            
+            await updatedBook.handleAssociations(inputSanitized, context);                                                                                                                                     
+            return updatedBook;                                                                                                                                                                                
+        } else {                                                                                                                                                                                               
+            throw new Error("You don't have authorization to perform this action");                                                                                                                            
+        }                                                                                                                                                                                                      
+    } catch (error) {                                                                                                                                                                                          
+        console.error(error);                                                                                                                                                                                  
+        handleError(error);                                                                                                                                                                                    
+    }                                                                                                                                                                                                          
+}, 
 `
 
 module.exports.bulk_add_model = `

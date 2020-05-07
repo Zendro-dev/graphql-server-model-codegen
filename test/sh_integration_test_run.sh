@@ -366,7 +366,7 @@ genCode() {
   # Add monkey-patching validation with AJV
   patch -V never ${TARGET_DIR}/validations/individual.js ./test/integration_test_misc/individual_validate.patch
   # Add patch for model webservice association
-  patch -V never ${TARGET_DIR}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
+  # patch -V never ${TARGET_DIR}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
 
   # Msg
   echo -e "@@ Code generated on ${TARGET_DIR}: ... ${LGREEN}done${NC}"

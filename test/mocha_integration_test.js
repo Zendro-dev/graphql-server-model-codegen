@@ -121,6 +121,8 @@ describe(
 
         for(let i = 0; i < individuals.length; i++){
             res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
+            let resBody = JSON.parse(res.body.toString('utf8'));
+
             expect(res.statusCode).to.equal(200);
         }
 
@@ -513,7 +515,7 @@ describe(
                                                                              `addIndividual: ${plantId}) ` +
                                                                              '{id gene individual { id name } } }');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
-
+    
         expect(res.statusCode).to.equal(200);
         expect(tcResBody).to.deep.equal({
             data: {
@@ -529,19 +531,22 @@ describe(
         })
     });
 
-  it('20. TranscriptCount delete all', function() {
+  it('20. TranscriptCount - Deleting a record with associations fails', function() {
 
-      let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-      let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
-
-      for(let i = 0; i < transcript_counts.length; i++){
-          res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
-          expect(res.statusCode).to.equal(200);
-      }
-
-      itHelpers.count_all_records('countTranscript_counts').then(cnt => {
-          expect(cnt).to.equal(0);
-      });
+      let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');    
+      res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: 4) }`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(500);
+      expect(resBody).to.deep.equal({
+          errors:[
+              {
+                  message:"Error: transcript_count with id 4 has associated records and is NOT valid for deletion. Please clean up before you delete.",
+                  details:"",
+                  path:["deleteTranscript_count"]
+                }
+            ],
+            data:null
+        });
   });
 
   it('21. Limit check', function() {

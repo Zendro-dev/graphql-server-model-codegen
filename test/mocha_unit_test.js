@@ -593,7 +593,7 @@ describe('Model Layer', function(){
     expect(g_model, 'No add one method found').to.have.string(test_model);
   })
 
-  it('Add one resolver - book', async function(){
+  it('Delete one resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
@@ -658,6 +658,7 @@ describe('Decouple association from resolvers', function(){
 
   let data_test = require('./unit_test_misc/test-describe/decouple-associations');
 
+  // Check for changes!
   it('BelongsTo implementation in model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -674,6 +675,7 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
+  // Check for changes!
   it('HasOne implementation in model - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -872,6 +874,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  // Check for changes!
   it('Many to many association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
@@ -880,6 +883,7 @@ describe('Cenz servers', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
+  // Check for changes!
   it('Many to many count association  - person', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
@@ -908,7 +912,7 @@ describe('Cursor based pagination', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Connection read all resolver - book', async function(){
+  it('Connection read all resolver - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -916,7 +920,7 @@ describe('Cursor based pagination', function(){
     expect(g_resolver, 'No method found').to.have.string(test_resolver);
   });
 
-  xit('Connection read all model - book', async function(){
+  it('Connection read all model - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -932,7 +936,7 @@ describe('Cursor based pagination', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('Association connection resolver - person', async function(){
+  it('Association connection resolver - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -940,7 +944,7 @@ describe('Cursor based pagination', function(){
     expect(g_resolver, 'No method found').to.have.string(test_resolver);
   });
 
-  xit('Many-to-many connection model - person', async function(){
+  it('Many-to-many connection model - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -956,7 +960,8 @@ describe('Cursor based pagination', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('Many to many association connection in cenz server  - person-book', async function(){
+  // Check for changes!
+  it('Many to many association connection in cenz server  - person-book', async function(){
     let opts = funks.getOptions(models_cenz.person);
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -969,7 +974,7 @@ describe('Cursor based pagination', function(){
 describe('Distributed data models', function(){
 
   let data_test = require('./unit_test_misc/test-describe/distributed-models');
-  xit('ReadById adapter- book', async function(){
+  it('ReadById adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -977,7 +982,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-  xit('Count Records adapter- book', async function(){
+  it('Count Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -985,7 +990,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
   });
 
-  xit('Read All Records adapter- book', async function(){
+  it('Read All Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1001,7 +1006,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('ReadById distributed data model- book', async function(){
+  it('ReadById distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1009,7 +1014,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('Count distributed data model- book', async function(){
+  it('Count distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1017,7 +1022,7 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('Read all distributed data model- book', async function(){
+  it('Read all distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1025,7 +1030,8 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('To-many association distributed data model- person', async function(){
+  // Check for changes!
+  it('To-many association distributed data model- person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1033,7 +1039,8 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('To-one association distributed data model- dog', async function(){
+  // Check for changes!
+  it('To-one association distributed data model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1041,13 +1048,6 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
-  xit('To-many association distributed data model- person', async function(){
-    let opts = funks.getOptions(models_distributed.person_ddm);
-    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.person_ddm_count_association.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
-  });
 });
 
 describe('To-one associations editing', function(){
@@ -1061,7 +1061,7 @@ describe('To-one associations editing', function(){
     expect(g_schema,'Incorrect schema').to.have.string(test_schema);
   });
 
-  xit('AddOne with to-one association - person', async function(){
+  it('AddOne with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -1069,7 +1069,7 @@ describe('To-one associations editing', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  xit('Update with to-one association - person', async function(){
+  it('Update with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -1106,7 +1106,7 @@ describe('External ids', function(){
   })
 });
 
-xdescribe('Extend api model layer associations', function(){
+describe('Extend api model layer associations', function(){
   let data_test = require('./unit_test_misc/test-describe/extended-api-model-layer');
 
   it('Add to-one association foreign key in source', async function(){
@@ -1125,45 +1125,11 @@ xdescribe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Set foreign key in source', async function(){
-    let opts = funks.getOptions(models.transcript_count);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.set_individual_id.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-
-  it('Add to-many association foreign key in target', async function(){
-    let opts = funks.getOptions(models.individual);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.to_add_transcript_counts.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-
-  it('Add to-many association trough table', async function(){
-    let opts = funks.getOptions(models.book_authors);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.to_add_trough_table.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
   it('Remove to-one association foreign key in source', async function(){
     let opts = funks.getOptions(models.transcript_count);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.remove_individual.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Remove to-many association foreign key in target', async function(){
-    let opts = funks.getOptions(models.individual);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.remove_transcript_counts.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
@@ -1175,49 +1141,9 @@ xdescribe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Remove to-many association trough table', async function(){
-    let opts = funks.getOptions(models.book_authors);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.remove_trough_table.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-
-  it('Cenz server - Add to-one association foreign key in source', async function(){
-    let opts = funks.getOptions(models_cenz.dog_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_add_owner.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Cenz server - Set foreign key in source', async function(){
-    let opts = funks.getOptions(models_cenz.dog_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_set_personId.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Cenz server - Add to-one association foreign key in target', async function(){
-    let opts = funks.getOptions(models_cenz.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_add_unique_pet.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Cenz server - Add to-many association ', async function(){
-    let opts = funks.getOptions(models_cenz.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models-cenz', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.cenz_add_works.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
 });
 
-xdescribe('Create and update transaction', function(){
+describe('Create and update transaction', function(){
   let data_test = require('./unit_test_misc/test-describe/transaction-create-update');
   it('Update - transcript_count', async function(){
     let opts = funks.getOptions(models.transcript_count);
@@ -1293,7 +1219,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('readById - peopleLocal', async function(){
+  it('readById - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1301,7 +1227,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('addOne - peopleLocal', async function(){
+  it('addOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1309,7 +1235,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('count - peopleLocal', async function(){
+  it('count - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1317,7 +1243,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('readAllCursor - peopleLocal', async function(){
+  it('readAllCursor - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1325,7 +1251,7 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('deleteOne - peopleLocal', async function(){
+  it('deleteOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1333,30 +1259,13 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('updateOne - peopleLocal', async function(){
+  it('updateOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.updateOne.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
-
-  xit('addAssociation - peopleLocal', async function(){
-    let opts = funks.getOptions(models_distributed.person_adapter_sql);
-    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.addWorks.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
-  });
-
-  xit('removeAssociation - peopleLocal', async function(){
-    let opts = funks.getOptions(models_distributed.person_adapter_sql);
-    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.removeWorks.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
-  });
-
 
   it('stripAssociations - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
@@ -1382,19 +1291,11 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  xit('type - peopleLocal', async function(){
+  it('type - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.type.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
-  });
-
-  xit('targetKey - book ddm', async function(){
-    let opts = funks.getOptions(models_distributed.book_ddm_association);
-    let generated_adapter =await funks.generateJs('create-distributed-model', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.targetKey_ddm.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
 
@@ -1778,6 +1679,7 @@ describe('Refactor associations - delete', function(){
   it('count associations - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    //console.log(generated_resolver);
     let g_resolver = generated_resolver.replace(/\s/g, '');
     let test_resolver = data_test.count_associations.replace(/\s/g, '');
     expect(g_resolver).to.have.string(test_resolver);
@@ -1807,4 +1709,65 @@ describe('Refactor associations - delete', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+});
+
+describe('Refactor associations - add / update', function(){
+  let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
+
+  it('handleAssociations - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.handleAssociations.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add_location to_one - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_to_one_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove_location to_one - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_to_one_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add_individuals to_many - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_to_many_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove_individuals to_many - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_to_many_fieldMutation_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('_addLocation - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-models', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test._addAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('_removeLocation - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession);
+    let generated_resolver =await funks.generateJs('create-models', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+  
 });
