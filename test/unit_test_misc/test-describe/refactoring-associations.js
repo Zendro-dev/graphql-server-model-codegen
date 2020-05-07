@@ -274,6 +274,7 @@ let query = \`
       updateAccession(
         accession_id:"\${accession_id}"
         addLocation:"\${locationId}"
+        skipAssociationsExistenceChecks: true
       ){
         accession_id
         locationId
@@ -312,6 +313,7 @@ static async remove_locationId(accession_id, locationId){
         updateAccession(
           accession_id:"\${accession_id}"
           removeLocation:"\${locationId}"
+          skipAssociationsExistenceChecks: true
         ){
           accession_id
           locationId
@@ -353,7 +355,9 @@ module.exports.add_one_resolver = `
            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
             await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
             await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+            if(!input.skipAssociationsExistenceChecks) {
+              await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+            }
            let createdRecord = await accession.addOne(inputSanitized);
            await createdRecord.handleAssociations(inputSanitized, context);
            return createdRecord;
@@ -389,7 +393,9 @@ module.exports.update_one_resolver = `
              let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
               await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
               await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-              await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+              if(!input.skipAssociationsExistenceChecks) {
+                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+              }
                let updatedRecord = await accession.updateOne(inputSanitized);
                await updatedRecord.handleAssociations(inputSanitized, context);
                return updatedRecord;

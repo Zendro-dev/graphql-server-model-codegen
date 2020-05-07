@@ -19,7 +19,7 @@
                   update<%- nameCp-%>(
                     <%- idAttribute -%>:"${<%- idAttribute -%>}"
                     <%- op %><%= associationsArguments["to_one"][i].name_cp%>:"${<%-associationsArguments["to_one"][i].targetKey-%>}"
-
+                    skipAssociationsExistenceChecks: true
                   ){
                     <%- idAttribute -%>
                     <%-associationsArguments["to_one"][i].targetKey-%>

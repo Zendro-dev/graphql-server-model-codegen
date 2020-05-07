@@ -1711,7 +1711,7 @@ describe('Refactor associations - delete', function(){
 });
 
 
-describe('Refactor associations - add - remove', function(){
+describe('Refactor associations in distributed data case - add - remove', function(){
   let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
 
   it('handle associations - accession', async function(){
