@@ -16,7 +16,7 @@ function errorMessageForRecordsLimit(query) {
 * @param {string} query The query that makes this check
 */
 async function checkCount(search, context, query) {
-  if (await <%- nameLc -%>.countRecords(search) > context.recordsLimit) {
+  if (await <%- nameLc -%>.countRecords(search).sum > context.recordsLimit) {
       throw new Error(errorMessageForRecordsLimit(query));
   }
 }

@@ -197,7 +197,10 @@ static countRecords(search) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
-        return super.count(options);
+        return {
+            sum: super.count(options),
+            errors: []
+        };
     }
 `
 
