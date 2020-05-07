@@ -468,7 +468,7 @@ module.exports = {
   count<%-namePlCp-%>: function({search}, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
       if (authorization === true) {
-        return <%- nameLc -%>.countRecords(search);
+        return <%- nameLc -%>.countRecords(search).sum;
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
