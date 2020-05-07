@@ -1,6 +1,6 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
   /**
-  * _<%- op %><%-associationsArguments["to_one"][i].name_cp-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
+  * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
   *
   * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
   * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
@@ -12,7 +12,7 @@
       */
     -%>
     <% if(storageType === 'cenzontle-webservice-adapter'){-%>
-      static _<%- op -%><%-associationsArguments["to_one"][i].name_cp-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
         let query = `
               mutation
                 update<%- nameCp-%>{
@@ -48,7 +48,7 @@
     */
   -%>
   <%if(storageType === 'sql-adapter'){-%>
-  static async _<%- op -%><%-associationsArguments["to_one"][i].name_cp-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+  static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
       let updated = await sequelize.transaction(async transaction => {
         try {
           return super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%>}}, {transaction: transaction})

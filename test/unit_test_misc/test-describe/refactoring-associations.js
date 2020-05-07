@@ -140,7 +140,7 @@ module.exports.to_one_add =`
  */
 accession.prototype.add_location = async function(input) {
 
-    await accession._addLocation(this.getIdValue(), input.addLocation);
+    await accession.add_locationId(this.getIdValue(), input.addLocation);
     this.locationId = input.addLocation;
 
 }
@@ -154,7 +154,7 @@ module.exports.to_one_remove = `
  */
 accession.prototype.remove_location = async function(input) {
    if (input.removeLocation === this.locationId) {
-      await accession._removeLocation(this.getIdValue(), input.removeLocation);
+      await accession.remove_locationId(this.getIdValue(), input.removeLocation);
       this.locationId = null;
     }
 }
@@ -170,7 +170,7 @@ accession.prototype.add_individuals = async function(input) {
 
     let results = [];
     for await (associatedRecordId of input.addIndividuals) {
-      results.push(models.individual._addAccession(associatedRecordId, this.getIdValue()));
+      results.push(models.individual.add_accessionId(associatedRecordId, this.getIdValue()));
     }
     await Promise.all(results);
 
@@ -186,7 +186,7 @@ module.exports.to_many_remove = `
 accession.prototype.remove_individuals = async function(input) {
     let results = [];
     for await (associatedRecordId of input.removeIndividuals) {
-        results.push(models.individual._removeAccession(associatedRecordId, this.getIdValue()));
+        results.push(models.individual.remove_accessionId(associatedRecordId, this.getIdValue()));
     }
     await Promise.all(results);
 }
@@ -195,39 +195,39 @@ accession.prototype.remove_individuals = async function(input) {
 
 module.exports.add_assoc_ddm_model = `
 /**
-* _addLocation - field Mutation (model-layer) for to_one associationsArguments to add
+* add_locationId - field Mutation (model-layer) for to_one associationsArguments to add
 *
 * @param {Id}   accession_id   IdAttribute of the root model to be updated
 * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
 */
-static async _addLocation(accession_id, locationId) {
+static async add_locationId(accession_id, locationId) {
 let responsibleAdapter = this.adapterForIri(accession_id);
-return await adapters[responsibleAdapter]._addLocation(accession_id, locationId);
+return await adapters[responsibleAdapter].add_locationId(accession_id, locationId);
 
 }
 `
 
 module.exports.remove_assoc_ddm_model = `
 /**
- * _removeLocation - field Mutation (model-layer) for to_one associationsArguments to remove
+ * remove_locationId - field Mutation (model-layer) for to_one associationsArguments to remove
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
-static async _removeLocation(accession_id, locationId) {
+static async remove_locationId(accession_id, locationId) {
   let responsibleAdapter = this.adapterForIri(accession_id);
-  return await adapters[responsibleAdapter]._removeLocation(accession_id, locationId);
+  return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId);
 }
 `
 
 module.exports.to_one_remove_sql_adapter =  `
 /**
- * _removeLocation - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ * remove_locationId - field Mutation (adapter-layer) for to_one associationsArguments to remove
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
-static async _removeLocation(accession_id, locationId) {
+static async remove_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
         try {
           return super.update({locationId: null},{where: {accession_id: accession_id}}, {transaction: transaction})
@@ -241,12 +241,12 @@ static async _removeLocation(accession_id, locationId) {
 
 module.exports.to_one_add_sql_adapter = `
 /**
-* _addLocation - field Mutation (adapter-layer) for to_one associationsArguments to add
+* add_locationId - field Mutation (adapter-layer) for to_one associationsArguments to add
 *
 * @param {Id}   accession_id   IdAttribute of the root model to be updated
 * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
 */
-static async _addLocation(accession_id, locationId) {
+static async add_locationId(accession_id, locationId) {
 
    let updated = await sequelize.transaction(async transaction => {
        try {
@@ -261,12 +261,12 @@ static async _addLocation(accession_id, locationId) {
 
 module.exports.to_one_add_cenz_adapter = `
 /**
-* _addLocation - field Mutation (adapter-layer) for to_one associationsArguments to add
+* add_locationId - field Mutation (adapter-layer) for to_one associationsArguments to add
 *
 * @param {Id}   accession_id   IdAttribute of the root model to be updated
 * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
 */
-static _addLocation(accession_id, locationId){
+static async add_locationId(accession_id, locationId){
 
 let query = \`
   mutation
@@ -298,13 +298,13 @@ let query = \`
 
 module.exports.to_one_remove_cenz_adapter = `
 /**
- * _removeLocation - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ * remove_locationId - field Mutation (adapter-layer) for to_one associationsArguments to remove
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
 
-static _removeLocation(accession_id, locationId){
+static async remove_locationId(accession_id, locationId){
 
   let query = \`
     mutation
