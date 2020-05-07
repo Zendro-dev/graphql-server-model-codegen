@@ -1,5 +1,5 @@
 /*
-    Resolvers for basic CRUD operations for 'generic' models.
+    Resolvers for basic CRUD operations for generic models
 */
 
 <%# 
@@ -17,6 +17,7 @@ const {handleError} = require('../utils/errors');
 const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
+const globals = require('../config/globals');
 
 <%# 
 /**
@@ -26,7 +27,8 @@ const models = require(path.join(__dirname, '..', 'models_index.js'));
  * associationArgsDef is an object that relates each add-association methods 
  * name (key) with the name of the corresponding association (value).
  */
--%>
+-%> 
+
 <% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -45,16 +47,24 @@ const associationArgsDef = {
  * 
  * These resolvers are implemented by extended the model's protoype
  * with methods to resolve each association related field.
- * 
- * This methods are executed as default field resolvers.
  */
 -%>
+<%# 
 /**
- * Section 3
- * Query resolvers for associations fields.
- * Implemented via prototypes on <%- nameLc -%> model layer.
- * This methods are executed by GraphQL engine as default field resolvers.
+ * Section 3.a
+ * Query resolvers for associations fields for:
+ * 
+ * < to_many_through_sql_cross_table > (many_to_many)
+ * 
+ * Methods:
+ * model.prototype.assocFilter()
+ * model.prototype.assocConnection()
+ * model.prototype.countFilteredAssoc()
+ * 
+ * THIS SECTION DOES NOT APPLY TO GENERIC MODELS
  */
+-%>
+
 <%# 
 /**
  * Section 3.b
@@ -80,8 +90,7 @@ const associationArgsDef = {
     if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
       try{
         if (search === undefined) {
-          return resolvers.readOne<%=associations_one[i].target_cp%>({
-            [models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context);
+          return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
         } else {
           //build new search filter
           let nsearch = helper.addSearchField({
@@ -92,7 +101,7 @@ const associationArgsDef = {
           });
           let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
           if (found) {
-            return found[0];
+            return found[0]
           }
           return found;
         }
@@ -100,8 +109,8 @@ const associationArgsDef = {
         console.error(error);
         handleError(error);
       };
-    }
-  } 
+    }  
+  }
 <%}-%>
 
 <%# 
@@ -235,53 +244,7 @@ const associationArgsDef = {
  * validForDeletion()
  */
 -%>
-/**
-* errorMessageForRecordsLimit(query) - returns error message in case the record limit is exceeded.
-*
-* @param {string} query The query that failed
-*/
-function errorMessageForRecordsLimit(query) {
-  return "Max record limit of " + globals.LIMIT_RECORDS + " exceeded in " + query;
-}
-
-/**
-* checkCount(search, context, query) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
-*
-* @param {object} search  Search argument for filtering records
-* @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-* @param {string} query The query that makes this check
-*/
-async function checkCount(search, context, query) {
-  if (await <%- nameLc -%>.countRecords(search) > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit(query));
-  }
-}
-
-/**
-* checkCountForOne(context) - Make sure that the record limit is not exhausted before requesting a single record
-*
-* @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-*/
-function checkCountForOne(context) {
-  if (1 > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit("readOne<%- nameCp -%>"));
-  }
-}
-
-/**
-* checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
-*
-* @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-* @param {number} numberOfFoundItems number of items that were found, to be subtracted from the current record limit
-* @param {string} query The query that makes this check
-*/
-function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
-  if (numberOfFoundItems > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit(query));
-  }
-  context.recordsLimit -= numberOfFoundItems;
-}
-
+<%- include('./includes/record-limit-helpers'); -%>
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *
@@ -311,7 +274,7 @@ function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
   let result_to_one = await Promise.all(promises_to_one);
 
   let get_to_many_associated = result_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
-  let get_to_one_associated = result_to_one.filter( (r, index) => r !== null ).length;
+  let get_to_one_associated = result_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
 
   return get_to_one_associated + get_to_many_associated;
 }
@@ -325,7 +288,7 @@ function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
  */
   async function validForDeletion(id, context){
   if( await countAllAssociatedRecords(id, context) > 0 ){
-    throw new Error(`Accession with accession_id ${id} has associated records and is NOT valid for deletion. Please clean up before you delete.`);
+    throw new Error(`<%- name %> with <%- idAttribute -%> ${id} has associated records and is NOT valid for deletion. Please clean up before you delete.`);
   }
   return true;
 }
@@ -340,53 +303,22 @@ function checkCountAgainAndAdaptLimit(context, numberOfFoundItems, query) {
  * root resolvers to resolve root Query and Mutations Types.
  */
 -%>
-/**
- *
- * Section 6
- * Root resolvers.
- *
- */
 module.exports = {
 <%# 
 /**
  * Section 6.a
- * Root resolvers on:
- * <Query> type.
+ * Root resolvers for: 
  * 
- * readOneModel()
+ * Query
+ * 
+ * Methods:
  * models()
  * modelsConnection()
+ * readOneModel()
  * countModels()
+ * vueTableAccession()
  */
 -%>
-  /**
-   * readOne<%- nameCp -%> - Returns a single record, the one with the specified <%- idAttribute -%> 
-   * in the <%- idAttribute -%> argument.
-   *
-   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve.
-   * @param  {object} context Provided to every resolver; holds contextual information like the resquest query and user info.
-   * @return {object}         Record with <%- idAttribute -%> requested. This record is a <%- nameLc -%> class instance,
-   * that contains resolved values on properties corresponding to scalar fields, and field-resolver functions as values on
-   * properties corresponding to object fields (@see section 3. Query resolvers for associations fields, on this file).
-   *                           
-   */
-  readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
-    return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
-      if (authorization === true) {
-        checkCountForOne(context);
-        let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
-        checkCountForOne(context);
-        context.recordsLimit = context.recordsLimit - 1;
-        return resultRecords;
-      } else {
-          throw new Error("You don't have authorization to perform this action");
-      }
-    }).catch( error =>{
-      console.error(error);
-      handleError( error);
-    });
-  },
-
   /**
    * <%- namePl -%> - Check user authorization and return certain number, specified in pagination argument, of records that
    * holds the condition of search argument, all of them sorted as specified by the order argument.
@@ -438,6 +370,30 @@ module.exports = {
            handleError( error);
      })
    },
+
+  /**
+   * readOne<%- nameCp -%> - Check user authorization and return one record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
+   *
+   * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {object}         Record with <%- idAttribute -%> requested
+   */
+  readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
+    return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
+      if (authorization === true) {
+        checkCountForOne(context);
+        let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
+        checkCountForOne(context);
+        context.recordsLimit = context.recordsLimit - 1;
+        return resultRecords;
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+          console.error(error);
+          handleError( error);
+    })
+  },
 
   /**
    * count<%-namePlCp-%> - Counts number of records that holds the conditions specified in the search argument
@@ -507,9 +463,9 @@ module.exports = {
         let authorization = await checkAuthorization(context, '<%- name -%>', 'create');
         if (authorization === true) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-            helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
-            helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-            /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)
             let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized);
             await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
             return created<%- nameCp -%>;
@@ -551,7 +507,7 @@ module.exports = {
   delete<%- nameCp -%>: function({<%- idAttribute -%>}, context){
     return checkAuthorization(context, '<%- name -%>', 'delete').then( async authorization =>{
       if (authorization === true) {
-        if(await <%- nameLc -%>.validForDeletion(<%- idAttribute -%>, context) ){
+        if(await validForDeletion(<%- idAttribute -%>, context) ){
             return <%- nameLc -%>.deleteOne(<%- idAttribute -%>);
         }
       } else {
@@ -577,9 +533,9 @@ module.exports = {
         let authorization = await checkAuthorization(context, '<%- name -%>', 'update');
         if (authorization === true) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-            helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
-            helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-            /*helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)*/
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized);
             await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
             return updated<%- nameCp -%>;
@@ -611,4 +567,5 @@ module.exports = {
         handleError(error);
     })
   }
+
 }
