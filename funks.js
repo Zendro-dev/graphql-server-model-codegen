@@ -25,7 +25,7 @@ associations_type = {
  * @return {object}       json file converted to js object
  */
 parseFile = function(jFile){
-  let data=fs.readFileSync(jFile, 'utf8');
+  let data = null;
   let words = null;
 
   //read

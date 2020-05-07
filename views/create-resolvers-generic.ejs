@@ -467,7 +467,7 @@ module.exports = {
             await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
             await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)
             let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized);
-            await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            if(created<%- nameCp -%>) await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
             return created<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -537,7 +537,7 @@ module.exports = {
             await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
             await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized);
-            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            if(updated<%- nameCp -%>) await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
             return updated<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
