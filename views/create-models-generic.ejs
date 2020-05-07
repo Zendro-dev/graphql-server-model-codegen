@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const path = require('path');
+const globals = require('../config/globals');
+const helper = require('../utils/helper');
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
@@ -358,6 +358,9 @@ module.exports = class <%- name -%>{
       throw new Error('csvTableTemplate<%- nameCp-%> is not implemented');
     }
 
+  <%- include('./includes/create-models-fieldMutations-generic', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic', {op: "remove"}); %> 
+
   static base64Decode(cursor){
     return Buffer.from(cursor, 'base64').toString('utf-8');
   }
@@ -401,6 +404,21 @@ module.exports = class <%- name -%>{
 
   getIdValue() {
     return this[<%- name -%>.idAttribute()]
+  }
+
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
   }
 
 };

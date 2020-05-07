@@ -1,0 +1,14 @@
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  /**
+  * _<%- op %><%-associationsArguments["to_one"][i].target_cp-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+  */
+  static async _<%- op -%><%-associationsArguments["to_one"][i].target_cp-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    return <%- name -%>.updateOne({ 
+      <%- idAttribute -%>: <%- idAttribute %>,
+      <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
+    });
+  }
+<%}-%>
