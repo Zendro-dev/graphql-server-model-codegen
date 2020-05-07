@@ -86,8 +86,8 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
 
 module.exports.individual_schema_camelcase = `
 type Mutation {
-  addInDiVIdual( name: String , addTranscriptCounts:[ID] ): inDiVIdual!
-updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscriptCounts:[ID] ): inDiVIdual!
+  addInDiVIdual( name: String , addTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
+updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
 
 
 deleteInDiVIdual(id: ID!): String!

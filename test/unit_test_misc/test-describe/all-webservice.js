@@ -120,8 +120,8 @@ type Query {
 }
 
   type Mutation {
-    addPerson( firstName: String, lastName: String, Age: Int,  addCompany: ID, addWorks:[ID]): Person!
-  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, addCompany: ID, removeCompany: ID, addWorks:[ID], removeWorks:[ID]): Person!
+    addPerson( firstName: String, lastName: String, Age: Int,  addCompany: ID, addWorks:[ID], skipAssociationsExistenceChecks:Boolean = false): Person!
+  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, addCompany: ID, removeCompany: ID, addWorks:[ID], removeWorks:[ID], skipAssociationsExistenceChecks:Boolean = false): Person!
 
 
 deletePerson(id: ID!): String!

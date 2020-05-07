@@ -44,12 +44,12 @@ async _addTranscript_counts( ids ){
 
 module.exports.to_add_unique_pet = `
 /**
-     * _addUnique_pet - field Mutation (model-layer) for to_one associationsArguments to add 
+     * _addDog - field Mutation (model-layer) for to_one associationsArguments to add 
      *
      * @param {Id}   id   IdAttribute of the root model to be updated
      * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated. 
      */
-    static async _addUnique_pet(id, personId) {
+    static async _addDog(id, personId) {
         let updated = await sequelize.transaction(async transaction => {
             try {
                 return Person.update({
@@ -123,12 +123,12 @@ async _removeTranscript_counts( ids ){
 
 module.exports.remove_unique_pet = `
 /**
-     * _removeUnique_pet - field Mutation (model-layer) for to_one associationsArguments to remove 
+     * _removeDog - field Mutation (model-layer) for to_one associationsArguments to remove 
      *
      * @param {Id}   id   IdAttribute of the root model to be updated
      * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated. 
      */
-    static async _removeUnique_pet(id, personId) {
+    static async _removeDog(id, personId) {
         let updated = await sequelize.transaction(async transaction => {
             try {
                 return Person.update({
