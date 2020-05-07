@@ -891,6 +891,22 @@ describe('Cenz servers', function(){
     let test_model = data_test.many_to_many_association_count.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
+
+  it('add_personId - Dog', async function(){
+    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.add_personId.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
+  it('remove_personId - Dog', async function(){
+    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.remove_personId.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
 });
 
 describe('Cursor based pagination', function(){
@@ -1679,7 +1695,6 @@ describe('Refactor associations - delete', function(){
   it('count associations - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
-    //console.log(generated_resolver);
     let g_resolver = generated_resolver.replace(/\s/g, '');
     let test_resolver = data_test.count_associations.replace(/\s/g, '');
     expect(g_resolver).to.have.string(test_resolver);
@@ -1711,7 +1726,7 @@ describe('Refactor associations - delete', function(){
 
 });
 
-describe('Refactor associations - add / update', function(){
+describe('Refactor associations - add / update SQL models', function(){
   let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
 
   it('handleAssociations - accession', async function(){

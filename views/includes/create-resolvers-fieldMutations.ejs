@@ -6,7 +6,7 @@
   * @param {object} input   Info of input Ids to <%- op %>  the association
   */
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many_through_sql_cross_table"][i].name_lc-%> = async function(input) {
-    await models.<%- nameLc -%>._<%- op %><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>(this, input.<%- op %><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>);
+    await models.<%- nameLc -%>.<%- op %>_<%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%>(this, input.<%- op %><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>);
   }
 
 <%}-%>
@@ -19,7 +19,7 @@
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input) {
     let results = [];
     for await(associatedRecordId of input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>) {
-      results.push(models.<%-associationsArguments["to_many"][i].target_lc-%>._<%- op %><%- nameCp -%> (associatedRecordId, this.getIdValue()));
+      results.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey-%> (associatedRecordId, this.getIdValue()));
     }
     await Promise.all(results);
   }
@@ -33,14 +33,14 @@
   */
   <% if (op === 'remove') { -%>
     <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
-      if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> === this.<%-associationsArguments["to_one"][i].targetKey%>) {
-        await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].target_cp-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+      if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> == this.<%-associationsArguments["to_one"][i].targetKey%>) {
+        await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
         this.<%-associationsArguments["to_one"][i].targetKey%> = null;
       }
     }
   <%} else { -%>
     <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
-      await <%- nameLc -%>._<%- op %><%-associationsArguments["to_one"][i].target_cp-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
       this.<%-associationsArguments["to_one"][i].targetKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>;
     }
   <%}-%>
