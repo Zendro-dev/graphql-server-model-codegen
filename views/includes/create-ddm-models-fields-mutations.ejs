@@ -1,0 +1,14 @@
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+    <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  /**
+  * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+  */
+  static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
+    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>);
+  }
+  <%}-%>
+<%}-%>

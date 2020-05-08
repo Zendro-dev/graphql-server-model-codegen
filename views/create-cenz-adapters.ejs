@@ -26,11 +26,11 @@ module.exports = class <%- adapterName -%>{
 
   static readById(iri){
     let query = `
-          query 
+          query
             readOne<%- nameCp %>
             {
               readOne<%- nameCp -%>(<%- idAttribute -%>:"${iri}")
-              { 
+              {
                 <%- idAttribute -%> <%for(var key in attributes){ %>
                 <%= key %> <%}%>
               }
@@ -51,7 +51,7 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static countRecords(search){    
+  static countRecords(search){
     let query = `
       query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
         count<%- namePlCp -%>(search: $search)
@@ -75,7 +75,7 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination){    
+  static readAllCursor(search, order, pagination){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -84,12 +84,12 @@ module.exports = class <%- adapterName -%>{
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
-    
+
       return axios.post(remoteCenzontleURL, {
-        query:query, 
+        query:query,
         variables: {
-          search: search, 
-          order:order, 
+          search: search,
+          order:order,
           pagination: pagination
         }
       }).then(res =>{
@@ -105,28 +105,23 @@ module.exports = class <%- adapterName -%>{
     });
   }
 
-  static addOne(input){    
+  static addOne(input){
     let query = `
         mutation add<%- nameCp _%>(
 <%if(!defaultId){-%>
           $<%=idAttribute%>:ID! <%}-%> <%for(var key in editableAttributes){%>
           $<%=key %>:<%= editableAttributes[key]%><%}-%>
-<%for(var key in associationsArguments.schema_attributes.one){-%> 
-          $add<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%><%for(var key in associationsArguments.schema_attributes.many){-%> 
-          $add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]
-<%}-%> 
         ){
-          add<%- nameCp -%>(<%if(!defaultId){-%> 
+          add<%- nameCp -%>(<%if(!defaultId){-%>
           <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){%>
-          <%=key %>:$<%= key%><%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%> 
-          add<%= associationsArguments.schema_attributes.one[key][2]%>:$add<%= associationsArguments.schema_attributes.one[key][2]%><%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> add<%= associationsArguments.schema_attributes.many[key][2]%>:$add<%= associationsArguments.schema_attributes.many[key][2]%><%}-%>){
-            <%- idAttribute -%> 
+          <%=key %>:$<%= key%><%}-%>){
+            <%- idAttribute -%>
 <%for(var key in attributes){-%>
             <%=key %>
 <%}-%>
           }
         }`;
-      
+
     return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res =>{
       //check
       if(res&&res.data&&res.data.data) {
@@ -142,11 +137,11 @@ module.exports = class <%- adapterName -%>{
 
   static deleteOne(id){
     let query = `
-          mutation 
-            delete<%- nameCp -%>{ 
+          mutation
+            delete<%- nameCp -%>{
               delete<%- nameCp -%>(
                 <%- idAttribute -%>: "${id}" )}`;
-    
+
     return axios.post(remoteCenzontleURL, {query: query}).then(res =>{
       //check
       if(res&&res.data&&res.data.data) {
@@ -162,22 +157,14 @@ module.exports = class <%- adapterName -%>{
 
   static updateOne(input){
     let query = `
-          mutation 
+          mutation
             update<%- nameCp-%>(
               $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
-              $<%=key %>:<%= editableAttributes[key]%> <%}-%> <%for(var key in associationsArguments.schema_attributes.one){ %>
-              $add<%= associationsArguments.schema_attributes.one[key][2]%>:ID 
-              $remove<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%> 
-              $add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID] 
-              $remove<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%> 
+              $<%=key %>:<%= editableAttributes[key]%> <%}-%>
             ){
               update<%- nameCp-%>(
                 <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
-                <%=key %>:$<%= key%> <%}-%> <%for(var key in associationsArguments.schema_attributes.one){-%> 
-                add<%= associationsArguments.schema_attributes.one[key][2]%>:$add<%= associationsArguments.schema_attributes.one[key][2]%> 
-                remove<%= associationsArguments.schema_attributes.one[key][2]%>:$remove<%= associationsArguments.schema_attributes.one[key][2]%> <%}-%> <%for(var key in associationsArguments.schema_attributes.many){%> 
-                add<%= associationsArguments.schema_attributes.many[key][2]%>:$add<%= associationsArguments.schema_attributes.many[key][2]%> 
-                remove<%= associationsArguments.schema_attributes.many[key][2]%>:$remove<%= associationsArguments.schema_attributes.many[key][2]%> <%}%>
+                <%=key %>:$<%= key%> <%}-%>
               ){
                 <%- idAttribute -%> <%for(var key in attributes){%>
                 <%=key %> <%}%>
@@ -196,6 +183,17 @@ module.exports = class <%- adapterName -%>{
       handleError(error);
     });
   }
+
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   */
+  -%>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+
 
   static bulkAddCsv(context) {
     throw new Error("<%- name -%>.bulkAddCsv is not implemented.")

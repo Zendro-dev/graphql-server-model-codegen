@@ -98,93 +98,92 @@ async function validForDeletion(id, context){
 `
 
 module.exports.handleAssociations = `
-/**                                                                                                                                                                                                                
- * handleAssociations - handles the given associations in the create and update case.                                                                                                                              
- *                                                                                                                                                                                                                 
- * @param {object} input   Info of each field to create the new record                                                                                                                                             
- * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.                                                                                          
- */                                                                                                                                                                                                                
-accession.prototype.handleAssociations = async function(input, context) {                                                                                                                                          
-    try {                                                                                                                                                                                                          
-        let promises = [];                                                                                                                                                                                         
-        if (helper.isNonEmptyArray(input.addIndividuals)) {                                                                                                                                                        
-            promises.push(this.add_individuals(input, context));                                                                                                                                                   
-        }                                                                                                                                                                                                          
-        if (helper.isNonEmptyArray(input.addMeasurements)) {                                                                                                                                                       
-            promises.push(this.add_measurements(input, context));                                                                                                                                                  
-        }                                                                                                                                                                                                          
-        if (helper.isNotUndefinedAndNotNull(input.addLocation)) {                                                                                                                                                  
-            promises.push(this.add_location(input, context));                                                                                                                                                      
-        }                                                                                                                                                                                                          
-        if (helper.isNonEmptyArray(input.removeIndividuals)) {                                                                                                                                                     
-            promises.push(this.remove_individuals(input, context));                                                                                                                                                
-        }                                                                                                                                                                                                          
-        if (helper.isNonEmptyArray(input.removeMeasurements)) {                                                                                                                                                    
-            promises.push(this.remove_measurements(input, context));                                                                                                                                               
-        }                                                                                                                                                                                                          
-        if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {                                                                                                                                               
-            promises.push(this.remove_location(input, context));                                                                                                                                                   
-        }                                                                                                                                                                                                          
-                                                                                                                                                                                                                   
-        await Promise.all(promises);                                                                                                                                                                               
-    } catch (error) {                                                                                                                                                                                              
-        throw error                                                                                                                                                                                                
-    }                                                                                                                                                                                                              
-}
+/**
+ * handleAssociations - handles the given associations in the create and update case.
+ *
+ * @param {object} input   Info of each field to create the new record
+ * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ */
+accession.prototype.handleAssociations = async function(input, context) {
+    try {
+        let promises = [];
+        if (helper.isNonEmptyArray(input.addIndividuals)) {
+            promises.push(this.add_individuals(input, context));
+        }
+        if (helper.isNonEmptyArray(input.addMeasurements)) {
+            promises.push(this.add_measurements(input, context));
+        }
+        if (helper.isNotUndefinedAndNotNull(input.addLocation)) {
+            promises.push(this.add_location(input, context));
+        }
+        if (helper.isNonEmptyArray(input.removeIndividuals)) {
+            promises.push(this.remove_individuals(input, context));
+        }
+        if (helper.isNonEmptyArray(input.removeMeasurements)) {
+            promises.push(this.remove_measurements(input, context));
+        }
+        if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {
+            promises.push(this.remove_location(input, context));
+        }
 
+        await Promise.all(promises);
+    } catch (error) {
+        throw error
+    }
+}
 `
 
 module.exports.add_assoc_to_one_fieldMutation_resolver = `
 /**
- * add_location - field Mutation for to_one associations to add 
+ * add_location - field Mutation for to_one associations to add
  *
  * @param {object} input   Info of input Ids to add  the association
  */
 accession.prototype.add_location = async function(input) {
-    await accession._addLocation(this.getIdValue(), input.addLocation);
+    await accession.add_locationId(this.getIdValue(), input.addLocation);
     this.locationId = input.addLocation;
 }
 `
 
 module.exports.remove_assoc_to_one_fieldMutation_resolver = `
 /**
- * remove_location - field Mutation for to_one associations to remove 
+ * remove_location - field Mutation for to_one associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
  */
 accession.prototype.remove_location = async function(input) {
     if (input.removeLocation === this.locationId) {
-        await accession._removeLocation(this.getIdValue(), input.removeLocation);
+        await accession.remove_locationId(this.getIdValue(), input.removeLocation);
         this.locationId = null;
     }
 }
 `
 
 module.exports.add_assoc_to_many_fieldMutation_resolver = `
-/**                                                                                                                                                                                                                
- * add_individuals - field Mutation for to_many associations to add                                                                                                                                                
- *                                                                                                                                                                                                                 
- * @param {object} input   Info of input Ids to add  the association                                                                                                                                               
- */                                                                                                                                                                                                                
-accession.prototype.add_individuals = async function(input) {                                                                                                                                                      
-    let results = [];                                                                                                                                                                                              
-    for await (associatedRecordId of input.addIndividuals) {                                                                                                                                                       
-        results.push(models.individual._addAccession(associatedRecordId, this.getIdValue()));                                                                                                                      
-    }                                                                                                                                                                                                              
-    await Promise.all(results);                                                                                                                                                                                    
+/**
+ * add_individuals - field Mutation for to_many associations to add
+ *
+ * @param {object} input   Info of input Ids to add  the association
+ */
+accession.prototype.add_individuals = async function(input) {
+    let results = [];
+    for await (associatedRecordId of input.addIndividuals) {
+        results.push(models.individual.add_accessionId(associatedRecordId, this.getIdValue()));
+    }
+    await Promise.all(results);
 }
 `
 
 module.exports.remove_assoc_to_many_fieldMutation_resolver = `
 /**
- * remove_individuals - field Mutation for to_many associations to remove 
+ * remove_individuals - field Mutation for to_many associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
  */
 accession.prototype.remove_individuals = async function(input) {
     let results = [];
     for await (associatedRecordId of input.removeIndividuals) {
-        results.push(models.individual._removeAccession(associatedRecordId, this.getIdValue()));
+        results.push(models.individual.remove_accessionId(associatedRecordId, this.getIdValue()));
     }
     await Promise.all(results);
 }
@@ -192,10 +191,10 @@ accession.prototype.remove_individuals = async function(input) {
 
 module.exports._addAssoc_to_one_fieldMutation_sql_model = `
 /**
- * _addLocation - field Mutation (model-layer) for to_one associationsArguments to add 
+ * _addLocation - field Mutation (model-layer) for to_one associationsArguments to add
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
- * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated. 
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
 static async _addLocation(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
@@ -216,13 +215,12 @@ static async _addLocation(accession_id, locationId) {
     return updated;
 }
 `
-
 module.exports._removeAssoc_to_one_fieldMutation_sql_model = `
 /**
- * _removeLocation - field Mutation (model-layer) for to_one associationsArguments to remove 
+ * _removeLocation - field Mutation (model-layer) for to_one associationsArguments to remove
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
- * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated. 
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
 static async _removeLocation(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
@@ -241,5 +239,344 @@ static async _removeLocation(accession_id, locationId) {
         }
     });
     return updated;
+}
+`
+module.exports.to_one_add =`
+/**
+ * add_location - field Mutation for to_one associations to add
+ *
+ * @param {object} input   Info of input Ids to add  the association
+ */
+accession.prototype.add_location = async function(input) {
+    await accession.add_locationId(this.getIdValue(), input.addLocation);
+    this.locationId = input.addLocation;
+}
+`
+
+module.exports.to_one_remove = `
+/**
+ * remove_location - field Mutation for to_one associations to remove
+ *
+ * @param {object} input   Info of input Ids to remove  the association
+ */
+accession.prototype.remove_location = async function(input) {
+   if (input.removeLocation === this.locationId) {
+      await accession.remove_locationId(this.getIdValue(), input.removeLocation);
+      this.locationId = null;
+    }
+}
+`
+
+module.exports.to_many_add = `
+/**
+ * add_individuals - field Mutation for to_many associations to add
+ *
+ * @param {object} input   Info of input Ids to add  the association
+ */
+accession.prototype.add_individuals = async function(input) {
+    let results = [];
+    for await (associatedRecordId of input.addIndividuals) {
+      results.push(models.individual.add_accessionId(associatedRecordId, this.getIdValue()));
+    }
+    await Promise.all(results);
+}
+`
+
+module.exports.to_many_remove = `
+/**
+ * remove_individuals - field Mutation for to_many associations to remove
+ *
+ * @param {object} input   Info of input Ids to remove  the association
+ */
+accession.prototype.remove_individuals = async function(input) {
+    let results = [];
+    for await (associatedRecordId of input.removeIndividuals) {
+        results.push(models.individual.remove_accessionId(associatedRecordId, this.getIdValue()));
+    }
+    await Promise.all(results);
+}
+`
+
+module.exports.add_assoc_ddm_model = `
+/**
+* add_locationId - field Mutation (model-layer) for to_one associationsArguments to add
+*
+* @param {Id}   accession_id   IdAttribute of the root model to be updated
+* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+*/
+static async add_locationId(accession_id, locationId) {
+let responsibleAdapter = this.adapterForIri(accession_id);
+return await adapters[responsibleAdapter].add_locationId(accession_id, locationId);
+}
+`
+
+module.exports.remove_assoc_ddm_model = `
+/**
+ * remove_locationId - field Mutation (model-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   accession_id   IdAttribute of the root model to be updated
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static async remove_locationId(accession_id, locationId) {
+  let responsibleAdapter = this.adapterForIri(accession_id);
+  return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId);
+}
+`
+
+module.exports.to_one_remove_sql_adapter =  `
+/**
+ * remove_locationId - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   accession_id   IdAttribute of the root model to be updated
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static async remove_locationId(accession_id, locationId) {
+    let updated = await sequelize.transaction(async transaction => {
+        try {
+          return super.update({locationId: null},{where: {accession_id: accession_id}}, {transaction: transaction})
+        } catch (error) {
+            throw error;
+        }
+    });
+    return updated;
+}
+`
+
+module.exports.to_one_add_sql_adapter = `
+/**
+* add_locationId - field Mutation (adapter-layer) for to_one associationsArguments to add
+*
+* @param {Id}   accession_id   IdAttribute of the root model to be updated
+* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+*/
+static async add_locationId(accession_id, locationId) {
+   let updated = await sequelize.transaction(async transaction => {
+       try {
+         return super.update({locationId: locationId},{where: {accession_id: accession_id}}, {transaction: transaction})
+       } catch (error) {
+           throw error;
+       }
+   });
+   return updated;
+}
+`
+
+module.exports.to_one_add_cenz_adapter = `
+/**
+* add_locationId - field Mutation (adapter-layer) for to_one associationsArguments to add
+*
+* @param {Id}   accession_id   IdAttribute of the root model to be updated
+* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+*/
+static async add_locationId(accession_id, locationId){
+let query = \`
+  mutation
+    updateAccession{
+      updateAccession(
+        accession_id:"\${accession_id}"
+        addLocation:"\${locationId}"
+        skipAssociationsExistenceChecks: true
+      ){
+        accession_id
+        locationId
+      }
+    }\`
+    return axios.post(remoteCenzontleURL, {
+        query: query
+    }).then(res => {
+        //check
+        if (res && res.data && res.data.data) {
+            return res.data.data.updateAccession;
+        } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+}
+`
+
+module.exports.to_one_remove_cenz_adapter = `
+/**
+ * remove_locationId - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   accession_id   IdAttribute of the root model to be updated
+ * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static async remove_locationId(accession_id, locationId){
+  let query = \`
+    mutation
+      updateAccession{
+        updateAccession(
+          accession_id:"\${accession_id}"
+          removeLocation:"\${locationId}"
+          skipAssociationsExistenceChecks: true
+        ){
+          accession_id
+          locationId
+        }
+      }\`
+      return axios.post(remoteCenzontleURL, {
+          query: query
+      }).then(res => {
+          //check
+          if (res && res.data && res.data.data) {
+              return res.data.data.updateAccession;
+          } else {
+              throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+          }
+      }).catch(error => {
+          error['url'] = remoteCenzontleURL;
+          handleError(error);
+      });
+}
+`
+module.exports.add_one_resolver = `
+/**
+ * addAccession - Check user authorization and creates a new record with data specified in the input argument
+ *
+ * @param  {object} input   Info of each field to create the new record
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {object}         New record created
+ */
+ addAccession: async function(input, context) {
+     //check: input has idAttribute
+     if (!input.accession_id) {
+         throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
+     }
+     //check: adapters auth
+     try {
+         let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'create');
+         if (authorizationCheck === true) {
+           let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            if(!input.skipAssociationsExistenceChecks) {
+              await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+            }
+           let createdRecord = await accession.addOne(inputSanitized);
+           await createdRecord.handleAssociations(inputSanitized, context);
+           return createdRecord;
+         } else { //adapter not auth
+             throw new Error("You don't have authorization to perform this action on adapter");
+         }
+     } catch (error) {
+         console.error(error);
+         handleError(error);
+     }
+ }
+`
+
+module.exports.update_one_resolver = `
+/**
+ * updateAccession - Check user authorization and update the record specified in the input argument
+ *
+ * @param  {object} input   record to update and new info to update
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {object}         Updated record
+ */
+ updateAccession: async function(input, context) {
+   //check: input has idAttribute
+   if (! input.accession_id) {
+     throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
+   }
+      //check: adapters auth
+       try {
+           let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'update');
+           if (authorizationCheck === true) {
+             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+              await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
+              await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+              if(!input.skipAssociationsExistenceChecks) {
+                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+              }
+               let updatedRecord = await accession.updateOne(inputSanitized);
+               await updatedRecord.handleAssociations(inputSanitized, context);
+               return updatedRecord;
+           } else {//adapter not auth
+               throw new Error("You don't have authorization to perform this action on adapter");
+           }
+       } catch (error) {
+           console.error(error);
+           handleError(error);
+       }
+   }
+`
+
+module.exports.add_one_cenz_adapter = `
+static addOne(input) {
+    let query = \`
+    mutation addAccession(
+      $accession_id:ID!
+      $collectors_name:String
+      $collectors_initials:String
+      $sampling_date:Date
+    ){
+      addAccession(
+      accession_id:$accession_id
+      collectors_name:$collectors_name
+      collectors_initials:$collectors_initials
+      sampling_date:$sampling_date){
+        accession_id
+        collectors_name
+        collectors_initials
+        sampling_date
+        locationId
+      }
+    }\`;
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: input
+    }).then(res => {
+        //check
+        if (res && res.data && res.data.data) {
+            return res.data.data.addAccession;
+        } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
+}
+`
+
+module.exports.update_one_cenz_adapter = `
+static updateOne(input) {
+    let query = \`
+      mutation
+        updateAccession(
+          $accession_id:ID!
+          $collectors_name:String
+          $collectors_initials:String
+          $sampling_date:Date){
+          updateAccession(
+            accession_id:$accession_id
+            collectors_name:$collectors_name
+            collectors_initials:$collectors_initials
+            sampling_date:$sampling_date
+          ){
+            accession_id
+            collectors_name
+            collectors_initials
+            sampling_date
+            locationId
+          }
+        }\`
+    return axios.post(remoteCenzontleURL, {
+        query: query,
+        variables: input
+    }).then(res => {
+        //check
+        if (res && res.data && res.data.data) {
+            return res.data.data.updateAccession;
+        } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    }).catch(error => {
+        error['url'] = remoteCenzontleURL;
+        handleError(error);
+    });
 }
 `
