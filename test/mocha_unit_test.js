@@ -675,15 +675,6 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  // Check for changes!
-  it('HasOne implementation in model - researcher', async function(){
-    let opts = funks.getOptions(models.researcher);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.hasOne_model.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
   it('HasOne implementation in resolver - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
@@ -1133,14 +1124,6 @@ describe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Add to-one association foreign key in target', async function(){
-    let opts = funks.getOptions(models.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.to_add_unique_pet.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
   it('Remove to-one association foreign key in source', async function(){
     let opts = funks.getOptions(models.transcript_count);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -1148,15 +1131,6 @@ describe('Extend api model layer associations', function(){
     let test_model = data_test.remove_individual.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
-
-  it('Remove to-one association foreign key in target', async function(){
-    let opts = funks.getOptions(models.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.remove_unique_pet.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
 });
 
 describe('Create and update transaction', function(){

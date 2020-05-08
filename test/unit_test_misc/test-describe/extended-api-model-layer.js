@@ -42,33 +42,6 @@ async _addTranscript_counts( ids ){
 }
 `
 
-module.exports.to_add_unique_pet = `
-/**
-     * add_personId - field Mutation (model-layer) for to_one associationsArguments to add 
-     *
-     * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated. 
-     */
-    static async add_personId(id, personId) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return Person.update({
-                    personId: personId
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
-`
-
 module.exports.to_add_trough_table = `
 
 async _addAuthors(ids){
@@ -119,33 +92,6 @@ async _removeTranscript_counts( ids ){
    });
 }
 
-`
-
-module.exports.remove_unique_pet = `
-/**
-     * remove_personId - field Mutation (model-layer) for to_one associationsArguments to remove 
-     *
-     * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated. 
-     */
-    static async remove_personId(id, personId) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return Person.update({
-                    personId: null
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
 `
 
 module.exports.remove_trough_table = `

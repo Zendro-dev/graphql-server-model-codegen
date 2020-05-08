@@ -1,20 +1,22 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-  /**
-  * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
-  *
-  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
-  * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
-  */
-  static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
-    let updated = await sequelize.transaction(async transaction => {
-      try {
-        return <%- name -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%>}}, {transaction: transaction})
-      } catch (error) {
-          throw error;
-      }
-    });
-    return updated;
-  }
+  <% if (associationsArguments["to_one"][i].keyIn === name) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+    */
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      let updated = await sequelize.transaction(async transaction => {
+        try {
+          return <%- name -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%>}}, {transaction: transaction})
+        } catch (error) {
+            throw error;
+        }
+      });
+      return updated;
+    }
+  <%} -%>
 <%}-%>
 <%for(let i=0; i < associationsArguments["to_many_through_sql_cross_table"].length; i++){-%>
   /**
