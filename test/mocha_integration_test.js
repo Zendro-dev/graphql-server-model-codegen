@@ -515,8 +515,6 @@ describe(
                                                                              `addIndividual: ${plantId}) ` +
                                                                              '{id gene individual { id name } } }');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
-        console.log("RESPONSEEEEEE", tcResBody);
-        console.log("RES: **************", res);
         expect(res.statusCode).to.equal(200);
         expect(tcResBody).to.deep.equal({
             data: {
