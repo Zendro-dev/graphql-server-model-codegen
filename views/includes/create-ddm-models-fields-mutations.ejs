@@ -1,4 +1,5 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+    <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
   /**
   * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
   *
@@ -9,4 +10,5 @@
     let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
     return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>);
   }
+  <%}-%>
 <%}-%>
