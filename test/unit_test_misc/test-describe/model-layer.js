@@ -160,7 +160,9 @@ module.exports.add_one_resolver = `
                 let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
                 await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
                 await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef)
+                if(!input.skipAssociationsExistenceChecks) {
+                    await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+                }
                 let createdBook = await book.addOne(inputSanitized);
                 await createdBook.handleAssociations(inputSanitized, context);
                 return createdBook;
@@ -263,7 +265,9 @@ updateBook: async function(input, context) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);                                                                                                
             await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);                                                                               
             await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);                                                                                                
-            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);                                                                                                        
+            if(!input.skipAssociationsExistenceChecks) {
+                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+            }                                                                                                      
             let updatedBook = await book.updateOne(inputSanitized);                                                                                                                                            
             await updatedBook.handleAssociations(inputSanitized, context);                                                                                                                                     
             return updatedBook;                                                                                                                                                                                

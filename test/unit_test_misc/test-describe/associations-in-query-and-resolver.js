@@ -1,6 +1,6 @@
 module.exports.person_schema = `
-addPerson( firstName: String, lastName: String, email: String , addDogs:[ID], addBooks:[ID] ): Person!
-updatePerson(id: ID!, firstName: String, lastName: String, email: String , addDogs:[ID], removeDogs:[ID] , addBooks:[ID], removeBooks:[ID] ): Person!
+addPerson( firstName: String, lastName: String, email: String , addDogs:[ID], addBooks:[ID], skipAssociationsExistenceChecks:Boolean = false ): Person!
+updatePerson(id: ID!, firstName: String, lastName: String, email: String , addDogs:[ID], removeDogs:[ID] , addBooks:[ID], removeBooks:[ID], skipAssociationsExistenceChecks:Boolean = false ): Person!
 
 `
 
