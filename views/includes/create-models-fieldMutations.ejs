@@ -1,5 +1,5 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-  <% if (associationsArguments["to_one"][i].keyIn === name) { -%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
     /**
     * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
     *

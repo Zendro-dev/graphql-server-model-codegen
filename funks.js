@@ -617,7 +617,9 @@ validateJsonFile =  function(opts){
             //}else if(associations_type["one"].includes(association.type))
             } else if(association.type === 'to_one') {
               associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
-              holdsTheForeignKey = true;
+              if (association.keyIn !== association.target) {
+                holdsTheForeignKey = true;
+              } 
             } else if(association.type === 'to_many_through_sql_cross_table') {
               if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
                 console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
