@@ -507,12 +507,6 @@ describe(
         expect(resBody.data.addIndividual.name).equal("IncredibleMaizePlantOne");
         let plantId = resBody.data.addIndividual.id;
 
-        console.log('New ID: ' + plantId);
-
-        res = itHelpers.request_graph_ql_post(`{ readOneIndividual(id : ${plantId}) {id name}`);
-        resBody = JSON.parse(res.body.toString('utf8'));
-        console.log(JSON.stringify(resBody));
-
         // Create TranscriptCount with above Plant assigned as Individual
         res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene D", ' +
                                                                              'variable: "RPKM", ' +
@@ -521,7 +515,6 @@ describe(
                                                                              `addIndividual: ${plantId}) ` +
                                                                              '{id gene individual { id name } } }');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
-        console.log(JSON.stringify(tcResBody));
     
         expect(res.statusCode).to.equal(200);
         expect(tcResBody).to.deep.equal({
