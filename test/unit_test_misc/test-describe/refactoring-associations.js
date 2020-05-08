@@ -152,7 +152,7 @@ module.exports.remove_assoc_to_one_fieldMutation_resolver = `
  * @param {object} input   Info of input Ids to remove  the association
  */
 accession.prototype.remove_location = async function(input) {
-    if (input.removeLocation === this.locationId) {
+    if (input.removeLocation == this.locationId) {
         await accession.remove_locationId(this.getIdValue(), input.removeLocation);
         this.locationId = null;
     }
@@ -191,12 +191,12 @@ accession.prototype.remove_individuals = async function(input) {
 
 module.exports._addAssoc_to_one_fieldMutation_sql_model = `
 /**
- * _addLocation - field Mutation (model-layer) for to_one associationsArguments to add
+ * add_locationId - field Mutation (model-layer) for to_one associationsArguments to add
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
-static async _addLocation(accession_id, locationId) {
+static async add_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
         try {
             return Accession.update({
@@ -217,12 +217,12 @@ static async _addLocation(accession_id, locationId) {
 `
 module.exports._removeAssoc_to_one_fieldMutation_sql_model = `
 /**
- * _removeLocation - field Mutation (model-layer) for to_one associationsArguments to remove
+ * remove_locationId - field Mutation (model-layer) for to_one associationsArguments to remove
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  */
-static async _removeLocation(accession_id, locationId) {
+static async remove_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
         try {
             return Accession.update({
@@ -260,7 +260,7 @@ module.exports.to_one_remove = `
  * @param {object} input   Info of input Ids to remove  the association
  */
 accession.prototype.remove_location = async function(input) {
-   if (input.removeLocation === this.locationId) {
+   if (input.removeLocation == this.locationId) {
       await accession.remove_locationId(this.getIdValue(), input.removeLocation);
       this.locationId = null;
     }

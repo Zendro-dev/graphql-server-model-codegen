@@ -1,11 +1,11 @@
 module.exports.to_add_individual = `
 /**
-     * _addIndividual - field Mutation (model-layer) for to_one associationsArguments to add 
+     * add_individual_id - field Mutation (model-layer) for to_one associationsArguments to add
      *
      * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   individual_id Foreign Key (stored in "Me") of the Association to be updated. 
+     * @param {Id}   individual_id Foreign Key (stored in "Me") of the Association to be updated.
      */
-    static async _addIndividual(id, individual_id) {
+    static async add_individual_id(id, individual_id) {
         let updated = await sequelize.transaction(async transaction => {
             try {
                 return transcript_count.update({
@@ -42,33 +42,6 @@ async _addTranscript_counts( ids ){
 }
 `
 
-module.exports.to_add_dog = `
-/**
-     * _addDog - field Mutation (model-layer) for to_one associationsArguments to add 
-     *
-     * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated. 
-     */
-    static async _addDog(id, personId) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return Person.update({
-                    personId: personId
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
-`
-
 module.exports.to_add_trough_table = `
 
 async _addAuthors(ids){
@@ -86,12 +59,12 @@ async _addAuthors(ids){
 
 module.exports.remove_individual = `
 /**
-     * _removeIndividual - field Mutation (model-layer) for to_one associationsArguments to remove 
+     * remove_individual_id - field Mutation (model-layer) for to_one associationsArguments to remove
      *
      * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   individual_id Foreign Key (stored in "Me") of the Association to be updated. 
+     * @param {Id}   individual_id Foreign Key (stored in "Me") of the Association to be updated.
      */
-    static async _removeIndividual(id, individual_id) {
+    static async remove_individual_id(id, individual_id) {
         let updated = await sequelize.transaction(async transaction => {
             try {
                 return transcript_count.update({
@@ -119,33 +92,6 @@ async _removeTranscript_counts( ids ){
    });
 }
 
-`
-
-module.exports.remove_dog = `
-/**
-     * _removeDog - field Mutation (model-layer) for to_one associationsArguments to remove 
-     *
-     * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated. 
-     */
-    static async _removeDog(id, personId) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return Person.update({
-                    personId: null
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
 `
 
 module.exports.remove_trough_table = `
