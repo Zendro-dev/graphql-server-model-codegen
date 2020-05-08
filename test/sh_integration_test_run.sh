@@ -166,7 +166,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/adapters" \
               $TARGET_DIR_INSTANCE2"/validations" \
               $TARGET_DIR_INSTANCE2"/patches")
 MANPAGE="./man/sh_integration_test_run.man"
-T1=300
+T1=180
 DO_DEFAULT=true
 KEEP_RUNNING=false
 NUM_ARGS=$#
