@@ -38,18 +38,25 @@ static readAll(search, order, pagination) {
 `
 module.exports.count_records = `
 static countRecords(search) {
-  let query = \`query countBooks($search: searchBookInput ){
-    countBooks(search: $search) }\`
+        let query = \`query countBooks($search: searchBookInput){
+      countBooks(search: $search)
+    }\`
 
-    return axios.post(url, {query:query, variables:{
-      search: search
-    }}).then( res =>{
-      return res.data.data.countBooks;
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
-}
+        return axios.post(url, {
+            query: query,
+            variables: {
+                search: search
+            }
+        }).then(res => {
+            return {
+                sum: res.data.data.countBooks,
+                errors: []
+            };
+        }).catch(error => {
+            error['url'] = url;
+            handleError(error);
+        });
+    }
 `
 
 module.exports.add_one = `
@@ -187,8 +194,8 @@ const definition = {
 
 module.exports.many_to_many_association_count = `
 static countRecords(search) {
-        let query = \`query countPeople(\$search: searchPersonInput){
-      countPeople(search: \$search)
+        let query = \`query countPeople($search: searchPersonInput){
+      countPeople(search: $search)
     }\`
 
         return axios.post(url, {
@@ -197,7 +204,10 @@ static countRecords(search) {
                 search: search
             }
         }).then(res => {
-            return res.data.data.countPeople;
+            return {
+                sum: res.data.data.countPeople,
+                errors: []
+            };
         }).catch(error => {
             error['url'] = url;
             handleError(error);

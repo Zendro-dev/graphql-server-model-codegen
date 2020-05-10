@@ -10,6 +10,9 @@ package-lock.json
 migrations
 models
 models-webservice
+models-distributed
+models-cenz-server
+adapters
 resolvers
 schemas
 TestConcept.js

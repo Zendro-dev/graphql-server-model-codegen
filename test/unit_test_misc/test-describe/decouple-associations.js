@@ -184,7 +184,7 @@ individual.prototype.transcript_countsFilter = function({
 }
 `
 module.exports.countAssociated_model = `
-static countRecords(search) {
+static async countRecords(search) {
         let options = {};
         if (search !== undefined) {
 
@@ -197,7 +197,10 @@ static countRecords(search) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
-        return super.count(options);
+        return {
+            sum: await super.count(options),
+            errors: []
+        };
     }
 `
 

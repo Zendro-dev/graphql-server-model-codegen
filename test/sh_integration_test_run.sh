@@ -141,17 +141,30 @@ set -e
 DOCKER_SERVICES=(gql_postgres \
                  gql_science_db_graphql_server \
                  gql_ncbi_sim_srv)
-TEST_MODELS="./test/integration_test_models"
-TARGET_DIR="./docker/integration_test_run"
-CODEGEN_DIRS=("./docker/integration_test_run/models" \
-              "./docker/integration_test_run/models-distributed" \
-              "./docker/integration_test_run/models-webservice" \
-              "./docker/integration_test_run/models-cenz-server"
-              "./docker/integration_test_run/migrations" \
-              "./docker/integration_test_run/schemas" \
-              "./docker/integration_test_run/resolvers" \
-              "./docker/integration_test_run/validations" \
-              "./docker/integration_test_run/patches")
+TEST_MODELS_INSTANCE1="./test/integration_test_models_instance1"
+TEST_MODELS_INSTANCE2="./test/integration_test_models_instance2"
+TARGET_DIR_INSTANCE1="./docker/integration_test_run/instance1"
+TARGET_DIR_INSTANCE2="./docker/integration_test_run/instance2"
+CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/adapters" \
+              $TARGET_DIR_INSTANCE1"/models" \
+              $TARGET_DIR_INSTANCE1"/models-distributed" \
+              $TARGET_DIR_INSTANCE1"/models-webservice" \
+              $TARGET_DIR_INSTANCE1"/models-cenz-server"
+              $TARGET_DIR_INSTANCE1"/migrations" \
+              $TARGET_DIR_INSTANCE1"/schemas" \
+              $TARGET_DIR_INSTANCE1"/resolvers" \
+              $TARGET_DIR_INSTANCE1"/validations" \
+              $TARGET_DIR_INSTANCE1"/patches" \
+              $TARGET_DIR_INSTANCE2"/adapters" \
+              $TARGET_DIR_INSTANCE2"/models" \
+              $TARGET_DIR_INSTANCE2"/models-distributed" \
+              $TARGET_DIR_INSTANCE2"/models-webservice" \
+              $TARGET_DIR_INSTANCE2"/models-cenz-server"
+              $TARGET_DIR_INSTANCE2"/migrations" \
+              $TARGET_DIR_INSTANCE2"/schemas" \
+              $TARGET_DIR_INSTANCE2"/resolvers" \
+              $TARGET_DIR_INSTANCE2"/validations" \
+              $TARGET_DIR_INSTANCE2"/patches")
 MANPAGE="./man/sh_integration_test_run.man"
 T1=180
 DO_DEFAULT=true
@@ -212,15 +225,16 @@ checkCode() {
   do
     # Check if directory exists
     if [ -d $i ]; then
+      echo -e "Code directory ${LGREEN}$i${NC} exists."
 
       # Check if directory is empty
-      if [ -n "$(ls -A ${i} 2>/dev/null)" ]; then
-        echo -e "@@ Code at: $i ... ${LGREEN}ok${NC}"
-      else
-        echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} exists but is empty!, please try -T option ... ${YEL}exit${NC}"
-        echo -e "${LGRAY}---------------------------- @@${NC}\n"
-        exit 0
-      fi
+      #if [ -n "$(ls -A ${i} 2>/dev/null)" ]; then
+      #  echo -e "@@ Code at: $i ... ${LGREEN}ok${NC}"
+      #else
+      #  echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} exists but is empty!, please try -T option ... ${YEL}exit${NC}"
+      #  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+      #  exit 0
+      #fi
     else
       echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} does not exists!, please try -T option ... ${YEL}exit${NC}"
       echo -e "${LGRAY}---------------------------- @@${NC}\n"
@@ -338,7 +352,23 @@ waitForGql() {
   done
 
   # Msg
-  echo -e "@@ GraphQL server is up! ... ${LGREEN}done${NC}"
+  echo -e "@@ First GraphQL server is up! ... ${LGREEN}done${NC}"
+  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+
+  until curl 'localhost:3030/graphql' > /dev/null 2>&1
+  do
+    if [ $waited == $T1 ]; then
+      # Msg: error
+      echo -e "!!${RED}ERROR${NC}: science-db graphql web server does not start, the wait time limit was reached ($T1).\n"
+      echo -e "${LGRAY}---------------------------- @@${NC}\n"
+      exit 0
+    fi
+    sleep 2
+    waited=$(expr $waited + 2)
+  done
+
+  # Msg
+  echo -e "@@ Second GraphQL server is up! ... ${LGREEN}done${NC}"
   echo -e "${LGRAY}---------------------------- @@${NC}\n"
 }
 
@@ -358,18 +388,19 @@ genCode() {
   echo -e "@@ Installing ... ${LGREEN}done${NC}"
 
   # Generate
-  node ./index.js -f ${TEST_MODELS} -o ${TARGET_DIR}
+  node ./index.js -f ${TEST_MODELS_INSTANCE1} -o ${TARGET_DIR_INSTANCE1}
+  node ./index.js -f ${TEST_MODELS_INSTANCE2} -o ${TARGET_DIR_INSTANCE2}
 
   # Patch the resolver for web-server
-  #patch -V never ${TARGET_DIR}/resolvers/aminoacidsequence.js ./docker/ncbi_sim_srv/amino_acid_sequence_resolver.patch
-  patch -V never ${TARGET_DIR}/models-webservice/aminoacidsequence.js ./docker/ncbi_sim_srv/model_aminoacidsequence.patch
+  #patch -V never ${TARGET_DIR_INSTANCE1}/resolvers/aminoacidsequence.js ./docker/ncbi_sim_srv/amino_acid_sequence_resolver.patch
+  patch -V never ${TARGET_DIR_INSTANCE1}/models-webservice/aminoacidsequence.js ./docker/ncbi_sim_srv/model_aminoacidsequence.patch
   # Add monkey-patching validation with AJV
-  patch -V never ${TARGET_DIR}/validations/individual.js ./test/integration_test_misc/individual_validate.patch
+  patch -V never ${TARGET_DIR_INSTANCE1}/validations/individual.js ./test/integration_test_misc/individual_validate.patch
   # Add patch for model webservice association
-  # patch -V never ${TARGET_DIR}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
+  # patch -V never ${TARGET_DIR_INSTANCE1}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
 
   # Msg
-  echo -e "@@ Code generated on ${TARGET_DIR}: ... ${LGREEN}done${NC}"
+  echo -e "@@ Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}: ... ${LGREEN}done${NC}"
   echo -e "${LGRAY}---------------------------- @@${NC}\n"
 }
 

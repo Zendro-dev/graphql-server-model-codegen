@@ -1,5 +1,5 @@
 module.exports.count_in_sequelize_model = `
-static countRecords(search) {
+static async countRecords(search) {
         let options = {};
         if (search !== undefined) {
 
@@ -12,7 +12,10 @@ static countRecords(search) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
-        return super.count(options);
+        return {
+            sum: await super.count(options),
+            errors: []
+        };
     }
 `
 
@@ -28,26 +31,26 @@ static countRecords(search){
 
 module.exports.count_in_resolvers = `
 /**
- * countDogs - Counts number of records that holds the conditions specified in the search argument
- *
- * @param  {object} {search} Search argument for filtering records
- * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {number}          Number of records that holds the conditions specified in the search argument
- */
-countDogs: function({
-    search
-}, context) {
-    return checkAuthorization(context, 'Dog', 'read').then(authorization => {
-        if (authorization === true) {
-            return dog.countRecords(search);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+     * countDogs - Counts number of records that holds the conditions specified in the search argument
+     *
+     * @param  {object} {search} Search argument for filtering records
+     * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {number}          Number of records that holds the conditions specified in the search argument
+     */
+    countDogs: async function({
+        search
+    }, context) {
+        return await checkAuthorization(context, 'Dog', 'read').then(async authorization => {
+            if (authorization === true) {
+                return (await dog.countRecords(search)).sum;
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        }).catch(error => {
+            console.error(error);
+            handleError(error);
+        })
+    },
 `
 module.exports.read_all = `
 static readAll(search, order, pagination) {

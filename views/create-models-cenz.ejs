@@ -54,7 +54,7 @@ module.exports = class <%- name -%>{
     }`
 
     return axios.post(url, {query:query, variables:{search: search}}).then(res=>{
-      return res.data.data.count<%- namePlCp -%>;
+      return {sum: res.data.data.count<%- namePlCp -%>, errors: []};
     }).catch(error =>{
       error['url'] = url;
       handleError(error);
