@@ -1533,3 +1533,52 @@ describe(
         expect(cnt).to.equal(0);
     })
   });
+
+  describe('Cenzontle Webservice Data Models', function() {
+    it('01. Create one accession', function() {
+        let res = itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "cenz_1-to-instance1" collectors_name:"me"){ accession_id collectors_name}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            addAccession: {
+              accession_id: "cenz_1-to-instance1",
+              collectors_name: "me"
+            }
+          }
+        });
+    });
+
+    it('02. Read one accession', function() {
+        let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id: "cenz_1-to-instance1"){ accession_id collectors_name}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            readOneAccession: {
+              accession_id: "cenz_1-to-instance1",
+              collectors_name: "me"
+            }
+          }
+        });
+    });
+
+    it('03. Update one accession', function() {
+        let res = itHelpers.request_graph_ql_post_instance2('mutation {updateAccession(accession_id: "cenz_1-to-instance1" collectors_name:"someone_else"){ accession_id collectors_name}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            updateAccession: {
+              accession_id: "cenz_1-to-instance1",
+              collectors_name: "someone_else"
+            }
+          }
+        });
+    });
+
+
+  });
