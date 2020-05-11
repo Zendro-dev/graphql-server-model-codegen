@@ -3,7 +3,7 @@
     "storageType" : "cenzontle-webservice-adapter",
     "adapterName": "person_instance2",
     "regex": "instance2",
-    "url": "",
+    "url": "http://server2:3030/graphql",
     "attributes" : {
       "name" : "String",
       "person_id": "String"

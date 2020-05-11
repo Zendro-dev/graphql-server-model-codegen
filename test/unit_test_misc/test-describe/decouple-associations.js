@@ -42,7 +42,7 @@ dog.prototype.researcher = async function({
 `
 
 module.exports.belongsTo_model = `
-static async _addResearcher(id, researcherId) {
+static async add_researcherId(id, researcherId) {
         let updated = await sequelize.transaction(async transaction => {
             try {
                 return Dog.update({
@@ -103,26 +103,6 @@ researcher.prototype.dog = async function({
         };
     }
 }
-`
-module.exports.hasOne_model = `
-static async _addDog(id, researcherId) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return Researcher.update({
-                    researcherId: researcherId
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
 `
 
 module.exports.belongsTo_schema = `

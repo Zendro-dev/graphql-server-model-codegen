@@ -4,11 +4,15 @@ module.exports.server_url = `
 
 module.exports.read_by_id = `
 static readById(id) {
-  let query = \`query readOneBook{ readOneBook(id: \${id}){id  title genre publisher_id} }\`
+  let query = \`query readOneBook{ readOneBook(id: "\${id}"){id  title genre publisher_id} }\`
 
   return axios.post(url,{query:query}).then( res => {
-    let data = res.data.data.readOneBook;
-    return new Book(data);
+    //check
+    if(res&&res.data&&res.data.data) {
+      return new Book(res.data.data.readOneBook);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
   }).catch( error =>{
     error['url'] = url;
     handleError(error);
@@ -27,8 +31,13 @@ static readAll(search, order, pagination) {
    order: order,
    pagination: pagination
  }}).then( res => {
-    let data = res.data.data.books;
-    return data.map(item => {return new Book(item)});
+    //check
+    if(res&&res.data&&res.data.data) {
+      let data = res.data.data.books;
+      return data.map(item => {return new Book(item)});
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
   }).catch( error =>{
     error['url'] = url;
     handleError(error);
@@ -61,13 +70,17 @@ static countRecords(search) {
 
 module.exports.add_one = `
 static addOne(input) {
-  let query = \`mutation addBook($title:String $genre:String $addPublisher:ID $addAuthors: [ID]){
-    addBook(title:$title genre:$genre addPublisher:$addPublisher addAuthors:$addAuthors){id  title genre publisher_id   }
+  let query = \`mutation addBook($title:String $genre:String){
+    addBook(title:$title genre:$genre){id  title genre publisher_id   }
   }\`;
 
   return axios.post(url, {query: query, variables: input}).then( res =>{
-    let data = res.data.data.addBook;
-    return new Book(data);
+    //check
+    if (res && res.data && res.data.data) {
+        return new Book(res.data.data.addBook);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
   }).catch(error =>{
     error['url'] = url;
     handleError(error);
@@ -76,26 +89,36 @@ static addOne(input) {
 `
 module.exports.delete_by_id = `
 static deleteOne(id) {
-  let query = \`mutation deleteBook{ deleteBook(id:\${id})}\`;
+  let query = \`mutation deleteBook{ deleteBook(id: "\${id}" )}\`;
 
-  return axios.post(url, {query: query}).then(res =>{
-    return res.data.data.deleteBook;
+  return axios.post(url, {query: query}).then(res => {
+      //check
+      if (res && res.data && res.data.data) {
+          return res.data.data.deleteBook;
+      } else {
+          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      }
   }).catch(error => {
-    error['url'] = url;
-    handleError(error);
+      error['url'] = url;
+      handleError(error);
   });
 }
+
 `
 
 module.exports.update_one = `
 static updateOne(input) {
-  let query = \`mutation updateBook($id:ID! $title:String $genre:String $addPublisher:ID $removePublisher:ID $addAuthors: [ID] $removeAuthors:[ID] ){
-    updateBook(id:$id title:$title genre:$genre addPublisher:$addPublisher removePublisher:$removePublisher addAuthors:$addAuthors removeAuthors:$removeAuthors  ){id  title genre publisher_id  }
+  let query = \`mutation updateBook($id:ID! $title:String $genre:String){
+    updateBook(id:$id title:$title genre:$genre){id  title genre publisher_id  }
   }\`
 
   return axios.post(url, {query: query, variables: input}).then(res=>{
-    let data = res.data.data.updateBook;
-    return new Book(data);
+    //check
+    if (res && res.data && res.data.data) {
+        return new Book(res.data.data.updateBook);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
   }).catch(error =>{
     error['url'] = url;
     handleError(error);
@@ -213,4 +236,69 @@ static countRecords(search) {
             handleError(error);
         });
     }
+`
+
+module.exports.add_personId = `
+/**
+ * add_personId - field Mutation (adapter-layer) for to_one associationsArguments to add
+ *
+ * @param {Id}   id   IdAttribute of the root model to be updated
+ * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static add_personId(id, personId) {
+  let query = \`
+      mutation
+        updateDog{
+          updateDog(
+            id:"\${id}"
+            addOwner:"\${personId}"
+          ){
+            id                  personId                }
+        }\`
+  return axios.post(url, {
+      query: query
+  }).then(res => {
+      //check
+      if (res && res.data && res.data.data) {
+          return new Dog(res.data.data.updateDog);
+      } else {
+          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      }
+  }).catch(error => {
+      error['url'] = url;
+      handleError(error);
+  });
+}
+`
+module.exports.remove_personId = `
+/**
+ * remove_personId - field Mutation (adapter-layer) for to_one associationsArguments to remove
+ *
+ * @param {Id}   id   IdAttribute of the root model to be updated
+ * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated.
+ */
+static remove_personId(id, personId) {
+  let query = \`
+      mutation
+        updateDog{
+          updateDog(
+            id:"\${id}"
+            removeOwner:"\${personId}"
+          ){
+            id                  personId                }
+        }\`
+  return axios.post(url, {
+      query: query
+  }).then(res => {
+      //check
+      if (res && res.data && res.data.data) {
+          return new Dog(res.data.data.updateDog);
+      } else {
+          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      }
+  }).catch(error => {
+      error['url'] = url;
+      handleError(error);
+  });
+}
 `

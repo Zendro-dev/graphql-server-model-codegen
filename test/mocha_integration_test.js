@@ -318,7 +318,7 @@ describe(
             }
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -343,7 +343,7 @@ describe(
           errors: []
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {names}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {names}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {names}}`], '.', null);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -374,7 +374,7 @@ describe(
             ]
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.data', null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -398,20 +398,20 @@ describe(
             ]
         );
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.~data', null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
             data: null,
-            errors: [{message: 
+            errors: [{message:
                 "jq: error: syntax error, unexpected INVALID_CHARACTER (Unix shell quoting issues?) at <top-level>, line 1:\n.~data \njq: error: try .[\"field\"] instead of .field for unusually named fields at <top-level>, line 1:\n.~data\njq: 2 compile errors\n"}]
         });
 
 
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$');
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -436,7 +436,7 @@ describe(
           errors: []
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$.data');
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -460,7 +460,7 @@ describe(
             ]
         );
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$~data');
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -471,7 +471,7 @@ describe(
         });
 
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
         `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', '$');
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -481,7 +481,7 @@ describe(
             errors: [{message: "State either 'jq' or 'jsonPath' expressions, never both. - jq is . and jsonPath is $"}]
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`, 
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
         `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -515,7 +515,6 @@ describe(
                                                                              `addIndividual: ${plantId}) ` +
                                                                              '{id gene individual { id name } } }');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
-    
         expect(res.statusCode).to.equal(200);
         expect(tcResBody).to.deep.equal({
             data: {
@@ -533,7 +532,7 @@ describe(
 
   it('20. TranscriptCount - Deleting a record with associations fails', function() {
 
-      let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');    
+      let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
       res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: 4) }`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(500);
@@ -721,6 +720,10 @@ describe(
                     }
                 }
             });
+
+            res = itHelpers.request_graph_ql_post(`mutation { updateTranscript_count(id: ${tcId}, removeAminoacidsequence: 63165) {id aminoacidsequence{id}}}`);
+            resBody = JSON.parse(res.body.toString('utf8'));
+            expect(res.statusCode).to.equal(200);
         });
 });
 
@@ -861,4 +864,34 @@ describe(
               })
           });
 
+  });
+
+  describe('Distributed Data Models', function() {
+    it('01. Create a person and a dog', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data:{
+                addPerson:{
+                    person_id:"instance1-01",
+                    name:"Anthony"
+                }
+            }
+        });
+
+        res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-01" name: "Benji") {dog_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data:{
+                addDog:{
+                    dog_id:"instance2-01",
+                    name:"Benji"
+                }
+            }
+        });
+
+    });
   });

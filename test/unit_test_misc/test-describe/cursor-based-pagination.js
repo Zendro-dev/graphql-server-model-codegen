@@ -425,20 +425,25 @@ booksConnection(search:$search pagination:$pagination order:$order){ edges{curso
           pagination: pagination
       }
   }).then(res => {
-      let data_edges = res.data.data.booksConnection.edges;
-      let pageInfo = res.data.data.booksConnection.pageInfo;
+      //check
+      if(res&&res.data&&res.data.data) {
+        let data_edges = res.data.data.booksConnection.edges;
+        let pageInfo = res.data.data.booksConnection.pageInfo;
 
-      let edges = data_edges.map(e => {
-          return {
-              node: new Book(e.node),
-              cursor: e.cursor
-          }
-      })
+        let edges = data_edges.map(e => {
+            return {
+                node: new Book(e.node),
+                cursor: e.cursor
+            }
+        })
 
-      return {
-          edges,
-          pageInfo
-      };
+        return {
+            edges,
+            pageInfo
+        };
+      } else {
+        throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      }
   }).catch(error => {
       error['url'] = url;
       handleError(error);
@@ -450,12 +455,10 @@ module.exports.many_to_many_association_connection_cenz_server = `
 static updateOne(input) {
         let query = \`mutation updatePerson($id:ID!        $firstName:String
             $lastName:String
-            $email:String
-       $addCompany:ID $removeCompany:ID  $addWorks:[ID] $removeWorks:[ID] ){
+            $email:String){
        updatePerson(id:$id           firstName:$firstName
                   lastName:$lastName
-                  email:$email
-          addCompany:$addCompany removeCompany:$removeCompany   addWorks:$addWorks removeWorks:$removeWorks ){
+                  email:$email){
           id            firstName
                     lastName
                     email
@@ -467,8 +470,12 @@ static updateOne(input) {
             query: query,
             variables: input
         }).then(res => {
-            let data = res.data.data.updatePerson;
-            return new Person(data);
+            //check
+            if (res && res.data && res.data.data) {
+                return new Person(res.data.data.updatePerson);
+            } else {
+              throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+            }
         }).catch(error => {
             error['url'] = url;
             handleError(error);

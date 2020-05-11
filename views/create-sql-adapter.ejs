@@ -96,7 +96,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
      * Search conditions
      */
     if (search !== undefined) {
-      
+
       //check
       if(typeof search !== 'object') {
         throw new Error('Illegal "search" argument type, it must be an object.');
@@ -124,7 +124,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
      * Search conditions
      */
     if (search !== undefined) {
-      
+
       //check
       if(typeof search !== 'object') {
         throw new Error('Illegal "search" argument type, it must be an object.');
@@ -310,6 +310,18 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
           }
         });
   }
+
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   */
+  -%>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+
+
 
   static bulkAddCsv(context){
 

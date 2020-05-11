@@ -7,6 +7,7 @@ const graphqlUrl = 'http://0.0.0.0:3000/graphql';
 const joinSrvUrl = 'http://0.0.0.0:3000/join';
 const metaqueryUrl = 'http://0.0.0.0:3000/meta_query';
 const srvUrl = 'http://0.0.0.0:3344';
+const graphqlUrlInstance2 = 'http://0.0.0.0:3030/graphql';
 
 /**
  * request_graph_ql_post - Send "POST" request to the local GraphQL server
@@ -16,6 +17,20 @@ const srvUrl = 'http://0.0.0.0:3344';
  */
 module.exports.request_graph_ql_post = function (query){
     return request('POST', graphqlUrl, {
+        json: {
+            query: `${query}`
+        }
+    });
+};
+
+/**
+ * request_graph_ql_post - Send "POST" request to the local GraphQL server
+ *
+ * @param  {query} {string}  Any query string in GraphQL format
+ * @return {object}          Request response
+ */
+module.exports.request_graph_ql_post_instance2 = function (query){
+    return request('POST', graphqlUrlInstance2, {
         json: {
             query: `${query}`
         }

@@ -675,15 +675,6 @@ describe('Decouple association from resolvers', function(){
     expect(g_resolvers, 'No method found').to.have.string(test_resolver);
   });
 
-  // Check for changes!
-  it('HasOne implementation in model - researcher', async function(){
-    let opts = funks.getOptions(models.researcher);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.hasOne_model.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
   it('HasOne implementation in resolver - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
@@ -889,6 +880,22 @@ describe('Cenz servers', function(){
     let generated_model =await funks.generateJs('create-models-cenz', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.many_to_many_association_count.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
+  it('add_personId - Dog', async function(){
+    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.add_personId.replace(/\s/g, '');
+    expect(g_model, 'No method found').to.have.string(test_model);
+  })
+
+  it('remove_personId - Dog', async function(){
+    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let generated_model =await funks.generateJs('create-models-cenz', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.remove_personId.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 });
@@ -1117,27 +1124,12 @@ describe('Extend api model layer associations', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Add to-one association foreign key in target', async function(){
-    let opts = funks.getOptions(models.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.to_add_dog.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
 
   it('Remove to-one association foreign key in source', async function(){
     let opts = funks.getOptions(models.transcript_count);
     let generated_model =await funks.generateJs('create-models', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.remove_individual.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
-  })
-
-  it('Remove to-one association foreign key in target', async function(){
-    let opts = funks.getOptions(models.person_one_assoc);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.remove_dog.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
@@ -1679,7 +1671,6 @@ describe('Refactor associations - delete', function(){
   it('count associations - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
-    //console.log(generated_resolver);
     let g_resolver = generated_resolver.replace(/\s/g, '');
     let test_resolver = data_test.count_associations.replace(/\s/g, '');
     expect(g_resolver).to.have.string(test_resolver);
@@ -1711,7 +1702,7 @@ describe('Refactor associations - delete', function(){
 
 });
 
-describe('Refactor associations - add / update', function(){
+describe('Refactor associations - add / update SQL models', function(){
   let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
 
   it('handleAssociations - accession', async function(){
@@ -1769,5 +1760,131 @@ describe('Refactor associations - add / update', function(){
     let test_resolver = data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, '');
     expect(g_resolver).to.have.string(test_resolver);
   });
-  
+
+});
+
+describe('Refactor associations in distributed data case - add - remove', function(){
+  let data_test = require('./unit_test_misc/test-describe/refactoring-associations');
+
+  it('handle associations - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.handleAssociations.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add to-one association - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.to_one_add.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove to-one association - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.to_one_remove.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add to-many association - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.to_many_add.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove to-many association - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.to_many_remove.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add association model layer - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-distributed-model', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_ddm_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('remove association model layer - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-distributed-model', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_ddm_model.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add association in cenzontle-webservice-adapter  - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.to_one_add_cenz_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('remove association in cenzontle-webservice-adapter - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.to_one_remove_cenz_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+
+  it('add association in sql-adapter  - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_sql_adapter);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.to_one_add_sql_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('remove association in sql-adapter - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_sql_adapter);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.to_one_remove_sql_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('add one resolver - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.add_one_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('update one resolver - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.update_one_resolver.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('add one in cenzontle-webservice-adapter - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.add_one_cenz_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('update one in cenzontle-webservice-adapter - accession', async function(){
+    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.update_one_cenz_adapter.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });
