@@ -865,3 +865,33 @@ describe(
           });
 
   });
+
+  describe('Distributed Data Models', function() {
+    it('01. Create a person and a dog', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data:{
+                addPerson:{
+                    person_id:"instance1-01",
+                    name:"Anthony"
+                }
+            }
+        });
+
+        res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-01" name: "Benji") {dog_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data:{
+                addDog:{
+                    dog_id:"instance2-01",
+                    name:"Benji"
+                }
+            }
+        });
+
+    });
+  });
