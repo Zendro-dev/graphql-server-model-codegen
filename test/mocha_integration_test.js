@@ -720,6 +720,10 @@ describe(
                     }
                 }
             });
+
+            res = itHelpers.request_graph_ql_post(`mutation { updateTranscript_count(id: ${tcId}, removeAminoacidsequence: 63165) {id aminoacidsequence{id}}}`);
+            resBody = JSON.parse(res.body.toString('utf8'));
+            expect(res.statusCode).to.equal(200);
         });
 });
 
