@@ -402,10 +402,10 @@ module.exports = {
    * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {number}          Number of records that holds the conditions specified in the search argument
    */
-  count<%-namePlCp-%>: function({search}, context){
-    return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
+  count<%-namePlCp-%>: async function({search}, context){
+    return await checkAuthorization(context, '<%- name -%>', 'read').then( async authorization =>{
       if (authorization === true) {
-        return <%- nameLc -%>.countRecords(search);
+        return await <%- nameLc -%>.countRecords(search);
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
