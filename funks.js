@@ -543,39 +543,6 @@ validateJsonFile =  function(opts){
   return check;
 }
 
-/**
- * validateAssociation - Does semantic validations on associations options object 
- * 'association' related to 'model' (EJS options).
- *
- * @param  {object} dataModel       Object with model EJS options.
- * @param  {object} association Object with association EJS options.
- * @return {boolean | throw}    If no errors, this function returns true, otherwise 
- *                              throws an error.
- */
-validateAssociation = function(dataModel, association) {
-  /**
-   * Check: model associations should have one of following types: 
-   * - to_one
-   * - to_many
-   * - to_many_through_sql_cross_table
-   */
-  switch(association.type) {
-    case 'to_one':
-    case 'to_many':
-    case 'to_many_through_sql_cross_table':
-      //ok
-      break;
-
-    default:
-      //wrong association type
-      console.error(colors.red(`Error: Not valid association type, model associations should be one of: 'to_one' | 'to_many' | 'to_many_through_sql_cross_table', but got: '${association.type}'`));
-      throw new Error('Not valid association type.')
-  }
-
-  //done
-  return true;
-}
-
 getSqlType = function(association, model_name){
   if(association.type === 'to_one' && association.keyIn !== association.target){
     return 'belongsTo';
@@ -621,15 +588,19 @@ module.exports.parseAssociations = function(associations){
   associations_info = {
     "schema_attributes" : {
       "many" : {},
-      "one" : {}
+      "one" : {},
+      "generic_one": {},
+      "generic_many": {}
     },
     //"mutations_attributes" : {},
     "to_one": [],
     "to_many": [],
     "to_many_through_sql_cross_table": [],
+    "generic_to_one": [],
+    "generic_to_many": [],
     foreignKeyAssociations: {},
-    associations: []
-
+    associations: [],
+    genericAssociations: []
   };
 
   if(associations!==undefined){
@@ -637,8 +608,17 @@ module.exports.parseAssociations = function(associations){
       association.targetStorageType = association.targetStorageType.toLowerCase();
       associations_info.foreignKeyAssociations[name] = association.targetKey;
       let type = association.type;
-      associations_info.associations.push(association);
       let holdsTheForeignKey = false;
+      let isStandardAssociation = (association.type !== 'generic_to_many' && association.type !== 'generic_to_one');
+      
+      //push association
+      if(isStandardAssociation) {
+        //standard
+        associations_info.associations.push(association);
+      } else {
+        //generic
+        associations_info.genericAssociations.push(association);
+      }
 
       //if(associations_type["many"].includes(association.type) )
       if(association.type === 'to_many') {
@@ -655,25 +635,42 @@ module.exports.parseAssociations = function(associations){
           console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
         }
         associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+      } else if(association.type === 'generic_to_one'){
+        associations_info.schema_attributes["generic_one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+      } else if(association.type === 'generic_to_many'){
+        associations_info.schema_attributes["generic_many"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];        
       } else { 
         console.error(colors.red("Association type "+ association.type + " not supported."));
       }
 
       let assoc = association;
-      assoc["name"] = name;
-      assoc["name_lc"] = uncapitalizeString(name);
-      assoc["name_cp"] = capitalizeString(name);
-      assoc["target_lc"] = uncapitalizeString(association.target);
-      assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
-      assoc["target_pl"] = inflection.pluralize(association.target);
-      assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
-      assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
-      assoc["targetKey"] = association.targetKey;
-      if(association.keyIn){
-          assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
+      //push association
+      if(isStandardAssociation) {
+        //standard
+        assoc["name"] = name;
+        assoc["name_lc"] = uncapitalizeString(name);
+        assoc["name_cp"] = capitalizeString(name);
+        assoc["target_lc"] = uncapitalizeString(association.target);
+        assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
+        assoc["target_pl"] = inflection.pluralize(association.target);
+        assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
+        assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
+        assoc["targetKey"] = association.targetKey;
+        if(association.keyIn){
+            assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
+        }
+        assoc["holdsForeignKey"] = holdsTheForeignKey;
+      } else {
+        //generic
+        assoc["name"] = name;
+        assoc["name_lc"] = uncapitalizeString(name);
+        assoc["name_cp"] = capitalizeString(name);
+        assoc["target_lc"] = uncapitalizeString(association.target);
+        assoc["target_lc_pl"] = inflection.pluralize(uncapitalizeString(association.target));
+        assoc["target_pl"] = inflection.pluralize(association.target);
+        assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
+        assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
       }
-      assoc["holdsForeignKey"] = holdsTheForeignKey;
-
 
       associations_info[type].push(assoc);
       //associations_info[type].push(assoc);
