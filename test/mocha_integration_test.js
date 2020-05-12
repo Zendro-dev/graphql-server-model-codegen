@@ -867,7 +867,7 @@ describe(
   });
 
   describe('Distributed Data Models', function() {
-    it('01. Create a person and a dog', function() {
+    it('01. Create a person and 2 dogs', function() {
         let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -893,9 +893,22 @@ describe(
             }
         });
 
+        res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-02" name: "Hector") {dog_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data: {
+              addDog: {
+                dog_id: "instance2-02",
+                name: "Hector"
+              }
+            }
+          });
+
     });
 
-    it('02. Update the person to associate with the dog', function() {
+    it('02. Update the person to associate with a dog', function() {
         let res = itHelpers.request_graph_ql_post('mutation {updatePerson(person_id:"instance1-01" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges {node {dog_id name}}}}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -919,4 +932,63 @@ describe(
             }
           });
     })
+
+    it('03. Update the other dog to associate with the person', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {updateDog(dog_id:"instance2-02" addPerson:"instance1-01") {dog_id name person{person_id name countFilteredDogs}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updateDog: {
+                dog_id: "instance2-02",
+                name: "Hector",
+                person: {
+                  person_id: "instance1-01",
+                  name: "Anthony",
+                  countFilteredDogs: 2
+                }
+              }
+            }
+          });
+    });
+
+    it('04. Update the person to remove the second dog', function() {
+        let res = itHelpers.request_graph_ql_post('mutation{updatePerson(person_id:"instance1-01" removeDogs:"instance2-02") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updatePerson: {
+                person_id: "instance1-01",
+                name: "Anthony",
+                countFilteredDogs: 1,
+                dogsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        dog_id: "instance2-01",
+                        name: "Benji"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+    });
+
+    it('05. Update the first dog to remove the person', function() {
+        let res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-01") {dog_id name person{person_id name}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updateDog: {
+                dog_id: "instance2-01",
+                name: "Benji",
+                person: null
+              }
+            }
+          });
+    });
   });
