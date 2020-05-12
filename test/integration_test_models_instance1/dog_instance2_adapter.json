@@ -1,12 +1,13 @@
 {
     "model" : "dog",
-    "storageType" : "cenzontle-webservice-adapter",
+    "storageType" : "ddm-adapter",
     "adapterName": "dog_instance2",
     "regex": "instance2",
     "url": "http://server2:3030/graphql",
     "attributes" : {
         "name": "String",
-      "dog_id": "String"
+      "dog_id": "String",
+      "person_id": "String"
     },
     "associations": {
       "person": {

@@ -894,4 +894,29 @@ describe(
         });
 
     });
+
+    it('02. Update the person to associate with the dog', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {updatePerson(person_id:"instance1-01" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges {node {dog_id name}}}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updatePerson: {
+                person_id: "instance1-01",
+                name: "Anthony",
+                countFilteredDogs: 1,
+                dogsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        dog_id: "instance2-01",
+                        name: "Benji"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+    })
   });
