@@ -991,4 +991,44 @@ describe(
             }
           });
     });
+
+    it('06. Add another person and read all', function() {
+        let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-01" name:"Bertha") {person_id name countFilteredDogs}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance2-01",
+                name: "Bertha",
+                countFilteredDogs: 0
+              }
+            }
+          });
+        res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id name countFilteredDogs}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance2-01",
+                      name: "Bertha",
+                      countFilteredDogs: 0
+                    }
+                  }
+                ]
+              }
+            }
+          });
+    })
   });

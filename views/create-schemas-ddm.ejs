@@ -75,7 +75,6 @@ input order<%- nameCp -%>Input{
 }
 
 type Query {
-  <%- namePl -%>(search: search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationInput ): [<%- name -%>]
   readOne<%- nameCp -%>(<%- idAttribute -%>: ID!): <%- name %>
   count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
   vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
