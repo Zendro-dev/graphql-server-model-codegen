@@ -4,7 +4,8 @@
     "registry": ["dog_instance1", "dog_instance2"],
     "attributes" : {
         "name": "String",
-      "dog_id": "String"
+      "dog_id": "String",
+      "person_id": "String"
     },
     "associations": {
       "person": {

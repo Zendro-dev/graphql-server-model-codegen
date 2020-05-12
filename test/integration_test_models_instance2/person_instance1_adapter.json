@@ -1,6 +1,6 @@
 {
     "model" : "person",
-    "storageType" : "cenzontle-webservice-adapter",
+    "storageType" : "ddm-adapter",
     "adapterName": "person_instance1",
     "regex": "instance1",
     "url": "http://server1:3000/graphql",

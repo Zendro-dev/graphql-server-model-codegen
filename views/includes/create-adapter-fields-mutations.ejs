@@ -9,10 +9,10 @@
 
     <%#
     /**
-      *check the type of adapter and handle cenzontle-webservice-adapter
+      *check the type of adapter and handle cenzontle-webservice-adapter and ddm-adapter
       */
     -%>
-    <% if(storageType === 'cenzontle-webservice-adapter'){-%>
+    <% if(storageType === 'cenzontle-webservice-adapter' || storageType === 'ddm-adapter'){-%>
       static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
         let query = `
               mutation
@@ -40,7 +40,7 @@
         });
       }
   <%}-%>
-  <%#  /** End of the the cenzontle-webservice-adapter case */ -%>
+  <%#  /** End of the cenzontle-webservice-adapter case and the ddm-adapter case */ -%>
 
 
   <%#
