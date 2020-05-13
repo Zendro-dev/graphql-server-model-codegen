@@ -6,14 +6,14 @@
     "name": "String",
     "method": "String",
     "reference": "String",
-    "accession_id": "String"
+    "accessionId": "String"
   },
   "associations": {
 
     "accession": {
       "type": "to_one",
       "target": "Accession",
-      "targetKey": "accession_id",
+      "targetKey": "accessionId",
       "keyIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "accession_id"

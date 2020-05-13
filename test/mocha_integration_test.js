@@ -1580,5 +1580,130 @@ describe(
         });
     });
 
+    it('04. Delete one accession', function() {
+        let res = itHelpers.request_graph_ql_post_instance2('mutation {deleteAccession(accession_id: "cenz_1-to-instance1")}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            deleteAccession: "Item successfully deleted"
+          }
+        });
+    });
+
+    it('05. Connection accessions', function() {
+        itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "a-instance1" collectors_name:"aa"){ accession_id}}');
+        itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "b-instance1" collectors_name:"bb"){ accession_id}}');
+        itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "c-instance1" collectors_name:"cc"){ accession_id}}');
+        itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "d-instance1" collectors_name:"dd"){ accession_id}}');
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessionsConnection{ edges{node{accession_id}}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "accessionsConnection": {
+              "edges": [
+                {
+                  "node": {
+                    "accession_id": "a-instance1"
+                  }
+                },
+                {
+                  "node": {
+                    "accession_id": "b-instance1"
+                  }
+                },
+                {
+                  "node": {
+                    "accession_id": "c-instance1"
+                  }
+                },
+                {
+                  "node": {
+                    "accession_id": "d-instance1"
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('06. Sort accessions', function() {
+      /**
+       * This integration test assumes that data from previous test (Connection accession) is still stored on the DB.
+      */
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(order: {field: collectors_name order: DESC}){collectors_name}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+              "accessions": [
+                {
+                  "collectors_name": "dd"
+                },
+                {
+                  "collectors_name": "cc"
+                },
+                {
+                  "collectors_name": "bb"
+                },
+                {
+                  "collectors_name": "aa"
+                }
+              ]
+            }
+        });
+    });
+
+
+    it('07. Search accessions', function() {
+      /**
+       * This integration test assumes that data from previous test (Connection accession) is still stored on the DB.
+       * This test will do a OR search.
+      */
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(search:{operator: or search:[{field:collectors_name value:{value:"%c%"} operator:like },{field:collectors_name value:{value:"%d%"} operator:like} ]}){collectors_name}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+              "accessions": [
+                {
+                  "collectors_name": "cc"
+                },
+                {
+                  "collectors_name": "dd"
+                }
+              ]
+            }
+        });
+    });
+
+
+    it('08. Pagination (offset based) accessions', function() {
+      /**
+       * This integration test assumes that data from previous test (Connection accession) is still stored on the DB.
+       * This test will do a OR search.
+      */
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(pagination:{ offset:1 limit: 2}){ accession_id}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "accessions": [
+              {
+                "accession_id": "b-instance1"
+              },
+              {
+                "accession_id": "c-instance1"
+              }
+            ]
+          }
+        });
+    });
 
   });
