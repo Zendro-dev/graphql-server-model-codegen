@@ -1031,4 +1031,308 @@ describe(
             }
           });
     })
+
+    it('07. Search, pagination and sort', function() {
+        // Create a few additional entries so that pagination can be applied better
+        let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-02" name:"Charlie") {person_id name}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance1-02",
+                name: "Charlie"
+              }
+            }
+          });
+        res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-02" name:"Dora") {person_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance2-02",
+                name: "Dora"
+              }
+            }
+          });
+        res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-03" name:"Emily" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance1-03",
+                name: "Emily",
+                countFilteredDogs: 1,
+                dogsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        dog_id: "instance2-01",
+                        name: "Benji"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+        // Make sure that no person intended to be stored on server 1 was stored elsewhere
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"} excludeAdapterNames:"person_instance1"}) {edges{node{person_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: []
+              }
+            }
+          });
+        // Get infos about people on server 1
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-03",
+                      name: "Emily",
+                      countFilteredDogs: 1,
+                      dogsConnection: {
+                        edges: [
+                          {
+                            node: {
+                              dog_id: "instance2-01",
+                              name: "Benji"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          });
+          // The same search, but order by name descending
+          res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}} order:{field:name order:DESC}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+          resBody = JSON.parse(res.body.toString('utf8'));
+          expect(res.statusCode).to.equal(200);
+          expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-03",
+                      name: "Emily",
+                      countFilteredDogs: 1,
+                      dogsConnection: {
+                        edges: [
+                          {
+                            node: {
+                              dog_id: "instance2-01",
+                              name: "Benji"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          });
+        // Get the first 3 people by name
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{first:3}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance2-01",
+                      name: "Bertha",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          });
+        // 'Free' dog Benji so that the entries can be erased next
+        res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-03") {dog_id name person_id}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updateDog: {
+                dog_id: "instance2-01",
+                name: "Benji",
+                person_id: null
+              }
+            }
+          });
+    });
+    it('08. Delete people and dogs', function() {
+        // Delete dog Hector
+        let res = itHelpers.request_graph_ql_post('mutation{deleteDog(dog_id:"instance2-02")}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deleteDog: "Item successfully deleted"
+            }
+          });
+        // Delete dog Benji
+        res = itHelpers.request_graph_ql_post('mutation{deleteDog(dog_id:"instance2-01")}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deleteDog: "Item successfully deleted"
+            }
+          });
+        // Make sure that no dog is left
+        res = itHelpers.request_graph_ql_post('{dogsConnection{edges{node{dog_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              dogsConnection: {
+                edges: []
+              }
+            }
+          });
+        // Delete Emily
+        res = itHelpers.request_graph_ql_post('mutation{deletePerson(person_id:"instance1-03")}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deletePerson: "Item successfully deleted"
+            }
+          });
+        // Delete Dora
+        res = itHelpers.request_graph_ql_post('mutation{deletePerson(person_id:"instance2-02")}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deletePerson: "Item successfully deleted"
+            }
+          });
+        // Make sure that only Anthony, Bertha and Charlie are left
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}){edges{node{person_id name}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony"
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance2-01",
+                      name: "Bertha"
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie"
+                    }
+                  }
+                ]
+              }
+            }
+          });
+    })
+    it('09. Delete all remaining people', function() {
+        let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
+        let people = JSON.parse(res.body.toString('utf8')).data.peopleConnection.edges;
+
+        for(let i = 0; i < people.length; i++){
+            res = itHelpers.request_graph_ql_post(`mutation { deletePerson (person_id: "${people[i].node.person_id}") }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        itHelpers.count_all_records('countPeople').then(cnt => {
+            expect(cnt).to.equal(0)
+        });
+    })
   });
