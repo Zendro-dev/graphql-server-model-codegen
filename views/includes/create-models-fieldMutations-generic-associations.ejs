@@ -1,0 +1,31 @@
+<%for(let i=0; i < associationsArguments["generic_to_one"].length; i++){-%>
+  <% let generic_to_one_association = associationsArguments["generic_to_one"][i] -%>
+  /**
+   * <%- op %>_<%-generic_to_one_association.name_lc-%>Impl - field Mutation (model-layer) for <%- op %> new <%-generic_to_one_association.name-%> association (generic_to_one). 
+   *
+   * @param {Object}  <%-nameLc-%>_input Object with all the current attributes of the <%-name-%> model record to be updated,
+   *                  including info of input ids to <%- op %> as association.
+   */
+  static async <%-op%>_<%-generic_to_one_association.name_lc-%>Impl(<%-nameLc-%>_input) {
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%- op -%>_<%-generic_to_one_association.name_lc-%>Impl() is not implemented');
+  }
+<%}-%>
+
+<%for(let i=0; i < associationsArguments["generic_to_many"].length; i++){-%>
+  <% generic_to_many_association = associationsArguments["generic_to_many"][i] -%>
+  /**
+   * <%- op %>_<%-generic_to_many_association.name_lc-%>Impl - field Mutation (model-layer) for <%- op %> new <%-generic_to_many_association.name-%> associations (generic_to_many). 
+   *
+   * @param {Object}  <%-nameLc-%>_input Object with all the current attributes of the <%-name-%> model record to be updated,
+   *                  including info of input ids to <%- op %> as association. 
+   */
+  static async <%-op%>_<%-generic_to_many_association.name_lc-%>Impl(<%- idAttribute-%>, ids_to_<%- op %>, <%-nameLc-%>_input) {
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%- op -%>_<%-generic_to_many_association.name_lc-%>Impl() is not implemented');
+  }
+<%}-%>

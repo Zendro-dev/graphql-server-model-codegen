@@ -9,14 +9,16 @@
   try {
     let promises = [];
     <% ['add','remove'].forEach(op => { -%>
-      <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"])-%>
+      <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_many"])-%>
       <%for(let i=0; i < to_manyAssociations.length; i++){-%>
         if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>)) {
           promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, context));
-        }<%}-%>    
-      <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-        if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=associationsArguments["to_one"][i].name_cp-%>)) {
-          promises.push(this.<%-op%>_<%=associationsArguments["to_one"][i].name_lc-%>(input, context));
+        }<%}-%>
+      
+      <% to_oneAssociations = associationsArguments["to_one"].concat(associationsArguments["generic_to_one"])-%>
+      <%for(let i=0; i < to_oneAssociations.length; i++){-%>
+        if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=to_oneAssociations[i].name_cp-%>)) {
+          promises.push(this.<%-op%>_<%=to_oneAssociations[i].name_lc-%>(input, context));
         }
       <%}-%>
     <%}) -%>  

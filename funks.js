@@ -605,8 +605,6 @@ module.exports.parseAssociations = function(associations){
 
   if(associations!==undefined){
     Object.entries(associations).forEach(([name, association]) => {
-      association.targetStorageType = association.targetStorageType.toLowerCase();
-      associations_info.foreignKeyAssociations[name] = association.targetKey;
       let type = association.type;
       let holdsTheForeignKey = false;
       let isStandardAssociation = (association.type !== 'generic_to_many' && association.type !== 'generic_to_one');
@@ -615,6 +613,8 @@ module.exports.parseAssociations = function(associations){
       if(isStandardAssociation) {
         //standard
         associations_info.associations.push(association);
+        association.targetStorageType = association.targetStorageType.toLowerCase();
+        associations_info.foreignKeyAssociations[name] = association.targetKey;
       } else {
         //generic
         associations_info.genericAssociations.push(association);

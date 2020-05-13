@@ -600,10 +600,48 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       return this.count<%- associations_temp[i].name_cp%>(options);
     }
   <%}-%>
+<%# generic_to_one -%>
+  <% associations_temp = associationsArguments["generic_to_one"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    
+    async <%=associations_temp[i].name%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
+    }
+  <%}-%>
+<%# generic_to_many -%>
+  <% associations_temp = associationsArguments["generic_to_many"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>FilterImpl() is not implemented');
+    }
+
+    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>ConnectionImpl() is not implemented');
+    }
+
+    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('countFiltered<%- associations_temp[i].name_cp %>Impl() is not implemented');
+    }
+  <%}-%>
 
   <%- include('./includes/create-models-fieldMutations', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations', {op: "remove"}); %> 
-
+  <%- include('./includes/create-models-fieldMutations', {op: "remove"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
+  
   /**
    * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
    *
