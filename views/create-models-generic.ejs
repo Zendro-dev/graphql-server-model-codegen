@@ -12,7 +12,6 @@ module.exports = class <%- name -%>{
    *
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
-
   constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
       this.<%- idAttribute -%> = <%- idAttribute -%>;
        <%for(var key in attributes){-%>
@@ -36,6 +35,11 @@ module.exports = class <%- name -%>{
    * Returned value:
    *    new <%- name -%>(record)
    * 
+   * Thrown on:
+   *    * No record found.
+   *    * Error.
+   *    * Operation failed.
+   * 
    * where record is an object with all its properties set from the record fetched.
    * @see: constructor() of the class <%- name -%>;
    * 
@@ -54,6 +58,10 @@ module.exports = class <%- name -%>{
    * countRecords - Count the number of records of model <%- name -%> that match the filters provided
    * in the @search parameter. Returns the number of records counted.
    * @see: Cenzontle specifications for search object.
+   * 
+   * Thrown on:
+   *    * Error.
+   *    * Operation failed.
    * 
    * @param  {object} search Object with search filters.
    * @return {int} Number of records counted, that match the search filters.
@@ -77,6 +85,10 @@ module.exports = class <%- name -%>{
    * Returned value:
    *    for each record
    *    array.push( new <%- name -%>(record) )
+   * 
+   * Thrown on:
+   *    * Error.
+   *    * Operation failed.
    * 
    * where record is an object with all its properties set from a record fetched.
    * @see: constructor() of the class <%- name -%>;
@@ -106,6 +118,10 @@ module.exports = class <%- name -%>{
    * 
    * Returned value:
    *    { edges, pageInfo }
+   * 
+   * Thrown on:
+   *    * Error.
+   *    * Operation failed.
    * 
    * where record is an object with all its properties set from a record fetched.
    * @see: constructor() of the class <%- name -%>;
@@ -272,7 +288,7 @@ module.exports = class <%- name -%>{
    * on @input object.
    * Only if record was created successfully, returns an instance of this class 
    * (<%- name -%>), with all its properties set from the new record created.
-   * If this function fails to create the new record, returns null.
+   * If this function fails to create the new record, should throw an error.
    * 
    * Conventions on input's attributes values.
    *    1. undefined value: attributes with value equal to undefined are set to 
@@ -284,12 +300,16 @@ module.exports = class <%- name -%>{
    * Returned value:
    *    new <%- name -%>(newRecord)
    * 
+   * Thrown on:
+   *    * Error.
+   *    * Operation failed.
+   * 
    * where newRecord is an object with all its properties set from the new record created.
    * @see: constructor() of the class <%- name -%>;
    * 
    * @param  {<%- idAttributeType %>} id The id of the record that needs to be fetched.
-   * @return {<%- name -%>|null} If successfully created, returns an instance of 
-   * <%- name -%> class constructed with the new record, otherwise returns null.
+   * @return {<%- name -%>} If successfully created, returns an instance of 
+   * <%- name -%> class constructed with the new record, otherwise throws an error.
    */
   static async addOne(input){
     /*
@@ -303,7 +323,7 @@ module.exports = class <%- name -%>{
    * of id attribute: '<%- idAttribute -%>', which should be on received as input.
    * Only if record was updated successfully, returns an instance of this class 
    * (<%- name -%>), with all its properties set from the record updated.
-   * If this function fails to update the record, returns null.
+   * If this function fails to update the record, should throw an error.
    * 
    * Conventions on input's attributes values.
    *    1. undefined value: attributes with value equal to undefined are NOT
@@ -314,14 +334,18 @@ module.exports = class <%- name -%>{
    * Returned value:
    *    new <%- name -%>(updatedRecord)
    * 
+   * Thrown on:
+   *    * Error.
+   *    * Operation failed.
+   * 
    * where updatedRecord is an object with all its properties set from the record updated.
    * @see: constructor() of the class <%- name -%>;
    * 
    * @param  {object} input Input with properties to be updated. The special id 
    * attribute: '<%- idAttribute -%>' should contains the id value of the record
    * that will be updated. 
-   * @return {<%- name -%>|null} If successfully created, returns an instance of 
-   * <%- name -%> class constructed with the new record, otherwise returns null.
+   * @return {<%- name -%>} If successfully created, returns an instance of 
+   * <%- name -%> class constructed with the new record, otherwise throws an error.
    */
   static async updateOne(input){
     /*
@@ -333,10 +357,14 @@ module.exports = class <%- name -%>{
   /**
    * deleteOne - Delete the record whose id is equal to the @id received as parameter.
    * Only if record was deleted successfully, returns the id of the deleted record.
-   * If this function fails to delete the record, returns null.
+   * If this function fails to delete the record, should throw an error.
+   * 
+   * Thrown on:
+   *    * Error.
+   *    * Operation failed.
    * 
    * @param  {<%- idAttributeType %>} id The id of the record that will be deleted.
-   * @return {int|null} id of the record deleted or null if the operation failed.
+   * @return {int} id of the record deleted or throws an error if the operation failed.
    */
   static async deleteOne(id){
     /*
@@ -359,8 +387,47 @@ module.exports = class <%- name -%>{
       throw new Error('csvTableTemplate<%- nameCp-%> is not implemented');
     }
 
+<%# generic_to_one -%>
+  <% associations_temp = associationsArguments["generic_to_one"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    
+    async <%=associations_temp[i].name%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
+    }
+  <%}-%>
+<%# generic_to_many -%>
+  <% associations_temp = associationsArguments["generic_to_many"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>FilterImpl() is not implemented');
+    }
+
+    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>ConnectionImpl() is not implemented');
+    }
+
+    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('countFiltered<%- associations_temp[i].name_cp %>Impl() is not implemented');
+    }
+  <%}-%>
+
   <%- include('./includes/create-models-fieldMutations-generic', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations-generic', {op: "remove"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic', {op: "remove"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
 
   static base64Decode(cursor){
     return Buffer.from(cursor, 'base64').toString('utf-8');

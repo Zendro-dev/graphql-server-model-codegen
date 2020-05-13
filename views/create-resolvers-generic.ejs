@@ -214,6 +214,139 @@ const associationArgsDef = {
 
 <%# 
 /**
+ * Section 3.d
+ * Query resolvers for associations fields for:
+ * 
+ * < generic_to_one >
+ * 
+ * Methods:
+ * model.prototype.assoc()
+ * 
+ */
+-%>
+<%let associations_generic_one = associationsArguments["generic_to_one"]-%>
+<% for(let i=0; i < associations_generic_one.length; i++){ -%>
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> - Return associated record
+   *
+   * @param  {object} search    Search argument to match the associated record.
+   * @param  {object} context   Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {type}             Associated record.
+   */
+  <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
+    return checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read').then(async authorization =>{
+      if (authorization === true) {
+        await checkCount(search, context, "<%=associations_generic_one[i].name%>");
+        let resultRecords = await this.<%=associations_generic_one[i].name%>Impl({search}, context);
+        checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%=associations_generic_one[i].name%>");
+        return resultRecords;
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+          console.error(error);
+          handleError( error);
+    });
+  }
+<%}-%>
+
+<%# 
+/**
+ * Section 3.e
+ * Query resolvers for associations fields for:
+ * 
+ * < generic_to_many >
+ * 
+ * Methods:
+ * model.prototype.assocFilter()
+ * model.prototype.assocConnection()
+ * model.prototype.countFilteredAssoc()
+ * 
+ */
+-%>
+<% associations_generic_many = associationsArguments["generic_to_many"]-%>
+<% for(let i=0; i < associations_generic_many.length; i++){ -%>
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter - Check user authorization and return certain 
+   * number, specified in pagination argument, of records associated with the current instance, this records should also
+   * holds the condition of search argument, all of them sorted as specified by the order argument.
+   *
+   * @param  {object} search      Search argument for filtering associated records.
+   * @param  {array}  order       Type of sorting (ASC, DESC) for each field.
+   * @param  {object} pagination  Offset and limit to get the records from and to respectively.
+   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {array}              Array of associated records holding conditions specified by search, order and pagination argument.
+   */
+  <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
+    return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
+      if (authorization === true) {
+        await checkCount(search, context, "<%=associations_generic_many[i].name%>Filter");
+        let resultRecords = await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
+        checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%=associations_generic_many[i].name%>Filter");
+        return resultRecords;
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+          console.error(error);
+          handleError( error);
+    });
+  }
+
+  /**
+   * <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> - Count number of associated records that 
+   * holds the conditions specified in the search argument.
+   *
+   * @param  {object} {search}  Search argument for filtering associated records.
+   * @param  {object} context   Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {type}             Number of associated records that holds the conditions specified in the search argument.
+   */
+  <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = function({search}, context){
+    return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
+      if (authorization === true) {
+        await checkCount(search, context, "countFiltered<%=associations_generic_many[i].name_cp%>");
+        let resultRecords = await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
+        checkCountAgainAndAdaptLimit(context, resultRecords.length, "countFiltered<%=associations_generic_many[i].name_cp%>");
+        return resultRecords;
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+          console.error(error);
+          handleError( error);
+    });
+  }
+
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection - Check user authorization and return 
+   * certain number, specified in pagination argument, of records associated with the current instance, this records 
+   * should also holds the condition of search argument, all of them sorted as specified by the order argument.
+   *
+   * @param  {object} search      Search argument for filtering associated records.
+   * @param  {array}  order       Type of sorting (ASC, DESC) for each field.
+   * @param  {object} pagination  Cursor and first (indicating the number of records to retrieve) arguments to apply cursor-based pagination.
+   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {array}              Array of records as grapqhql connections holding conditions specified by search, order and pagination argument.
+   */
+  <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
+    return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
+      if (authorization === true) {
+        await checkCount(search, context, "<%=associations_generic_many[i].name%>Connection");
+        let resultRecords = await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
+        checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%=associations_generic_many[i].name%>Connection");
+        return resultRecords;
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+          console.error(error);
+          handleError( error);
+    });
+  }
+<%}-%>
+
+<%# 
+/**
  * Section 4
  * Mutation resolvers for associations fields.
  * 
@@ -229,6 +362,8 @@ const associationArgsDef = {
 <%- include('./includes/handleAssociations'); -%>
 <%- include('./includes/create-resolvers-fieldMutations-generic', {op: "add"}); -%> 
 <%- include('./includes/create-resolvers-fieldMutations-generic', {op: "remove"}); -%>
+<%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "add"}); -%> 
+<%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "remove"}); -%>
 
 <%# 
 /**
@@ -259,6 +394,8 @@ const associationArgsDef = {
   if (<%- nameLc %> === null) throw new Error(`Record with ID = ${id} does not exist`);
   let promises_to_many = [];
   let promises_to_one = [];
+  let promises_generic_to_many = [];
+  let promises_generic_to_one = [];
 
   <%# check associations to_one and to_many are counted in diferent variable -%>
   <%associations_temp = associationsArguments["to_many"] -%>
@@ -269,14 +406,26 @@ const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
   <%}-%>
+  <%associations_temp = associationsArguments["generic_to_many"] -%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    promises_generic_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+  <%}-%>
+  <%associations_temp = associationsArguments["generic_to_one"] -%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    promises_generic_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+  <%}-%>
 
   let result_to_many = await Promise.all(promises_to_many);
   let result_to_one = await Promise.all(promises_to_one);
+  let result_generic_to_many = await Promise.all(promises_generic_to_many);
+  let result_generic_to_one = await Promise.all(promises_generic_to_one);
 
   let get_to_many_associated = result_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
   let get_to_one_associated = result_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
+  let get_generic_to_many_associated = result_generic_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
+  let get_generic_to_one_associated = result_generic_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
 
-  return get_to_one_associated + get_to_many_associated;
+  return get_to_one_associated + get_to_many_associated + get_generic_to_many_associated + get_generic_to_one_associated;
 }
 
 /**
