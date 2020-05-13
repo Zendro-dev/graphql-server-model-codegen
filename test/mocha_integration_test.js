@@ -14,6 +14,8 @@ describe(
   function() {
 
     after(function() {
+        // Delete associations between individuals and transcript_counts
+        // The only ones to exist at this point are from Test 19
         let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}}) {id individual_id}}');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -33,6 +35,7 @@ describe(
               });
         }
 
+        // Delete all individuals
         res = itHelpers.request_graph_ql_post('{ individuals {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
@@ -45,6 +48,7 @@ describe(
             expect(cnt).to.equal(0)
         });
 
+        // Delete all transcript_counts
         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
         let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
 
@@ -78,6 +82,7 @@ describe(
     });
 
 
+    // This test uses the entry created in the last test
     it('03. Individual update', function() {
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"First"}}){id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -97,6 +102,7 @@ describe(
         })
     });
 
+    // This test relies on the two tests before where the first entry was created and modified (so the number of entries will be 2)
     it('04. Individual add one more and find both', function() {
 
         itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Second") {id} }');
@@ -109,6 +115,7 @@ describe(
     });
 
 
+    // This test reads the entry created in the last test
     it('05. Individual read one', function() {
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"Second"}}){id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -129,6 +136,7 @@ describe(
 
     });
 
+    // This test finds both entries created before - the first entry was modified in 03 to match the search
     it('06. Individual search with like', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, value:{value:"%Second%"}, operator:like}) {name}}');
@@ -139,6 +147,7 @@ describe(
 
     });
 
+    // This test needs entries to exist
     it('07. Individual paginate', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(pagination:{limit:1}) {id name}}');
@@ -149,6 +158,7 @@ describe(
 
     });
 
+    // This test finds both entries created before, with the first entry (here shown second because of sorting) modified in 03
     it('08. Individual sort', function() {
 
         let res = itHelpers.request_graph_ql_post('{individuals(pagination: {limit:2}, order: [{field: name, order: DESC}]) {name}}');
@@ -166,6 +176,7 @@ describe(
 
     });
 
+    // After this test, the 2 entries created before are gone
     it('09. Individual delete all', function() {
 
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
@@ -213,6 +224,7 @@ describe(
     });
 
 
+    // This test modifies the entry created in the last test
     it('12. TranscriptCount update', function() {
         let res = itHelpers.request_graph_ql_post('{transcript_counts{id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -233,6 +245,7 @@ describe(
 
     });
 
+    // This test finds the entry created and modified in the 2 last tests
     it('13. TranscriptCount add one more and find both', function() {
 
         itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene C", ' +
@@ -248,6 +261,7 @@ describe(
     });
 
 
+    // This test reads the entry created in the last test
     it('14. TranscriptCount read one', function() {
         let res = itHelpers.request_graph_ql_post('{transcript_counts(search: {field:gene operator:eq value:{value:"Gene C"}}) {id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -271,6 +285,7 @@ describe(
 
     });
 
+    // This test reads the 2 entries that were created before (in 11 and 13)
     it('15. TranscriptCount search with like', function() {
 
         let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:{value:"%ene%"},operator: like}) {gene}}`);
@@ -281,6 +296,7 @@ describe(
 
     });
 
+    // This test needs an entry to exist
     it('16. TranscriptCount paginate', function() {
 
         let res = itHelpers.request_graph_ql_post('{transcript_counts(pagination:{limit:1}) {id gene}}');
@@ -291,6 +307,7 @@ describe(
 
     });
 
+    // This test finds the 2 entries created and modified before (11 - 13)
     it('17. TranscriptCount sort', function() {
 
         let res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination: {limit:2}, order: [{field: gene, order: DESC}]) {gene} }');
@@ -307,6 +324,7 @@ describe(
         })
     });
 
+    // This test is independent from the other ones, other than the check for total numbers of entries found
     it('18. Extended search and regular expressions', async () => {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Zazanaza") { id name } }');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -592,6 +610,7 @@ describe(
 
     });
 
+  // This test uses the entry created in the last test, and relies on this entry having got an association (and thus cannot be erased)
   it('20. TranscriptCount - Deleting a record with associations fails', function() {
       let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}}) {id individual_id}}');
       let tcResBody = JSON.parse(res.body.toString('utf8'));
@@ -613,6 +632,7 @@ describe(
         });
   });
 
+  // This test is independent of the other ones
   it('21. Limit check', function() {
     let res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
     expect(res.statusCode).to.equal(200);
@@ -782,6 +802,7 @@ describe(
             });
         })
 
+        // The entry used here is set up by the patching of the model file
         it('01. Webservice simulator is up', function() {
 
             let res = itHelpers.request_graph_ql_get('/aminoAcidSequence/63165');
@@ -796,6 +817,7 @@ describe(
 
         });
 
+        // The entry used here is set up by the patching of the model file
         it('02. Webservice read one', function() {
 
             let res = itHelpers.request_graph_ql_post('{ readOneAminoacidsequence(id : 69905) { id accession sequence} }');
@@ -813,6 +835,7 @@ describe(
             });
         });
 
+        // The same aminoacidsequence as in 01 is used here
         it('03. Webservice associate new TranscriptCount', function() {
             let res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "new_gene", ' +
                                                                                      'addAminoacidsequence: 63165) { id aminoacidsequence{id }} }');
@@ -847,6 +870,7 @@ describe(
 
 
 describe( 'Batch Upload', function() {
+    // For now, only individuals are present in this section
     after(function() {
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
@@ -1053,6 +1077,7 @@ describe(
   });
 
   describe('Distributed Data Models', function() {
+    // The entries created in this test are used in the following ones as well
     it('01. Create a person and 2 dogs', function() {
         let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -1177,6 +1202,8 @@ describe(
             }
           });
     });
+
+    // At this point, no associations between people and dogs should exist
 
     it('06. Add another person and read all', function() {
         let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-01" name:"Bertha") {person_id name countFilteredDogs}}');
