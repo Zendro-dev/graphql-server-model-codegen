@@ -395,7 +395,7 @@ module.exports = {
   <%- namePl -%>: function({search, order, pagination}, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
         if (authorization === true) {
-          await checkCount(search, context, "<%- namePl -%>");
+          await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>");
           return await <%- nameLc -%>.readAll(search, order, pagination);
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -419,7 +419,7 @@ module.exports = {
    <%- namePl -%>Connection: function({search, order, pagination}, context){
      return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
          if (authorization === true) {
-           await checkCount(search, context, "<%- namePl -%>Connection");
+           await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>Connection");
            return <%- nameLc -%>.readAllCursor(search, order, pagination);
        } else {
            throw new Error("You don't have authorization to perform this action");
@@ -440,7 +440,7 @@ module.exports = {
   readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
       if (authorization === true) {
-        checkCountForOne(context);
+        checkCountForOneAndReduceRecordsLimit(context);
         return <%- nameLc -%>.readById(<%- idAttribute -%>);
       } else {
           throw new Error("You don't have authorization to perform this action");

@@ -113,7 +113,7 @@ module.exports.read_all_resolver = `
     }, context) {
         return checkAuthorization(context, 'Dog', 'read').then(async authorization => {
             if (authorization === true) {
-                await checkCount(search, context, "dogs");
+                await checkCountAndReduceRecordsLimit(search, context, "dogs");
                 return await dog.readAll(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");

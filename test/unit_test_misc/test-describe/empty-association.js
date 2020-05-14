@@ -35,7 +35,7 @@ module.exports.individual_no_assoc_resolvers = `
     }, context) {
         return checkAuthorization(context, 'individual', 'read').then(async authorization => {
             if (authorization === true) {
-                await checkCount(search, context, "individuals");
+                await checkCountAndReduceRecordsLimit(search, context, "individuals");
                 return await individual.readAll(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
