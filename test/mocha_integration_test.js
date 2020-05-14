@@ -1068,7 +1068,7 @@ describe(
         });
     });
 
-    it('09. Create record with association accession-location', function() {
+    it('09. Create record with association(to-one) accession-location', function() {
       //add location first
       itHelpers.request_graph_ql_post_instance2('mutation{addLocation(locationId: "location-cenz-1"){locationId}}');
 
@@ -1088,7 +1088,7 @@ describe(
         });
     });
 
-    it('10. Remove association accession-location', function() {
+    it('10. Remove association(to-one) accession-location', function() {
       /**
        * This test assumes that the accession and location created in the previous test(09. Create record with association accession-location) are still in the DB
        * */
@@ -1106,7 +1106,7 @@ describe(
         });
     });
 
-    it('11.Update association accession-location', function() {
+    it('11.Update association(to-one) accession-location', function() {
       /**
        * This test assumes that the accession and location created in the previous test(09. Create record with association accession-location) are still in the DB
        * */
@@ -1124,5 +1124,124 @@ describe(
           }
         });
     });
+
+
+    it('12.Create with association(to-many) accession-measurement', function() {
+      /**
+       * Create measurements that will be associated to accession
+       * */
+       itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_1" ){measurement_id}}');
+       itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_2" ){measurement_id}}');
+       itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_3" ){measurement_id}}');
+
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"cenz-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "addAccession": {
+              "measurementsFilter": [
+                {
+                  "measurement_id": "measuremente_test_1"
+                },
+                {
+                  "measurement_id": "measuremente_test_2"
+                },
+                {
+                  "measurement_id": "measuremente_test_3"
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('13.Remove association(to-many) accession-measurement', function() {
+      /**
+       * This test assumes that association from previous test (12.Create with association(to-many) accession-measurement) still is stored in the DB.
+       * */
+
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "updateAccession": {
+              "measurementsFilter": [
+                {
+                  "measurement_id": "measuremente_test_2"
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('14.Update add association(to-many) accession-measurement', function() {
+      /**
+       * This test assumes that association from previous tests (12.Create with association(to-many and 13.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
+       * */
+
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "updateAccession": {
+              "measurementsFilter": [
+                {
+                  "measurement_id": "measuremente_test_1"
+                },
+                {
+                  "measurement_id": "measuremente_test_2"
+                },
+                {
+                  "measurement_id": "measuremente_test_3"
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('15. Read connection association(to-many) accession-measurement', function() {
+      /**
+       * This test assumes that association from previous tests (12.Create with association(to-many and 13.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
+       * */
+
+      let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id:"cenz-3-accession"){ measurementsConnection(order:{field: measurement_id order: ASC}){ edges{node{measurement_id}}}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "readOneAccession": {
+              "measurementsConnection": {
+                "edges": [
+                  {
+                    "node": {
+                      "measurement_id": "measuremente_test_1"
+                    }
+                  },
+                  {
+                    "node": {
+                      "measurement_id": "measuremente_test_2"
+                    }
+                  },
+                  {
+                    "node": {
+                      "measurement_id": "measuremente_test_3"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        });
+    });
+
 
   });
