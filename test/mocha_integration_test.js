@@ -1068,4 +1068,61 @@ describe(
         });
     });
 
+    it('09. Create record with association accession-location', function() {
+      //add location first
+      itHelpers.request_graph_ql_post_instance2('mutation{addLocation(locationId: "location-cenz-1"){locationId}}');
+
+      //create accession with the location created in the line above
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"cenz-2-accession" addLocation:"location-cenz-1" ){location{locationId}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "addAccession": {
+              "location": {
+                "locationId": "location-cenz-1"
+              }
+            }
+          }
+        });
+    });
+
+    it('10. Remove association accession-location', function() {
+      /**
+       * This test assumes that the accession and location created in the previous test(09. Create record with association accession-location) are still in the DB
+       * */
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-2-accession" removeLocation:"location-cenz-1"){locationId location{locationId}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "updateAccession": {
+              "locationId": null,
+              "location": null
+            }
+          }
+        });
+    });
+
+    it('11.Update association accession-location', function() {
+      /**
+       * This test assumes that the accession and location created in the previous test(09. Create record with association accession-location) are still in the DB
+       * */
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-2-accession" addLocation:"location-cenz-1"){location{locationId}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "updateAccession": {
+              "location": {
+                "locationId": "location-cenz-1"
+              }
+            }
+          }
+        });
+    });
+
   });
