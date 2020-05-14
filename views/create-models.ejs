@@ -600,6 +600,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       return this.count<%- associations_temp[i].name_cp%>(options);
     }
   <%}-%>
+
 <%# generic_to_one -%>
   <% associations_temp = associationsArguments["generic_to_one"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -611,6 +612,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
     }
   <%}-%>
+  
 <%# generic_to_many -%>
   <% associations_temp = associationsArguments["generic_to_many"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>

@@ -16,24 +16,24 @@
 <%}-%>
 
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  /**
+  * <%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> - field Mutation for to_one associations to <%- op %>
+  *
+  * @param {object} input   Info of input Ids to <%- op %>  the association
+  */
+  <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
-    /**
-    * <%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> - field Mutation for to_one associations to <%- op %> 
-    *
-    * @param {object} input   Info of input Ids to <%- op %>  the association
-    */
     <% if (op === 'remove') { -%>
-      <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
-        if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> === this.<%-associationsArguments["to_one"][i].targetKey%>) {
-          await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
-          this.<%-associationsArguments["to_one"][i].targetKey%> = null;
-        }
+      if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> === this.<%-associationsArguments["to_one"][i].targetKey%>) {
+        await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+        this.<%-associationsArguments["to_one"][i].targetKey%> = null;
       }
     <%} else { -%>
-      <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
-        await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
-        this.<%-associationsArguments["to_one"][i].targetKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>;
-      }
+      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
+      this.<%-associationsArguments["to_one"][i].targetKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>; 
     <%}-%>
+  <%} else {-%>
+    await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, this.getIdValue());
   <%}-%>
+  }
 <%}-%>

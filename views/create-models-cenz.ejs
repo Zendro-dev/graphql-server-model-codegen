@@ -200,15 +200,6 @@ module.exports = class <%- name -%>{
     });
   }
 
-   <%#
-  /**
-   * Add and remove methods for to-one association where the foreign key
-   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
-   */
-  -%>
-  <%- include('./includes/create-models-cenz-fieldMutations', {op: "add"}); %>
-  <%- include('./includes/create-models-cenz-fieldMutations', {op: "remove"}); %>
-
   static bulkAddCsv(context){
     let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
 
@@ -231,14 +222,65 @@ module.exports = class <%- name -%>{
   }
 
   static  csvTableTemplate(){
-      let query = `query { csvTableTemplate<%- nameCp-%> }`;
-      return axios.post(url, {query:query}).then(res =>{
-        return res.data.data.csvTableTemplate<%- nameCp-%>;
-      }).catch(error =>{
-        error['url'] = url;
-        handleError(error);
-      });
+    let query = `query { csvTableTemplate<%- nameCp-%> }`;
+    return axios.post(url, {query:query}).then(res =>{
+      return res.data.data.csvTableTemplate<%- nameCp-%>;
+    }).catch(error =>{
+      error['url'] = url;
+      handleError(error);
+    });
+  }
+
+<%# generic_to_one -%>
+  <% associations_temp = associationsArguments["generic_to_one"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    
+    async <%=associations_temp[i].name%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
     }
+  <%}-%>
+  
+<%# generic_to_many -%>
+  <% associations_temp = associationsArguments["generic_to_many"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>FilterImpl() is not implemented');
+    }
+
+    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>ConnectionImpl() is not implemented');
+    }
+
+    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('countFiltered<%- associations_temp[i].name_cp %>Impl() is not implemented');
+    }
+  <%}-%>
+
+   <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   * Also add and remove methods for generic-to-one and generic-to-many associations.
+   */
+  -%>
+  <%- include('./includes/create-models-cenz-fieldMutations', {op: "add"}); %>
+  <%- include('./includes/create-models-cenz-fieldMutations', {op: "remove"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
+
 
   static get definition(){
     return definition;

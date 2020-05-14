@@ -290,16 +290,6 @@ module.exports = class <%- name -%>{
     return adapters[responsibleAdapter].updateOne(input).then(result => new <%- name -%>(result));
   }
 
-  <%#
-  /**
-   * Add and remove methods for to-one association where the foreign key
-   * is stored in this model.
-   */
-  -%>
-  <%- include('./includes/create-ddm-models-fields-mutations', {op: "add"}); %>
-  <%- include('./includes/create-ddm-models-fields-mutations', {op: "remove"}); %>
-
-
   static bulkAddCsv(context) {
     throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
   }
@@ -307,4 +297,55 @@ module.exports = class <%- name -%>{
   static csvTableTemplate() {
       return helper.csvTableTemplate(<%- name -%>);
   }
+
+<%# generic_to_one -%>
+  <% associations_temp = associationsArguments["generic_to_one"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    
+    async <%=associations_temp[i].name%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
+    }
+  <%}-%>
+  
+<%# generic_to_many -%>
+  <% associations_temp = associationsArguments["generic_to_many"]-%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+
+    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>FilterImpl() is not implemented');
+    }
+
+    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('<%=associations_temp[i].name%>ConnectionImpl() is not implemented');
+    }
+
+    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context){
+      /*
+      YOUR CODE GOES HERE
+      */
+      throw new Error('countFiltered<%- associations_temp[i].name_cp %>Impl() is not implemented');
+    }
+  <%}-%>
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model. Also for generic-to-one and generic-to-many
+   * associations.
+   */
+  -%>
+  <%- include('./includes/create-ddm-models-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-ddm-models-fields-mutations', {op: "remove"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
+
 }
