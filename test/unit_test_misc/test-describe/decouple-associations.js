@@ -87,16 +87,16 @@ researcher.prototype.dog = async function({
         let found = await resolvers.dogs({
             search: nsearch
         }, context);
-        if (found && found.length == 1) {
-            return found[0];
-        } else if (found && found.length > 1) {
-            let foundIds = [];
-            found.forEach(dog => {
-                foundIds.push(dog.getIdValue())
-            })
-            context.benignErrors.push(new Error(
-                \`Not unique "to_one" association Error: Found \${found.length} dogs matching researcher with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog. Found Dogs \${models.dog.idAttribute()}s: [\${foundIds.toString()}]\`
-            ))
+        if(found){
+            if(found.length > 1){
+                let foundIds = [];
+                found.forEach(dog => {
+                    foundIds.push(dog.getIdValue())
+                })
+                context.benignErrors.push(new Error(
+                    \`Not unique "to_one" association Error: Found \${found.length} dogs matching researcher with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog. Found Dogs \${models.dog.idAttribute()}s: [\${foundIds.toString()}]\`
+                )); 
+            }
             return found[0];
         }
         return found;

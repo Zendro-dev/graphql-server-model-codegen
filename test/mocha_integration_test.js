@@ -761,6 +761,43 @@ describe(
     expect(trCounts).to.deep.equal([]);
 
   });
+  
+  //one_to_one associations where foreignKey is in the target model
+  it('22. one_to_one: add one country and one capital', async function() {
+
+    itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
+    let res = itHelpers.request_graph_ql_post('{ countries {country_id} }');
+    let resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.countries.length).equal(1);
+
+    itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_B", name: "Berlin", addUnique_country:"GER") {capital_id} }');
+    res = itHelpers.request_graph_ql_post('{ capitals {capital_id} }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.capitals.length).equal(1);
+
+    itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_BN", name: "Bonn", addUnique_country:"GER") {capital_id} }');
+    res = itHelpers.request_graph_ql_post('{ capitals {capital_id} }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    console.log(JSON.stringify(res))
+    expect(res.statusCode).to.equal(200);
+
+    //cleanup
+    res = await itHelpers.request_graph_ql_post('mutation { updateCountry(country_id: "GER", removeUnique_capital:"GER_B") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = await itHelpers.request_graph_ql_post('mutation { updateCountry(country_id: "GER", removeUnique_capital:"GER_BN") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = await itHelpers.request_graph_ql_post('mutation { deleteCountry(country_id: "GER")}');
+    expect(res.statusCode).to.equal(200);
+    res = await itHelpers.request_graph_ql_post('mutation { deleteCapital(capital_id: "GER_B")}');
+    expect(res.statusCode).to.equal(200);
+    res = await itHelpers.request_graph_ql_post('mutation { deleteCapital(capital_id: "GER_BN")}');
+    expect(res.statusCode).to.equal(200);
+
+  });
 
 });
 

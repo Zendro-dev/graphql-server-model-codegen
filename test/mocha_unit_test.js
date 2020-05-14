@@ -1055,6 +1055,14 @@ describe('Distributed data models', function(){
     expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
   });
 
+  it('one-To-one association distributed resolver - Person', async function(){
+    let opts = funks.getOptions(models_distributed.person_ddm);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.person_ddm_resolver_one_to_one.replace(/\s/g, '');
+    expect(g_resolver, 'Incorrect distributed data model').to.have.string(test_resolver);
+  });
+
 });
 
 describe('To-one associations editing', function(){

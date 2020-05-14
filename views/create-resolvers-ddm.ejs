@@ -68,14 +68,15 @@ const associationArgsDef = {
       });
 
       let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context)).edges;
-      if(found && found.length == 1){
-        return found[0].node;
-      } else if(found && found.length > 1) {
-        let foundIds = [];
-        found.forEach(<%=associations_one[i].target_lc%> => {foundIds.push(<%=associations_one[i].target_lc%>.node.getIdValue())})
-        context.benignErrors.push(new Error(
-          `Not unique "to_one" association Error: Found ${found.length} dogs matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target%>. Found <%=associations_one[i].target_pl%> ${models.<%=associations_one[i].target_lc%>.idAttribute()}s: [${foundIds.toString()}]`
-        ))
+
+      if(found) {
+        if(found.length > 1){
+          let foundIds = [];
+          found.forEach(<%=associations_one[i].target_lc%> => {foundIds.push(<%=associations_one[i].target_lc%>.getIdValue())})
+          context.benignErrors.push(new Error(
+            `Not unique "to_one" association Error: Found ${found.length} dogs matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>. Found <%=associations_one[i].target_pl-%> ${models.<%=associations_one[i].target_lc-%>.idAttribute()}s: [${foundIds.toString()}]`
+          ));
+        }
         return found[0].node;
       }
       return found;
