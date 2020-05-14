@@ -396,9 +396,7 @@ module.exports = {
     return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
         if (authorization === true) {
           await checkCount(search, context, "<%- namePl -%>");
-          let resultRecords = await <%- nameLc -%>.readAll(search, order, pagination);
-          checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%- namePl -%>");
-          return resultRecords;
+          return await <%- nameLc -%>.readAll(search, order, pagination);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -422,8 +420,6 @@ module.exports = {
      return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
          if (authorization === true) {
            await checkCount(search, context, "<%- namePl -%>Connection");
-           let resultRecords = await <%- nameLc -%>.readAll(search, order, pagination);
-           checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%- namePl -%>Connection");
            return <%- nameLc -%>.readAllCursor(search, order, pagination);
        } else {
            throw new Error("You don't have authorization to perform this action");
@@ -445,10 +441,7 @@ module.exports = {
     return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
       if (authorization === true) {
         checkCountForOne(context);
-        let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
-        checkCountForOne(context);
-        context.recordsLimit = context.recordsLimit - 1;
-        return resultRecords;
+        return <%- nameLc -%>.readById(<%- idAttribute -%>);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
