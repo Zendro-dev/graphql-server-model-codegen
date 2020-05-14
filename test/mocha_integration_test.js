@@ -13,7 +13,7 @@ describe(
   'Clean GraphQL Server: one new basic function per test ("Individual" model)',
   function() {
 
-    after(function() {
+    after(async function() {
         // Delete associations between individuals and transcript_counts
         // The only ones to exist at this point are from Test 19
         let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}}) {id individual_id}}');
@@ -44,9 +44,8 @@ describe(
             expect(res.statusCode).to.equal(200);
         }
 
-        itHelpers.count_all_records('countIndividuals').then(cnt => {
-            expect(cnt).to.equal(0)
-        });
+        let cnt = await itHelpers.count_all_records('countIndividuals');
+        expect(cnt).to.equal(0)
 
         // Delete all transcript_counts
         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
@@ -57,9 +56,8 @@ describe(
             expect(res.statusCode).to.equal(200);
         }
 
-        itHelpers.count_all_records('countTranscript_counts').then(cnt => {
-            expect(cnt).to.equal(0);
-        });
+        cnt = await itHelpers.count_all_records('countTranscript_counts');
+        expect(cnt).to.equal(0);
     })
 
     it('01. Individual table is empty', function() {
@@ -71,14 +69,13 @@ describe(
     });
 
 
-    it('02. Individual add', function() {
+    it('02. Individual add', async function() {
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "First") { id } }');
 
         expect(res.statusCode).to.equal(200);
         
-        itHelpers.count_all_records('countIndividuals').then(cnt => {
-            expect(cnt).to.equal(1)
-        });
+        let cnt = await itHelpers.count_all_records('countIndividuals');
+        expect(cnt).to.equal(1);
     });
 
 
@@ -177,22 +174,18 @@ describe(
     });
 
     // After this test, the 2 entries created before are gone
-    it('09. Individual delete all', function() {
+    it('09. Individual delete all', async function() {
 
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
         for(let i = 0; i < individuals.length; i++){
             res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
-            let resBody = JSON.parse(res.body.toString('utf8'));
-
             expect(res.statusCode).to.equal(200);
         }
 
-        itHelpers.count_all_records('countIndividuals').then(cnt => {
-            expect(cnt).to.equal(0)
-        });
-
+        let cnt = await itHelpers.count_all_records('countIndividuals');
+        expect(cnt).to.equal(0);
     });
 
     // transcript_count model tests start here:
@@ -207,20 +200,17 @@ describe(
     });
 
 
-    it('11. TranscriptCount add', function() {
+    it('11. TranscriptCount add', async function() {
 
         let res = itHelpers.request_graph_ql_post('mutation ' +
             '{ addTranscript_count(gene: "Gene A", ' +
                                   'variable: "RPKM", ' +
                                   'count: 123.32, ' +
                                   'tissue_or_condition: "Root") { id } }');
-        let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
-        itHelpers.count_all_records('countTranscript_counts').then(cnt => {
-            expect(cnt).to.equal(1)
-        });
-
+        let cnt = await itHelpers.count_all_records('countTranscript_counts');
+        expect(cnt).to.equal(1);
     });
 
 
@@ -634,25 +624,27 @@ describe(
 
   // This test is independent of the other ones
   it('21. Limit check', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    let individualName = "CountIndividual";
+    let individualAdding = `mutation { addIndividual (name: "${individualName}") { name }}`;
+    let res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
-    res = itHelpers.request_graph_ql_post(`mutation { addIndividual (name: "CountIndividual") { name }}`);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
-    res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: {value: "CountIndividual"}}) {name}}`);
+    res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: {value: "${individualName}"}}) {name}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -678,7 +670,7 @@ describe(
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.transcript_counts.length).equal(11);
 
-    res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: {value: "CountIndividual"}}) { name } transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
+    res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: {value: "${individualName}"}}) { name } transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     const errorObject_TranscriptCount = {
@@ -689,21 +681,21 @@ describe(
         }],
         data:{
             individuals:[
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"},
-                {name:"CountIndividual"}
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName},
+                {name:individualName}
             ],
             transcript_counts:null
         }};
@@ -717,17 +709,17 @@ describe(
         data:{
             individuals:null,
             transcript_counts:[
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"},
-                {gene:"Gene Z"}
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene},
+                {gene:transcript_count_gene}
             ]
         }
 
@@ -742,7 +734,7 @@ describe(
         expect(resBody).to.deep.equal(errorObject_TranscriptCount);
     }
 
-    res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"CountIndividual"}}) {id}}');
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
     expect(res.statusCode).to.equal(200);
     let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     for(let i = 0; i < individuals.length; i++){
@@ -751,19 +743,19 @@ describe(
         expect(res.statusCode).to.equal(200);
     }
 
-    res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"CountIndividual"}}) {id}}');
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
     expect(res.statusCode).to.equal(200);
     individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     expect(individuals).to.deep.equal([]);
 
-    res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:gene operator:eq value:{value:"Gene Z"}}) {id}}');
+    res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field:gene operator:eq value:{value:"${transcript_count_gene}"}}) {id}}`);
     expect(res.statusCode).to.equal(200);
     let trCounts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
     for (let i = 0; i < trCounts.length; i++){
         res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${trCounts[i].id}) }`);
         expect(res.statusCode).to.equal(200);
     }
-    res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:gene operator:eq value:{value:"Gene Z"}}) {id}}');
+    res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field:gene operator:eq value:{value:"${transcript_count_gene}"}}) {id}}`);
     expect(res.statusCode).to.equal(200);
     trCounts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
     expect(trCounts).to.deep.equal([]);
@@ -776,7 +768,7 @@ describe(
 describe(
     'Web service model',
     function() {
-        after(function() {
+        after(async function() {
             let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     
@@ -785,9 +777,8 @@ describe(
                 expect(res.statusCode).to.equal(200);
             }
     
-            itHelpers.count_all_records('countIndividuals').then(cnt => {
-                expect(cnt).to.equal(0)
-            });
+            let cnt = await itHelpers.count_all_records('countIndividuals');
+            expect(cnt).to.equal(0);
     
             res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
             let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
@@ -797,9 +788,8 @@ describe(
                 expect(res.statusCode).to.equal(200);
             }
     
-            itHelpers.count_all_records('countTranscript_counts').then(cnt => {
-                expect(cnt).to.equal(0);
-            });
+            cnt = await itHelpers.count_all_records('countTranscript_counts');
+            expect(cnt).to.equal(0);
         })
 
         // The entry used here is set up by the patching of the model file
@@ -871,7 +861,7 @@ describe(
 
 describe( 'Batch Upload', function() {
     // For now, only individuals are present in this section
-    after(function() {
+    after(async function() {
         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
@@ -880,9 +870,8 @@ describe( 'Batch Upload', function() {
             expect(res.statusCode).to.equal(200);
         }
 
-        itHelpers.count_all_records('countIndividuals').then(cnt => {
-            expect(cnt).to.equal(0)
-        });
+        let cnt = await itHelpers.count_all_records('countIndividuals');
+        expect(cnt).to.equal(0);
 
         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
         let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
@@ -892,9 +881,8 @@ describe( 'Batch Upload', function() {
             expect(res.statusCode).to.equal(200);
         }
 
-        itHelpers.count_all_records('countTranscript_counts').then(cnt => {
-            expect(cnt).to.equal(0);
-        });
+        cnt = await itHelpers.count_all_records('countTranscript_counts');
+        expect(cnt).to.equal(0);
     })
 
     it('01. SCV individual batch upload', async function () {
@@ -920,7 +908,7 @@ describe( 'Batch Upload', function() {
 describe(
     'Generic async validation tests',
     function() {
-        after(function() {
+        after(async function() {
             let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     
@@ -929,9 +917,8 @@ describe(
                 expect(res.statusCode).to.equal(200);
             }
     
-            itHelpers.count_all_records('countIndividuals').then(cnt => {
-                expect(cnt).to.equal(0)
-            });
+            let cnt = await itHelpers.count_all_records('countIndividuals');
+            expect(cnt).to.equal(0);
     
             res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
             let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
@@ -941,9 +928,8 @@ describe(
                 expect(res.statusCode).to.equal(200);
             }
     
-            itHelpers.count_all_records('countTranscript_counts').then(cnt => {
-                expect(cnt).to.equal(0);
-            });
+            cnt = await itHelpers.count_all_records('countTranscript_counts');
+            expect(cnt).to.equal(0);
         })
 
         it('01. Validate on add', function () {
@@ -1035,7 +1021,7 @@ describe(
         'Date types test',
         function() {
 
-            after(function() {
+            after(async function() {
                 let res = itHelpers.request_graph_ql_post('{ sequencingExperiments {id} }');
                 let sequencingExperiments = JSON.parse(res.body.toString('utf8')).data.sequencingExperiments;
         
@@ -1044,9 +1030,8 @@ describe(
                     expect(res.statusCode).to.equal(200);
                 }
         
-                itHelpers.count_all_records('countSequencingExperiments').then(cnt => {
-                    expect(cnt).to.equal(0)
-                });
+                let cnt = await itHelpers.count_all_records('countSequencingExperiments');
+                expect(cnt).to.equal(0);
         
             })
 
@@ -1535,7 +1520,7 @@ describe(
             }
           });
     })
-    it('09. Delete all remaining people', function() {
+    it('09. Delete all remaining people', async function() {
         let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
         let people = JSON.parse(res.body.toString('utf8')).data.peopleConnection.edges;
 
@@ -1544,8 +1529,7 @@ describe(
             expect(res.statusCode).to.equal(200);
         }
 
-        itHelpers.count_all_records('countPeople').then(cnt => {
-            expect(cnt).to.equal(0)
-        });
+        let cnt = await itHelpers.count_all_records('countPeople');
+        expect(cnt).to.equal(0);
     })
   });
