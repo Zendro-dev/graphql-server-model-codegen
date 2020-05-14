@@ -1729,6 +1729,22 @@ describe('Refactor associations - add / update SQL models', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+  it('add_dog to_one fK in target - accession', async function(){
+    let opts = funks.getOptions(models.researcher);
+    let generated_resolvers =await funks.generateJs('create-resolvers', opts);
+    let g_resolvers = generated_resolvers.replace(/\s/g, '');
+    let test_resolver = data_test.add_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(/\s/g, '');
+    expect(g_resolvers).to.have.string(test_resolver);
+  });
+
+  it('remove_dog to_one fK in target - accession', async function(){
+    let opts = funks.getOptions(models.researcher);
+    let generated_resolvers =await funks.generateJs('create-resolvers', opts);
+    let g_resolvers = generated_resolvers.replace(/\s/g, '');
+    let test_resolver = data_test.remove_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(/\s/g, '');
+    expect(g_resolvers).to.have.string(test_resolver);
+  });
+
   it('add_individuals to_many - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
@@ -1745,7 +1761,7 @@ describe('Refactor associations - add / update SQL models', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
-  it('_addLocation - accession', async function(){
+  it('add_locationId- accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-models', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
@@ -1753,7 +1769,7 @@ describe('Refactor associations - add / update SQL models', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
-  it('_removeLocation - accession', async function(){
+  it('remove_locationId - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver =await funks.generateJs('create-models', opts);
     let g_resolver = generated_resolver.replace(/\s/g, '');
