@@ -61,7 +61,6 @@ describe('Empty associations', function(){
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.individual_no_assoc_resolvers.replace(/\s/g, '');
-    //console.log(generated_resolvers);
     expect(g_resolvers, 'Incorrect resolvers').to.have.string(test_resolvers);
   });
 
@@ -208,7 +207,6 @@ describe('Model naming cases ', function(){
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.resolvers_webservice_aminoAcid.replace(/\s/g, '');
-    //console.log(generated_resolvers);
     expect(g_resolvers).to.have.string(test_resolvers);
   });
 
@@ -265,7 +263,6 @@ describe('Model naming cases ', function(){
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.transcriptCount_resolvers_camelcase.replace(/\s/g, '');
-    //console.log(generated_resolvers);
     expect(g_resolvers).to.have.string(test_resolvers);
   });
 
@@ -569,7 +566,6 @@ describe('Model Layer', function(){
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolver = data_test.read_all_resolver.replace(/\s/g, '');
-    //console.log(generated_resolvers);
     expect(g_resolvers, 'No read all method found').to.have.string(test_resolver);
   });
 
