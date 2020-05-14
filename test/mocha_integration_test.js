@@ -621,7 +621,8 @@ describe(
                               line: 1
                             }
                           ],
-                  path:["deleteTranscript_count"]
+                  path:["deleteTranscript_count"],
+                  extensions: null
                 }
             ],
             data:null
@@ -689,7 +690,8 @@ describe(
                         line: 1
                       }
                     ],
-            path:["transcript_counts"]
+            path:["transcript_counts"],
+            extensions: null
         }],
         data:{
             individuals:[
@@ -722,7 +724,8 @@ describe(
                 line: 1
               }
             ],
-            path:["individuals"]
+            path:["individuals"],
+            extensions: null
         }],
         data:{
             individuals:null,
