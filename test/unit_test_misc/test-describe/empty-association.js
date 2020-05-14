@@ -18,9 +18,7 @@ bulkAddTranscript_countCsv: [transcript_count] }
 `
 
 module.exports.individual_no_assoc_resolvers = `
-module.exports = {
-
-    /**
+/**
      * individuals - Check user authorization and return certain number, specified in pagination argument, of records that
      * holds the condition of search argument, all of them sorted as specified by the order argument.
      *
@@ -37,10 +35,8 @@ module.exports = {
     }, context) {
         return checkAuthorization(context, 'individual', 'read').then(async authorization => {
             if (authorization === true) {
-                await checkCount(search, context, "individuals");
-                let resultRecords = await individual.readAll(search, order, pagination);
-                checkCountAgainAndAdaptLimit(context, resultRecords.length, "individuals");
-                return resultRecords;
+                await checkCountAndReduceRecordsLimit(search, context, "individuals");
+                return await individual.readAll(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
@@ -48,7 +44,7 @@ module.exports = {
             console.error(error);
             handleError(error);
         })
-    }`
+    },`
 
 module.exports.transcript_count_no_assoc_model = `
 static associate(models) {
