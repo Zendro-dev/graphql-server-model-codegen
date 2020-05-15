@@ -39,11 +39,12 @@ static recognizeId(iri) {
 `
 
 module.exports.readById = `
-static readById(id) {
-    let options = {};
-    options['where'] = {};
-    options['where'][this.idAttribute()] = id;
-    return peopleLocalSql.findOne(options);
+static async readById(id) {
+    let item = await peopleLocalSql.findByPk(id);
+    if (item === null) {
+        throw new Error(\`Record with ID = "\${id}" does not exist\`);
+    }
+    return item;
 }
 `
 

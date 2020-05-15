@@ -82,11 +82,12 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return iriRegex.test(iri);
   }
 
-  static readById(id){
-    let options = {};
-    options['where'] = {};
-    options['where'][this.idAttribute()] = id;
-    return <%- adapterName -%>.findOne(options);
+  static async readById(id){
+    let item = await <%- adapterName -%>.findByPk(id);
+    if (item === null) {
+        throw new Error(`Record with ID = "${id}" does not exist`);
+    }
+    return item;
   }
 
   static countRecords(search){
