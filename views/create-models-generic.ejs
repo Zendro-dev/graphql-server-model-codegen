@@ -429,21 +429,6 @@ module.exports = class <%- name -%>{
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
 
-  static base64Decode(cursor){
-    return Buffer.from(cursor, 'base64').toString('utf-8');
-  }
-
-  base64Enconde(){
-    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
-  }
-
-  stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
-    <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
-    let data_values = _.pick(this, attributes);
-    return data_values;
-  }
-
   /**
    * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
    *
@@ -472,6 +457,21 @@ module.exports = class <%- name -%>{
 
   getIdValue() {
     return this[<%- name -%>.idAttribute()]
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
   }
 
   static externalIdsArray(){
