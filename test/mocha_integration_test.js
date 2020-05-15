@@ -783,6 +783,55 @@ describe(
 
   });
 
+  it('22. Cursor based pagination', function() {
+    let res = itHelpers.request_graph_ql_post('{transcript_countsConnection{edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    let edges = resBody.data.transcript_countsConnection.edges;
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        transcript_countsConnection: {
+          edges: [
+              {
+                  cursor: `${edges[0].cursor}`,
+                  node: {
+                      id: `${edges[0].node.id}`,
+                      gene: "Gene B"
+                  }
+              },
+              {
+                  cursor: `${edges[1].cursor}`,
+                  node: {
+                      id: `${edges[1].node.id}`,
+                      gene: "Gene C"
+                  }
+              },
+              {
+                  cursor: `${edges[2].cursor}`,
+                  node: {
+                      id: `${edges[2].node.id}`,
+                      gene: "Gene D"
+                  }
+              },
+              {
+                  cursor: `${edges[3].cursor}`,
+                  node: {
+                      id: `${edges[3].node.id}`,
+                      gene: "Gene D"
+                  }
+              }
+          ],
+          pageInfo: {
+              startCursor: `${resBody.data.transcript_countsConnection.pageInfo.startCursor}`,
+              endCursor: `${resBody.data.transcript_countsConnection.pageInfo.endCursor}`,
+              hasPreviousPage: false,
+              hasNextPage: false
+          }
+      }
+  }});
+  })
+
 });
 
 
