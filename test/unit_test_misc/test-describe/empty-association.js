@@ -28,22 +28,22 @@ module.exports.individual_no_assoc_resolvers = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
-    individuals: function({
+    individuals: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'individual', 'read').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'individual', 'read' === true)) {
                 await checkCountAndReduceRecordsLimit(search, context, "individuals");
                 return await individual.readAll(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
+        }
     },`
 
 module.exports.transcript_count_no_assoc_model = `

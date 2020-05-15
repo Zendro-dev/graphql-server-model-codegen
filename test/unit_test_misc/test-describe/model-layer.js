@@ -40,16 +40,16 @@ module.exports.count_in_resolvers = `
     countDogs: async function({
         search
     }, context) {
-        return await checkAuthorization(context, 'Dog', 'read').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'Dog', 'read') === true) {
                 return (await dog.countRecords(search)).sum;
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
+        }
     },
 `
 module.exports.read_all = `
@@ -106,22 +106,22 @@ module.exports.read_all_resolver = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
-    dogs: function({
+    dogs: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'Dog', 'read').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'Dog', 'read' === true)) {
                 await checkCountAndReduceRecordsLimit(search, context, "dogs");
                 return await dog.readAll(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
+        }
     },
 `
 
@@ -206,21 +206,21 @@ module.exports.delete_one_resolver = `
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {string}         Message indicating if deletion was successfull.
      */
-    deleteBook: function({
+    deleteBook: async function({
         id
     }, context) {
-        return checkAuthorization(context, 'Book', 'delete').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'Book', 'delete') === true) {
                 if (await validForDeletion(id, context)) {
                     return book.deleteOne(id);
                 }
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
+        }
     },
 `
 module.exports.update_one_model = `
@@ -342,19 +342,18 @@ module.exports.bulk_add_resolver = `
      * @param  {string} _       First parameter is not used
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      */
-    bulkAddBookCsv: function(_, context) {
-        return checkAuthorization(context, 'Book', 'create').then(authorization => {
-            if (authorization === true) {
-              return book.bulkAddCsv(context);
-
+    bulkAddBookCsv: async function(_, context) {
+        try {
+            if (await checkAuthorization(context, 'Book', 'create') === true) {
+                return book.bulkAddCsv(context);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
-    }
+        }
+    },
 `
 module.exports.table_template_model = `
 static csvTableTemplate(){
@@ -364,24 +363,24 @@ static csvTableTemplate(){
 
 module.exports.table_template_resolver = `
 /**
- * csvTableTemplateIndividual - Returns table's template
- *
- * @param  {string} _       First parameter is not used
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {Array}         Strings, one for header and one columns types
- */
-csvTableTemplateIndividual: function(_, context) {
-    return checkAuthorization(context, 'individual', 'read').then(authorization => {
-        if (authorization === true) {
-            return individual.csvTableTemplate();
-        } else {
-            throw new Error("You don't have authorization to perform this action");
+     * csvTableTemplateIndividual - Returns table's template
+     *
+     * @param  {string} _       First parameter is not used
+     * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {Array}         Strings, one for header and one columns types
+     */
+    csvTableTemplateIndividual: async function(_, context) {
+        try {
+            if (await checkAuthorization(context, 'individual', 'read') === true) {
+                return individual.csvTableTemplate();
+            } else {
+                throw new Error("You don't have authorization to perform this action");
+            }
+        } catch (error) {
+            console.error(error);
+            handleError(error);
         }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+    }
 
 }
 `

@@ -9,22 +9,22 @@ module.exports.resolvers_webservice_aminoAcid = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
-    aminoAcidSequences: function({
+    aminoAcidSequences: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'aminoAcidSequence', 'read').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'aminoAcidSequence', 'read' === true)) {
                 await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
                 return await aminoAcidSequence.readAll(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
+        }
     },
 `
 
@@ -140,19 +140,19 @@ module.exports.transcriptCount_resolvers_camelcase=`
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {object}         Record with id requested
      */
-    readOneTranscriptCount: function({
+    readOneTranscriptCount: async function({
         id
     }, context) {
-        return checkAuthorization(context, 'transcriptCount', 'read').then(authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
                 checkCountForOneAndReduceRecordsLimit(context);
                 return transcriptCount.readById(id);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
+        } catch (error) {
             console.error(error);
             handleError(error);
-        })
+        }
     },
 `
