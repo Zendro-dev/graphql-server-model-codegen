@@ -392,18 +392,19 @@ module.exports = {
    * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {array}             Array of records holding conditions specified by search, order and pagination argument
    */
-  <%- namePl -%>: function({search, order, pagination}, context){
-    return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
-        if (authorization === true) {
+  <%- namePl -%>: async function({search, order, pagination}, context){
+    //return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
+      try {
+        if (await checkAuthorization(context, '<%- name -%>', 'read' === true)) {
           await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>");
           return await <%- nameLc -%>.readAll(search, order, pagination);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
-    }).catch( error =>{
+    } catch( error ) {
           console.error(error);
           handleError( error);
-    })
+    }
   },
 
   /**
