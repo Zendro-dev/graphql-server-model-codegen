@@ -291,12 +291,21 @@ book.prototype.AuthorsFilter = function({
     order,
     pagination
 }, context) {
-  try{
-    return this.AuthorsFilterImpl({search, order, pagination});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    return checkAuthorization(context, 'Person', 'read').then(async authorization => {
+        if (authorization === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            return this.AuthorsFilterImpl({
+                search,
+                order,
+                pagination
+            });
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
+        console.error(error);
+        handleError(error);
+    })
 }
 `
 
@@ -311,11 +320,18 @@ module.exports.belongsToMany_resolver_count = `
 book.prototype.countFilteredAuthors = function({
     search
 }, context) {
-  try{
-    return this.countFilteredAuthorsImpl({search});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    return checkAuthorization(context, 'Person', 'read').then(async authorization => {
+        if (authorization === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            return this.countFilteredAuthorsImpl({
+                search
+            });
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
+        console.error(error);
+        handleError(error);
+    })
 }
 `
