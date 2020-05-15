@@ -763,40 +763,52 @@ describe(
   });
   
   //one_to_one associations where foreignKey is in the target model
-  it('22. one_to_one: add one country and one capital', async function() {
-
+  it('22. one_to_one associations', function() {
+    //setup
     itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
     let res = itHelpers.request_graph_ql_post('{ countries {country_id} }');
     let resBody = JSON.parse(res.body.toString('utf8'));
-
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.countries.length).equal(1);
 
     itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_B", name: "Berlin", addUnique_country:"GER") {capital_id} }');
     res = itHelpers.request_graph_ql_post('{ capitals {capital_id} }');
     resBody = JSON.parse(res.body.toString('utf8'));
-
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.capitals.length).equal(1);
+  });
 
-    itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_BN", name: "Bonn", addUnique_country:"GER") {capital_id} }');
-    res = itHelpers.request_graph_ql_post('{ capitals {capital_id} }');
+  it('23. one_to_one associations success', function() {
+    //test success
+    res = itHelpers.request_graph_ql_post('{ countries {country_id unique_capital{ capital_id}} }');
     resBody = JSON.parse(res.body.toString('utf8'));
-    console.log(JSON.stringify(res))
     expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal(
+      {"data":{"countries":[{"country_id":"GER","unique_capital":{"capital_id":"GER_B"}}]}}
+    )
+  });
 
+  it('24. one_to_one associations error', function() {
+    //test error
+    itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_BN", name: "Bonn", addUnique_country:"GER") {capital_id} }');
+    res = itHelpers.request_graph_ql_post('{ countries {country_id unique_capital{ capital_id}} }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({"errors":[{"message":"Not unique \"to_one\" association Error: Found 2 dogs matching country with country_id GER. Consider making this association a \"to_many\", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]","details":""}],"data":{"countries":[{"country_id":"GER","unique_capital":{"capital_id":"GER_B"}}]}});
+  });
+
+  it('25. one_to_one associations deletion cleanup', function() {
     //cleanup
-    res = await itHelpers.request_graph_ql_post('mutation { updateCountry(country_id: "GER", removeUnique_capital:"GER_B") {country_id} }');
+    res = itHelpers.request_graph_ql_post('mutation { updateCountry(country_id: "GER", removeUnique_capital:"GER_B") {country_id} }');
     expect(res.statusCode).to.equal(200);
-    res = await itHelpers.request_graph_ql_post('mutation { updateCountry(country_id: "GER", removeUnique_capital:"GER_BN") {country_id} }');
+    res = itHelpers.request_graph_ql_post('mutation { updateCountry(country_id: "GER", removeUnique_capital:"GER_BN") {country_id} }');
     expect(res.statusCode).to.equal(200);
-    res = await itHelpers.request_graph_ql_post('mutation { deleteCountry(country_id: "GER")}');
+    res = itHelpers.request_graph_ql_post('mutation { deleteCountry(country_id: "GER")}');
     expect(res.statusCode).to.equal(200);
-    res = await itHelpers.request_graph_ql_post('mutation { deleteCapital(capital_id: "GER_B")}');
+    res = itHelpers.request_graph_ql_post('mutation { deleteCapital(capital_id: "GER_B")}');
     expect(res.statusCode).to.equal(200);
-    res = await itHelpers.request_graph_ql_post('mutation { deleteCapital(capital_id: "GER_BN")}');
+    res = itHelpers.request_graph_ql_post('mutation { deleteCapital(capital_id: "GER_BN")}');
     expect(res.statusCode).to.equal(200);
-
   });
 
 });
@@ -1569,4 +1581,70 @@ describe(
         let cnt = await itHelpers.count_all_records('countPeople');
         expect(cnt).to.equal(0);
     })
+
+      //one_to_one associations where foreignKey is in the target model
+    it('10. one_to_one ddm associations setup', function() {
+      //setup
+      itHelpers.request_graph_ql_post('mutation { addPerson(person_id: "instance1-person01") {person_id} }');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody.data.peopleConnection.edges.length).equal(1);
+
+      itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot01", addUnique_person:"instance1-person01") {parrot_id} }');
+      res = itHelpers.request_graph_ql_post('{parrotsConnection{edges{node{parrot_id}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody.data.parrotsConnection.edges.length).equal(1);
+    });
+
+    it('11. one_to_one ddm associations success', function() {
+      //test success
+      let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id unique_parrot{parrot_id}}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal(
+        {
+          "data": {
+            "peopleConnection": {
+              "edges": [
+                {
+                  "node": {
+                    "person_id": "instance1-person01",
+                    "unique_parrot": {
+                      "parrot_id": "instance2-parrot01"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      )
+    });
+
+    it('12. one_to_one ddm associations error', function() {
+      //test error
+      itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot02", addUnique_person:"instance1-person01") {parrot_id} }');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection {edges {node {person_id unique_parrot {parrot_id}}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal(
+        {"errors":[{"message":"Not unique \"to_one\" association Error: Found 2 dogs matching person with person_id instance1-person01. Consider making this association a \"to_many\", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]","details":""}],"data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-person01","unique_parrot":{"parrot_id":"instance2-parrot01"}}}]}}}
+      )
+    });
+
+    it('13. one_to_one ddm associations deletion cleanup', function() {
+      //cleanup
+      let res = itHelpers.request_graph_ql_post('mutation { updatePerson(person_id: "instance1-person01", removeUnique_parrot:"instance2-parrot01") {person_id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { updatePerson(person_id: "instance1-person01", removeUnique_parrot:"instance2-parrot02") {person_id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { deletePerson(person_id: "instance1-person01")}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { deleteParrot(parrot_id: "instance2-parrot01")}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { deleteParrot(parrot_id: "instance2-parrot02")}');
+      expect(res.statusCode).to.equal(200);
+    });
   });

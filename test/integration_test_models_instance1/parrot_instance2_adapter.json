@@ -1,0 +1,22 @@
+{
+  "model" : "parrot",
+  "storageType" : "ddm-adapter",
+  "adapterName": "parrot_instance2",
+  "regex": "instance2",
+  "url": "http://server2:3030/graphql",
+  "attributes" : {
+    "name" : "String",
+    "parrot_id": "String",
+    "person_id": "String"
+  },
+  "associations": {
+    "unique_person": {
+      "type" : "to_one",
+      "target" : "person",
+      "targetKey" : "person_id",
+      "keyIn": "parrot",
+      "targetStorageType" : "distributed-data-model"
+    }
+  },
+  "internalId": "parrot_id"
+}
