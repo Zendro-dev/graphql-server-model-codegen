@@ -420,7 +420,7 @@ upContainers() {
   echo -e "@@ Installing ... ${LGREEN}done${NC}"
 
   # Up
-  docker-compose -f ./docker/docker-compose-test.yml up -d
+  docker-compose -f ./docker/docker-compose-test.yml up -d --no-recreate
   # Msg
   echo -e "@@ Containers up ... ${LGREEN}done${NC}"
 
@@ -550,7 +550,7 @@ if [ $# -gt 0 ]; then
               # Check code
               checkCode
               # Restart containers
-              restartContainers
+              upContainers
               # Do the tests
               doTests
 

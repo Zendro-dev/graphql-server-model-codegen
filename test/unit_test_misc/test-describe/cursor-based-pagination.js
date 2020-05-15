@@ -194,9 +194,7 @@ module.exports.resolver_read_all_connection = `
     }, context) {
         return checkAuthorization(context, 'Book', 'read').then(async authorization => {
             if (authorization === true) {
-                await checkCount(search, context, "booksConnection");
-                let resultRecords = await book.readAll(search, order, pagination);
-                checkCountAgainAndAdaptLimit(context, resultRecords.length, "booksConnection");
+                await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
                 return book.readAllCursor(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
