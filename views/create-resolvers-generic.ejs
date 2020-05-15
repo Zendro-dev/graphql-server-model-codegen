@@ -258,9 +258,8 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     return checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        await checkCount(search, context, "<%=associations_generic_one[i].name%>");
+        checkCountForOneAndReduceRecordsLimit(context);
         let resultRecords = await this.<%=associations_generic_one[i].name%>Impl({search}, context);
-        checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%=associations_generic_one[i].name%>");
         return resultRecords;
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -302,9 +301,8 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        await checkCount(search, context, "<%=associations_generic_many[i].name%>Filter");
+        await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter");
         let resultRecords = await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
-        checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%=associations_generic_many[i].name%>Filter");
         return resultRecords;
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -326,9 +324,8 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = function({search}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        await checkCount(search, context, "countFiltered<%=associations_generic_many[i].name_cp%>");
+        await checkCountAndReduceRecordsLimit(search, context, "countFiltered<%=associations_generic_many[i].name_cp%>");
         let resultRecords = await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
-        checkCountAgainAndAdaptLimit(context, resultRecords.length, "countFiltered<%=associations_generic_many[i].name_cp%>");
         return resultRecords;
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -353,9 +350,8 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        await checkCount(search, context, "<%=associations_generic_many[i].name%>Connection");
+        await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection");
         let resultRecords = await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
-        checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%=associations_generic_many[i].name%>Connection");
         return resultRecords;
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -394,14 +390,14 @@ const associationArgsDef = {
  * 
  * Functions:
  * errorMessageForRecordsLimit()
- * checkCount()
- * checkCountForOne()
- * checkCountAgainAndAdaptLimit()
+ * checkCountAndReduceRecordsLimit()
+ * checkCountForOneAndReduceRecordsLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
 <%- include('./includes/record-limit-helpers'); -%>
+
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *
@@ -503,10 +499,8 @@ module.exports = {
   <%- namePl -%>: function({search, order, pagination}, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
         if (authorization === true) {
-          await checkCount(search, context, "<%- namePl -%>");
-          let resultRecords = await <%- nameLc -%>.readAll(search, order, pagination);
-          checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%- namePl -%>");
-          return resultRecords;
+          await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>");
+          return await <%- nameLc -%>.readAll(search, order, pagination);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -526,21 +520,19 @@ module.exports = {
    * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
-   <%- namePl -%>Connection: function({search, order, pagination}, context){
-     return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
-         if (authorization === true) {
-           await checkCount(search, context, "<%- namePl -%>Connection");
-           let resultRecords = await <%- nameLc -%>.readAll(search, order, pagination);
-           checkCountAgainAndAdaptLimit(context, resultRecords.length, "<%- namePl -%>Connection");
-           return <%- nameLc -%>.readAllCursor(search, order, pagination);
-       } else {
-           throw new Error("You don't have authorization to perform this action");
-       }
-     }).catch( error =>{
-          console.error(error);
-           handleError( error);
-     })
-   },
+  <%- namePl -%>Connection: function({search, order, pagination}, context){
+    return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
+      if (authorization === true) {
+        await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>Connection");
+        return <%- nameLc -%>.readAllCursor(search, order, pagination);
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+    }).catch( error =>{
+        console.error(error);
+          handleError( error);
+    })
+  },
 
   /**
    * readOne<%- nameCp -%> - Check user authorization and return one record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
@@ -552,11 +544,8 @@ module.exports = {
   readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
     return checkAuthorization(context, '<%- name -%>', 'read').then( authorization =>{
       if (authorization === true) {
-        checkCountForOne(context);
-        let resultRecords = <%- nameLc -%>.readById(<%- idAttribute -%>);
-        checkCountForOne(context);
-        context.recordsLimit = context.recordsLimit - 1;
-        return resultRecords;
+        checkCountForOneAndReduceRecordsLimit(context);
+        return <%- nameLc -%>.readById(<%- idAttribute -%>);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }

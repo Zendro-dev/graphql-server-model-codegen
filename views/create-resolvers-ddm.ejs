@@ -165,8 +165,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     return checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        let resultRecords = await this.<%=associations_generic_one[i].name%>Impl({search}, context);
-        return resultRecords;
+        return  await this.<%=associations_generic_one[i].name%>Impl({search}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -207,8 +206,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        let resultRecords = await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
-        return resultRecords;
+        return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -229,8 +227,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = function({search}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        let resultRecords = await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
-        return resultRecords;
+        return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -254,8 +251,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
-        let resultRecords = await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
-        return resultRecords;
+        return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -287,18 +283,14 @@ const associationArgsDef = {
 
 <%#
 /**
+ * Section 5
  * Local helper fuctions.
  *
  * Functions:
- * errorMessageForRecordsLimit()
- * checkCount()
- * checkCountForOne()
- * checkCountAgainAndAdaptLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
-<%- include('./includes/record-limit-helpers'); -%>
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *
