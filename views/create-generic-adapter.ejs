@@ -411,11 +411,11 @@ module.exports = class <%- name -%>{
   }
 
   static async csvTableTemplate(){
-      /*
-      YOUR CODE GOES HERE
-      */
-      throw new Error('csvTableTemplate<%- nameCp-%> is not implemented');
-    }
+    /*
+    YOUR CODE GOES HERE
+    */
+    throw new Error('csvTableTemplate<%- nameCp-%> is not implemented');
+  }
 
   <%- include('./includes/create-models-fieldMutations-generic', {op: "add"}); %> 
   <%- include('./includes/create-models-fieldMutations-generic', {op: "remove"}); %>
@@ -425,7 +425,6 @@ module.exports = class <%- name -%>{
    *
    * @return {type} Name of the attribute that functions as an internalId
    */
-
   static idAttribute() {
     return <%- adapterName -%>.definition.id.name;
   }
@@ -435,7 +434,6 @@ module.exports = class <%- name -%>{
    *
    * @return {type} Type given in the JSON model
    */
-
   static idAttributeType() {
     return <%- adapterName -%>.definition.id.type;
   }
@@ -445,7 +443,6 @@ module.exports = class <%- name -%>{
    *
    * @return {type} id value
    */
-
   getIdValue() {
     return this[<%- adapterName -%>.idAttribute()]
   }
