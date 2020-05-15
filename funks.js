@@ -406,23 +406,23 @@ writeIndexAdapters = function(dir_write){
     if( adapters[adapter.adapterName] ){
       throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
     }
-    
+
     switch(adapter.adapterType) {
       case 'ddm-adapter':
       case 'cenzontle-webservice-adapter':
       case 'generic-adapter':
-        adapters[adapter.adapterName] = adapter; 
+        adapters[adapter.adapterName] = adapter;
         break;
 
       case 'sql-adapter':
         adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
         break;
-      
+
       case 'default':
         throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
     }
   });
-  
+
   `
   try {
     let file_name = dir_write + '/adapters/' +  'index.js';
@@ -533,9 +533,9 @@ validateJsonFile =  function(opts){
 
   //check: validate external ids declare in attributes
   opts.externalIds.forEach( x => {
-    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String' 
+    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String'
         || opts.attributes[x] === 'Float' || opts.attributes[x] === 'Int'  ) ) {
-      
+
           //error
           check.pass = false;
           check.errors.push(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`);
@@ -601,7 +601,7 @@ validateJsonFile =  function(opts){
         associations: []
 
       };
-  
+
       if(associations!==undefined){
         Object.entries(associations).forEach(([name, association]) => {
             association.targetStorageType = association.targetStorageType.toLowerCase();
@@ -609,7 +609,7 @@ validateJsonFile =  function(opts){
             let type = association.type;
             associations_info.associations.push(association);
             let holdsTheForeignKey = false;
-  
+
             //if(associations_type["many"].includes(association.type) )
             if(association.type === 'to_many') {
               //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
@@ -619,16 +619,16 @@ validateJsonFile =  function(opts){
               associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
               if (association.keyIn !== association.target) {
                 holdsTheForeignKey = true;
-              } 
+              }
             } else if(association.type === 'to_many_through_sql_cross_table') {
               if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
                 console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
               }
               associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
-            } else { 
+            } else {
               console.error(colors.red("Association type "+ association.type + " not supported."));
             }
-  
+
             let assoc = association;
             assoc["name"] = name;
             assoc["name_lc"] = uncapitalizeString(name);
@@ -643,12 +643,12 @@ validateJsonFile =  function(opts){
                 assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
             }
             assoc["holdsForeignKey"] = holdsTheForeignKey;
-  
-  
+
+
             associations_info[type].push(assoc);
             //associations_info[type].push(assoc);
           });
-  
+
         }
         associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
         return associations_info;
@@ -729,7 +729,7 @@ generateSection = async function(section, opts, dir_write ){
 };
 
 /**
-  * generateSections - Receives an array of sections, and for each one invokes generateSection() after handling 
+  * generateSections - Receives an array of sections, and for each one invokes generateSection() after handling
   * particular sections checks.
   *
   * @param  {array} sections     Array of sections that will be generated; each section is an object with 'dir' and 'template' keys.
@@ -753,7 +753,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'resolvers':
       case 'resolvers-ddm':
       //models
-      case 'models':  
+      case 'models':
       case 'models-webservice':
       case 'models-cenz':
       case 'distributed-model':
@@ -766,7 +766,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'migrations':
         file_name = createNameMigration(dir_write, section.fileName);
         break;
-      //validations & patches 
+      //validations & patches
       case 'validations':
       case 'patches':
         //set file name
@@ -817,7 +817,7 @@ getIdAttribute = function(dataModel){
 
 getStorageType = function(dataModel) {
   let valid = true;
-  
+
   /**
    * Checks for 'storageType'.
    */
@@ -845,7 +845,7 @@ getStorageType = function(dataModel) {
         case 'generic-adapter':
           //ok
           break;
-        
+
         default:
           //not ok
           valid = false;
@@ -863,7 +863,7 @@ getStorageType = function(dataModel) {
 }
 
 
-/** 
+/**
  * generateCode - Given a set of json files, describing each of them a data model, this
  * functions generate the code for a graphql server that will handle CRUD operations.
  * The generated code consists of four sections: sequelize models, migrations, resolvers and
@@ -968,7 +968,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       });
       console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
       return;
-  
+
     } else { //valid model
       //done
     }
@@ -989,7 +989,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'models',     template: 'models',     fileName: opts.nameLc},
           {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: 'sql-'+opts.nameLc},
         ]
         break;
 
@@ -998,6 +998,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-webservice', template: 'models-webservice', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: 'webservice-'+opts.nameLc},
         ]
         break;
 
@@ -1006,6 +1007,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-cenz-server', template: 'models-cenz', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: 'cenz-server-'+opts.nameLc},
         ]
         break;
 
@@ -1034,7 +1036,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
           {dir: 'validations',  template: 'validations',  fileName: opts.nameLc},
-          {dir: 'patches', template: 'patches', fileName: opts.nameLc},
+          {dir: 'patches', template: 'patches', fileName: 'sql-adapter'+opts.nameLc},
         ]
         break;
 
@@ -1052,11 +1054,11 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       //msg
       console.log("@@ ", colors.red('done'));
       totalGenErrors++;
+    };
     });
 
     //save data for writeCommons
     models.push([opts.name , opts.namePl]);
-  };
 
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
@@ -1083,7 +1085,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   if(verbose) console.log("@@ Total JSON files with errors: ", (totalWrongFiles>0) ? colors.red(totalWrongFiles) : colors.green(totalWrongFiles));
   //msg
   if(verbose) console.log("@@ Total models with errors: ", (totalWrongModels>0) ? colors.red(totalWrongModels) : colors.green(totalWrongModels));
-  
+
   //msg
   console.log(colors.white('@ Code generation...'), (totalWrongModels>0 || totalGenErrors>0) ? colors.red('done') : colors.green('done'));
 };
