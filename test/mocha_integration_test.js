@@ -613,7 +613,7 @@ describe(
       expect(resBody).to.deep.equal({
           errors:[
               {
-                  message:`Error: transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
+                  message:`transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
                   details:"",
                   locations: [
                             {
@@ -682,7 +682,7 @@ describe(
 
     const errorObject_TranscriptCount = {
         errors:[{
-            message:"Error: Max record limit of 25 exceeded in transcript_counts",
+            message:"Max record limit of 25 exceeded in transcript_counts",
             details:"",
             locations: [
                       {
@@ -716,7 +716,7 @@ describe(
 
     const errorObject_Individual = {
         errors:[{
-            message:"Error: Max record limit of 25 exceeded in individuals",
+            message:"Max record limit of 25 exceeded in individuals",
             details:"",
             locations: [
               {
@@ -750,10 +750,8 @@ describe(
     expect((resBody.data.individuals === null) !== (resBody.data.transcript_counts === null)).to.be.true;
 
     if (resBody.data.individuals === null) {
-      console.log('Individuals failed!');
         expect(resBody).to.deep.equal(errorObject_Individual);
     } else {
-      console.log('Transcript_count failed!');
         expect(resBody).to.deep.equal(errorObject_TranscriptCount);
     }
 
