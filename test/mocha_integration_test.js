@@ -49,7 +49,7 @@ describe(
 
         // Delete all transcript_counts
         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-        let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
+        let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
 
         for(let i = 0; i < transcript_counts.length; i++){
             res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
@@ -73,7 +73,7 @@ describe(
         let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "First") { id } }');
 
         expect(res.statusCode).to.equal(200);
-        
+
         let cnt = await itHelpers.count_all_records('countIndividuals');
         expect(cnt).to.equal(1);
     });
@@ -771,23 +771,23 @@ describe(
         after(async function() {
             let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
-    
+
             for(let i = 0; i < individuals.length; i++){
                 res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
                 expect(res.statusCode).to.equal(200);
             }
-    
+
             let cnt = await itHelpers.count_all_records('countIndividuals');
             expect(cnt).to.equal(0);
-    
+
             res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-            let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
-    
+            let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
+
             for(let i = 0; i < transcript_counts.length; i++){
                 res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
                 expect(res.statusCode).to.equal(200);
             }
-    
+
             cnt = await itHelpers.count_all_records('countTranscript_counts');
             expect(cnt).to.equal(0);
         })
@@ -874,7 +874,7 @@ describe( 'Batch Upload', function() {
         expect(cnt).to.equal(0);
 
         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-        let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
+        let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
 
         for(let i = 0; i < transcript_counts.length; i++){
             res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
@@ -911,23 +911,23 @@ describe(
         after(async function() {
             let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
-    
+
             for(let i = 0; i < individuals.length; i++){
                 res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
                 expect(res.statusCode).to.equal(200);
             }
-    
+
             let cnt = await itHelpers.count_all_records('countIndividuals');
             expect(cnt).to.equal(0);
-    
+
             res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-            let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;      
-    
+            let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
+
             for(let i = 0; i < transcript_counts.length; i++){
                 res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
                 expect(res.statusCode).to.equal(200);
             }
-    
+
             cnt = await itHelpers.count_all_records('countTranscript_counts');
             expect(cnt).to.equal(0);
         })
@@ -1024,15 +1024,15 @@ describe(
             after(async function() {
                 let res = itHelpers.request_graph_ql_post('{ sequencingExperiments {id} }');
                 let sequencingExperiments = JSON.parse(res.body.toString('utf8')).data.sequencingExperiments;
-        
+
                 for(let i = 0; i < sequencingExperiments.length; i++){
                     res = itHelpers.request_graph_ql_post(`mutation { deleteSequencingExperiment (id: ${sequencingExperiments[i].id}) }`);
                     expect(res.statusCode).to.equal(200);
                 }
-        
+
                 let cnt = await itHelpers.count_all_records('countSequencingExperiments');
                 expect(cnt).to.equal(0);
-        
+
             })
 
           it('01. Create and retrieve instance with date type', function() {
@@ -1706,7 +1706,36 @@ describe(
         });
     });
 
-    it('09. Create record with association(to-one) accession-location', function() {
+    it('09. Pagination (cursor based) accessions', function() {
+      /**
+       * This integration test assumes that data from previous tests is still stored on the DB.
+       * This test will do a OR search.
+      */
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessionsConnection(pagination:{ first: 2} order:{field: collectors_name order:DESC}){ edges{node{accession_id}}}}');
+
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "accessionsConnection": {
+              "edges": [
+                {
+                  "node": {
+                    "accession_id": "d-instance1"
+                  }
+                },
+                {
+                  "node": {
+                    "accession_id": "c-instance1"
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+
+    it('10. Create record with association(to-one) accession-location', function() {
       //add location first
       itHelpers.request_graph_ql_post_instance2('mutation{addLocation(locationId: "location-cenz-1"){locationId}}');
 
@@ -1726,9 +1755,9 @@ describe(
         });
     });
 
-    it('10. Remove association(to-one) accession-location', function() {
+    it('11. Remove association(to-one) accession-location', function() {
       /**
-       * This test assumes that the accession and location created in the previous test(09. Create record with association accession-location) are still in the DB
+       * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
       let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-2-accession" removeLocation:"location-cenz-1"){locationId location{locationId}}}');
 
@@ -1744,9 +1773,9 @@ describe(
         });
     });
 
-    it('11.Update association(to-one) accession-location', function() {
+    it('12. Update association(to-one) accession-location', function() {
       /**
-       * This test assumes that the accession and location created in the previous test(09. Create record with association accession-location) are still in the DB
+       * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
       let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-2-accession" addLocation:"location-cenz-1"){location{locationId}}}');
 
@@ -1761,10 +1790,13 @@ describe(
             }
           }
         });
+
+        //remove association for cleaning
+        itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-2-accession" removeLocation:"location-cenz-1"){location{locationId}}}');
     });
 
 
-    it('12.Create with association(to-many) accession-measurement', function() {
+    it('13.Create with association(to-many) accession-measurement', function() {
       /**
        * Create measurements that will be associated to accession
        * */
@@ -1795,9 +1827,9 @@ describe(
         });
     });
 
-    it('13.Remove association(to-many) accession-measurement', function() {
+    it('14.Remove association(to-many) accession-measurement', function() {
       /**
-       * This test assumes that association from previous test (12.Create with association(to-many) accession-measurement) still is stored in the DB.
+       * This test assumes that association from previous test (13.Create with association(to-many) accession-measurement) still is stored in the DB.
        * */
 
       let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
@@ -1817,9 +1849,9 @@ describe(
         });
     });
 
-    it('14.Update add association(to-many) accession-measurement', function() {
+    it('15.Update add association(to-many) accession-measurement', function() {
       /**
-       * This test assumes that association from previous tests (12.Create with association(to-many and 13.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
+       * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
 
       let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
@@ -1843,11 +1875,12 @@ describe(
             }
           }
         });
+
     });
 
-    it('15. Read connection association(to-many) accession-measurement', function() {
+    it('16. Read connection association(to-many) accession-measurement', function() {
       /**
-       * This test assumes that association from previous tests (12.Create with association(to-many and 13.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
+       * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
 
       let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id:"cenz-3-accession"){ measurementsConnection(order:{field: measurement_id order: ASC}){ edges{node{measurement_id}}}}}');
@@ -1879,7 +1912,50 @@ describe(
             }
           }
         });
+
+        //remove associations for cleaning
+         itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"cenz-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
     });
 
+
+    it('17. Delete all remaining accessions', async function() {
+        let res = itHelpers.request_graph_ql_post_instance2('{accessions{accession_id}}');
+        let accessions = JSON.parse(res.body.toString('utf8')).data.accessions;
+
+        for(let i = 0; i < accessions.length; i++){
+            res = itHelpers.request_graph_ql_post_instance2(`mutation { deleteAccession (accession_id: "${accessions[i].accession_id}") }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        let cnt = await itHelpers.count_all_records('countAccessions');
+        expect(cnt).to.equal(0);
+    });
+
+
+    it('18. Delete all remaining measurements', async function() {
+        let res = itHelpers.request_graph_ql_post_instance2('{measurements{measurement_id}}');
+        let measurements = JSON.parse(res.body.toString('utf8')).data.measurements;
+
+        for(let i = 0; i < measurements.length; i++){
+            res = itHelpers.request_graph_ql_post_instance2(`mutation { deleteMeasurement (measurement_id: "${measurements[i].measurement_id}") }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        let cnt = await itHelpers.count_all_records('countMeasurements');
+        expect(cnt).to.equal(0);
+    });
+
+    it('19. Delete all remaining locations', async function() {
+        let res = itHelpers.request_graph_ql_post_instance2('{locations{locationId}}');
+        let locations = JSON.parse(res.body.toString('utf8')).data.locations;
+
+        for(let i = 0; i < locations.length; i++){
+            res = itHelpers.request_graph_ql_post_instance2(`mutation { deleteLocation (locationId: "${locations[i].locationId}") }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        let cnt = await itHelpers.count_all_records('countLocations');
+        expect(cnt).to.equal(0);
+    });
 
   });
