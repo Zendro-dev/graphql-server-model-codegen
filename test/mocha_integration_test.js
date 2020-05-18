@@ -832,6 +832,13 @@ describe(
   }});
   })
 
+  it('23. Error output for wrong parameter', function() {
+    let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    console.log('The status is ' + res.statusCode);
+    console.log('The output: ' + JSON.stringify(resBody, null, 4));
+  })
+
 });
 
 
