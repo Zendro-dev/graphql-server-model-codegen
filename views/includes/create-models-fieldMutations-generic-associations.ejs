@@ -10,7 +10,7 @@
       /*
       YOUR CODE GOES HERE
       */
-      throw new Error('<%- op -%>_<%-generic_to_one_association.name_lc-%>Impl() is not implemented');
+      throw new Error('<%- op -%>_<%-generic_to_one_association.name_lc-%>Impl() is not implemented for model <%- name -%>');
   }
 <%}-%>
 
@@ -22,10 +22,10 @@
    * @param {Object}  <%-nameLc-%>_input Object with all the current attributes of the <%-name-%> model record to be updated,
    *                  including info of input ids to <%- op %> as association. 
    */
-  static async <%-op%>_<%-generic_to_many_association.name_lc-%>Impl(<%- idAttribute-%>, ids_to_<%- op %>, <%-nameLc-%>_input) {
+  static async <%-op%>_<%-generic_to_many_association.name_lc-%>Impl(<%-nameLc-%>_input) {
       /*
       YOUR CODE GOES HERE
       */
-      throw new Error('<%- op -%>_<%-generic_to_many_association.name_lc-%>Impl() is not implemented');
+      throw new Error('<%- op -%>_<%-generic_to_many_association.name_lc-%>Impl() is not implemented for model <%- name -%>');
   }
 <%}-%>

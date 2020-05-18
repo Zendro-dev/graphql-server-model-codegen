@@ -29,7 +29,7 @@ const globals = require('../config/globals');
  */
 -%> 
 
-<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
+<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_one"]).concat(associationsArguments["generic_to_many"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%if( i == associations_temp.length - 1 ){-%>

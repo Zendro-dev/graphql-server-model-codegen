@@ -1,27 +1,7 @@
 const _ = require('lodash');
 const globals = require('../config/globals');
-const {
-    handleError
-} = require('../utils/errors');
-const Sequelize = require('sequelize');
-const dict = require('../utils/graphql-sequelize-types');
-const validatorUtil = require('../utils/validatorUtil');
-const helper = require('../utils/helper');
-const searchArg = require('../utils/search-argument');
-const path = require('path');
-const fileTools = require('../utils/file-tools');
-const helpersAcl = require('../utils/helpers-acl');
-const email = require('../utils/email');
-const fs = require('fs');
-const os = require('os');
-const uuidv4 = require('uuidv4');
-const models = require(path.join(__dirname, '..', 'models_index.js'));
-
-const _ = require('lodash');
-const globals = require('../config/globals');
 const helper = require('../utils/helper');
 
-const remoteCenzontleURL = "<%- url -%>";
 const iriRegex = new RegExp('<%- regex -%>');
 
 // An exact copy of the the model definition that comes from the .json file
@@ -81,7 +61,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
      */
-    throw new Error('readOne<%- nameCp -%> is not implemented');
+    throw new Error('readById() is not implemented for model <%- name -%>');
   }
 
   /**
@@ -101,7 +81,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('count<%- namePlCp -%> is not implemented');
+    throw new Error('countRecords() is not implemented for model <%- name -%>');
   }
 
   /**
@@ -135,7 +115,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('Read all <%- namePl -%> is not implemented');
+    throw new Error('readAll() is not implemented for model <%- name -%>');
   }
 
   /**
@@ -345,7 +325,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('add<%- nameCp -%> is not implemented');
+    throw new Error('addOne() is not implemented for model <%- name -%>');
   }
 
   /**
@@ -381,7 +361,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('update<%- nameCp-%> is not implemented');
+    throw new Error('updateOne() is not implemented for model <%- name -%>');
   }
 
   /**
@@ -400,25 +380,22 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('delete<%- nameCp -%> is not implemented');
+    throw new Error('deleteOne is not implemented for model <%- name -%>');
   }
 
   static async bulkAddCsv(context){
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('bulkAdd<%- nameCp -%>Csv is not implemented');
+    throw new Error('bulkAddCsv() is not implemented for model <%- name -%>');
   }
 
   static async csvTableTemplate(){
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('csvTableTemplate<%- nameCp-%> is not implemented');
+    throw new Error('csvTableTemplate() is not implemented for model <%- name -%>');
   }
-
-  <%- include('./includes/create-models-fieldMutations-generic', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations-generic', {op: "remove"}); %>
 
   /**
    * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.

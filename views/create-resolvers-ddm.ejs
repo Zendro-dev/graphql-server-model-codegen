@@ -13,7 +13,7 @@ const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 const globals = require('../config/globals');
 
-<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
+<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_one"]).concat(associationsArguments["generic_to_many"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%if( i == associations_temp.length - 1 ){-%>
@@ -165,6 +165,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     return checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
+        checkCountForOneAndReduceRecordsLimit(context);
         return  await this.<%=associations_generic_one[i].name%>Impl({search}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -206,6 +207,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
+        await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter");
         return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -227,6 +229,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = function({search}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
+        await checkCountAndReduceRecordsLimit(search, context, "countFiltered<%=associations_generic_many[i].name_cp%>");
         return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -251,6 +254,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
+        await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection");
         return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
@@ -281,16 +285,20 @@ const associationArgsDef = {
 <%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "add"}); -%> 
 <%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "remove"}); -%>
 
-<%#
+<%# 
 /**
  * Section 5
  * Local helper fuctions.
- *
+ * 
  * Functions:
+ * errorMessageForRecordsLimit()
+ * checkCountAndReduceRecordsLimit()
+ * checkCountForOneAndReduceRecordsLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
+<%- include('./includes/record-limit-helpers'); -%>
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *

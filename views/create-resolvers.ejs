@@ -28,7 +28,7 @@ const globals = require('../config/globals');
  * name (key) with the name of the corresponding association (value).
  */
 -%> 
-<% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"])-%>
+  <% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_one"]).concat(associationsArguments["generic_to_many"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <%if( i == associations_temp.length - 1 ){-%>
@@ -321,8 +321,7 @@ const associationArgsDef = {
     return checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
         checkCountForOneAndReduceRecordsLimit(context);
-        let resultRecords = await this.<%=associations_generic_one[i].name%>Impl({search}, context);
-        return resultRecords;
+        return await this.<%=associations_generic_one[i].name%>Impl({search}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -364,8 +363,7 @@ const associationArgsDef = {
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
         await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter");
-        let resultRecords = await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
-        return resultRecords;
+        return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -387,8 +385,7 @@ const associationArgsDef = {
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
         await checkCountAndReduceRecordsLimit(search, context, "countFiltered<%=associations_generic_many[i].name_cp%>");
-        let resultRecords = await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
-        return resultRecords;
+        return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -413,8 +410,7 @@ const associationArgsDef = {
     return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
       if (authorization === true) {
         await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection");
-        let resultRecords = await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
-        return resultRecords;
+        return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }

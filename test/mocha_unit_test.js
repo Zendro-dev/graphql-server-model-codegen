@@ -1900,40 +1900,65 @@ describe('Generic Models - GraphQL Schema Layer', function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test1.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test1_1).and
+      .to.not.match(data_test.test1_2).and
+      .to.not.match(data_test.test1_3).and
+      .to.not.match(data_test.test1_4).and
+      .to.not.match(data_test.test1_5).and
+      .to.not.match(data_test.test1_6).and
+      .to.not.match(data_test.test1_7).and
+      .to.not.match(data_test.test1_8).and
+      .to.not.match(data_test.test1_9).and
+      .to.not.match(data_test.test1_10);
   });
 
   it('2. sql <to_many> generic - person', async function(){
     let opts = funks.getOptions(models_generic.personSql_toMany_dogGeneric);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test2.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test2_1).and
+      .to.match(data_test.test2_2).and
+      .to.match(data_test.test2_3).and
+      .to.match(data_test.test2_4).and
+      .to.match(data_test.test2_5).and
+      .to.match(data_test.test2_6);
   });
 
   it('3. generic <to_one> sql - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_toOne_personSql);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test3.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test3_1).and
+      .to.match(data_test.test3_2).and
+      .to.match(data_test.test3_3).and
+      .to.match(data_test.test3_4);
   });
 
   it('4. sql <to_one> generic - person', async function(){
     let opts = funks.getOptions(models_generic.personSql_toOne_hometownGeneric);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test4.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+    .to.match(data_test.test4_1).and
+    .to.match(data_test.test4_2).and
+    .to.match(data_test.test4_3).and
+    .to.match(data_test.test4_4);
   });
 
   it('5. generic <to_many> sql - hometown', async function(){
     let opts = funks.getOptions(models_generic.hometownGeneric_toMany_personSql);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test5.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+    .to.match(data_test.test5_1).and
+    .to.match(data_test.test5_2).and
+    .to.match(data_test.test5_3).and
+    .to.match(data_test.test5_4).and
+    .to.match(data_test.test5_5).and
+    .to.match(data_test.test5_6);
   });
 });
 
@@ -1943,46 +1968,71 @@ describe('Generic Models - GraphQL Schema Layer', function(){
 describe('Generic Models - Resolvers Layer', function(){
   let data_test = require('./unit_test_misc/test-describe/all-generic');
 
-  it('6. generic with no associations - person', async function(){
+  it('6.1. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
     let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test6.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test6_1);
+  });
+
+  it('6.2. generic with no associations - person', async function(){
+    let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
+    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test6_2);
+  });
+
+  it('6.3. generic with no associations - person', async function(){
+    let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
+    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test6_3);
+  });
+
+  it('6.4. generic with no associations - person', async function(){
+    let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
+    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test6_4);
+  });
+
+  it('6.5. generic with no associations - person', async function(){
+    let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
+    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test6_5);
   });
 
   it('7. sql <to_many> generic - person', async function(){
     let opts = funks.getOptions(models_generic.personSql_toMany_dogGeneric);
     let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test7.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test7_1).and
+      .to.match(data_test.test7_2).and
+      .to.match(data_test.test7_3).and
+      .to.match(data_test.test7_4).and
+      .to.match(data_test.test7_5).and
+      .to.match(data_test.test7_6).and
+      .to.match(data_test.test7_7).and
+      .to.match(data_test.test7_8);
   });
 
   it('8. generic <to_one> sql - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_toOne_personSql);
     let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test8.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test8_1).and
+      .to.match(data_test.test8_2).and
+      .to.match(data_test.test8_3).and
+      .to.match(data_test.test8_4);
   });
-
-  it('9. sql <to_one> generic - person', async function(){
-    let opts = funks.getOptions(models_generic.personSql_toOne_hometownGeneric);
-    let generated_schema =await funks.generateJs('create-resolvers', opts);
-    let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test9.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
-  });
-
-  it('10. generic <to_many> sql - hometown', async function(){
-    let opts = funks.getOptions(models_generic.hometownGeneric_toMany_personSql);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
-    let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test10.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
-  });
-
 });
 
 /** 
@@ -1991,44 +2041,310 @@ describe('Generic Models - Resolvers Layer', function(){
 describe('Generic Models - Model Layer', function(){
   let data_test = require('./unit_test_misc/test-describe/all-generic');
 
-  it('11. generic with no associations - person', async function(){
+  it('9. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
     let generated_schema =await funks.generateJs('create-models-generic', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test11.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test9_1).and
+      .to.match(data_test.test9_2).and
+      .to.match(data_test.test9_3).and
+      .to.match(data_test.test9_4).and
+      .to.match(data_test.test9_5).and
+      .to.match(data_test.test9_6).and
+      .to.match(data_test.test9_7).and
+      .to.match(data_test.test9_8).and
+      .to.not.match(data_test.test9_9).and
+      .to.not.match(data_test.test9_10);
+
   });
 
-  it('12. sql <to_many> generic - person', async function(){
+  it('10.1 sql <to_many> generic - person', async function(){
     let opts = funks.getOptions(models_generic.personSql_toMany_dogGeneric);
     let generated_schema =await funks.generateJs('create-models', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test12.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test10_1);
   });
 
-  it('13. generic <to_one> sql - dog', async function(){
+  it('10.2 sql <to_many> generic - person', async function(){
+    let opts = funks.getOptions(models_generic.personSql_toMany_dogGeneric);
+    let generated_schema =await funks.generateJs('create-models', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.not.match(data_test.test10_2);
+  });
+
+  it('11. generic <to_one> sql - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_toOne_personSql);
     let generated_schema =await funks.generateJs('create-models-generic', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test13.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test11_1).and
+      .to.match(data_test.test11_2).and
+      .to.match(data_test.test11_3).and
+      .to.match(data_test.test11_4).and
+      .to.match(data_test.test11_5).and
+      .to.match(data_test.test11_6).and
+      .to.match(data_test.test11_7).and
+      .to.match(data_test.test11_8).and
+      .to.match(data_test.test11_9).and
+      .to.match(data_test.test11_10);
   });
 
-  it('14. sql <to_one> generic - person', async function(){
+  it('12. sql <to_one> generic - person', async function(){
     let opts = funks.getOptions(models_generic.personSql_toOne_hometownGeneric);
     let generated_schema =await funks.generateJs('create-models', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test14.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test12_1).and
+      .to.match(data_test.test12_2);
   });
 
-  it('15. generic <to_many> sql - hometown', async function(){
+  it('13. generic <to_many> sql - hometown', async function(){
     let opts = funks.getOptions(models_generic.hometownGeneric_toMany_personSql);
     let generated_schema =await funks.generateJs('create-models-generic', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
-    let test_schema = data_test.test15.replace(/\s/g, '');
-    expect(g_schema,'Incorrect schema').to.have.string(test_schema);
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test13_1).and
+      .to.match(data_test.test13_2).and
+      .to.match(data_test.test13_3).and
+      .to.match(data_test.test13_4).and
+      .to.match(data_test.test13_5).and
+      .to.match(data_test.test13_6).and
+      .to.match(data_test.test13_7).and
+      .to.match(data_test.test13_8).and
+      .to.not.match(data_test.test13_9).and
+      .to.not.match(data_test.test13_10);
   });
 });
 
+/** 
+ * Generic Associations - GraphQL Schema Layer
+ */
+describe('Generic Associations - GraphQL Schema Layer', function(){
+  let data_test = require('./unit_test_misc/test-describe/all-generic');
+
+  it('14. generic <generic_to_one> - dog', async function(){
+    let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
+    let generated_schema =await funks.generateJs('create-schemas', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test14_1).and
+      .to.match(data_test.test14_2).and
+      .to.match(data_test.test14_3).and
+      .to.match(data_test.test14_4);
+  });
+
+  it('15. sql <generic_to_many> - person', async function(){
+    let opts = funks.getOptions(models_generic.personSql_genericToMany_dog);
+    let generated_schema =await funks.generateJs('create-schemas', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test15_1).and
+      .to.match(data_test.test15_2).and
+      .to.match(data_test.test15_3).and
+      .to.match(data_test.test15_4).and
+      .to.match(data_test.test15_5).and
+      .to.match(data_test.test15_6);
+  });
+
+  it('14_b. ddm <generic_to_one> - dog', async function(){
+    let opts = funks.getOptions(models_generic.dogDdm_genericToOne_person);
+    let generated_schema =await funks.generateJs('create-schemas-ddm', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test14_1).and
+      .to.match(data_test.test14_2).and
+      .to.match(data_test.test14_3).and
+      .to.match(data_test.test14_4);
+  });
+
+  it('15_b. ddm <generic_to_many> - person', async function(){
+    let opts = funks.getOptions(models_generic.personDdm_genericToMany_dog);
+    let generated_schema =await funks.generateJs('create-schemas-ddm', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test15_1).and
+      .to.match(data_test.test15_2).and
+      .to.match(data_test.test15_3).and
+      .to.match(data_test.test15_4).and
+      .to.match(data_test.test15_5).and
+      .to.match(data_test.test15_6);
+  });
+});
+
+/** 
+ * Generic Associations - Resolvers Layer
+ */
+describe('Generic Associations - Resolvers Layer', function(){
+  let data_test = require('./unit_test_misc/test-describe/all-generic');
+
+  it('16. sql <generic_to_many> - person', async function(){
+    let opts = funks.getOptions(models_generic.personSql_genericToMany_dog);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test16_1).and
+      .to.match(data_test.test16_2).and
+      .to.match(data_test.test16_3).and
+      .to.match(data_test.test16_4).and
+      .to.match(data_test.test16_5).and
+      .to.match(data_test.test16_6).and
+      .to.match(data_test.test16_7).and
+      .to.match(data_test.test16_8).and
+      .to.match(data_test.test16_9).and
+      .to.match(data_test.test16_10).and
+      .to.match(data_test.test16_11).and
+      .to.match(data_test.test16_12).and
+      .to.match(data_test.test16_13).and
+      .to.match(data_test.test16_14).and
+      .to.match(data_test.test16_15).and
+      .to.match(data_test.test16_16);
+  });
+
+  it('17. generic <generic_to_one> - dog', async function(){
+    let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
+    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test17_1).and
+      .to.match(data_test.test17_2).and
+      .to.match(data_test.test17_3).and
+      .to.match(data_test.test17_4).and
+      .to.match(data_test.test17_5).and
+      .to.match(data_test.test17_6).and
+      .to.match(data_test.test17_7).and
+      .to.match(data_test.test17_8).and
+      .to.match(data_test.test17_9).and
+      .to.match(data_test.test17_10).and
+      .to.match(data_test.test17_11).and
+      .to.match(data_test.test17_12).and
+      .to.match(data_test.test17_13).and
+      .to.match(data_test.test17_14);
+  });
+
+  it('16_b. ddm <generic_to_many> - person', async function(){
+    let opts = funks.getOptions(models_generic.personDdm_genericToMany_dog);
+    let generated_schema =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test16_1).and
+      .to.match(data_test.test16_2).and
+      .to.match(data_test.test16_3).and
+      .to.match(data_test.test16_4).and
+      .to.match(data_test.test16_5).and
+      .to.match(data_test.test16_6).and
+      .to.match(data_test.test16_7).and
+      .to.match(data_test.test16_8).and
+      .to.match(data_test.test16_9).and
+      .to.match(data_test.test16_10).and
+      .to.match(data_test.test16_11).and
+      .to.match(data_test.test16_12).and
+      .to.match(data_test.test16_13).and
+      .to.match(data_test.test16_14).and
+      .to.match(data_test.test16_15).and
+      .to.match(data_test.test16_16);
+  });
+
+  it('17_b. ddm <generic_to_one> - dog', async function(){
+    let opts = funks.getOptions(models_generic.dogDdm_genericToOne_person);
+    let generated_schema =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test17_1).and
+      .to.match(data_test.test17_2).and
+      .to.match(data_test.test17_3).and
+      .to.match(data_test.test17_4).and
+      .to.match(data_test.test17_5).and
+      .to.match(data_test.test17_6).and
+      .to.match(data_test.test17_7).and
+      .to.match(data_test.test17_8).and
+      .to.match(data_test.test17_9).and
+      .to.match(data_test.test17_10).and
+      .to.match(data_test.test17_11).and
+      .to.match(data_test.test17_12).and
+      .to.match(data_test.test17_13).and
+      .to.match(data_test.test17_14);
+  });
+});
+
+/** 
+ * Generic Associations - Model Layer
+ */
+describe('Generic Associations - Model Layer', function(){
+  let data_test = require('./unit_test_misc/test-describe/all-generic');
+
+  it('18. sql <generic_to_many> - person', async function(){
+    let opts = funks.getOptions(models_generic.personSql_genericToMany_dog);
+    let generated_schema =await funks.generateJs('create-models', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test18_1).and
+      .to.match(data_test.test18_2).and
+      .to.match(data_test.test18_3).and
+      .to.match(data_test.test18_4).and
+      .to.match(data_test.test18_5);
+  });
+  
+  it('19. generic <generic_to_one> - dog', async function(){
+    let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
+    let generated_schema =await funks.generateJs('create-models-generic', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+    .to.match(data_test.test19_1).and
+    .to.match(data_test.test19_2).and
+    .to.match(data_test.test19_3);
+  });
+
+  it('18_b. ddm <generic_to_many> - person', async function(){
+    let opts = funks.getOptions(models_generic.personDdm_genericToMany_dog);
+    let generated_schema =await funks.generateJs('create-distributed-model', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test18_1).and
+      .to.match(data_test.test18_2).and
+      .to.match(data_test.test18_3).and
+      .to.match(data_test.test18_4).and
+      .to.match(data_test.test18_5);
+  });
+  
+  it('19_b. generic <generic_to_one> - dog', async function(){
+    let opts = funks.getOptions(models_generic.dogDdm_genericToOne_person);
+    let generated_schema =await funks.generateJs('create-distributed-model', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+    .to.match(data_test.test19_1).and
+    .to.match(data_test.test19_2).and
+    .to.match(data_test.test19_3);
+  });
+
+});
+
+/** 
+ * Generic Adapter
+ */
+describe('Generic Adapter', function(){
+  let data_test = require('./unit_test_misc/test-describe/all-generic');
+
+  it('20. generic-adapter - person_a', async function(){
+    let opts = funks.getOptions(models_generic.personGenericAdapter);
+    let generated_schema =await funks.generateJs('create-generic-adapter', opts);
+    let g_schema = generated_schema.replace(/\s/g, '');
+    expect(g_schema,'Incorrect schema')
+      .to.match(data_test.test20_1).and
+      .to.match(data_test.test20_2).and
+      .to.match(data_test.test20_3).and
+      .to.match(data_test.test20_4).and
+      .to.match(data_test.test20_5).and
+      .to.match(data_test.test20_6).and
+      .to.match(data_test.test20_7).and
+      .to.match(data_test.test20_8).and
+      .to.match(data_test.test20_9).and
+      .to.match(data_test.test20_10).and
+      .to.match(data_test.test20_11).and
+      .to.match(data_test.test20_12).and
+      .to.match(data_test.test20_13).and
+      .to.match(data_test.test20_14);
+  });
+});

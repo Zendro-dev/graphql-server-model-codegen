@@ -99,3 +99,96 @@ module.exports.hometownGeneric_toMany_personSql = {
   },
   "internalId": "hometownId"
 }
+
+// 6. generic <generic_to_one> - dog
+module.exports.dogGeneric_genericToOne_person = {
+  "model" : "Dog",
+  "storageType" : "generic",
+  "attributes" : {
+    "name" : "String",
+    "breed" : "String",
+    "personId": "Int"
+  },
+  "associations" : {
+    "owner" : {
+      "type" : "generic_to_one",
+      "target" : "Person"
+    }
+  }
+}
+
+// 7. sql <generic_to_many> - person
+module.exports.personSql_genericToMany_dog = {
+  "model" : "Person",
+  "storageType" : "SQL",
+  "attributes" : {
+    "personId": "String",
+    "firstName" : "String",
+    "lastName" : "String",
+    "email" : "String",
+    "hometownId": "String"
+  },
+  "associations":{
+    "dogs": {
+      "type": "generic_to_many",
+      "target": "Dog"
+    }
+  },
+  "internalId": "personId"
+}
+
+// 8. ddm <generic_to_one> - dog
+module.exports.dogDdm_genericToOne_person = {
+  "model" : "Dog",
+  "storageType" : "distributed-data-model",
+  "registry": ["dog-a", "dog-b"],
+  "attributes" : {
+    "name" : "String",
+    "breed" : "String",
+    "personId": "Int"
+  },
+  "associations" : {
+    "owner" : {
+      "type" : "generic_to_one",
+      "target" : "Person"
+    }
+  }
+}
+
+// 8. dmm <generic_to_many> - person
+module.exports.personDdm_genericToMany_dog = {
+  "model" : "Person",
+  "storageType" : "distributed-data-model",
+  "registry": ["person-a", "person-b"],
+  "attributes" : {
+    "personId": "String",
+    "firstName" : "String",
+    "lastName" : "String",
+    "email" : "String",
+    "hometownId": "String"
+  },
+  "associations":{
+    "dogs": {
+      "type": "generic_to_many",
+      "target": "Dog"
+    }
+  },
+  "internalId": "personId"
+}
+
+// 9. generic-adapter - person_a
+module.exports.personGenericAdapter = {
+  "model" : "Person",
+  "storageType" : "generic-adapter",
+  "adapterName": "person_a",
+  "regex": "_a",
+  "url": "http://localhost:3000/graphql",
+  "attributes" : {
+    "personId": "String",
+    "firstName" : "String",
+    "lastName" : "String",
+    "email" : "String",
+    "hometownId": "String"
+  },
+  "internalId": "personId"
+}
