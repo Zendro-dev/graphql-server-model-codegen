@@ -989,7 +989,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'models',     template: 'models',     fileName: opts.nameLc},
           {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: 'sql-'+opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
         break;
 
@@ -998,7 +998,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-webservice', template: 'models-webservice', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: 'webservice-'+opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
         break;
 
@@ -1007,7 +1008,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-cenz-server', template: 'models-cenz', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: 'cenz-server-'+opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
         break;
 
@@ -1022,12 +1024,16 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'cenzontle-webservice-adapter':
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
+          {dir: 'patches', template: 'patches', fileName: opts.adapterName},
         ]
         break;
 
       case 'ddm-adapter':
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
+          {dir: 'patches', template: 'patches', fileName: opts.adapterName},
         ]
         break;
 
@@ -1035,8 +1041,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
-          {dir: 'validations',  template: 'validations',  fileName: opts.nameLc},
-          {dir: 'patches', template: 'patches', fileName: 'sql-adapter'+opts.nameLc},
+          {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
+          {dir: 'patches', template: 'patches', fileName: opts.adapterName},
         ]
         break;
 
