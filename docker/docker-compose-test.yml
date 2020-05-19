@@ -98,6 +98,8 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
+      - /home/thomas/ScienceDbStarterPack/graphql-server/server.js:/usr/src/app/server.js
+      - /home/thomas/ScienceDbStarterPack/graphql-server/utils/errors.js:/usr/src/app/utils/errors.js
       - ./integration_test_run/instance2/adapters:/usr/src/app/adapters
       - ./integration_test_run/instance2/schemas:/usr/src/app/schemas
       - ./integration_test_run/instance2/resolvers:/usr/src/app/resolvers

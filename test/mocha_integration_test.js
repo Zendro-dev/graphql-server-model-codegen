@@ -835,8 +835,47 @@ describe(
   it('23. Error output for wrong parameter', function() {
     let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
-    console.log('The status is ' + res.statusCode);
-    console.log('The output: ' + JSON.stringify(resBody, null, 4));
+    expect(res.statusCode).to.equal(400);
+    expect(resBody).to.deep.equal({
+      errors: [
+          {
+              message: 'Field "hello" is not defined by type paginationCursorInput.',
+              locations: [
+                  {
+                      line: 1,
+                      column: 36
+                  }
+              ],
+              details: "",
+              extensions: null
+          }
+      ]
+    });
+    res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{first:1, last:1}) {edges {node {id}}}}');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+          {
+              message: 'Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!',
+              locations: [
+                  {
+                      line: 1,
+                      column: 2
+                  }
+              ],
+              details: "",
+              path: [
+                  "individualsConnection"
+              ],
+              extensions: null
+          }
+      ],
+      data: {
+          individualsConnection: null
+      }
+  });
+
   })
 
 });
