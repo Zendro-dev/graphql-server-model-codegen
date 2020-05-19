@@ -614,15 +614,14 @@ describe(
           errors:[
               {
                   message:`transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
-                  details:"",
+                  extensions:"",
                   locations: [
                             {
                               column: 12,
                               line: 1
                             }
                           ],
-                  path:["deleteTranscript_count"],
-                  extensions: null
+                  path:["deleteTranscript_count"]
                 }
             ],
             data:null
@@ -683,15 +682,14 @@ describe(
     const errorObject_TranscriptCount = {
         errors:[{
             message:"Max record limit of 25 exceeded in transcript_counts",
-            details:"",
+            extensions:"",
             locations: [
                       {
                         column: 95,
                         line: 1
                       }
                     ],
-            path:["transcript_counts"],
-            extensions: null
+            path:["transcript_counts"]
         }],
         data:{
             individuals:[
@@ -717,15 +715,14 @@ describe(
     const errorObject_Individual = {
         errors:[{
             message:"Max record limit of 25 exceeded in individuals",
-            details:"",
+            extensions:"",
             locations: [
               {
                 column: 3,
                 line: 1
               }
             ],
-            path:["individuals"],
-            extensions: null
+            path:["individuals"]
         }],
         data:{
             individuals:null,
@@ -818,9 +815,8 @@ describe(
     expect(resBody).to.deep.equal({
       errors:[
         {
-          message:'Not unique "to_one" association Error: Found 2 dogs matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
-          details:"",
-          extensions: null,
+          message:'Not unique "to_one" association Error: Found 2 capitals matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
+          extensions:"",
           locations: ""
         }
       ],
@@ -914,8 +910,7 @@ describe(
                       column: 36
                   }
               ],
-              details: "",
-              extensions: null
+              extensions: ""
           }
       ]
     });
@@ -932,11 +927,10 @@ describe(
                       column: 2
                   }
               ],
-              details: "",
+              extensions: "",
               path: [
                   "individualsConnection"
-              ],
-              extensions: null
+              ]
           }
       ],
       data: {
@@ -1768,9 +1762,8 @@ describe(
         {
           errors:[
             {
-              message:'Not unique "to_one" association Error: Found 2 dogs matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
-              details:"",
-              extensions: null,
+              message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
+              extensions:"",
               locations: ""
             }
           ],

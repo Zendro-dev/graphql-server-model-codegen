@@ -456,7 +456,7 @@ person.prototype.parrot = async function({
                     foundIds.push(parrot.node.getIdValue())                                                                                                                                                                 
                 })                                                                                                                                                                                                     
                 context.benignErrors.push(new Error(                                                                                                                                                                   
-                    \`Not unique "to_one" association Error: Found \${found.length} dogs matching person with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving 
+                    \`Not unique "to_one" association Error: Found \${found.length} parrots matching person with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving 
     the foreign key into the Person model. Returning first Parrot. Found Parrots \${models.parrot.idAttribute()}s: [\${foundIds.toString()}]\`
                 ));
             }
