@@ -204,7 +204,7 @@ const associationArgsDef = {
             let foundIds = [];
             found.forEach(<%=associations_one[i].target_lc%> => {foundIds.push(<%=associations_one[i].target_lc%>.getIdValue())})
             context.benignErrors.push(new Error(
-              `Not unique "to_one" association Error: Found ${found.length} dogs matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>. Found <%=associations_one[i].target_pl-%> ${models.<%=associations_one[i].target_lc-%>.idAttribute()}s: [${foundIds.toString()}]`
+              `Not unique "to_one" association Error: Found ${found.length} <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>. Found <%=associations_one[i].target_pl-%> ${models.<%=associations_one[i].target_lc-%>.idAttribute()}s: [${foundIds.toString()}]`
             ));
           }
           return found[0];
