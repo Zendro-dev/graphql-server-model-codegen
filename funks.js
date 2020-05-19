@@ -989,7 +989,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'models',     template: 'models',     fileName: opts.nameLc},
           {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
         ]
         break;
 
@@ -999,7 +999,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-webservice', template: 'models-webservice', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
         ]
         break;
 
@@ -1025,7 +1025,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
           {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
-          {dir: 'patches', template: 'patches', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
@@ -1033,7 +1033,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
           {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
-          {dir: 'patches', template: 'patches', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
@@ -1042,7 +1042,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
           {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
-          {dir: 'patches', template: 'patches', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
@@ -1060,12 +1060,11 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       //msg
       console.log("@@ ", colors.red('done'));
       totalGenErrors++;
-    };
     });
 
     //save data for writeCommons
     models.push([opts.name , opts.namePl]);
-
+    };
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
   //generate commons & index's

@@ -9,7 +9,11 @@ static readById(id) {
   return axios.post(url,{query:query}).then( res => {
     //check
     if(res&&res.data&&res.data.data) {
-      return new Book(res.data.data.readOneBook);
+      let item = new Book(res.data.data.readOneBook);
+      return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
+          .then((valSuccess) => {
+              return item
+          })
     } else {
       throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
     }
@@ -69,7 +73,10 @@ static countRecords(search) {
 `
 
 module.exports.add_one = `
+
 static addOne(input) {
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
+      .then(async (valSuccess) => {
   let query = \`mutation addBook($title:String $genre:String){
     addBook(title:$title genre:$genre){id  title genre publisher_id   }
   }\`;
@@ -85,6 +92,7 @@ static addOne(input) {
     error['url'] = url;
     handleError(error);
   });
+});
 }
 `
 module.exports.delete_by_id = `
@@ -107,22 +115,26 @@ static deleteOne(id) {
 `
 
 module.exports.update_one = `
-static updateOne(input) {
-  let query = \`mutation updateBook($id:ID! $title:String $genre:String){
-    updateBook(id:$id title:$title genre:$genre){id  title genre publisher_id  }
-  }\`
 
-  return axios.post(url, {query: query, variables: input}).then(res=>{
-    //check
-    if (res && res.data && res.data.data) {
-        return new Book(res.data.data.updateBook);
-    } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
-    }
-  }).catch(error =>{
-    error['url'] = url;
-    handleError(error);
-  });
+static updateOne(input) {
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
+      .then(async (valSuccess) => {
+      let query = \`mutation updateBook($id:ID! $title:String $genre:String){
+        updateBook(id:$id title:$title genre:$genre){id  title genre publisher_id  }
+      }\`
+
+      return axios.post(url, {query: query, variables: input}).then(res=>{
+        //check
+        if (res && res.data && res.data.data) {
+            return new Book(res.data.data.updateBook);
+        } else {
+          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+        }
+      }).catch(error =>{
+        error['url'] = url;
+        handleError(error);
+      });
+    });
 }
 `
 

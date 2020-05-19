@@ -506,6 +506,8 @@ module.exports.update_one_resolver = `
 
 module.exports.add_one_cenz_adapter = `
 static addOne(input) {
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
+      .then(async (valSuccess) => {
     let query = \`
     mutation addAccession(
       $accession_id:ID!
@@ -539,11 +541,14 @@ static addOne(input) {
         error['url'] = remoteCenzontleURL;
         handleError(error);
     });
+  });
 }
 `
 
 module.exports.update_one_cenz_adapter = `
 static updateOne(input) {
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
+      .then(async (valSuccess) => {
     let query = \`
       mutation
         updateAccession(
@@ -578,5 +583,6 @@ static updateOne(input) {
         error['url'] = remoteCenzontleURL;
         handleError(error);
     });
+  });
 }
 `

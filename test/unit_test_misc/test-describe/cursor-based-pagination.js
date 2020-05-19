@@ -408,7 +408,7 @@ static readAllCursor(search, order, pagination) {
   if (!argsValid) {
     throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
   }
-    
+
   let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
 booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
   genre
@@ -451,6 +451,8 @@ booksConnection(search:$search pagination:$pagination order:$order){ edges{curso
 
 module.exports.many_to_many_association_connection_cenz_server = `
 static updateOne(input) {
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
+      .then(async (valSuccess) => {
         let query = \`mutation updatePerson($id:ID!        $firstName:String
             $lastName:String
             $email:String){
@@ -478,5 +480,6 @@ static updateOne(input) {
             error['url'] = url;
             handleError(error);
         });
+      });
     }
 `

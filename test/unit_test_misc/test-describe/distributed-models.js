@@ -1,15 +1,15 @@
 module.exports.book_adapter_readById = `
 static readById(iri) {
         let query = \`
-          query 
+          query
             readOneBook
             {
               readOneBook(id:"\${iri}")
-              { 
-                id 
-                title 
-                genre 
-                publisher_id 
+              {
+                id
+                title
+                genre
+                publisher_id
               }
             }\`;
 
@@ -18,7 +18,11 @@ static readById(iri) {
         }).then(res => {
             //check
             if (res && res.data && res.data.data) {
-                return res.data.data.readOneBook;
+              let item = res.data.data.readOneBook;
+              return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
+                  .then((valSuccess) => {
+                      return item
+                  })
             } else {
                 throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
             }
@@ -114,12 +118,12 @@ static countRecords(search, authorizedAdapters) {
         let authAdapters = [];
         /**
          * Differentiated cases:
-         *    if authorizedAdapters is defined: 
+         *    if authorizedAdapters is defined:
          *      - called from resolver.
          *      - authorizedAdapters will no be modified.
-         * 
-         *    if authorizedAdapters is not defined: 
-         *      - called internally 
+         *
+         *    if authorizedAdapters is not defined:
+         *      - called internally
          *      - authorizedAdapters will be set to registered adapters.
          */
         if (authorizedAdapters === undefined) {
@@ -131,9 +135,9 @@ static countRecords(search, authorizedAdapters) {
         let promises = authAdapters.map(adapter => {
             /**
              * Differentiated cases:
-             *   sql-adapter: 
+             *   sql-adapter:
              *      resolve with current parameters.
-             *   
+             *
              *   ddm-adapter:
              *   cenzontle-webservice-adapter:
              *   generic-adapter:
@@ -178,12 +182,12 @@ static readAllCursor(search, order, pagination, authorizedAdapters) {
         let authAdapters = [];
         /**
          * Differentiated cases:
-         *    if authorizedAdapters is defined: 
+         *    if authorizedAdapters is defined:
          *      - called from resolver.
          *      - authorizedAdapters will no be modified.
-         * 
-         *    if authorizedAdapters is not defined: 
-         *      - called internally 
+         *
+         *    if authorizedAdapters is not defined:
+         *      - called internally
          *      - authorizedAdapters will be set to registered adapters.
          */
         if (authorizedAdapters === undefined) {
@@ -202,9 +206,9 @@ static readAllCursor(search, order, pagination, authorizedAdapters) {
         let promises = authAdapters.map(adapter => {
             /**
              * Differentiated cases:
-             *   sql-adapter: 
+             *   sql-adapter:
              *      resolve with current parameters.
-             *   
+             *
              *   ddm-adapter:
              *   cenzontle-webservice-adapter:
              *   generic-adapter:
