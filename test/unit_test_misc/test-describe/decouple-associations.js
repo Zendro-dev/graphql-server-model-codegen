@@ -73,35 +73,37 @@ module.exports.hasOne_resolver = `
 researcher.prototype.dog = async function({
     search
 }, context) {
-    if (helper.isNotUndefinedAndNotNull(this.researcherId)) {
-        try {
-            if (search === undefined) {
-                return resolvers.readOneDog({
-                    [models.dog.idAttribute()]: this.researcherId
-                }, context)
-            } else {
-                //build new search filter
-                let nsearch = helper.addSearchField({
-                    "search": search,
-                    "field": models.dog.idAttribute(),
-                    "value": {
-                        "value": this.researcherId
-                    },
-                    "operator": "eq"
-                });
-                let found = await resolvers.dogs({
-                    search: nsearch
-                }, context);
-                if (found) {
-                    return found[0]
-                }
-                return found;
+    try {
+        //build new search filter
+        let nsearch = helper.addSearchField({
+            "search": search,
+            "field": "researcherId",
+            "value": {
+                "value": this.getIdValue()
+            },
+            "operator": "eq"
+        });
+
+        let found = await resolvers.dogs({
+            search: nsearch
+        }, context);
+        if(found){
+            if(found.length > 1){
+                let foundIds = [];
+                found.forEach(dog => {
+                    foundIds.push(dog.getIdValue())
+                })
+                context.benignErrors.push(new Error(
+                    \`Not unique "to_one" association Error: Found \${found.length} dogs matching researcher with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog. Found Dogs \${models.dog.idAttribute()}s: [\${foundIds.toString()}]\`
+                )); 
             }
-        } catch (error) {
-            console.error(error);
-            handleError(error);
-        };
-    }
+            return found[0];
+        }
+        return found;
+    } catch (error) {
+        console.error(error);
+        handleError(error);
+    };
 }
 `
 
@@ -289,12 +291,21 @@ book.prototype.AuthorsFilter = function({
     order,
     pagination
 }, context) {
-  try{
-    return this.AuthorsFilterImpl({search, order, pagination});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    return checkAuthorization(context, 'Person', 'read').then(async authorization => {
+        if (authorization === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            return this.AuthorsFilterImpl({
+                search,
+                order,
+                pagination
+            });
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
+        console.error(error);
+        handleError(error);
+    })
 }
 `
 
@@ -309,11 +320,18 @@ module.exports.belongsToMany_resolver_count = `
 book.prototype.countFilteredAuthors = function({
     search
 }, context) {
-  try{
-    return this.countFilteredAuthorsImpl({search});
-  }catch(error){
-    console.error(error);
-    handleError(error);
-  };
+    return checkAuthorization(context, 'Person', 'read').then(async authorization => {
+        if (authorization === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            return this.countFilteredAuthorsImpl({
+                search
+            });
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
+        console.error(error);
+        handleError(error);
+    })
 }
 `
