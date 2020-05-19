@@ -815,7 +815,26 @@ describe(
     res = itHelpers.request_graph_ql_post('{ countries {country_id unique_capital{ capital_id}} }');
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
-    expect(resBody).to.deep.equal({"errors":[{"message":"Not unique \"to_one\" association Error: Found 2 dogs matching country with country_id GER. Consider making this association a \"to_many\", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]","details":""}],"data":{"countries":[{"country_id":"GER","unique_capital":{"capital_id":"GER_B"}}]}});
+    expect(resBody).to.deep.equal({
+      errors:[
+        {
+          message:'Not unique "to_one" association Error: Found 2 dogs matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
+          details:"",
+          extensions: null,
+          locations: ""
+        }
+      ],
+      data:{
+        countries:[
+          {
+            country_id:"GER",
+            unique_capital:{
+              capital_id:"GER_B"
+            }
+          }
+        ]
+      }
+    });
   });
 
   it('25. one_to_one associations deletion cleanup', function() {
@@ -832,7 +851,7 @@ describe(
     expect(res.statusCode).to.equal(200);
   });
 
-  it('22. Cursor based pagination', function() {
+  it('26. Cursor based pagination', function() {
     let res = itHelpers.request_graph_ql_post('{transcript_countsConnection{edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     let edges = resBody.data.transcript_countsConnection.edges;
@@ -881,7 +900,7 @@ describe(
   }});
   })
 
-  it('23. Error output for wrong parameter', function() {
+  it('27. Error output for wrong parameter', function() {
     let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(400);
@@ -1746,7 +1765,30 @@ describe(
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal(
-        {"errors":[{"message":"Not unique \"to_one\" association Error: Found 2 dogs matching person with person_id instance1-person01. Consider making this association a \"to_many\", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]","details":""}],"data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-person01","unique_parrot":{"parrot_id":"instance2-parrot01"}}}]}}}
+        {
+          errors:[
+            {
+              message:'Not unique "to_one" association Error: Found 2 dogs matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
+              details:"",
+              extensions: null,
+              locations: ""
+            }
+          ],
+          data:{
+            peopleConnection:{
+              edges:[
+                {
+                  node:{
+                    person_id:"instance1-person01",
+                    unique_parrot:{
+                      parrot_id:"instance2-parrot01"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
       )
     });
 
