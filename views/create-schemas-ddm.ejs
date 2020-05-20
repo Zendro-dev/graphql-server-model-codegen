@@ -76,7 +76,7 @@ type <%- name -%>
   """
   countFiltered<%= associationsArguments.schema_attributes.many[key][2]%>(search: search<%= associationsArguments.schema_attributes.many[key][1] -%>Input) : Int
 <%}-%>
-}
+
 <%# generic_to_one -%>
 <%for(var key in associationsArguments.schema_attributes.generic_one){-%>
   <%=key%>(search: search<%= associationsArguments.schema_attributes.generic_one[key][1] -%>Input): <%= associationsArguments.schema_attributes.generic_one[key][0]%>

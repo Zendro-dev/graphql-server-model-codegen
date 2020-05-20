@@ -26,6 +26,7 @@ services:
       - ./integration_test_run/instance1/models-distributed:/usr/src/app/models-distributed
       - ./integration_test_run/instance1/models-webservice:/usr/src/app/models-webservice
       - ./integration_test_run/instance1/models-cenz-server:/usr/src/app/models-cenz-server
+      - ./integration_test_run/instance1/models-generic:/usr/src/app/models-generic
       - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance1/validations:/usr/src/app/validations
       - ./integration_test_run/instance1/patches:/usr/src/app/patches
@@ -103,6 +104,7 @@ services:
       - ./integration_test_run/instance2/models-distributed:/usr/src/app/models-distributed
       - ./integration_test_run/instance2/models-webservice:/usr/src/app/models-webservice
       - ./integration_test_run/instance2/models-cenz-server:/usr/src/app/models-cenz-server
+      - ./integration_test_run/instance1/models-generic:/usr/src/app/models-generic
       - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance2/validations:/usr/src/app/validations
       - ./integration_test_run/instance2/patches:/usr/src/app/patches
