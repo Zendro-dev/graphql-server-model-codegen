@@ -47,7 +47,6 @@ module.exports.count_in_resolvers = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -119,7 +118,6 @@ module.exports.read_all_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -171,7 +169,6 @@ module.exports.add_one_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -218,7 +215,6 @@ module.exports.delete_one_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -275,8 +271,7 @@ updateBook: async function(input, context) {
         } else {                                                                                                                                                                                               
             throw new Error("You don't have authorization to perform this action");                                                                                                                            
         }                                                                                                                                                                                                      
-    } catch (error) {                                                                                                                                                                                          
-        console.error(error);                                                                                                                                                                                  
+    } catch (error) {                                                                                                                                                                                                                                                                                                                                                                         
         handleError(error);                                                                                                                                                                                    
     }                                                                                                                                                                                                          
 }, 
@@ -350,7 +345,6 @@ module.exports.bulk_add_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -377,7 +371,6 @@ module.exports.table_template_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     }

@@ -20,7 +20,6 @@ module.exports.individual_resolvers = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -44,7 +43,6 @@ module.exports.specie_resolvers = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },

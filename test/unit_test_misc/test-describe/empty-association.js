@@ -41,7 +41,6 @@ module.exports.individual_no_assoc_resolvers = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },`

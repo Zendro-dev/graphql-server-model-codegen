@@ -200,7 +200,6 @@ module.exports.resolver_read_all_connection = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -243,7 +242,6 @@ person.prototype.booksConnection = function({
             throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-        console.error(error);
         handleError(error);
     })
 }

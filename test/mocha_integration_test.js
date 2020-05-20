@@ -1344,7 +1344,25 @@ describe(
                 name: "Hector"
               }
             }
-          });
+        });
+
+        res = itHelpers.request_graph_ql_post('{dogsConnection(pagination:{first:-1}) {edges{node{dog_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "errors": [
+              {
+                  "message": "LIMIT must not be negative",
+                  "locations": "",
+                  "details": ""
+              }
+          ],
+          "data": {
+              "dogsConnection": {
+                  "edges": []
+              }
+          }
+      });
 
     });
 

@@ -464,7 +464,6 @@ person.prototype.parrot = async function({
         }
         return null;
     }catch(error){
-        console.error(error);
         handleError(error);
     };
 }

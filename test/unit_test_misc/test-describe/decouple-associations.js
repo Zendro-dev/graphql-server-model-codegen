@@ -34,7 +34,6 @@ dog.prototype.researcher = async function({
                 return found;
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         };
     }
@@ -101,7 +100,6 @@ researcher.prototype.dog = async function({
         }
         return found;
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
 }
@@ -160,7 +158,6 @@ individual.prototype.transcript_countsFilter = function({
             pagination: pagination
         }, context);
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
 }
@@ -213,7 +210,6 @@ individual.prototype.countFilteredTranscript_counts = function({
             search: nsearch
         }, context);
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
 }
@@ -303,7 +299,6 @@ book.prototype.AuthorsFilter = function({
             throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-        console.error(error);
         handleError(error);
     })
 }
@@ -330,7 +325,6 @@ book.prototype.countFilteredAuthors = function({
             throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-        console.error(error);
         handleError(error);
     })
 }

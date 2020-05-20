@@ -22,7 +22,6 @@ module.exports.resolvers_webservice_aminoAcid = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -76,7 +75,6 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
             pagination: pagination
         }, context);
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
 }
@@ -151,7 +149,6 @@ module.exports.transcriptCount_resolvers_camelcase=`
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },

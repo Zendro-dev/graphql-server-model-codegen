@@ -69,7 +69,6 @@ module.exports.delete_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         }
     },
@@ -486,7 +485,6 @@ module.exports.add_one_resolver = `
              throw new Error("You don't have authorization to perform this action on adapter");
          }
      } catch (error) {
-         console.error(error);
          handleError(error);
      }
  }
@@ -522,7 +520,6 @@ module.exports.update_one_resolver = `
                throw new Error("You don't have authorization to perform this action on adapter");
            }
        } catch (error) {
-           console.error(error);
            handleError(error);
        }
    }

@@ -34,7 +34,6 @@ dog.prototype.owner = async function({
                 return found;
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         };
     }
@@ -86,7 +85,6 @@ academicTeam.prototype.membersFilter = function({
             pagination: pagination
         }, context);
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
 }
