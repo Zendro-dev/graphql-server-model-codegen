@@ -214,13 +214,10 @@ module.exports.test16_6 = /promises\.push\(this\.remove_dogs\(input,context\)\);
 module.exports.test16_7 = /person\.prototype\.add_dogs=asyncfunction\(input\){.+person\.add_dogsImpl\(input\);/;
 module.exports.test16_8 = /person\.prototype\.remove_dogs=asyncfunction\(input\){.+person\.remove_dogsImpl\(input\);/;
 module.exports.test16_9 = /countAllAssociatedRecords.+{.+letpromises_generic_to_many=\[\];/;
-module.exports.test16_10 = /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;
-module.exports.test16_11 = /countAllAssociatedRecords.+promises_generic_to_many\.push\(person\.countFilteredDogs\({},context\)\);/;
-module.exports.test16_12 = /countAllAssociatedRecords.+letresult_generic_to_many=awaitPromise\.all\(promises_generic_to_many\);/;
-module.exports.test16_13 = /countAllAssociatedRecords.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;
-module.exports.test16_14 = /countAllAssociatedRecords.+letget_generic_to_many_associated=result_generic_to_many\.reduce\(\(accumulator,current_val\)=>accumulator\+current_val,0\);/;
-module.exports.test16_15 = /countAllAssociatedRecords.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
-module.exports.test16_16 = /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_many_associated\+get_generic_to_one_associated;/;
+module.exports.test16_10 = /countAllAssociatedRecords.+promises_generic_to_many\.push\(person\.countFilteredDogs\({},context\)\);/;
+module.exports.test16_11 = /countAllAssociatedRecords.+letresult_generic_to_many=awaitPromise\.all\(promises_generic_to_many\);/;
+module.exports.test16_12 = /countAllAssociatedRecords.+letget_generic_to_many_associated=result_generic_to_many\.reduce\(\(accumulator,current_val\)=>accumulator\+current_val,0\);/;
+module.exports.test16_13 = /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_many_associated;/;
 
 /**
  * 17.    generic <generic_to_one> - dog
@@ -233,14 +230,11 @@ module.exports.test17_3 = /promises\.push\(this\.add_owner\(input,context\)\);/;
 module.exports.test17_4 = /promises\.push\(this\.remove_owner\(input,context\)\);/;
 module.exports.test17_5 = /dog\.prototype\.add_owner=asyncfunction\(input\){.+dog\.add_ownerImpl\(input\);/;
 module.exports.test17_6 = /dog\.prototype\.remove_owner=asyncfunction\(input\){.+dog\.remove_ownerImpl\(input\);/;
-module.exports.test17_7 = /countAllAssociatedRecords.+{.+letpromises_generic_to_many=\[\];/;
-module.exports.test17_8 = /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;
-module.exports.test17_9 = /countAllAssociatedRecords.+promises_generic_to_one\.push\(dog\.owner\({},context\)\);/;
-module.exports.test17_10 = /countAllAssociatedRecords.+letresult_generic_to_many=awaitPromise\.all\(promises_generic_to_many\);/;
-module.exports.test17_11 = /countAllAssociatedRecords.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;
-module.exports.test17_12 = /countAllAssociatedRecords.+letget_generic_to_many_associated=result_generic_to_many\.reduce\(\(accumulator,current_val\)=>accumulator\+current_val,0\);/;
-module.exports.test17_13 = /countAllAssociatedRecords.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
-module.exports.test17_14 = /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_many_associated\+get_generic_to_one_associated;/;
+module.exports.test17_7 = /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;
+module.exports.test17_8 = /countAllAssociatedRecords.+promises_generic_to_one\.push\(dog\.owner\({},context\)\);/;
+module.exports.test17_9 = /countAllAssociatedRecords.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;
+module.exports.test17_10 = /countAllAssociatedRecords.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
+module.exports.test17_11 = /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_one_associated;/;
    
 /* Models */
 

@@ -1311,7 +1311,9 @@ describe('Parse associations', function() {
           many:{},
           one:{
             individual:["individual", "Individual", "Individual"]
-          }
+          },
+          generic_many:{},
+          generic_one:{}
         },
         to_one:[
           {
@@ -1334,6 +1336,8 @@ describe('Parse associations', function() {
         ],
         to_many:[],
         to_many_through_sql_cross_table:[],
+        generic_to_one:[],
+        generic_to_many:[],
         foreignKeyAssociations:{
           individual:"individual_id"
         },
@@ -1356,6 +1360,7 @@ describe('Parse associations', function() {
             holdsForeignKey:true
           }
         ],
+        genericAssociations:[],
         mutations_attributes:""
       });
   });
@@ -1368,7 +1373,9 @@ describe('Parse associations', function() {
         many:{
           transcript_counts:["transcript_count","Transcript_count","Transcript_counts"]
         },
-        one:{}
+        one:{},
+        generic_many:{},
+        generic_one:{}
       },
       to_one:[],
       to_many:[
@@ -1391,6 +1398,8 @@ describe('Parse associations', function() {
         }
       ],
       to_many_through_sql_cross_table:[],
+      generic_to_one:[],
+      generic_to_many:[],
       foreignKeyAssociations:{
         transcript_counts:"individual_id"
       },
@@ -1413,6 +1422,7 @@ describe('Parse associations', function() {
           holdsForeignKey:false
         }
       ],
+      genericAssociations:[],
       mutations_attributes:""
     });
   });
@@ -1427,7 +1437,9 @@ describe('Parse associations', function() {
         many:{
           assoc:["Project","Project","Assoc"]
         },
-        one:{}
+        one:{},
+        generic_many:{},
+        generic_one:{}
       },
       to_one:[],
       to_many:[],
@@ -1451,6 +1463,8 @@ describe('Parse associations', function() {
           holdsForeignKey:false
         }
       ],
+      generic_to_one:[],
+      generic_to_many:[],
       foreignKeyAssociations:{
         assoc:"projectId"
       },
@@ -1474,6 +1488,7 @@ describe('Parse associations', function() {
           holdsForeignKey:false
         }
       ],
+      genericAssociations:[],
       mutations_attributes:""
     });
   });
@@ -1488,7 +1503,9 @@ describe('Parse associations', function() {
           dogs:["Dog","Dog","Dogs"],
           books:["Book","Book","Books"]
         },
-        one:{}
+        one:{},
+        generic_many:{},
+        generic_one:{}
       },
       to_one:[],
       to_many:[
@@ -1529,6 +1546,8 @@ describe('Parse associations', function() {
           holdsForeignKey:false
         }
       ],
+      generic_to_one:[],
+      generic_to_many:[],
       foreignKeyAssociations:{
         dogs:"personId",
         books:"bookId"
@@ -1569,6 +1588,7 @@ describe('Parse associations', function() {
           holdsForeignKey:false
         }
       ],
+      genericAssociations:[],
       mutations_attributes:""
     });
   });
@@ -1582,7 +1602,9 @@ describe('Parse associations', function() {
         one:{
           person:["Person","Person","Person"],
           researcher:["Researcher","Researcher","Researcher"]
-        }
+        },
+        generic_many:{},
+        generic_one:{}
       },
       to_one:[
         {
@@ -1625,6 +1647,8 @@ describe('Parse associations', function() {
       ],
       to_many:[],
       to_many_through_sql_cross_table:[],
+      generic_to_one:[],
+      generic_to_many:[],
       foreignKeyAssociations:{
         person:"personId",
         researcher:"researcherId"
@@ -1668,6 +1692,7 @@ describe('Parse associations', function() {
           holdsForeignKey:true
         }
       ],
+      genericAssociations:[],
       mutations_attributes:""
     });
   })
@@ -2221,10 +2246,7 @@ describe('Generic Associations - Resolvers Layer', function(){
       .to.match(data_test.test16_10).and
       .to.match(data_test.test16_11).and
       .to.match(data_test.test16_12).and
-      .to.match(data_test.test16_13).and
-      .to.match(data_test.test16_14).and
-      .to.match(data_test.test16_15).and
-      .to.match(data_test.test16_16);
+      .to.match(data_test.test16_13);
   });
 
   it('17. generic <generic_to_one> - dog', async function(){
@@ -2242,10 +2264,7 @@ describe('Generic Associations - Resolvers Layer', function(){
       .to.match(data_test.test17_8).and
       .to.match(data_test.test17_9).and
       .to.match(data_test.test17_10).and
-      .to.match(data_test.test17_11).and
-      .to.match(data_test.test17_12).and
-      .to.match(data_test.test17_13).and
-      .to.match(data_test.test17_14);
+      .to.match(data_test.test17_11);
   });
 
   it('16_b. ddm <generic_to_many> - person', async function(){
@@ -2265,10 +2284,7 @@ describe('Generic Associations - Resolvers Layer', function(){
       .to.match(data_test.test16_10).and
       .to.match(data_test.test16_11).and
       .to.match(data_test.test16_12).and
-      .to.match(data_test.test16_13).and
-      .to.match(data_test.test16_14).and
-      .to.match(data_test.test16_15).and
-      .to.match(data_test.test16_16);
+      .to.match(data_test.test16_13);
   });
 
   it('17_b. ddm <generic_to_one> - dog', async function(){
@@ -2286,10 +2302,7 @@ describe('Generic Associations - Resolvers Layer', function(){
       .to.match(data_test.test17_8).and
       .to.match(data_test.test17_9).and
       .to.match(data_test.test17_10).and
-      .to.match(data_test.test17_11).and
-      .to.match(data_test.test17_12).and
-      .to.match(data_test.test17_13).and
-      .to.match(data_test.test17_14);
+      .to.match(data_test.test17_11);
   });
 });
 

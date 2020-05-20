@@ -152,7 +152,7 @@ module.exports.remove_assoc_to_one_fieldMutation_resolver = `
  * @param {object} input   Info of input Ids to remove  the association
  */
 accession.prototype.remove_location = async function(input) {
-    if (input.removeLocation == this.locationId) {
+    if (input.removeLocation === this.locationId) {
         await accession.remove_locationId(this.getIdValue(), input.removeLocation);
         this.locationId = null;
     }
@@ -284,7 +284,7 @@ module.exports.to_one_remove = `
  * @param {object} input   Info of input Ids to remove  the association
  */
 accession.prototype.remove_location = async function(input) {
-   if (input.removeLocation == this.locationId) {
+   if (input.removeLocation === this.locationId) {
       await accession.remove_locationId(this.getIdValue(), input.removeLocation);
       this.locationId = null;
     }
