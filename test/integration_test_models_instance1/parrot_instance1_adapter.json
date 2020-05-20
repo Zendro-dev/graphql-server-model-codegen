@@ -1,0 +1,21 @@
+{
+  "model" : "parrot",
+  "storageType" : "sql-adapter",
+  "adapterName": "parrot_instance1",
+  "regex": "instance1",
+  "attributes" : {
+    "name" : "String",
+    "parrot_id": "String",
+    "person_id": "String"
+  },
+  "associations": {
+    "unique_person": {
+      "type" : "to_one",
+      "target" : "person",
+      "targetKey" : "person_id",
+      "keyIn": "parrot",
+      "targetStorageType" : "distributed-data-model"
+    }
+  },
+  "internalId": "parrot_id"
+}

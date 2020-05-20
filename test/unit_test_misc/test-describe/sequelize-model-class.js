@@ -33,10 +33,16 @@ static associate(models){
 `
 
 module.exports.book_model_read_by_id = `
-static readById(id) {
-  let options = {};
-  options['where'] = {};
-  options['where'][this.idAttribute()] = id;
-  return Book.findOne(options);
+static async readById(id) {
+  let item = await Book.findByPk(id);
+  if (item === null) {
+      throw new Error(\`Record with ID = "\${id}" does not exist\`);
+  }
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
+      .then((valSuccess) => {
+          return item
+      }).catch((err) => {
+          return err
+      });
 }
 `

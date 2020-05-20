@@ -102,7 +102,15 @@ module.exports.person_ddm =  {
         "targetKey": "personId",
         "keyIn": "Dog",
         "targetStorageType": "sql"
-      }
+      },
+
+      "parrot" :{
+        "type": "to_one",
+        "target": "Parrot",
+        "targetKey": "personId",
+        "keyIn": "Parrot",
+        "targetStorageType": "sql"
+      },
     }
 
   }

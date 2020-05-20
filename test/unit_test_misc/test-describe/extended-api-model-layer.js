@@ -71,7 +71,8 @@ module.exports.remove_individual = `
                     individual_id: null
                 }, {
                     where: {
-                        id: id
+                        id: id,
+                        individual_id: individual_id
                     }
                 }, {
                     transaction: transaction

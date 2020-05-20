@@ -1,0 +1,27 @@
+{
+  "model": "Location",
+  "storageType": "cenz-server",
+  "url": "http://server1:3000/graphql",
+  "attributes" : {
+    "locationId": "String",
+    "country": "String",
+    "state": "String",
+    "municipality": "String",
+    "locality": "String"
+  },
+
+  "associations" :{
+
+    "accessions": {
+      "type": "to_many",
+      "target": "Accession",
+      "targetKey": "locationId",
+      "keyIn": "Accession",
+      "targetStorageType": "sql",
+      "label": "accession_id"
+    }
+
+  },
+  "internalId" : "locationId"
+
+}
