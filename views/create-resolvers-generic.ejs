@@ -405,15 +405,19 @@ const associationArgsDef = {
  * @param  {objec} context Default context by resolver
  * @return {Int}         Number of associated records
  */
-  async function countAllAssociatedRecords(id, context ){
+async function countAllAssociatedRecords(id, context ){
 
   let <%- nameLc %> = await resolvers.readOne<%- nameCp -%>({<%- idAttribute-%>: id}, context);
   //check that record actually exists
   if (<%- nameLc %> === null) throw new Error(`Record with ID = ${id} does not exist`);
   let promises_to_many = [];
   let promises_to_one = [];
+<%if(associationsArguments["generic_to_many"].length > 0) {-%>
   let promises_generic_to_many = [];
+<%}-%>
+<%if(associationsArguments["generic_to_one"].length > 0) {-%>
   let promises_generic_to_one = [];
+  <%}-%>
 
   <%# check associations to_one and to_many are counted in diferent variable -%>
   <%associations_temp = associationsArguments["to_many"] -%>
@@ -435,15 +439,23 @@ const associationArgsDef = {
 
   let result_to_many = await Promise.all(promises_to_many);
   let result_to_one = await Promise.all(promises_to_one);
+<%if(associationsArguments["generic_to_many"].length > 0) {-%>
   let result_generic_to_many = await Promise.all(promises_generic_to_many);
+<%}-%>
+<%if(associationsArguments["generic_to_one"].length > 0) {-%>
   let result_generic_to_one = await Promise.all(promises_generic_to_one);
+<%}-%>
 
   let get_to_many_associated = result_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
   let get_to_one_associated = result_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
+<%if(associationsArguments["generic_to_many"].length > 0) {-%>
   let get_generic_to_many_associated = result_generic_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
+<%}-%>
+<%if(associationsArguments["generic_to_one"].length > 0) {-%>
   let get_generic_to_one_associated = result_generic_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
+<%}-%>
 
-  return get_to_one_associated + get_to_many_associated + get_generic_to_many_associated + get_generic_to_one_associated;
+  return get_to_one_associated + get_to_many_associated <%if(associationsArguments["generic_to_many"].length > 0) {%>+ get_generic_to_many_associated<%}-%><%if(associationsArguments["generic_to_one"].length > 0) {%> + get_generic_to_one_associated<%}%>;
 }
 
 /**
