@@ -51,11 +51,7 @@
   <%if(storageType === 'sql-adapter'){-%>
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
       let updated = await sequelize.transaction(async transaction => {
-        //try {
           return super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}}, {transaction: transaction})
-        /*} catch (error) {
-            throw error;
-        }*/
       });
       return updated;
    }
