@@ -421,6 +421,17 @@ writeIndexAdapters = function(dir_write){
       case 'default':
         throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
     }
+
+    let validator_patch = path.join(__dirname,'..','validations', file);
+    if(fs.existsSync(validator_patch)){
+        adapter = require(\`\${validator_patch}\`).validator_patch(adapter);
+    }
+
+    let patches_patch = path.join(__dirname,'..','patches', file);
+    if(fs.existsSync(patches_patch)){
+        adapter = require(\`\${patches_patch}\`).logic_patch(adapter);
+    }
+
   });
 
   `
