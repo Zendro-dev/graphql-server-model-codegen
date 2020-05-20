@@ -614,7 +614,7 @@ describe(
           errors:[
               {
                   message:`transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
-                  extensions:"",
+                  details:"",
                   locations: [
                             {
                               column: 12,
@@ -682,7 +682,7 @@ describe(
     const errorObject_TranscriptCount = {
         errors:[{
             message:"Max record limit of 25 exceeded in transcript_counts",
-            extensions:"",
+            details:"",
             locations: [
                       {
                         column: 95,
@@ -715,7 +715,7 @@ describe(
     const errorObject_Individual = {
         errors:[{
             message:"Max record limit of 25 exceeded in individuals",
-            extensions:"",
+            details:"",
             locations: [
               {
                 column: 3,
@@ -816,7 +816,7 @@ describe(
       errors:[
         {
           message:'Not unique "to_one" association Error: Found 2 capitals matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
-          extensions:"",
+          details:"",
           locations: ""
         }
       ],
@@ -910,7 +910,7 @@ describe(
                       column: 36
                   }
               ],
-              extensions: ""
+              details: ""
           }
       ]
     });
@@ -927,7 +927,7 @@ describe(
                       column: 2
                   }
               ],
-              extensions: "",
+              details: "",
               path: [
                   "individualsConnection"
               ]
@@ -937,6 +937,72 @@ describe(
           individualsConnection: null
       }
   });
+
+  res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"acc1" sampling_date:"today") {accession_id sampling_date}}');
+  resBody = JSON.parse(res.body.toString('utf8'));
+  expect(res.statusCode).to.equal(400);
+  expect(resBody).to.deep.equal({
+    errors: [
+        {
+            message: 'Expected type Date, found "today"; Date cannot represent an invalid date-string today.',
+            locations: [
+                {
+                    line: 1,
+                    column: 57
+                }
+            ],
+            details: ""
+        }
+    ]
+  });
+
+  res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "@#$%^&") { name } }');
+  resBody = JSON.parse(res.body.toString('utf8'));
+  expect(res.statusCode).to.equal(500);
+  expect(resBody).to.deep.equal({
+    errors: [
+        {
+            message: "validation failed",
+            locations: [
+                {
+                    line: 1,
+                    column: 12
+                }
+            ],
+            details: [
+                {
+                    keyword: "type",
+                    dataPath: ".name",
+                    schemaPath: "#/properties/name/anyOf/0/type",
+                    params: {
+                        type: "null"
+                    },
+                    message: "should be null"
+                },
+                {
+                    keyword: "pattern",
+                    dataPath: ".name",
+                    schemaPath: "#/properties/name/anyOf/1/pattern",
+                    params: {
+                        pattern: "^[a-zA-Z0-9]+$"
+                    },
+                    message: "should match pattern \"^[a-zA-Z0-9]+$\""
+                },
+                {
+                    keyword: "anyOf",
+                    dataPath: ".name",
+                    schemaPath: "#/properties/name/anyOf",
+                    params: {},
+                    message: "should match some schema in anyOf"
+                }
+            ],
+            path: [
+                "addIndividual"
+            ]
+        }
+    ],
+    data: null
+});
 
   })
 
@@ -1763,7 +1829,7 @@ describe(
           errors:[
             {
               message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
-              extensions:"",
+              details:"",
               locations: ""
             }
           ],

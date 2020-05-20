@@ -54,7 +54,6 @@ const associationArgsDef = {
           return found;
         }
       }catch(error){
-        console.error(error);
         handleError(error);
       };
     }
@@ -82,7 +81,6 @@ const associationArgsDef = {
         }
         return null;
       }catch(error){
-        console.error(error);
         handleError(error);
       };
     <%}-%>
@@ -112,7 +110,6 @@ const associationArgsDef = {
 
       return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
     }catch(error){
-      console.error(error);
       handleError(error);
     };
   }
@@ -142,7 +139,6 @@ const associationArgsDef = {
 
       return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
     }catch(error){
-      console.error(error);
       handleError(error);
     };
   }
@@ -281,7 +277,6 @@ module.exports = {
           }
       }
     } catch (error) {
-        console.error(error);
         handleError(error);
     }
   },
@@ -304,7 +299,6 @@ module.exports = {
         throw new Error("You don't have authorization to perform this action on adapter");
       }
     } catch (error) {
-      console.error(error);
       handleError(error);
     }
   },
@@ -339,7 +333,6 @@ module.exports = {
         throw new Error("You don't have authorization to perform this action on adapter");
       }
     } catch (error) {
-      console.error(error);
       handleError(error);
     }
   },
@@ -359,7 +352,6 @@ module.exports = {
           throw new Error("You don't have authorization to perform this action");
       }
     }).catch(error => {
-      console.error(error);
       handleError( error);
     })
   },
@@ -383,7 +375,6 @@ module.exports = {
         throw new Error("You don't have authorization to perform this action on adapter");
       }
     } catch (error) {
-      console.error(error);
       handleError(error);
     }
   },
@@ -418,7 +409,6 @@ module.exports = {
         throw new Error("You don't have authorization to perform this action on adapter");
       }
     } catch (error) {
-      console.error(error);
       handleError(error);
     }
   },
@@ -469,7 +459,6 @@ module.exports = {
           }
       }
     } catch (error) {
-        console.error(error);
         handleError(error);
     }
   },
@@ -489,7 +478,6 @@ module.exports = {
             throw new Error("You don't have authorization to perform this action");
         }
     }).catch(error => {
-      console.error(error);
         handleError(error);
     })
   }
