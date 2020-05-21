@@ -34,7 +34,7 @@
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input) {
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
     <% if (op === 'remove') { -%>
-      if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> === this.<%-associationsArguments["to_one"][i].targetKey%>) {
+      if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> == this.<%-associationsArguments["to_one"][i].targetKey%>) {
         await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>);
         this.<%-associationsArguments["to_one"][i].targetKey%> = null;
       }
