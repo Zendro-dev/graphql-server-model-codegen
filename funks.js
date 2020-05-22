@@ -422,11 +422,6 @@ writeIndexAdapters = function(dir_write){
         throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
     }
 
-    let validator_patch = path.join(__dirname,'..','validations', file);
-    if(fs.existsSync(validator_patch)){
-        adapter = require(\`\${validator_patch}\`).validator_patch(adapter);
-    }
-
     let patches_patch = path.join(__dirname,'..','patches', file);
     if(fs.existsSync(patches_patch)){
         adapter = require(\`\${patches_patch}\`).logic_patch(adapter);
@@ -1029,13 +1024,13 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',    template: 'schemas-ddm',   fileName: opts.nameLc},
           {dir: 'resolvers',  template: 'resolvers-ddm', fileName: opts.nameLc},
           {dir: 'models-distributed', template: 'distributed-model', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
         ]
         break;
 
       case 'cenzontle-webservice-adapter':
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
-          {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
@@ -1043,7 +1038,6 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'ddm-adapter':
         sections = [
           {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
-          {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
@@ -1052,7 +1046,6 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
-          {dir: 'validations',  template: 'validations',  fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;

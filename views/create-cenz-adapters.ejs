@@ -42,11 +42,7 @@ module.exports = class <%- adapterName -%>{
     }).then(res =>{
       //check
       if(res&&res.data&&res.data.data) {
-        let item = res.data.data.readOne<%- nameCp -%>;
-        return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-            .then((valSuccess) => {
-                return item
-            })
+          return res.data.data.readOne<%- nameCp -%>;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
       }
@@ -111,9 +107,6 @@ module.exports = class <%- adapterName -%>{
   }
 
   static addOne(input){
-
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
       let query = `
           mutation add<%- nameCp _%>(
   <%if(!defaultId){-%>
@@ -141,7 +134,6 @@ module.exports = class <%- adapterName -%>{
         error['url'] = remoteCenzontleURL;
         handleError(error);
       });
-    });
   }
 
   static deleteOne(id){
@@ -165,34 +157,31 @@ module.exports = class <%- adapterName -%>{
   }
 
   static updateOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
-        let query = `
-              mutation
-                update<%- nameCp-%>(
-                  $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
-                  $<%=key %>:<%= editableAttributes[key]%> <%}-%>
-                ){
-                  update<%- nameCp-%>(
-                    <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
-                    <%=key %>:$<%= key%> <%}-%>
-                  ){
-                    <%- idAttribute -%> <%for(var key in attributes){%>
-                    <%=key %> <%}%>
-                  }
-                }`
+    let query = `
+          mutation
+            update<%- nameCp-%>(
+              $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
+              $<%=key %>:<%= editableAttributes[key]%> <%}-%>
+            ){
+              update<%- nameCp-%>(
+                <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
+                <%=key %>:$<%= key%> <%}-%>
+              ){
+                <%- idAttribute -%> <%for(var key in attributes){%>
+                <%=key %> <%}%>
+              }
+            }`
 
-        return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res => {
-          //check
-          if(res&&res.data&&res.data.data) {
-            return res.data.data.update<%- nameCp -%>;
-          } else {
-            throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
-          }
-        }).catch(error =>{
-          error['url'] = remoteCenzontleURL;
-          handleError(error);
-        });
+    return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res => {
+      //check
+      if(res&&res.data&&res.data.data) {
+        return res.data.data.update<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    }).catch(error =>{
+      error['url'] = remoteCenzontleURL;
+      handleError(error);
     });
   }
 

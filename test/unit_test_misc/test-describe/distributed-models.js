@@ -18,11 +18,7 @@ static readById(iri) {
         }).then(res => {
             //check
             if (res && res.data && res.data.data) {
-              let item = res.data.data.readOneBook;
-              return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-                  .then((valSuccess) => {
-                      return item
-                  })
+              return res.data.data.readOneBook;
             } else {
                 throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
             }
