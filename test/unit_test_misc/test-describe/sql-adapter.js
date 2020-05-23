@@ -50,7 +50,7 @@ static async readById(id) {
 
 
 module.exports.addOne = `
-static addOne(input) {
+static async addOne(input) {
       try {
           const result = await sequelize.transaction(async (t) => {
               let item = await super.create(input, {
@@ -263,7 +263,7 @@ module.exports.deleteOne = `
     }`
 
 module.exports.updateOne = `
-    static updateOne(input) {
+    static async updateOne(input) {
       try {
           let result = await sequelize.transaction(async (t) => {
               let item = await super.findByPk(input[this.idAttribute()], {

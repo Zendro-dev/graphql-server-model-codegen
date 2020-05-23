@@ -104,7 +104,14 @@ static readById(id) {
     throw new Error("IRI has no match WS");
   }
 
-  return adapters[responsibleAdapter[0] ].readById(id).then(result => new Book(result));
+  return adapters[responsibleAdapter[0] ].readById(id).then(result => {
+    let item  = new Book(result);
+    return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
+        .then((valSuccess) => {
+            return item;
+        });
+
+   });
   }
 }
 `

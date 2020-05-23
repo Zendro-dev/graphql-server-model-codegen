@@ -261,7 +261,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     });
   }
 
-  static addOne(input){
+  static async addOne(input){
 
     try{
       const result = await sequelize.transaction( async(t) =>{
@@ -287,7 +287,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
         });
   }
 
-  static updateOne(input){
+  static async updateOne(input){
     try{
       let result = await sequelize.transaction( async (t) =>{
         let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
