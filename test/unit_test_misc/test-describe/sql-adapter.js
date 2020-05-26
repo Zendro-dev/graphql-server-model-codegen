@@ -44,32 +44,24 @@ static async readById(id) {
     if (item === null) {
         throw new Error(\`Record with ID = "\${id}" does not exist\`);
     }
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-        .then((valSuccess) => {
-            return item
-        }).catch((err) => {
-            return err
-        });
+    return item;
 }
 `
 
 
 module.exports.addOne = `
-static addOne(input) {
-        return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-            .then(async (valSuccess) => {
-                try {
-                    const result = await sequelize.transaction(async (t) => {
-                        let item = await super.create(input, {
-                            transaction: t
-                        });
-                        return item;
-                    });
-                    return result;
-                } catch (error) {
-                    throw error;
-                }
-            });
+static async addOne(input) {
+      try {
+          const result = await sequelize.transaction(async (t) => {
+              let item = await super.create(input, {
+                  transaction: t
+              });
+              return item;
+          });
+          return result;
+      } catch (error) {
+          throw error;
+      }
     }`
 
 module.exports.count = `
@@ -258,43 +250,34 @@ static readAllCursor(search, order, pagination) {
 module.exports.deleteOne = `
     static deleteOne(id) {
         return super.findByPk(id)
-            .then(item => {
+        .then(item => {
 
-                if (item === null) return new Error(\`Record with ID = \${id} not exist\`);
+        if (item === null) return new Error(\`Record with ID = \${id} not exist\`);
+          return item
+              .destroy()
+              .then(() => {
+                  return 'Item successfully deleted';
+              });
 
-                return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
-                    .then((valSuccess) => {
-                        return item
-                            .destroy()
-                            .then(() => {
-                                return 'Item successfully deleted';
-                            });
-                    }).catch((err) => {
-                        return err
-                    })
-            });
-
+        });
     }`
 
 module.exports.updateOne = `
-    static updateOne(input) {
-        return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-            .then(async (valSuccess) => {
-                try {
-                    let result = await sequelize.transaction(async (t) => {
-                        let item = await super.findByPk(input[this.idAttribute()], {
-                            transaction: t
-                        });
-                        let updated = await item.update(input, {
-                            transaction: t
-                        });
-                        return updated;
-                    });
-                    return result;
-                } catch (error) {
-                    throw error;
-                }
-            });
+    static async updateOne(input) {
+      try {
+          let result = await sequelize.transaction(async (t) => {
+              let item = await super.findByPk(input[this.idAttribute()], {
+                  transaction: t
+              });
+              let updated = await item.update(input, {
+                  transaction: t
+              });
+              return updated;
+          });
+          return result;
+      } catch (error) {
+          throw error;
+      }
     }`
 
 

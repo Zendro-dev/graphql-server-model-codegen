@@ -41,8 +41,6 @@ static async readById(id) {
   return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
       .then((valSuccess) => {
           return item
-      }).catch((err) => {
-          return err
       });
 }
 `
