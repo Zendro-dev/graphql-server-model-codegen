@@ -187,22 +187,21 @@ module.exports.resolver_read_all_connection = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
      */
-    booksConnection: function({
+    booksConnection: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'Book', 'read').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'Book', 'read') === true) {
                 await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
                 return book.readAllCursor(search, order, pagination);
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
-            console.error(error);
+        } catch (error) {
             handleError(error);
-        })
+        }
     },
 `
 
@@ -226,21 +225,25 @@ module.exports.resolver_to_many_association = `
  * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
  */
-person.prototype.booksConnection = function({
-    search,
-    order,
-    pagination
-}, context) {
-    try {
-        return this.booksConnectionImpl({
-            search,
-            order,
-            pagination
-        });
-    } catch (error) {
-        console.error(error);
+person.prototype.booksConnection = function({                                                                                                                                                                   
+    search,                                                                                                                                                                                                     
+    order,                                                                                                                                                                                                      
+    pagination                                                                                                                                                                                                  
+}, context) {                                                                                                                                                                                                   
+    return checkAuthorization(context, 'Book', 'read').then(async authorization => {                                                                                                                            
+        if (authorization === true) {                                                                                                                                                                           
+            await checkCountAndReduceRecordsLimit(search, context, "peopleConnection");                                                                                                                         
+            return this.booksConnectionImpl({                                                                                                                                                                   
+                search,                                                                                                                                                                                         
+                order,
+                pagination
+            });
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    }).catch(error => {
         handleError(error);
-    };
+    })
 }
 `
 

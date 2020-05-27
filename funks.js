@@ -534,7 +534,8 @@ module.exports.getOptions = function(dataModel){
 validateJsonFile =  function(opts){
   let check = {
     pass : true,
-    errors: []
+    errors: [],
+    warnings: []
   }
 
   //check: validate external ids declare in attributes
@@ -547,6 +548,14 @@ validateJsonFile =  function(opts){
           check.errors.push(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`);
     }
   });
+
+  //check: validate if to_one assoc with foreignKey in target model exists
+  //       Warn user that validation e.g. unique constraint needs to be added
+  opts.associationsArguments["to_one"].forEach( assoc => {
+    if (assoc.holdsForeignKey === false) {
+      check.warnings.push(`WARNING: ${assoc.name} is a to_one associations with the foreignKey in ${assoc.target}. Be sure to validate uniqueness`)
+    }
+  })
 
   return check;
 }
@@ -924,6 +933,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   let totalWrongFiles = 0; //errors on reading or parsing
   let totalWrongModels = 0; //semantic errors
   let totalGenErrors = 0; //errors in codegen process
+  let totalModelsWithWarnings = 0; //warnings in codegen process
 
   /**
    * Processes each JSON file on input directory.
@@ -976,6 +986,15 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       return;
 
     } else { //valid model
+      //check for Warnings
+      if(check.warnings.length > 0) {
+        totalModelsWithWarnings++;
+        check.warnings.forEach( (warning) =>{
+          //Warnings
+          console.log("@@@", colors.yellow(warning));
+        });
+        console.log('@@@ File:', colors.blue(json_file), colors.yellow('processed with WARNINGS'));
+      }
       //done
     }
 
@@ -1090,6 +1109,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   console.log("@@ Total JSON files excluded: ", (totalExcludedFiles>0) ? colors.yellow(totalExcludedFiles) : colors.green(totalExcludedFiles));
   //msg
   console.log("@@ Total codegen errors: ", (totalGenErrors>0) ? colors.red(totalGenErrors) : colors.green(totalGenErrors));
+  //msg
+  if(verbose) console.log("@@ Total models with Warnings: ", (totalModelsWithWarnings>0) ? colors.yellow(totalModelsWithWarnings) : colors.green(totalModelsWithWarnings));
   //msg
   if(verbose) console.log("@@ Total JSON files with errors: ", (totalWrongFiles>0) ? colors.red(totalWrongFiles) : colors.green(totalWrongFiles));
   //msg

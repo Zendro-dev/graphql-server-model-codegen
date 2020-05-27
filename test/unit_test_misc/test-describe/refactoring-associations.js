@@ -57,21 +57,20 @@ module.exports.delete_resolver = `
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {string}         Message indicating if deletion was successfull.
      */
-    deleteAccession: function({
+    deleteAccession: async function({
         accession_id
     }, context) {
-        return checkAuthorization(context, 'Accession', 'delete').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'Accession', 'delete') === true) {
                 if (await validForDeletion(accession_id, context)) {
                     return accession.deleteOne(accession_id);
                 }
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
-            console.error(error);
+        } catch (error) {
             handleError(error);
-        })
+        }
     },
 `
 
@@ -158,6 +157,29 @@ accession.prototype.remove_location = async function(input) {
     }
 }
 `
+module.exports.add_assoc_to_one_fieldMutation_resolver_fK_in_target = `
+/**
+ * add_dog - field Mutation for to_one associations to add
+ *
+ * @param {object} input   Info of input Ids to add  the association
+ */
+researcher.prototype.add_dog = async function(input) {
+    await models.dog.add_researcherId(input.addDog, this.getIdValue());
+}
+
+`
+
+module.exports.remove_assoc_to_one_fieldMutation_resolver_fK_in_target = `
+/**
+ * remove_dog - field Mutation for to_one associations to remove
+ *
+ * @param {object} input   Info of input Ids to remove  the association
+ */
+researcher.prototype.remove_dog = async function(input) {
+    await models.dog.remove_researcherId(input.removeDog, this.getIdValue());
+}
+
+`
 
 module.exports.add_assoc_to_many_fieldMutation_resolver = `
 /**
@@ -229,7 +251,8 @@ static async remove_locationId(accession_id, locationId) {
                 locationId: null
             }, {
                 where: {
-                    accession_id: accession_id
+                    accession_id: accession_id,
+                    locationId: locationId
                 }
             }, {
                 transaction: transaction
@@ -333,7 +356,7 @@ module.exports.to_one_remove_sql_adapter =  `
 static async remove_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
         try {
-          return super.update({locationId: null},{where: {accession_id: accession_id}}, {transaction: transaction})
+          return super.update({locationId: null},{where: {accession_id: accession_id, locationId: locationId}}, {transaction: transaction})
         } catch (error) {
             throw error;
         }
@@ -462,7 +485,6 @@ module.exports.add_one_resolver = `
              throw new Error("You don't have authorization to perform this action on adapter");
          }
      } catch (error) {
-         console.error(error);
          handleError(error);
      }
  }
@@ -498,7 +520,6 @@ module.exports.update_one_resolver = `
                throw new Error("You don't have authorization to perform this action on adapter");
            }
        } catch (error) {
-           console.error(error);
            handleError(error);
        }
    }

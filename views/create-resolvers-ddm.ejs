@@ -34,8 +34,8 @@ const associationArgsDef = {
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
+    <% if (associations_one[i].holdsForeignKey) { %>
     if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
-      try{
         if (search === undefined) {
           return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
         } else {
@@ -52,11 +52,30 @@ const associationArgsDef = {
           }
           return found;
         }
-      }catch(error){
-        console.error(error);
-        handleError(error);
-      };
     }
+    <%}else{-%>
+        //build new search filter
+        let nsearch = helper.addSearchField({
+          "search": search, 
+          "field": "<%=associations_one[i].targetKey%>", 
+          "value": {"value": this.getIdValue()}, 
+          "operator": "eq"
+        });
+
+        let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context)).edges;
+
+        if(found.length > 0) {
+          if(found.length > 1){
+            let foundIds = [];
+            found.forEach(<%=associations_one[i].target_lc%> => {foundIds.push(<%=associations_one[i].target_lc%>.node.getIdValue())})
+            context.benignErrors.push(new Error(
+              `Not unique "to_one" association Error: Found ${found.length} <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>. Found <%=associations_one[i].target_pl-%> ${models.<%=associations_one[i].target_lc-%>.idAttribute()}s: [${foundIds.toString()}]`
+            ));
+          }
+          return found[0].node;
+        }
+        return null;
+    <%}-%>
   }
 <%}-%>
 
@@ -71,7 +90,6 @@ const associationArgsDef = {
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
    <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-    try{
 
       //build new search filter
       let nsearch = helper.addSearchField({
@@ -82,10 +100,6 @@ const associationArgsDef = {
       });
 
       return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
-    }catch(error){
-      console.error(error);
-      handleError(error);
-    };
   }
 
 
@@ -101,7 +115,6 @@ const associationArgsDef = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
    <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
-    try{
 
       //build new search filter
       let nsearch = helper.addSearchField({
@@ -112,10 +125,6 @@ const associationArgsDef = {
       });
 
       return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
-    }catch(error){
-      console.error(error);
-      handleError(error);
-    };
   }
 <%}-%>
 
@@ -222,7 +231,6 @@ module.exports = {
       throw new Error('No adapters registered for data model "<%- name %>"');
     }//else
 
-    try {
       //exclude adapters
       let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
       if(adapters.length === 0) {
@@ -251,10 +259,6 @@ module.exports = {
               throw new Error('No available adapters for data model "<%- name %>" ');
           }
       }
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    }
   },
 
 
@@ -267,17 +271,12 @@ module.exports = {
    */
   readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
     //check: adapters auth
-    try {
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
       if (authorizationCheck === true) {
         return <%- nameLc _%>.readById(<%- idAttribute _%>);
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
-    } catch (error) {
-      console.error(error);
-      handleError(error);
-    }
   },
 
   /**
@@ -294,7 +293,6 @@ module.exports = {
     }
 
     //check: adapters auth
-    try {
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>), 'create');
       if (authorizationCheck === true) {
         let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
@@ -309,10 +307,6 @@ module.exports = {
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
-    } catch (error) {
-      console.error(error);
-      handleError(error);
-    }
   },
 
 
@@ -322,17 +316,12 @@ module.exports = {
    * @param  {string} _       First parameter is not used
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    */
-  bulkAdd<%- nameCp -%>Csv: function(_, context) {
-    return checkAuthorization(context, '<%- name -%>', 'create').then(authorization => {
-      if (authorization === true) {
+  bulkAdd<%- nameCp -%>Csv: async function(_, context) {
+      if (await checkAuthorization(context, '<%- name -%>', 'create') === true) {
         return <%- nameLc -%>.bulkAddCsv(context);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
-    }).catch(error => {
-      console.error(error);
-      handleError( error);
-    })
   },
 
   /**
@@ -344,7 +333,6 @@ module.exports = {
    */
   delete<%- nameCp -%>: async function({<%- idAttribute -%>}, context){
     //check: adapters auth
-    try {
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'delete');
       if (authorizationCheck === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
@@ -353,10 +341,6 @@ module.exports = {
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
-    } catch (error) {
-      console.error(error);
-      handleError(error);
-    }
   },
 
   /**
@@ -373,7 +357,6 @@ module.exports = {
     }
 
     //check: adapters auth
-    try {
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(input.<%- idAttribute _%>), 'update');
       if (authorizationCheck === true) {
         let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
@@ -388,10 +371,6 @@ module.exports = {
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
-    } catch (error) {
-      console.error(error);
-      handleError(error);
-    }
   },
 
   /**
@@ -409,7 +388,6 @@ module.exports = {
       throw new Error('No adapters registered for data model "<%- name %>"');
     }//else
 
-    try {
       //exclude adapters
       let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
       if(adapters.length === 0) {
@@ -439,10 +417,6 @@ module.exports = {
               throw new Error('No available adapters for data model "<%- name %>"');
           }
       }
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    }
   },
 
   /**
@@ -452,17 +426,12 @@ module.exports = {
    * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {Array}         Strings, one for header and one columns types
    */
-  csvTableTemplate<%- nameCp-%>: function(_, context){
-    return checkAuthorization(context, '<%- name -%>', 'read').then(authorization => {
-        if (authorization === true) {
+  csvTableTemplate<%- nameCp-%>: async function(_, context){
+        if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
             return <%- nameLc -%>.csvTableTemplate();
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-    }).catch(error => {
-      console.error(error);
-        handleError(error);
-    })
   }
 
 }

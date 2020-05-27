@@ -13,6 +13,13 @@
         "targetKey" : "person_id",
         "keyIn": "dog",
         "targetStorageType" : "distributed-data-model"
+      },
+      "unique_parrot": {
+        "type" : "to_one",
+        "target" : "parrot",
+        "targetKey" : "person_id",
+        "keyIn": "parrot",
+        "targetStorageType" : "distributed-data-model"
       }
     },
     "internalId": "person_id"
