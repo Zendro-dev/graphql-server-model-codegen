@@ -102,7 +102,6 @@ book.prototype.publisher = async function({
                 return found;
             }
         } catch (error) {
-            console.error(error);
             handleError(error);
         };
     }
@@ -171,7 +170,6 @@ person.prototype.worksFilter = function({
             pagination: pagination
         }, context);
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
 }

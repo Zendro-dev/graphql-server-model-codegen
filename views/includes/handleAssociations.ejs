@@ -6,7 +6,6 @@
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 */
 <%- nameLc -%>.prototype.handleAssociations = async function(input, context){
-  try {
     let promises = [];
     <% ['add','remove'].forEach(op => { -%>
       <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_many"])-%>
@@ -23,7 +22,4 @@
       <%}-%>
     <%}) -%>  
     await Promise.all(promises);
-  } catch (error) {
-      throw error
-  }
 }

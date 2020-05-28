@@ -57,21 +57,20 @@ module.exports.delete_resolver = `
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {string}         Message indicating if deletion was successfull.
      */
-    deleteAccession: function({
+    deleteAccession: async function({
         accession_id
     }, context) {
-        return checkAuthorization(context, 'Accession', 'delete').then(async authorization => {
-            if (authorization === true) {
+        try {
+            if (await checkAuthorization(context, 'Accession', 'delete') === true) {
                 if (await validForDeletion(accession_id, context)) {
                     return accession.deleteOne(accession_id);
                 }
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        }).catch(error => {
-            console.error(error);
+        } catch (error) {
             handleError(error);
-        })
+        }
     },
 `
 
@@ -486,7 +485,6 @@ module.exports.add_one_resolver = `
              throw new Error("You don't have authorization to perform this action on adapter");
          }
      } catch (error) {
-         console.error(error);
          handleError(error);
      }
  }
@@ -522,7 +520,6 @@ module.exports.update_one_resolver = `
                throw new Error("You don't have authorization to perform this action on adapter");
            }
        } catch (error) {
-           console.error(error);
            handleError(error);
        }
    }

@@ -31,7 +31,7 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-  try {
+    try {
         //build new search filter
         let nsearch = helper.addSearchField({
             "search": search,
@@ -48,10 +48,8 @@ individual.prototype.transcript_countsFilter = function({
             pagination: pagination
         }, context);
     } catch (error) {
-        console.error(error);
         handleError(error);
     };
-
 }
 `
 
