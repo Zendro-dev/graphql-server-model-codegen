@@ -192,16 +192,13 @@ module.exports.resolver_read_all_connection = `
         order,
         pagination
     }, context) {
-        try {
-            if (await checkAuthorization(context, 'Book', 'read') === true) {
-                await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
-                return book.readAllCursor(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        } catch (error) {
-            handleError(error);
+        if (await checkAuthorization(context, 'Book', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            return book.readAllCursor(search, order, pagination);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
         }
+
     },
 `
 
@@ -225,25 +222,21 @@ module.exports.resolver_to_many_association = `
  * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
  */
-person.prototype.booksConnection = function({                                                                                                                                                                   
-    search,                                                                                                                                                                                                     
-    order,                                                                                                                                                                                                      
-    pagination                                                                                                                                                                                                  
-}, context) {                                                                                                                                                                                                   
-    return checkAuthorization(context, 'Book', 'read').then(async authorization => {                                                                                                                            
-        if (authorization === true) {                                                                                                                                                                           
-            await checkCountAndReduceRecordsLimit(search, context, "peopleConnection");                                                                                                                         
-            return this.booksConnectionImpl({                                                                                                                                                                   
-                search,                                                                                                                                                                                         
+person.prototype.booksConnection = async function({
+    search,
+    order,
+    pagination
+}, context) {
+if (await checkAuthorization(context, 'Book', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "peopleConnection");
+            return this.booksConnectionImpl({
+                search,
                 order,
                 pagination
             });
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-    }).catch(error => {
-        handleError(error);
-    })
 }
 `
 
@@ -427,6 +420,9 @@ booksConnection(search:$search pagination:$pagination order:$order){ edges{curso
       }
   }).then(res => {
       //check
+      if (helper.isNonEmptyArray(res.data.errors)){
+        throw new Error(JSON.stringify(res.data.errors));
+      }
       if(res&&res.data&&res.data.data) {
         let data_edges = res.data.data.booksConnection.edges;
         let pageInfo = res.data.data.booksConnection.pageInfo;

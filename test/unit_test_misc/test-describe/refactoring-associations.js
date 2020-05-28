@@ -60,7 +60,6 @@ module.exports.delete_resolver = `
     deleteAccession: async function({
         accession_id
     }, context) {
-        try {
             if (await checkAuthorization(context, 'Accession', 'delete') === true) {
                 if (await validForDeletion(accession_id, context)) {
                     return accession.deleteOne(accession_id);
@@ -68,9 +67,6 @@ module.exports.delete_resolver = `
             } else {
                 throw new Error("You don't have authorization to perform this action");
             }
-        } catch (error) {
-            handleError(error);
-        }
     },
 `
 
@@ -104,31 +100,27 @@ module.exports.handleAssociations = `
  * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  */
 accession.prototype.handleAssociations = async function(input, context) {
-    try {
-        let promises = [];
-        if (helper.isNonEmptyArray(input.addIndividuals)) {
-            promises.push(this.add_individuals(input, context));
-        }
-        if (helper.isNonEmptyArray(input.addMeasurements)) {
-            promises.push(this.add_measurements(input, context));
-        }
-        if (helper.isNotUndefinedAndNotNull(input.addLocation)) {
-            promises.push(this.add_location(input, context));
-        }
-        if (helper.isNonEmptyArray(input.removeIndividuals)) {
-            promises.push(this.remove_individuals(input, context));
-        }
-        if (helper.isNonEmptyArray(input.removeMeasurements)) {
-            promises.push(this.remove_measurements(input, context));
-        }
-        if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {
-            promises.push(this.remove_location(input, context));
-        }
+      let promises = [];
+      if (helper.isNonEmptyArray(input.addIndividuals)) {
+          promises.push(this.add_individuals(input, context));
+      }
+      if (helper.isNonEmptyArray(input.addMeasurements)) {
+          promises.push(this.add_measurements(input, context));
+      }
+      if (helper.isNotUndefinedAndNotNull(input.addLocation)) {
+          promises.push(this.add_location(input, context));
+      }
+      if (helper.isNonEmptyArray(input.removeIndividuals)) {
+          promises.push(this.remove_individuals(input, context));
+      }
+      if (helper.isNonEmptyArray(input.removeMeasurements)) {
+          promises.push(this.remove_measurements(input, context));
+      }
+      if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {
+          promises.push(this.remove_location(input, context));
+      }
 
-        await Promise.all(promises);
-    } catch (error) {
-        throw error
-    }
+      await Promise.all(promises);
 }
 `
 
@@ -220,7 +212,6 @@ module.exports._addAssoc_to_one_fieldMutation_sql_model = `
  */
 static async add_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
-        try {
             return Accession.update({
                 locationId: locationId
             }, {
@@ -230,9 +221,6 @@ static async add_locationId(accession_id, locationId) {
             }, {
                 transaction: transaction
             })
-        } catch (error) {
-            throw error;
-        }
     });
     return updated;
 }
@@ -246,7 +234,6 @@ module.exports._removeAssoc_to_one_fieldMutation_sql_model = `
  */
 static async remove_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
-        try {
             return Accession.update({
                 locationId: null
             }, {
@@ -257,9 +244,6 @@ static async remove_locationId(accession_id, locationId) {
             }, {
                 transaction: transaction
             })
-        } catch (error) {
-            throw error;
-        }
     });
     return updated;
 }
@@ -355,11 +339,8 @@ module.exports.to_one_remove_sql_adapter =  `
  */
 static async remove_locationId(accession_id, locationId) {
     let updated = await sequelize.transaction(async transaction => {
-        try {
           return super.update({locationId: null},{where: {accession_id: accession_id, locationId: locationId}}, {transaction: transaction})
-        } catch (error) {
-            throw error;
-        }
+
     });
     return updated;
 }
@@ -374,11 +355,8 @@ module.exports.to_one_add_sql_adapter = `
 */
 static async add_locationId(accession_id, locationId) {
    let updated = await sequelize.transaction(async transaction => {
-       try {
          return super.update({locationId: locationId},{where: {accession_id: accession_id}}, {transaction: transaction})
-       } catch (error) {
-           throw error;
-       }
+
    });
    return updated;
 }
@@ -469,7 +447,6 @@ module.exports.add_one_resolver = `
          throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
      }
      //check: adapters auth
-     try {
          let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'create');
          if (authorizationCheck === true) {
            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
@@ -484,9 +461,6 @@ module.exports.add_one_resolver = `
          } else { //adapter not auth
              throw new Error("You don't have authorization to perform this action on adapter");
          }
-     } catch (error) {
-         handleError(error);
-     }
  }
 `
 
@@ -504,7 +478,6 @@ module.exports.update_one_resolver = `
      throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
    }
       //check: adapters auth
-       try {
            let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'update');
            if (authorizationCheck === true) {
              let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
@@ -519,9 +492,6 @@ module.exports.update_one_resolver = `
            } else {//adapter not auth
                throw new Error("You don't have authorization to perform this action on adapter");
            }
-       } catch (error) {
-           handleError(error);
-       }
    }
 `
 

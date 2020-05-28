@@ -33,16 +33,14 @@ module.exports.individual_no_assoc_resolvers = `
         order,
         pagination
     }, context) {
-        try {
-            if (await checkAuthorization(context, 'individual', 'read' === true)) {
-                await checkCountAndReduceRecordsLimit(search, context, "individuals");
-                return await individual.readAll(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        } catch (error) {
-            handleError(error);
+
+        if (await checkAuthorization(context, 'individual', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "individuals");
+            return await individual.readAll(search, order, pagination);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
         }
+
     },`
 
 module.exports.transcript_count_no_assoc_model = `

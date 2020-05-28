@@ -14,15 +14,11 @@ module.exports.resolvers_webservice_aminoAcid = `
         order,
         pagination
     }, context) {
-        try {
-            if (await checkAuthorization(context, 'aminoAcidSequence', 'read' === true)) {
-                await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
-                return await aminoAcidSequence.readAll(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        } catch (error) {
-            handleError(error);
+        if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
+            return await aminoAcidSequence.readAll(search, order, pagination);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
         }
     },
 `
@@ -58,25 +54,21 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
     order,
     pagination
 }, context) {
-    try {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "individual_id",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
+      //build new search filter
+      let nsearch = helper.addSearchField({
+          "search": search,
+          "field": "individual_id",
+          "value": {
+              "value": this.getIdValue()
+          },
+          "operator": "eq"
+      });
 
-        return resolvers.transcriptCounts({
-            search: nsearch,
-            order: order,
-            pagination: pagination
-        }, context);
-    } catch (error) {
-        handleError(error);
-    };
+      return resolvers.transcriptCounts({
+          search: nsearch,
+          order: order,
+          pagination: pagination
+      }, context);
 }
 `
 
@@ -141,15 +133,11 @@ module.exports.transcriptCount_resolvers_camelcase=`
     readOneTranscriptCount: async function({
         id
     }, context) {
-        try {
-            if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
-                checkCountForOneAndReduceRecordsLimit(context);
-                return transcriptCount.readById(id);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        } catch (error) {
-            handleError(error);
+        if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
+            checkCountForOneAndReduceRecordsLimit(context);
+            return transcriptCount.readById(id);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
         }
     },
 `

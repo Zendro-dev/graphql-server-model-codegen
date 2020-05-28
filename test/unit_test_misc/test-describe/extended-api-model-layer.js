@@ -7,7 +7,6 @@ module.exports.to_add_individual = `
      */
     static async add_individual_id(id, individual_id) {
         let updated = await sequelize.transaction(async transaction => {
-            try {
                 return transcript_count.update({
                     individual_id: individual_id
                 }, {
@@ -17,9 +16,7 @@ module.exports.to_add_individual = `
                 }, {
                     transaction: transaction
                 })
-            } catch (error) {
-                throw error;
-            }
+
         });
         return updated;
     }
@@ -66,7 +63,6 @@ module.exports.remove_individual = `
      */
     static async remove_individual_id(id, individual_id) {
         let updated = await sequelize.transaction(async transaction => {
-            try {
                 return transcript_count.update({
                     individual_id: null
                 }, {
@@ -77,9 +73,6 @@ module.exports.remove_individual = `
                 }, {
                     transaction: transaction
                 })
-            } catch (error) {
-                throw error;
-            }
         });
         return updated;
     }

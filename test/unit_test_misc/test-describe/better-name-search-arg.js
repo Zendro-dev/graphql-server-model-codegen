@@ -15,14 +15,12 @@ module.exports.researcher_resolver = `
     countResearchers: async function({
         search
     }, context) {
-        try {
-            if (await checkAuthorization(context, 'Researcher', 'read') === true) {
-                return (await researcher.countRecords(search)).sum;
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        } catch (error) {
-            handleError(error);
+
+        if (await checkAuthorization(context, 'Researcher', 'read') === true) {
+            return (await researcher.countRecords(search)).sum;
+        } else {
+            throw new Error("You don't have authorization to perform this action");
         }
+
     },
 `

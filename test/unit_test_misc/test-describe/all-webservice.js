@@ -78,32 +78,29 @@ book.prototype.publisher = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.publisher_id)) {
-        try {
-            if (search === undefined) {
-                return resolvers.readOnePubli_sher({
-                    [models.publi_sher.idAttribute()]: this.publisher_id
-                }, context)
-            } else {
-                //build new search filter
-                let nsearch = helper.addSearchField({
-                    "search": search,
-                    "field": models.publi_sher.idAttribute(),
-                    "value": {
-                        "value": this.publisher_id
-                    },
-                    "operator": "eq"
-                });
-                let found = await resolvers.publi_shers({
-                    search: nsearch
-                }, context);
-                if (found) {
-                    return found[0]
-                }
-                return found;
+        if (search === undefined) {
+            return resolvers.readOnePubli_sher({
+                [models.publi_sher.idAttribute()]: this.publisher_id
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.publi_sher.idAttribute(),
+                "value": {
+                    "value": this.publisher_id
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.publi_shers({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
             }
-        } catch (error) {
-            handleError(error);
-        };
+            return found;
+        }
+
     }
 }
 `
@@ -153,7 +150,6 @@ person.prototype.worksFilter = function({
     order,
     pagination
 }, context) {
-    try {
         //build new search filter
         let nsearch = helper.addSearchField({
             "search": search,
@@ -169,9 +165,6 @@ person.prototype.worksFilter = function({
             order: order,
             pagination: pagination
         }, context);
-    } catch (error) {
-        handleError(error);
-    };
 }
 
 `

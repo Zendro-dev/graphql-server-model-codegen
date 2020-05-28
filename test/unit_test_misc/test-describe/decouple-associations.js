@@ -10,32 +10,28 @@ dog.prototype.researcher = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.researcherId)) {
-        try {
-            if (search === undefined) {
-                return resolvers.readOneResearcher({
-                    [models.researcher.idAttribute()]: this.researcherId
-                }, context)
-            } else {
-                //build new search filter
-                let nsearch = helper.addSearchField({
-                    "search": search,
-                    "field": models.researcher.idAttribute(),
-                    "value": {
-                        "value": this.researcherId
-                    },
-                    "operator": "eq"
-                });
-                let found = await resolvers.researchers({
-                    search: nsearch
-                }, context);
-                if (found) {
-                    return found[0]
-                }
-                return found;
+        if (search === undefined) {
+            return resolvers.readOneResearcher({
+                [models.researcher.idAttribute()]: this.researcherId
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.researcher.idAttribute(),
+                "value": {
+                    "value": this.researcherId
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.researchers({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
             }
-        } catch (error) {
-            handleError(error);
-        };
+            return found;
+        }
     }
 }
 `
@@ -43,19 +39,16 @@ dog.prototype.researcher = async function({
 module.exports.belongsTo_model = `
 static async add_researcherId(id, researcherId) {
         let updated = await sequelize.transaction(async transaction => {
-            try {
-                return Dog.update({
-                    researcherId: researcherId
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
+            return Dog.update({
+                researcherId: researcherId
+            }, {
+                where: {
+                    id: id
+                }
+            }, {
+                transaction: transaction
+            })
+
         });
         return updated;
     }
@@ -72,36 +65,32 @@ module.exports.hasOne_resolver = `
 researcher.prototype.dog = async function({
     search
 }, context) {
-    try {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "researcherId",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
+      //build new search filter
+      let nsearch = helper.addSearchField({
+          "search": search,
+          "field": "researcherId",
+          "value": {
+              "value": this.getIdValue()
+          },
+          "operator": "eq"
+      });
 
-        let found = await resolvers.dogs({
-            search: nsearch
-        }, context);
-        if(found){
-            if(found.length > 1){
-                let foundIds = [];
-                found.forEach(dog => {
-                    foundIds.push(dog.getIdValue())
-                })
-                context.benignErrors.push(new Error(
-                    \`Not unique "to_one" association Error: Found \${found.length} dogs matching researcher with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog. Found Dogs \${models.dog.idAttribute()}s: [\${foundIds.toString()}]\`
-                )); 
-            }
-            return found[0];
-        }
-        return found;
-    } catch (error) {
-        handleError(error);
-    };
+      let found = await resolvers.dogs({
+          search: nsearch
+      }, context);
+      if(found){
+          if(found.length > 1){
+              let foundIds = [];
+              found.forEach(dog => {
+                  foundIds.push(dog.getIdValue())
+              })
+              context.benignErrors.push(new Error(
+                  \`Not unique "to_one" association Error: Found \${found.length} dogs matching researcher with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog. Found Dogs \${models.dog.idAttribute()}s: [\${foundIds.toString()}]\`
+              ));
+          }
+          return found[0];
+      }
+      return found;
 }
 `
 
@@ -141,25 +130,21 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-    try {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "individual_id",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
+    //build new search filter
+    let nsearch = helper.addSearchField({
+        "search": search,
+        "field": "individual_id",
+        "value": {
+            "value": this.getIdValue()
+        },
+        "operator": "eq"
+    });
 
-        return resolvers.transcript_counts({
-            search: nsearch,
-            order: order,
-            pagination: pagination
-        }, context);
-    } catch (error) {
-        handleError(error);
-    };
+    return resolvers.transcript_counts({
+        search: nsearch,
+        order: order,
+        pagination: pagination
+    }, context);
 }
 `
 module.exports.countAssociated_model = `
@@ -194,24 +179,19 @@ module.exports.countAssociated_resolver = `
 individual.prototype.countFilteredTranscript_counts = function({
     search
 }, context) {
-    try {
+    //build new search filter
+    let nsearch = helper.addSearchField({
+        "search": search,
+        "field": "individual_id",
+        "value": {
+            "value": this.getIdValue()
+        },
+        "operator": "eq"
+    });
 
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "individual_id",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
-
-        return resolvers.countTranscript_counts({
-            search: nsearch
-        }, context);
-    } catch (error) {
-        handleError(error);
-    };
+    return resolvers.countTranscript_counts({
+        search: nsearch
+    }, context);
 }
 `
 
@@ -282,13 +262,12 @@ module.exports.belongsToMany_resolver = `
  * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
  */
-book.prototype.AuthorsFilter = function({
+book.prototype.AuthorsFilter = async function({
     search,
     order,
     pagination
 }, context) {
-    return checkAuthorization(context, 'Person', 'read').then(async authorization => {
-        if (authorization === true) {
+      if (await checkAuthorization(context, 'Person', 'read') === true) {
             await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
             return this.AuthorsFilterImpl({
                 search,
@@ -298,9 +277,7 @@ book.prototype.AuthorsFilter = function({
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-    }).catch(error => {
-        handleError(error);
-    })
+
 }
 `
 
@@ -312,11 +289,10 @@ module.exports.belongsToMany_resolver_count = `
  * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {type}          Number of associated records that holds the conditions specified in the search argument
  */
-book.prototype.countFilteredAuthors = function({
+book.prototype.countFilteredAuthors = async function({
     search
 }, context) {
-    return checkAuthorization(context, 'Person', 'read').then(async authorization => {
-        if (authorization === true) {
+  if (await checkAuthorization(context, 'Person', 'read') === true) {
             await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
             return this.countFilteredAuthorsImpl({
                 search
@@ -324,8 +300,6 @@ book.prototype.countFilteredAuthors = function({
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-    }).catch(error => {
-        handleError(error);
-    })
+
 }
 `

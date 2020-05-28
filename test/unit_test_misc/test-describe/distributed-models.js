@@ -431,48 +431,44 @@ countFilteredDogsImpl ({search}){
 `
 
 module.exports.person_ddm_resolver_one_to_one = `
-/**                                                                                                                                                                                                                
- * person.prototype.parrot - Return associated record                                                                                                                                                              
- *                                                                                                                                                                                                                 
- * @param  {object} search       Search argument to match the associated record                                                                                                                                    
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.                                                                                         
- * @return {type}         Associated record                                                                                                                                                                        
- */                                                                                                                                                                                                                
-person.prototype.parrot = async function({          
-    search                                                                                               
-}, context) {  
-    try {                                     
-        //build new search filter                                                                            
-        let nsearch = helper.addSearchField({           
-            "search": search,                                                                                
-            "field": "personId",                                                                                                                                                                                       
-            "value": {                                                                                                                                                                                                 
-                "value": this.getIdValue()                                                                                                                                                                             
-            },                                                                                                                                                                                                         
-            "operator": "eq"                                                                                                                                                                                           
-        });                                                                                                  
-                                                                                                                                                                                                                    
-        let found = (await resolvers.parrotsConnection({                                                                                                                                                               
-            search: nsearch                                                                                                                                                                                            
-        }, context)).edges;                                                                                                                                                                                            
-                                                                                                                                                                                                                    
-        if (found.length > 0) {                                                                                                                                                                                                   
-            if (found.length > 1) {                                                                                                                                                                                    
-                let foundIds = [];                                                                                                                                                                                     
-                found.forEach(parrot => {                                                                                                                                                                              
-                    foundIds.push(parrot.node.getIdValue())                                                                                                                                                                 
-                })                                                                                                                                                                                                     
-                context.benignErrors.push(new Error(                                                                                                                                                                   
-                    \`Not unique "to_one" association Error: Found \${found.length} parrots matching person with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving 
+/**
+ * person.prototype.parrot - Return associated record
+ *
+ * @param  {object} search       Search argument to match the associated record
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {type}         Associated record
+ */
+person.prototype.parrot = async function({
+    search
+}, context) {                                   
+        //build new search filter
+        let nsearch = helper.addSearchField({
+            "search": search,
+            "field": "personId",
+            "value": {
+                "value": this.getIdValue()
+            },
+            "operator": "eq"
+        });
+
+        let found = (await resolvers.parrotsConnection({
+            search: nsearch
+        }, context)).edges;
+
+        if (found.length > 0) {
+            if (found.length > 1) {
+                let foundIds = [];
+                found.forEach(parrot => {
+                    foundIds.push(parrot.node.getIdValue())
+                })
+                context.benignErrors.push(new Error(
+                    \`Not unique "to_one" association Error: Found \${found.length} parrots matching person with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving
     the foreign key into the Person model. Returning first Parrot. Found Parrots \${models.parrot.idAttribute()}s: [\${foundIds.toString()}]\`
                 ));
             }
             return found[0].node;
         }
         return null;
-    }catch(error){
-        handleError(error);
-    };
 }
 
 `

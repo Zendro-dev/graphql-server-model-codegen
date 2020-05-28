@@ -2,7 +2,7 @@
     Resolvers for basic CRUD operations
 */
 
-<%# 
+<%#
 /**
  * Section 1
  * Require Statements.
@@ -19,15 +19,15 @@ const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 const globals = require('../config/globals');
 
-<%# 
+<%#
 /**
  * Section 2
  * associationArgsDef object definition.
- * 
- * associationArgsDef is an object that relates each add-association methods 
+ *
+ * associationArgsDef is an object that relates each add-association methods
  * name (key) with the name of the corresponding association (value).
  */
--%> 
+-%>
   <% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_one"]).concat(associationsArguments["generic_to_many"])-%>
 const associationArgsDef = {
   <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -39,27 +39,27 @@ const associationArgsDef = {
   <%}-%>
 }
 
-<%# 
+<%#
 /**
  * Section 3
  * Query resolvers for associations fields.
- * 
+ *
  * These resolvers are implemented by extended the model's protoype
  * with methods to resolve each association related field.
  */
 -%>
-<%# 
+<%#
 /**
  * Section 3.a
  * Query resolvers for associations fields for:
- * 
+ *
  * < to_many_through_sql_cross_table > (many_to_many)
- * 
+ *
  * Methods:
  * model.prototype.assocFilter()
  * model.prototype.assocConnection()
  * model.prototype.countFilteredAssoc()
- * 
+ *
  */
 -%>
 
@@ -106,7 +106,7 @@ const associationArgsDef = {
         return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
       } else {
         throw new Error("You don't have authorization to perform this action");
-      }   
+      }
    }
 
   /**
@@ -126,16 +126,16 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 3.b
  * Query resolvers for associations fields for:
- * 
+ *
  * < to_one >
- * 
+ *
  * Methods:
  * model.prototype.assoc()
- * 
+ *
  */
 -%>
 <%let associations_one = associationsArguments["to_one"]-%>
@@ -170,9 +170,9 @@ const associationArgsDef = {
     <%}else{-%>
         //build new search filter
         let nsearch = helper.addSearchField({
-          "search": search, 
-          "field": "<%=associations_one[i].targetKey%>", 
-          "value": {"value": this.getIdValue()}, 
+          "search": search,
+          "field": "<%=associations_one[i].targetKey%>",
+          "value": {"value": this.getIdValue()},
           "operator": "eq"
         });
 
@@ -192,18 +192,18 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 3.c
  * Query resolvers for associations fields for:
- * 
+ *
  * < to_many >
- * 
+ *
  * Methods:
  * model.prototype.assocFilter()
  * model.prototype.assocConnection()
  * model.prototype.countFilteredAssoc()
- * 
+ *
  */
 -%>
 <% associations_temp = associationsArguments["to_many"]-%>
@@ -276,16 +276,16 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 3.d
  * Query resolvers for associations fields for:
- * 
+ *
  * < generic_to_one >
- * 
+ *
  * Methods:
  * model.prototype.assoc()
- * 
+ *
  */
 -%>
 <%let associations_generic_one = associationsArguments["generic_to_one"]-%>
@@ -312,24 +312,24 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 3.e
  * Query resolvers for associations fields for:
- * 
+ *
  * < generic_to_many >
- * 
+ *
  * Methods:
  * model.prototype.assocFilter()
  * model.prototype.assocConnection()
  * model.prototype.countFilteredAssoc()
- * 
+ *
  */
 -%>
 <% associations_generic_many = associationsArguments["generic_to_many"]-%>
 <% for(let i=0; i < associations_generic_many.length; i++){ -%>
   /**
-   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter - Check user authorization and return certain 
+   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter - Check user authorization and return certain
    * number, specified in pagination argument, of records associated with the current instance, this records should also
    * holds the condition of search argument, all of them sorted as specified by the order argument.
    *
@@ -354,7 +354,7 @@ const associationArgsDef = {
   }
 
   /**
-   * <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> - Count number of associated records that 
+   * <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> - Count number of associated records that
    * holds the conditions specified in the search argument.
    *
    * @param  {object} {search}  Search argument for filtering associated records.
@@ -376,8 +376,8 @@ const associationArgsDef = {
   }
 
   /**
-   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection - Check user authorization and return 
-   * certain number, specified in pagination argument, of records associated with the current instance, this records 
+   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection - Check user authorization and return
+   * certain number, specified in pagination argument, of records associated with the current instance, this records
    * should also holds the condition of search argument, all of them sorted as specified by the order argument.
    *
    * @param  {object} search      Search argument for filtering associated records.
@@ -401,11 +401,11 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 4
  * Mutation resolvers for associations fields.
- * 
+ *
  * These resolvers are implemented by extended the model's protoype
  * with methods to resolve each association related field.
  *
@@ -416,16 +416,16 @@ const associationArgsDef = {
  */
 -%>
 <%- include('./includes/handleAssociations'); -%>
-<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%> 
+<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%>
 <%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); -%>
-<%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "add"}); -%> 
+<%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "add"}); -%>
 <%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "remove"}); -%>
 
-<%# 
+<%#
 /**
  * Section 5
  * Local helper fuctions.
- * 
+ *
  * Functions:
  * errorMessageForRecordsLimit()
  * checkCountAndReduceRecordsLimit()
@@ -510,24 +510,24 @@ const associationArgsDef = {
   return true;
 }
 
-<%# 
+<%#
 /**
  * Section 6
  * Root resolvers.
- * 
+ *
  * These root resolvers are implemented as attributes of an
  * object. This object of resolvers is merged with all other
  * root resolvers to resolve root Query and Mutations Types.
  */
 -%>
 module.exports = {
-<%# 
+<%#
 /**
  * Section 6.a
- * Root resolvers for: 
- * 
+ * Root resolvers for:
+ *
  * Query
- * 
+ *
  * Methods:
  * models()
  * modelsConnection()
@@ -547,7 +547,7 @@ module.exports = {
    * @return {array}             Array of records holding conditions specified by search, order and pagination argument
    */
   <%- namePl -%>: async function({search, order, pagination}, context){
-      if (await checkAuthorization(context, '<%- name -%>', 'read' === true)) {
+      if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
           await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>");
           return await <%- nameLc -%>.readAll(search, order, pagination);
       } else {
@@ -620,13 +620,13 @@ module.exports = {
       }
   },
 
-<%# 
+<%#
 /**
  * Section 6.b
- * Root resolvers for: 
- * 
+ * Root resolvers for:
+ *
  * Mutation
- * 
+ *
  * Methods:
  * addModel()
  * bulkAddModelCsv()
