@@ -181,7 +181,7 @@ static countRecords(search, authorizedAdapters) {
 `
 
 module.exports.book_ddm_read_all = `
-static readAllCursor(search, order, pagination, authorizedAdapters) {
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
         let authAdapters = [];
         /**
          * Differentiated cases:
@@ -220,12 +220,12 @@ static readAllCursor(search, order, pagination, authorizedAdapters) {
             switch (adapter.adapterType) {
                 case 'ddm-adapter':
                     let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                    return adapter.readAllCursor(nsearch, order, pagination).catch(benignErrors => benignErrors);
+                    return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter).catch(benignErrors => benignErrors);
 
                 case 'generic-adapter':
                 case 'sql-adapter':
                 case 'cenzontle-webservice-adapter':
-                    return adapter.readAllCursor(search, order, pagination).catch(benignErrors => benignErrors);
+                    return adapter.readAllCursor(search, order, pagination,benignErrorReporter ).catch(benignErrors => benignErrors);
 
                 default:
                     throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
@@ -440,7 +440,7 @@ module.exports.person_ddm_resolver_one_to_one = `
  */
 person.prototype.parrot = async function({
     search
-}, context) {                                   
+}, context) {
         //build new search filter
         let nsearch = helper.addSearchField({
             "search": search,

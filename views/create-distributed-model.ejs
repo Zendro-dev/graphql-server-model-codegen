@@ -128,7 +128,7 @@ module.exports = class <%- name -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination, authorizedAdapters) {
+  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -167,12 +167,12 @@ module.exports = class <%- name -%>{
       switch(adapter.adapterType) {
         case 'ddm-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.readAllCursor(nsearch, order, pagination).catch(benignErrors => benignErrors);
+          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter).catch(benignErrors => benignErrors);
 
         case 'generic-adapter':
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.readAllCursor(search, order, pagination).catch(benignErrors => benignErrors);
+          return adapter.readAllCursor(search, order, pagination, benignErrorReporter).catch(benignErrors => benignErrors);
 
         default:
           throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
@@ -314,7 +314,7 @@ module.exports = class <%- name -%>{
 <%# generic_to_one -%>
   <% associations_temp = associationsArguments["generic_to_one"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
-    
+
     async <%=associations_temp[i].name%>Impl({search}, context){
       /*
       YOUR CODE GOES HERE
@@ -322,7 +322,7 @@ module.exports = class <%- name -%>{
       throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
     }
   <%}-%>
-  
+
 <%# generic_to_many -%>
   <% associations_temp = associationsArguments["generic_to_many"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -358,7 +358,7 @@ module.exports = class <%- name -%>{
   -%>
   <%- include('./includes/create-ddm-models-fields-mutations', {op: "add"}); %>
   <%- include('./includes/create-ddm-models-fields-mutations', {op: "remove"}); %>
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
 
 }
