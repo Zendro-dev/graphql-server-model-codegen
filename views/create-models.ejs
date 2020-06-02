@@ -119,7 +119,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       let arg_sequelize = arg.toSequelize();
       options['where'] = arg_sequelize;
     }
-    return {sum: await super.count(options), errors:[]};
+    return super.count(options);
   }
 
   static readAll(search, order, pagination){

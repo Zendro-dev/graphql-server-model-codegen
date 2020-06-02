@@ -9,7 +9,7 @@ const uuidv4 = require('uuidv4').uuid;
 const globals = require('../config/globals');
 const validatorUtil = require('../utils/validatorUtil');
 const helper = require('../utils/helper');
-const errorHelper = require('../utils/errors')
+const errorHelper = require('../utils/errors');
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
@@ -39,9 +39,9 @@ module.exports = class <%- name -%>{
 
   static async readById( id, benignErrorReporter){
     let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(<%- idAttribute -%>: "${id}"){<%- idAttribute -%> <%for(var key in attributes){-%>
-       <%=key %>
+      <%=key %>
     <%}-%> } }`
-
+    
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
@@ -52,7 +52,7 @@ module.exports = class <%- name -%>{
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
       if (response && response.data && response.data.data) {
-        let item = new <%- name -%>(res.data.data.readOne<%- nameCp -%>);
+        let item = new <%- name -%>(response.data.data.readOne<%- nameCp -%>);
         return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item).then((valSuccess) => {
           return item
         })
@@ -75,21 +75,22 @@ module.exports = class <%- name -%>{
 
     try {
       let response = await axios.post(url, {query:query, variables:{search: search}});
+      if(response&&response.data&&response.data.data) {
+        return response.data.data.count<%- namePlCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${url}`);
+      }
+    } catch(error){
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
     }
-
-    return axios.post(url, {query:query, variables:{search: search}}).then(res=>{
-      return {sum: res.data.data.count<%- namePlCp -%>, errors: []};
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
   }
 
   static async readAll(search, order, pagination, benignErrorReporter){
     let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>(search:$search pagination:$pagination order:$order){<%- idAttribute -%> <%for(var key in attributes){-%>
          <%=key %>
-    <%}-%> } }`
+       <%}-%> } }`
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
@@ -100,8 +101,8 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(res&&res.data&&res.data.data) {
-        let data = res.data.data.<%- namePl -%> ;
+      if(response&&response.data&&response.data.data) {
+        let data = response.data.data.<%- namePl -%> ;
         return data.map(item => {return new <%- name -%>(item) });
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);
@@ -112,7 +113,7 @@ module.exports = class <%- name -%>{
     }
   }
 
-  static async readAllCursor(search, order, pagination, BenignErrorReporter){
+  static async readAllCursor(search, order, pagination, benignErrorReporter){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -121,7 +122,7 @@ module.exports = class <%- name -%>{
 
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
-    <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
+       <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
@@ -134,9 +135,9 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(res&&res.data&&res.data.data) {
-        let data_edges = res.data.data.<%- namePl -%>Connection.edges ;
-        let pageInfo = res.data.data.<%- namePl -%>Connection.pageInfo ;
+      if(response&&response.data&&response.data.data) {
+        let data_edges = response.data.data.<%- namePl -%>Connection.edges ;
+        let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo ;
 
         let edges = data_edges.map( e =>{
           return {
@@ -156,41 +157,49 @@ module.exports = class <%- name -%>{
   }
 
   static async addOne(input, benignErrorReporter){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input).then(async (valSuccess) => {
-      let query = `
-          mutation add<%- nameCp -%>(<%if(!defaultId){-%>
-            $<%=idAttribute-%>:ID! <%}-%> <%for(var key in editableAttributes){-%>
-            $<%=key %>:<%= editableAttributes[key]%><%}-%>){
-            add<%- nameCp -%>(<%if(!defaultId){-%>
-            <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){-%>
-            <%=key %>:$<%= key%><%}-%>){
-              <%- idAttribute -%>
-              <%for(var key in attributes){-%> <%=key -%><%}-%>
-            }
-      }`;
+    let query = `
+            mutation add<%- nameCp _%>(
+    <%if(!defaultId){-%>
+              $<%=idAttribute%>:ID! <%}-%> <%for(var key in editableAttributes){%>
+              $<%=key %>:<%= editableAttributes[key]%><%}-%>
+            ){
+              add<%- nameCp -%>(<%if(!defaultId){-%>
+              <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){%>
+              <%=key %>:$<%= key%><%}-%>){
+                <%- idAttribute -%>
+    <%for(var key in attributes){-%>
+                <%=key %>
+    <%}-%>
+              }
+            }`;
 
-      //use default BenignErrorReporter if no BenignErrorReporter defined
-      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
-      try {
-        // Send an HTTP request to the remote server
-        let response = await axios.post(url, {query:query, variables:input});
-        // STATUS-CODE is 200
-        // NO ERROR as such has been detected by the server (Express)
-        // check if data was send
-        if(res&&res.data&&res.data.data) {
-          return new <%- name -%>(res.data.data.add<%- nameCp -%>);
-        } else {
-          throw new Error(`Invalid response from remote cenz-server: ${url}`);
-        }
-      } catch(error) {
-        //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    try {
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
+      // Send an HTTP request to the remote server
+      let response = await axios.post(url, {query:query, variables:input});
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response&&response.data&&response.data.data) {
+        return new <%- name -%>(response.data.data.add<%- nameCp -%>);
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${url}`);
       }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    }
   }
 
   static async deleteOne(id, benignErrorReporter){
-    let query = `mutation delete<%- nameCp -%>{delete<%- nameCp -%>(<%- idAttribute -%>: "${id}" )}`;
+    let query = `
+              mutation
+                delete<%- nameCp -%>{
+                  delete<%- nameCp -%>(
+                    <%- idAttribute -%>: "${id}" )}`;
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
@@ -201,8 +210,8 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(res&&res.data&&res.data.data) {
-        return res.data.data.delete<%- nameCp -%>;
+      if(response&&response.data&&response.data.data) {
+        return response.data.data.delete<%- nameCp -%>;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);
       }
@@ -212,65 +221,79 @@ module.exports = class <%- name -%>{
     }
   }
 
-  static async updateOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input).then(async (valSuccess) => {
-      let query = `mutation update<%- nameCp-%>($<%- idAttribute -%>:ID! <%for(var key in editableAttributes){-%>
-        $<%=key -%>:<%= editableAttributes[key]-%> <%}-%>){update<%- nameCp-%>(
-          <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
-          <%=key %>:$<%= key%> <%}-%>){<%- idAttribute -%> <%for(var key in attributes){%><%=key %> <%}-%>
-        }
-      }`
+  static async updateOne(input, benignErrorReporter){
+    let query = `
+            mutation
+              update<%- nameCp-%>(
+                $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
+                $<%=key %>:<%= editableAttributes[key]%> <%}-%>
+              ){
+                update<%- nameCp-%>(
+                  <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
+                  <%=key %>:$<%= key%> <%}-%>
+                ){
+                  <%- idAttribute -%> <%for(var key in attributes){%>
+                  <%=key %> <%}%>
+                }
+              }`
 
-      //use default BenignErrorReporter if no BenignErrorReporter defined
-      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
-      try {
-        // Send an HTTP request to the remote server
-        let response = await axios.post(url, {query:query, variables:input});
-        // STATUS-CODE is 200
-        // NO ERROR as such has been detected by the server (Express)
-        // check if data was send
-        if(res&&res.data&&res.data.data) {
-          return new <%- name -%>(res.data.data.update<%- nameCp -%>);
-        } else {
-          throw new Error(`Invalid response from remote cenz-server: ${url}`);
-        }
-      } catch(error) {
-        //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    try {
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+      // Send an HTTP request to the remote server
+      let response = await axios.post(url, {query:query, variables:input});
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response&&response.data&&response.data.data) {
+        return new <%- name -%>(response.data.data.update<%- nameCp -%>);
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${url}`);
       }
-    });
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    }
   }
 
-  static bulkAddCsv(context){
+  static async bulkAddCsv(context, benignErrorReporter){
     let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
 
-    return context.request.files.csv_file.mv(tmpFile).then(() =>{
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
       let query = `mutation {bulkAdd<%- nameCp -%>Csv{<%- idAttribute -%>}}`;
       let formData = new FormData();
       formData.append('csv_file', fs.createReadStream(tmpFile));
       formData.append('query', query);
 
-      return axios.post(url, formData,  {
+      let response = await axios.post(url, formData,  {
         headers: formData.getHeaders()
-      }).then(res =>{
-          return res.data.data.bulkAdd<%- nameCp -%>Csv;
-        });
+      });
+      return response.data.data.bulkAdd<%- nameCp -%>Csv;
 
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    }
   }
 
-  static  csvTableTemplate(){
+  static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
-    return axios.post(url, {query:query}).then(res =>{
-      return res.data.data.csvTableTemplate<%- nameCp-%>;
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      let response = await axios.post(url, {query:query});
+      return response.data.data.csvTableTemplate<%- nameCp-%>;
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    }
   }
 
 <%# generic_to_one -%>

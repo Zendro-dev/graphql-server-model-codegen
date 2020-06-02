@@ -19,8 +19,6 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
-      - /home/vsuaste/Documentos/CONABIO/Projects-ScienceDB/2019/DevCodeTeam/server.js:/usr/src/app/server.js
-      - /home/vsuaste/Documentos/CONABIO/Projects-ScienceDB/2019/DevCodeTeam/errors.js:/usr/src/app/utils/errors.js
       - ./integration_test_run/instance1/adapters:/usr/src/app/adapters
       - ./integration_test_run/instance1/schemas:/usr/src/app/schemas
       - ./integration_test_run/instance1/resolvers:/usr/src/app/resolvers
