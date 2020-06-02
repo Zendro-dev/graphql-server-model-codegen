@@ -69,7 +69,7 @@ module.exports = class <%- name -%>{
     }
   }
 
-  static countRecords(search, authorizedAdapters){
+  static countRecords(search, authorizedAdapters, benignErrorReporter){
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -87,6 +87,9 @@ module.exports = class <%- name -%>{
       authAdapters = Array.from(authorizedAdapters)
     }
 
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
     let promises = authAdapters.map( adapter => {
       /**
        * Differentiated cases:
@@ -102,29 +105,29 @@ module.exports = class <%- name -%>{
         case 'ddm-adapter':
         case 'generic-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.countRecords(nsearch).catch(benignErrors => benignErrors);
+          return adapter.countRecords(nsearch, benignErrorReporter);
 
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.countRecords(search).catch(benignErrors => benignErrors);
+          return adapter.countRecords(search, benignErrorReporter);
 
         case 'default':
           throw new Error(`Adapter type: '${adapter.adapterType}' is not supported`);
       }
     });
 
-    return Promise.all(promises).then( results =>{
-      return results.reduce( (total, current)=> {
-        //check if current is Error
-        if (current instanceof Error) {
-          total.errors.push(current);
-        }
-        //check current result
-        else if(current) {
-          total.sum += current;
-        }
-        return total;
-      }, {sum:0, errors:[]});
+    return Promise.allSettled(promises).then(results => {
+        return results.reduce((total, current) => {
+            //check if current is Error
+            if (current.status === 'rejected') {
+                benignErrorReporter.reportError(current.reason);
+            }
+            //check current result
+            else if (current.status === 'fulfilled') {
+                total += current.value;
+            }
+            return total;
+        }, 0 );
     });
   }
 

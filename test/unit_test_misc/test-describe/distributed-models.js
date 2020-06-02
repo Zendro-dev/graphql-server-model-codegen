@@ -117,7 +117,7 @@ static readById(id) {
 `
 
 module.exports.book_ddm_count = `
-static countRecords(search, authorizedAdapters) {
+static countRecords(search, authorizedAdapters, benignErrorReporter) {
         let authAdapters = [];
         /**
          * Differentiated cases:
@@ -135,6 +135,9 @@ static countRecords(search, authorizedAdapters) {
             authAdapters = Array.from(authorizedAdapters)
         }
 
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
         let promises = authAdapters.map(adapter => {
             /**
              * Differentiated cases:
@@ -150,32 +153,29 @@ static countRecords(search, authorizedAdapters) {
                 case 'ddm-adapter':
                 case 'generic-adapter':
                     let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                    return adapter.countRecords(nsearch).catch(benignErrors => benignErrors);
+                    return adapter.countRecords(nsearch, benignErrorReporter);
 
                 case 'sql-adapter':
                 case 'cenzontle-webservice-adapter':
-                    return adapter.countRecords(search).catch(benignErrors => benignErrors);
+                    return adapter.countRecords(search, benignErrorReporter);
 
                 case 'default':
                     throw new Error(\`Adapter type: '\${adapter.adapterType}' is not supported\`);
             }
         });
 
-        return Promise.all(promises).then(results => {
+        return Promise.allSettled(promises).then(results => {
             return results.reduce((total, current) => {
                 //check if current is Error
-                if (current instanceof Error) {
-                    total.errors.push(current);
+                if (current.status === 'rejected') {
+                    benignErrorReporter.reportError(current.reason);
                 }
                 //check current result
-                else if (current) {
-                    total.sum += current;
+                else if (current.status === 'fulfilled') {
+                    total += current.value;
                 }
                 return total;
-            }, {
-                sum: 0,
-                errors: []
-            });
+            }, 0 );
         });
     }
 `
