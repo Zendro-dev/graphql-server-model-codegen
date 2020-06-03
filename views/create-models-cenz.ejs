@@ -53,9 +53,8 @@ module.exports = class <%- name -%>{
       // check if data was send
       if (response && response.data && response.data.data) {
         let item = new <%- name -%>(response.data.data.readOne<%- nameCp -%>);
-        return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item).then((valSuccess) => {
-          return item
-        })
+        await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+        return item;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);
       }
@@ -75,7 +74,7 @@ module.exports = class <%- name -%>{
 
     try {
       let response = await axios.post(url, {query:query, variables:{search: search}});
-      if(response&&response.data&&response.data.data) {
+      if(response && response.data && response.data.data) {
         return response.data.data.count<%- namePlCp -%>;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);
@@ -101,7 +100,7 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response&&response.data&&response.data.data) {
+      if(response && response.data && response.data.data) {
         let data = response.data.data.<%- namePl -%> ;
         return data.map(item => {return new <%- name -%>(item) });
       } else {
@@ -135,9 +134,9 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response&&response.data&&response.data.data) {
-        let data_edges = response.data.data.<%- namePl -%>Connection.edges ;
-        let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo ;
+      if(response && response.data && response.data.data) {
+        let data_edges = response.data.data.<%- namePl -%>Connection.edges;
+        let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo;
 
         let edges = data_edges.map( e =>{
           return {
@@ -183,7 +182,7 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response&&response.data&&response.data.data) {
+      if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.add<%- nameCp -%>);
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);
@@ -210,7 +209,7 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response&&response.data&&response.data.data) {
+      if(response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);
@@ -247,7 +246,7 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response&&response.data&&response.data.data) {
+      if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.update<%- nameCp -%>);
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${url}`);

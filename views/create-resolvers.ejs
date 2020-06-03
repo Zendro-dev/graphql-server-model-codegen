@@ -571,7 +571,7 @@ module.exports = {
          if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
            await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>Connection");
            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-           return <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
+           return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }
@@ -588,7 +588,7 @@ module.exports = {
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
         checkCountForOneAndReduceRecordsLimit(context);
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-        return <%- nameLc -%>.readById(<%- idAttribute -%>, benignErrorReporter);
+        return await <%- nameLc -%>.readById(<%- idAttribute -%>, benignErrorReporter);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -604,7 +604,7 @@ module.exports = {
   count<%-namePlCp-%>: async function({search}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-        return (await <%- nameLc -%>.countRecords(search, benignErrorReporter));
+        return await <%- nameLc -%>.countRecords(search, benignErrorReporter);
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
