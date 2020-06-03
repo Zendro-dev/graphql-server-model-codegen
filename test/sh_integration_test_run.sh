@@ -399,6 +399,9 @@ genCode() {
   # Add patch for model webservice association
   # patch -V never ${TARGET_DIR_INSTANCE1}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
 
+  # Add patch for sql model accession validation
+  patch -V never ${TARGET_DIR_INSTANCE1}/validations/accession.js ./test/integration_test_misc/accession_validate_instance1.patch
+
   # Msg
   echo -e "@@ Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}: ... ${LGREEN}done${NC}"
   echo -e "${LGRAY}---------------------------- @@${NC}\n"

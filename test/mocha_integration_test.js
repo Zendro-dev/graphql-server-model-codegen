@@ -614,7 +614,6 @@ describe(
           errors:[
               {
                   message:`transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
-                  details:"",
                   locations: [
                             {
                               column: 12,
@@ -682,7 +681,6 @@ describe(
     const errorObject_TranscriptCount = {
         errors:[{
             message:"Max record limit of 25 exceeded in transcript_counts",
-            details:"",
             locations: [
                       {
                         column: 95,
@@ -816,7 +814,6 @@ describe(
       errors:[
         {
           message:'Not unique "to_one" association Error: Found 2 capitals matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
-          details:"",
           locations: ""
         }
       ],
@@ -897,64 +894,61 @@ describe(
   })
 
   it('27. Error output for wrong parameter', function() {
-  //   let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
-  //   let resBody = JSON.parse(res.body.toString('utf8'));
-  //   expect(res.statusCode).to.equal(400);
-  //   expect(resBody).to.deep.equal({
-  //     errors: [
-  //         {
-  //             message: 'Field "hello" is not defined by type paginationCursorInput.',
-  //             locations: [
-  //                 {
-  //                     line: 1,
-  //                     column: 36
-  //                 }
-  //             ],
-  //             details: ""
-  //         }
-  //     ]
-  //   });
-  //   res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{first:1, last:1}) {edges {node {id}}}}');
-  //   resBody = JSON.parse(res.body.toString('utf8'));
-  //   expect(res.statusCode).to.equal(200);
-  //   expect(resBody).to.deep.equal({
-  //     errors: [
-  //         {
-  //             message: 'Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!',
-  //             locations: [
-  //                 {
-  //                     line: 1,
-  //                     column: 2
-  //                 }
-  //             ],
-  //             details: "",
-  //             path: [
-  //                 "individualsConnection"
-  //             ]
-  //         }
-  //     ],
-  //     data: {
-  //         individualsConnection: null
-  //     }
-  // });
-  //
-  // res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"acc1" sampling_date:"today") {accession_id sampling_date}}');
-  // resBody = JSON.parse(res.body.toString('utf8'));
-  // expect(res.statusCode).to.equal(400);
-  // expect(resBody).to.deep.equal({
-  //   errors: [
-  //       {
-  //           message: 'Expected type Date, found "today"; Date cannot represent an invalid date-string today.',
-  //           locations: [
-  //               {
-  //                   line: 1,
-  //                   column: 57
-  //               }
-  //           ],
-  //           details: ""
-  //       }
-  //   ]
-  // });
+    let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(400);
+    expect(resBody).to.deep.equal({
+      errors: [
+          {
+              message: 'Field "hello" is not defined by type paginationCursorInput.',
+              locations: [
+                  {
+                      line: 1,
+                      column: 36
+                  }
+              ]
+          }
+      ]
+    });
+    res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{first:1, last:1}) {edges {node {id}}}}');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+          {
+              message: 'Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!',
+              locations: [
+                  {
+                      line: 1,
+                      column: 2
+                  }
+              ],
+              path: [
+                  "individualsConnection"
+              ]
+          }
+      ],
+      data: {
+          individualsConnection: null
+      }
+  });
+  
+  res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"acc1" sampling_date:"today") {accession_id sampling_date}}');
+  resBody = JSON.parse(res.body.toString('utf8'));
+  expect(res.statusCode).to.equal(400);
+  expect(resBody).to.deep.equal({
+    errors: [
+        {
+            message: 'Expected type Date, found "today"; Date cannot represent an invalid date-string today.',
+            locations: [
+                {
+                    line: 1,
+                    column: 57
+                }
+            ],
+        }
+    ]
+  });
 
   res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "@#$%^&") { name } }');
   resBody = JSON.parse(res.body.toString('utf8'));
@@ -969,7 +963,8 @@ describe(
                     column: 12
                 }
             ],
-            details: [
+            extensions: {
+              "validationErrors": [
                 {
                     keyword: "type",
                     dataPath: ".name",
@@ -995,7 +990,7 @@ describe(
                     params: {},
                     message: "should match some schema in anyOf"
                 }
-            ],
+              ]},
             path: [
                 "addIndividual"
             ]
@@ -1009,881 +1004,881 @@ describe(
 });
 
 
-// describe(
-//     'Web service model',
-//     function() {
-//         after(async function() {
-//             let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
-//             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
-//
-//             for(let i = 0; i < individuals.length; i++){
-//                 res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
-//                 expect(res.statusCode).to.equal(200);
-//             }
-//
-//             let cnt = await itHelpers.count_all_records('countIndividuals');
-//             expect(cnt).to.equal(0);
-//
-//             res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-//             let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
-//
-//             for(let i = 0; i < transcript_counts.length; i++){
-//                 res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
-//                 expect(res.statusCode).to.equal(200);
-//             }
-//
-//             cnt = await itHelpers.count_all_records('countTranscript_counts');
-//             expect(cnt).to.equal(0);
-//         })
-//
-//         // The entry used here is set up by the patching of the model file
-//         it('01. Webservice simulator is up', function() {
-//
-//             let res = itHelpers.request_graph_ql_get('/aminoAcidSequence/63165');
-//             let resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             expect(res.statusCode).to.equal(200);
-//             expect(resBody).to.deep.equal({
-//                 "accession": "P63165",
-//                 "id": 63165,
-//                 "sequence": "MSDQEAKPSTEDLGDKKEGEYIKLKVIGQDSSEIHFKVKMTTHLKKLKESYCQRQGVPMNSLRFLFEGQRIADNHTPKELGMEEEDVIEVYQEQTGGHSTV"
-//             });
-//
-//         });
-//
-//         // The entry used here is set up by the patching of the model file
-//         it('02. Webservice read one', function() {
-//
-//             let res = itHelpers.request_graph_ql_post('{ readOneAminoacidsequence(id : 69905) { id accession sequence} }');
-//             let resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             expect(res.statusCode).to.equal(200);
-//             expect(resBody).to.deep.equal({
-//                 "data": {
-//                     "readOneAminoacidsequence": {
-//                         "accession": "P69905",
-//                         "id": "69905",
-//                         "sequence": "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR"
-//                     }
-//                 }
-//             });
-//         });
-//
-//         // The same aminoacidsequence as in 01 is used here
-//         it('03. Webservice associate new TranscriptCount', function() {
-//             let res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "new_gene", ' +
-//                                                                                      'addAminoacidsequence: 63165) { id aminoacidsequence{id }} }');
-//             let resBody = JSON.parse(res.body.toString('utf8'));
-//             expect(res.statusCode).to.equal(200);
-//
-//             let tcId = resBody.data.addTranscript_count.id;
-//             res = itHelpers.request_graph_ql_post(`{ readOneTranscript_count(id : ${tcId}) ` +
-//                                                    '{ id aminoacidsequence{id accession} } }');
-//             resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             expect(res.statusCode).to.equal(200);
-//             expect(resBody).to.deep.equal({
-//                 "data": {
-//                     "readOneTranscript_count": {
-//                         "aminoacidsequence": {
-//                             "accession": "P63165",
-//                             "id": "63165"
-//                         },
-//                         "id": `${tcId}`
-//                     }
-//                 }
-//             });
-//
-//             res = itHelpers.request_graph_ql_post(`mutation { updateTranscript_count(id: ${tcId}, removeAminoacidsequence: 63165) {id aminoacidsequence{id}}}`);
-//             resBody = JSON.parse(res.body.toString('utf8'));
-//             expect(res.statusCode).to.equal(200);
-//         });
-// });
-//
-//
-//
-//
-// describe( 'Batch Upload', function() {
-//     // For now, only individuals are present in this section
-//     after(async function() {
-//         let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
-//         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
-//
-//         for(let i = 0; i < individuals.length; i++){
-//             res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
-//             expect(res.statusCode).to.equal(200);
-//         }
-//
-//         let cnt = await itHelpers.count_all_records('countIndividuals');
-//         expect(cnt).to.equal(0);
-//
-//         res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-//         let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
-//
-//         for(let i = 0; i < transcript_counts.length; i++){
-//             res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
-//             expect(res.statusCode).to.equal(200);
-//         }
-//
-//         cnt = await itHelpers.count_all_records('countTranscript_counts');
-//         expect(cnt).to.equal(0);
-//     })
-//
-//     it('01. SCV individual batch upload', async function () {
-//
-//         let csvPath = path.join(__dirname, 'integration_test_misc', 'individual_valid.csv');
-//
-//         // count records before upload
-//         let cnt1 = await itHelpers.count_all_records('countIndividuals');
-//
-//         // batch_upload_csv start new background, there is no way to test the actual result
-//         // without explicit delay. The test may fail if delay is too small, just check the
-//         // resulting DB table to be sure that all records from file individual_valid.csv were added.
-//         let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{id}}');
-//         expect(success).equal(true);
-//         await delay(500);
-//
-//         // count records before upload
-//         let cnt2 = await itHelpers.count_all_records('countIndividuals');
-//         expect(cnt2 - cnt1).to.equal(4);
-//     });
-// });
-//
-// describe(
-//     'Generic async validation tests',
-//     function() {
-//         after(async function() {
-//             let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
-//             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
-//
-//             for(let i = 0; i < individuals.length; i++){
-//                 res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
-//                 expect(res.statusCode).to.equal(200);
-//             }
-//
-//             let cnt = await itHelpers.count_all_records('countIndividuals');
-//             expect(cnt).to.equal(0);
-//
-//             res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
-//             let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
-//
-//             for(let i = 0; i < transcript_counts.length; i++){
-//                 res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
-//                 expect(res.statusCode).to.equal(200);
-//             }
-//
-//             cnt = await itHelpers.count_all_records('countTranscript_counts');
-//             expect(cnt).to.equal(0);
-//         })
-//
-//         it('01. Validate on add', function () {
-//
-//             let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "@#$%^&") { name } }');
-//             let resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             // expect(res.statusCode).to.equal(500);
-//             expect(resBody).to.have.property('errors');
-//
-//         });
-//
-//         it('02. Validate on update', function () {
-//
-//             // Add correct record
-//             let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "ToBeUpdated") { id } }');
-//             let resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             expect(res.statusCode).to.equal(200);
-//
-//             // Try to update to incorrect
-//             res = itHelpers.request_graph_ql_post(`mutation { updateIndividual(id: ${resBody.data.addIndividual.id}, name: "#$%^&*") {id name} }`);
-//             resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             // expect(res.statusCode).to.equal(500);
-//             expect(resBody).to.have.property('errors');
-//         });
-//
-//         it('03. Validate on delete', function () {
-//
-//             // Add a record with a special name that can't be deleted
-//             let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Undeletable") { id } }');
-//             let resBody = JSON.parse(res.body.toString('utf8'));
-//             expect(res.statusCode).to.equal(200);
-//             let indiId = resBody.data.addIndividual.id;
-//
-//             // Try to delete an item with a special name that can't be deleted (see individual_validate_joi.patch for details)
-//             res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${indiId}) }`);
-//             resBody = JSON.parse(res.body.toString('utf8'));
-//
-//             // expect(res.statusCode).to.equal(500);
-//             expect(resBody).to.have.property('errors');
-//
-//             res = itHelpers.request_graph_ql_post(`mutation { updateIndividual (id: ${indiId} name:"Another") {id} }`);
-//             resBody = JSON.parse(res.body.toString('utf8'));
-//
-//         });
-//
-//
-//         it('04. Validate CSV individual batch upload', async function () {
-//             let csvPath = path.join(__dirname, 'integration_test_misc', 'individual_invalid.csv');
-//
-//             // count records before upload
-//             let cnt1 = await itHelpers.count_all_records('countIndividuals');
-//
-//             // batch_upload_csv start new background, it returns a response without
-//             // an error independently if there are validation errors during batch add or not.
-//             // These errors will be sent to the user's e-mail.
-//             let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{ id}}');
-//             expect(success).equal(true);
-//             await delay(500);
-//
-//             // count records before upload
-//             let cnt2 = await itHelpers.count_all_records('countIndividuals');
-//             expect(cnt2 - cnt1).to.equal(0);
-//         });
-//
-//         it('05. CSV with explicit Null values', async function () {
-//             let csvPath = path.join(__dirname, 'integration_test_misc', 'transcript_count_nulls.csv');
-//
-//             // count records before upload
-//             let cnt1 = await itHelpers.count_all_records('countTranscript_counts');
-//
-//             // batch_upload_csv start new background, it returns a response without
-//             // an error independently if there are validation errors during batch add or not.
-//             // These errors will be sent to the user's e-mail.
-//             let success = await itHelpers.batch_upload_csv(csvPath, 'mutation { bulkAddTranscript_countCsv {id}}');
-//             expect(success).equal(true);
-//             await delay(500);
-//
-//             // count records before upload
-//             let cnt2 = await itHelpers.count_all_records('countTranscript_counts');
-//             expect(cnt2 - cnt1).to.equal(1);
-//         });
-//
-//     });
-//
-//   describe(
-//         'Date types test',
-//         function() {
-//
-//             after(async function() {
-//                 let res = itHelpers.request_graph_ql_post('{ sequencingExperiments {id} }');
-//                 let sequencingExperiments = JSON.parse(res.body.toString('utf8')).data.sequencingExperiments;
-//
-//                 for(let i = 0; i < sequencingExperiments.length; i++){
-//                     res = itHelpers.request_graph_ql_post(`mutation { deleteSequencingExperiment (id: ${sequencingExperiments[i].id}) }`);
-//                     expect(res.statusCode).to.equal(200);
-//                 }
-//
-//                 let cnt = await itHelpers.count_all_records('countSequencingExperiments');
-//                 expect(cnt).to.equal(0);
-//
-//             })
-//
-//           it('01. Create and retrieve instance with date type', function() {
-//
-//               // Create Plant to subjected to RNA-Seq analysis from which the transcript_counts result
-//               let res = itHelpers.request_graph_ql_post('mutation { addSequencingExperiment(name: "Experiment 1" start_date: "2007-12-03" end_date: "2010-12-03") {id name  start_date} }');
-//               let resBody = JSON.parse(res.body.toString('utf8'));
-//               expect(res.statusCode).to.equal(200);
-//               expect(resBody.data.addSequencingExperiment.start_date).equal("2007-12-03");
-//               let experimentId = resBody.data.addSequencingExperiment.id;
-//
-//               // Create TranscriptCount with above Plant assigned as Individual
-//               res = itHelpers.request_graph_ql_post(`{ readOneSequencingExperiment(id: ${experimentId}){ start_date end_date  } }`);
-//               let tcResBody = JSON.parse(res.body.toString('utf8'));
-//               expect(res.statusCode).to.equal(200);
-//               expect(tcResBody).to.deep.equal({
-//                   data: {
-//                     readOneSequencingExperiment: {
-//                       start_date: "2007-12-03",
-//                       end_date: "2010-12-03"
-//
-//                     }
-//                   }
-//               })
-//           });
-//
-//   });
-//
-//   describe('Distributed Data Models', function() {
-//     // The entries created in this test are used in the following ones as well
-//     it('01. Create a person and 2 dogs', function() {
-//         let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data:{
-//                 addPerson:{
-//                     person_id:"instance1-01",
-//                     name:"Anthony"
-//                 }
-//             }
-//         });
-//
-//         res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-01" name: "Benji") {dog_id name}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//
-//         expect(resBody).to.deep.equal({
-//             data:{
-//                 addDog:{
-//                     dog_id:"instance2-01",
-//                     name:"Benji"
-//                 }
-//             }
-//         });
-//
-//         res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-02" name: "Hector") {dog_id name}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               addDog: {
-//                 dog_id: "instance2-02",
-//                 name: "Hector"
-//               }
-//             }
-//         });
-//
-//         res = itHelpers.request_graph_ql_post('{dogsConnection(pagination:{first:-1}) {edges{node{dog_id}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//           "errors": [
-//               {
-//                   "message": "LIMIT must not be negative",
-//                   "locations": "",
-//                   "details": ""
-//               }
-//           ],
-//           "data": {
-//               "dogsConnection": {
-//                   "edges": []
-//               }
-//           }
-//       });
-//
-//     });
-//
-//     it('02. Update the person to associate with a dog', function() {
-//         let res = itHelpers.request_graph_ql_post('mutation {updatePerson(person_id:"instance1-01" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges {node {dog_id name}}}}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               updatePerson: {
-//                 person_id: "instance1-01",
-//                 name: "Anthony",
-//                 countFilteredDogs: 1,
-//                 dogsConnection: {
-//                   edges: [
-//                     {
-//                       node: {
-//                         dog_id: "instance2-01",
-//                         name: "Benji"
-//                       }
-//                     }
-//                   ]
-//                 }
-//               }
-//             }
-//           });
-//     })
-//
-//     it('03. Update the other dog to associate with the person', function() {
-//         let res = itHelpers.request_graph_ql_post('mutation {updateDog(dog_id:"instance2-02" addPerson:"instance1-01") {dog_id name person{person_id name countFilteredDogs}}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               updateDog: {
-//                 dog_id: "instance2-02",
-//                 name: "Hector",
-//                 person: {
-//                   person_id: "instance1-01",
-//                   name: "Anthony",
-//                   countFilteredDogs: 2
-//                 }
-//               }
-//             }
-//           });
-//     });
-//
-//     it('04. Update the person to remove the second dog', function() {
-//         let res = itHelpers.request_graph_ql_post('mutation{updatePerson(person_id:"instance1-01" removeDogs:"instance2-02") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               updatePerson: {
-//                 person_id: "instance1-01",
-//                 name: "Anthony",
-//                 countFilteredDogs: 1,
-//                 dogsConnection: {
-//                   edges: [
-//                     {
-//                       node: {
-//                         dog_id: "instance2-01",
-//                         name: "Benji"
-//                       }
-//                     }
-//                   ]
-//                 }
-//               }
-//             }
-//           });
-//     });
-//
-//     it('05. Update the first dog to remove the person', function() {
-//         let res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-01") {dog_id name person{person_id name}}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               updateDog: {
-//                 dog_id: "instance2-01",
-//                 name: "Benji",
-//                 person: null
-//               }
-//             }
-//           });
-//     });
-//
-//     // At this point, no associations between people and dogs should exist
-//
-//     it('06. Add another person and read all', function() {
-//         let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-01" name:"Bertha") {person_id name countFilteredDogs}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               addPerson: {
-//                 person_id: "instance2-01",
-//                 name: "Bertha",
-//                 countFilteredDogs: 0
-//               }
-//             }
-//           });
-//         res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id name countFilteredDogs}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               peopleConnection: {
-//                 edges: [
-//                   {
-//                     node: {
-//                       person_id: "instance1-01",
-//                       name: "Anthony",
-//                       countFilteredDogs: 0
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance2-01",
-//                       name: "Bertha",
-//                       countFilteredDogs: 0
-//                     }
-//                   }
-//                 ]
-//               }
-//             }
-//           });
-//     })
-//
-//     it('07. Search, pagination and sort', function() {
-//         // Create a few additional entries so that pagination can be applied better
-//         let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-02" name:"Charlie") {person_id name}}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               addPerson: {
-//                 person_id: "instance1-02",
-//                 name: "Charlie"
-//               }
-//             }
-//           });
-//         res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-02" name:"Dora") {person_id name}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               addPerson: {
-//                 person_id: "instance2-02",
-//                 name: "Dora"
-//               }
-//             }
-//           });
-//         res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-03" name:"Emily" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               addPerson: {
-//                 person_id: "instance1-03",
-//                 name: "Emily",
-//                 countFilteredDogs: 1,
-//                 dogsConnection: {
-//                   edges: [
-//                     {
-//                       node: {
-//                         dog_id: "instance2-01",
-//                         name: "Benji"
-//                       }
-//                     }
-//                   ]
-//                 }
-//               }
-//             }
-//           });
-//         // Make sure that no person intended to be stored on server 1 was stored elsewhere
-//         res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"} excludeAdapterNames:"person_instance1"}) {edges{node{person_id}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               peopleConnection: {
-//                 edges: []
-//               }
-//             }
-//           });
-//         // Get infos about people on server 1
-//         res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               peopleConnection: {
-//                 edges: [
-//                   {
-//                     node: {
-//                       person_id: "instance1-01",
-//                       name: "Anthony",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance1-02",
-//                       name: "Charlie",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance1-03",
-//                       name: "Emily",
-//                       countFilteredDogs: 1,
-//                       dogsConnection: {
-//                         edges: [
-//                           {
-//                             node: {
-//                               dog_id: "instance2-01",
-//                               name: "Benji"
-//                             }
-//                           }
-//                         ]
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             }
-//           });
-//           // The same search, but order by name descending
-//           res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}} order:{field:name order:DESC}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
-//           resBody = JSON.parse(res.body.toString('utf8'));
-//           expect(res.statusCode).to.equal(200);
-//           expect(resBody).to.deep.equal({
-//             data: {
-//               peopleConnection: {
-//                 edges: [
-//                   {
-//                     node: {
-//                       person_id: "instance1-03",
-//                       name: "Emily",
-//                       countFilteredDogs: 1,
-//                       dogsConnection: {
-//                         edges: [
-//                           {
-//                             node: {
-//                               dog_id: "instance2-01",
-//                               name: "Benji"
-//                             }
-//                           }
-//                         ]
-//                       }
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance1-02",
-//                       name: "Charlie",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance1-01",
-//                       name: "Anthony",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             }
-//           });
-//         // Get the first 3 people by name
-//         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{first:3}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               peopleConnection: {
-//                 edges: [
-//                   {
-//                     node: {
-//                       person_id: "instance1-01",
-//                       name: "Anthony",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance2-01",
-//                       name: "Bertha",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance1-02",
-//                       name: "Charlie",
-//                       countFilteredDogs: 0,
-//                       dogsConnection: {
-//                         edges: []
-//                       }
-//                     }
-//                   }
-//                 ]
-//               }
-//             }
-//           });
-//         // 'Free' dog Benji so that the entries can be erased next
-//         res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-03") {dog_id name person_id}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               updateDog: {
-//                 dog_id: "instance2-01",
-//                 name: "Benji",
-//                 person_id: null
-//               }
-//             }
-//           });
-//     });
-//     it('08. Delete people and dogs', function() {
-//         // Delete dog Hector
-//         let res = itHelpers.request_graph_ql_post('mutation{deleteDog(dog_id:"instance2-02")}');
-//         let resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               deleteDog: "Item successfully deleted"
-//             }
-//           });
-//         // Delete dog Benji
-//         res = itHelpers.request_graph_ql_post('mutation{deleteDog(dog_id:"instance2-01")}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               deleteDog: "Item successfully deleted"
-//             }
-//           });
-//         // Make sure that no dog is left
-//         res = itHelpers.request_graph_ql_post('{dogsConnection{edges{node{dog_id}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               dogsConnection: {
-//                 edges: []
-//               }
-//             }
-//           });
-//         // Delete Emily
-//         res = itHelpers.request_graph_ql_post('mutation{deletePerson(person_id:"instance1-03")}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               deletePerson: "Item successfully deleted"
-//             }
-//           });
-//         // Delete Dora
-//         res = itHelpers.request_graph_ql_post('mutation{deletePerson(person_id:"instance2-02")}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               deletePerson: "Item successfully deleted"
-//             }
-//           });
-//         // Make sure that only Anthony, Bertha and Charlie are left
-//         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}){edges{node{person_id name}}}}');
-//         resBody = JSON.parse(res.body.toString('utf8'));
-//         expect(res.statusCode).to.equal(200);
-//         expect(resBody).to.deep.equal({
-//             data: {
-//               peopleConnection: {
-//                 edges: [
-//                   {
-//                     node: {
-//                       person_id: "instance1-01",
-//                       name: "Anthony"
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance2-01",
-//                       name: "Bertha"
-//                     }
-//                   },
-//                   {
-//                     node: {
-//                       person_id: "instance1-02",
-//                       name: "Charlie"
-//                     }
-//                   }
-//                 ]
-//               }
-//             }
-//           });
-//     })
-//     it('09. Delete all remaining people', async function() {
-//         let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
-//         let people = JSON.parse(res.body.toString('utf8')).data.peopleConnection.edges;
-//
-//         for(let i = 0; i < people.length; i++){
-//             res = itHelpers.request_graph_ql_post(`mutation { deletePerson (person_id: "${people[i].node.person_id}") }`);
-//             expect(res.statusCode).to.equal(200);
-//         }
-//
-//         let cnt = await itHelpers.count_all_records('countPeople');
-//         expect(cnt).to.equal(0);
-//     })
-//
-//       //one_to_one associations where foreignKey is in the target model
-//     it('10. one_to_one ddm associations setup', function() {
-//       //setup
-//       itHelpers.request_graph_ql_post('mutation { addPerson(person_id: "instance1-person01") {person_id} }');
-//       let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
-//       let resBody = JSON.parse(res.body.toString('utf8'));
-//       expect(res.statusCode).to.equal(200);
-//       expect(resBody.data.peopleConnection.edges.length).equal(1);
-//
-//       itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot01", addUnique_person:"instance1-person01") {parrot_id} }');
-//       res = itHelpers.request_graph_ql_post('{parrotsConnection{edges{node{parrot_id}}}}');
-//       resBody = JSON.parse(res.body.toString('utf8'));
-//       expect(res.statusCode).to.equal(200);
-//       expect(resBody.data.parrotsConnection.edges.length).equal(1);
-//     });
-//
-//     it('11. one_to_one ddm associations success', function() {
-//       //test success
-//       let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id unique_parrot{parrot_id}}}}}');
-//       resBody = JSON.parse(res.body.toString('utf8'));
-//       expect(res.statusCode).to.equal(200);
-//       expect(resBody).to.deep.equal(
-//         {
-//           "data": {
-//             "peopleConnection": {
-//               "edges": [
-//                 {
-//                   "node": {
-//                     "person_id": "instance1-person01",
-//                     "unique_parrot": {
-//                       "parrot_id": "instance2-parrot01"
-//                     }
-//                   }
-//                 }
-//               ]
-//             }
-//           }
-//         }
-//       )
-//     });
-//
-//     it('12. one_to_one ddm associations error', function() {
-//       //test error
-//       itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot02", addUnique_person:"instance1-person01") {parrot_id} }');
-//       let res = itHelpers.request_graph_ql_post('{peopleConnection {edges {node {person_id unique_parrot {parrot_id}}}}}');
-//       resBody = JSON.parse(res.body.toString('utf8'));
-//       expect(res.statusCode).to.equal(200);
-//       expect(resBody).to.deep.equal(
-//         {
-//           errors:[
-//             {
-//               message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
-//               details:"",
-//               locations: ""
-//             }
-//           ],
-//           data:{
-//             peopleConnection:{
-//               edges:[
-//                 {
-//                   node:{
-//                     person_id:"instance1-person01",
-//                     unique_parrot:{
-//                       parrot_id:"instance2-parrot01"
-//                     }
-//                   }
-//                 }
-//               ]
-//             }
-//           }
-//         }
-//       )
-//     });
-//
-//     it('13. one_to_one ddm associations deletion cleanup', function() {
-//       //cleanup
-//       let res = itHelpers.request_graph_ql_post('mutation { updatePerson(person_id: "instance1-person01", removeUnique_parrot:"instance2-parrot01") {person_id} }');
-//       expect(res.statusCode).to.equal(200);
-//       res = itHelpers.request_graph_ql_post('mutation { updatePerson(person_id: "instance1-person01", removeUnique_parrot:"instance2-parrot02") {person_id} }');
-//       expect(res.statusCode).to.equal(200);
-//       res = itHelpers.request_graph_ql_post('mutation { deletePerson(person_id: "instance1-person01")}');
-//       expect(res.statusCode).to.equal(200);
-//       res = itHelpers.request_graph_ql_post('mutation { deleteParrot(parrot_id: "instance2-parrot01")}');
-//       expect(res.statusCode).to.equal(200);
-//       res = itHelpers.request_graph_ql_post('mutation { deleteParrot(parrot_id: "instance2-parrot02")}');
-//       expect(res.statusCode).to.equal(200);
-//     });
-//   });
-//
+describe(
+    'Web service model',
+    function() {
+        after(async function() {
+            let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+            let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
+
+            for(let i = 0; i < individuals.length; i++){
+                res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
+                expect(res.statusCode).to.equal(200);
+            }
+
+            let cnt = await itHelpers.count_all_records('countIndividuals');
+            expect(cnt).to.equal(0);
+
+            res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+            let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
+
+            for(let i = 0; i < transcript_counts.length; i++){
+                res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
+                expect(res.statusCode).to.equal(200);
+            }
+
+            cnt = await itHelpers.count_all_records('countTranscript_counts');
+            expect(cnt).to.equal(0);
+        })
+
+        // The entry used here is set up by the patching of the model file
+        it('01. Webservice simulator is up', function() {
+
+            let res = itHelpers.request_graph_ql_get('/aminoAcidSequence/63165');
+            let resBody = JSON.parse(res.body.toString('utf8'));
+
+            expect(res.statusCode).to.equal(200);
+            expect(resBody).to.deep.equal({
+                "accession": "P63165",
+                "id": 63165,
+                "sequence": "MSDQEAKPSTEDLGDKKEGEYIKLKVIGQDSSEIHFKVKMTTHLKKLKESYCQRQGVPMNSLRFLFEGQRIADNHTPKELGMEEEDVIEVYQEQTGGHSTV"
+            });
+
+        });
+
+        // The entry used here is set up by the patching of the model file
+        it('02. Webservice read one', function() {
+
+            let res = itHelpers.request_graph_ql_post('{ readOneAminoacidsequence(id : 69905) { id accession sequence} }');
+            let resBody = JSON.parse(res.body.toString('utf8'));
+
+            expect(res.statusCode).to.equal(200);
+            expect(resBody).to.deep.equal({
+                "data": {
+                    "readOneAminoacidsequence": {
+                        "accession": "P69905",
+                        "id": "69905",
+                        "sequence": "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR"
+                    }
+                }
+            });
+        });
+
+        // The same aminoacidsequence as in 01 is used here
+        it('03. Webservice associate new TranscriptCount', function() {
+            let res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "new_gene", ' +
+                                                                                     'addAminoacidsequence: 63165) { id aminoacidsequence{id }} }');
+            let resBody = JSON.parse(res.body.toString('utf8'));
+            expect(res.statusCode).to.equal(200);
+
+            let tcId = resBody.data.addTranscript_count.id;
+            res = itHelpers.request_graph_ql_post(`{ readOneTranscript_count(id : ${tcId}) ` +
+                                                   '{ id aminoacidsequence{id accession} } }');
+            resBody = JSON.parse(res.body.toString('utf8'));
+
+            expect(res.statusCode).to.equal(200);
+            expect(resBody).to.deep.equal({
+                "data": {
+                    "readOneTranscript_count": {
+                        "aminoacidsequence": {
+                            "accession": "P63165",
+                            "id": "63165"
+                        },
+                        "id": `${tcId}`
+                    }
+                }
+            });
+
+            res = itHelpers.request_graph_ql_post(`mutation { updateTranscript_count(id: ${tcId}, removeAminoacidsequence: 63165) {id aminoacidsequence{id}}}`);
+            resBody = JSON.parse(res.body.toString('utf8'));
+            expect(res.statusCode).to.equal(200);
+        });
+});
+
+
+
+
+describe( 'Batch Upload', function() {
+    // For now, only individuals are present in this section
+    after(async function() {
+        let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+        let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
+
+        for(let i = 0; i < individuals.length; i++){
+            res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        let cnt = await itHelpers.count_all_records('countIndividuals');
+        expect(cnt).to.equal(0);
+
+        res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+        let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
+
+        for(let i = 0; i < transcript_counts.length; i++){
+            res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        cnt = await itHelpers.count_all_records('countTranscript_counts');
+        expect(cnt).to.equal(0);
+    })
+
+    it('01. SCV individual batch upload', async function () {
+
+        let csvPath = path.join(__dirname, 'integration_test_misc', 'individual_valid.csv');
+
+        // count records before upload
+        let cnt1 = await itHelpers.count_all_records('countIndividuals');
+
+        // batch_upload_csv start new background, there is no way to test the actual result
+        // without explicit delay. The test may fail if delay is too small, just check the
+        // resulting DB table to be sure that all records from file individual_valid.csv were added.
+        let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{id}}');
+        expect(success).equal(true);
+        await delay(500);
+
+        // count records before upload
+        let cnt2 = await itHelpers.count_all_records('countIndividuals');
+        expect(cnt2 - cnt1).to.equal(4);
+    });
+});
+
+describe(
+    'Generic async validation tests',
+    function() {
+        after(async function() {
+            let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+            let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
+
+            for(let i = 0; i < individuals.length; i++){
+                res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
+                expect(res.statusCode).to.equal(200);
+            }
+
+            let cnt = await itHelpers.count_all_records('countIndividuals');
+            expect(cnt).to.equal(0);
+
+            res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+            let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
+
+            for(let i = 0; i < transcript_counts.length; i++){
+                res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`);
+                expect(res.statusCode).to.equal(200);
+            }
+
+            cnt = await itHelpers.count_all_records('countTranscript_counts');
+            expect(cnt).to.equal(0);
+        })
+
+        it('01. Validate on add', function () {
+
+            let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "@#$%^&") { name } }');
+            let resBody = JSON.parse(res.body.toString('utf8'));
+
+            // expect(res.statusCode).to.equal(500);
+            expect(resBody).to.have.property('errors');
+
+        });
+
+        it('02. Validate on update', function () {
+
+            // Add correct record
+            let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "ToBeUpdated") { id } }');
+            let resBody = JSON.parse(res.body.toString('utf8'));
+
+            expect(res.statusCode).to.equal(200);
+
+            // Try to update to incorrect
+            res = itHelpers.request_graph_ql_post(`mutation { updateIndividual(id: ${resBody.data.addIndividual.id}, name: "#$%^&*") {id name} }`);
+            resBody = JSON.parse(res.body.toString('utf8'));
+
+            // expect(res.statusCode).to.equal(500);
+            expect(resBody).to.have.property('errors');
+        });
+
+        it('03. Validate on delete', function () {
+
+            // Add a record with a special name that can't be deleted
+            let res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Undeletable") { id } }');
+            let resBody = JSON.parse(res.body.toString('utf8'));
+            expect(res.statusCode).to.equal(200);
+            let indiId = resBody.data.addIndividual.id;
+
+            // Try to delete an item with a special name that can't be deleted (see individual_validate_joi.patch for details)
+            res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${indiId}) }`);
+            resBody = JSON.parse(res.body.toString('utf8'));
+
+            // expect(res.statusCode).to.equal(500);
+            expect(resBody).to.have.property('errors');
+
+            res = itHelpers.request_graph_ql_post(`mutation { updateIndividual (id: ${indiId} name:"Another") {id} }`);
+            resBody = JSON.parse(res.body.toString('utf8'));
+
+        });
+
+
+        it('04. Validate CSV individual batch upload', async function () {
+            let csvPath = path.join(__dirname, 'integration_test_misc', 'individual_invalid.csv');
+
+            // count records before upload
+            let cnt1 = await itHelpers.count_all_records('countIndividuals');
+
+            // batch_upload_csv start new background, it returns a response without
+            // an error independently if there are validation errors during batch add or not.
+            // These errors will be sent to the user's e-mail.
+            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{ id}}');
+            expect(success).equal(true);
+            await delay(500);
+
+            // count records before upload
+            let cnt2 = await itHelpers.count_all_records('countIndividuals');
+            expect(cnt2 - cnt1).to.equal(0);
+        });
+
+        it('05. CSV with explicit Null values', async function () {
+            let csvPath = path.join(__dirname, 'integration_test_misc', 'transcript_count_nulls.csv');
+
+            // count records before upload
+            let cnt1 = await itHelpers.count_all_records('countTranscript_counts');
+
+            // batch_upload_csv start new background, it returns a response without
+            // an error independently if there are validation errors during batch add or not.
+            // These errors will be sent to the user's e-mail.
+            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation { bulkAddTranscript_countCsv {id}}');
+            expect(success).equal(true);
+            await delay(500);
+
+            // count records before upload
+            let cnt2 = await itHelpers.count_all_records('countTranscript_counts');
+            expect(cnt2 - cnt1).to.equal(1);
+        });
+
+    });
+
+  describe(
+        'Date types test',
+        function() {
+
+            after(async function() {
+                let res = itHelpers.request_graph_ql_post('{ sequencingExperiments {id} }');
+                let sequencingExperiments = JSON.parse(res.body.toString('utf8')).data.sequencingExperiments;
+
+                for(let i = 0; i < sequencingExperiments.length; i++){
+                    res = itHelpers.request_graph_ql_post(`mutation { deleteSequencingExperiment (id: ${sequencingExperiments[i].id}) }`);
+                    expect(res.statusCode).to.equal(200);
+                }
+
+                let cnt = await itHelpers.count_all_records('countSequencingExperiments');
+                expect(cnt).to.equal(0);
+
+            })
+
+          it('01. Create and retrieve instance with date type', function() {
+
+              // Create Plant to subjected to RNA-Seq analysis from which the transcript_counts result
+              let res = itHelpers.request_graph_ql_post('mutation { addSequencingExperiment(name: "Experiment 1" start_date: "2007-12-03" end_date: "2010-12-03") {id name  start_date} }');
+              let resBody = JSON.parse(res.body.toString('utf8'));
+              expect(res.statusCode).to.equal(200);
+              expect(resBody.data.addSequencingExperiment.start_date).equal("2007-12-03");
+              let experimentId = resBody.data.addSequencingExperiment.id;
+
+              // Create TranscriptCount with above Plant assigned as Individual
+              res = itHelpers.request_graph_ql_post(`{ readOneSequencingExperiment(id: ${experimentId}){ start_date end_date  } }`);
+              let tcResBody = JSON.parse(res.body.toString('utf8'));
+              expect(res.statusCode).to.equal(200);
+              expect(tcResBody).to.deep.equal({
+                  data: {
+                    readOneSequencingExperiment: {
+                      start_date: "2007-12-03",
+                      end_date: "2010-12-03"
+
+                    }
+                  }
+              })
+          });
+
+  });
+
+  describe.skip('Distributed Data Models', function() {
+    // The entries created in this test are used in the following ones as well
+    it('01. Create a person and 2 dogs', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data:{
+                addPerson:{
+                    person_id:"instance1-01",
+                    name:"Anthony"
+                }
+            }
+        });
+
+        res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-01" name: "Benji") {dog_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data:{
+                addDog:{
+                    dog_id:"instance2-01",
+                    name:"Benji"
+                }
+            }
+        });
+
+        res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-02" name: "Hector") {dog_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+
+        expect(resBody).to.deep.equal({
+            data: {
+              addDog: {
+                dog_id: "instance2-02",
+                name: "Hector"
+              }
+            }
+        });
+
+        res = itHelpers.request_graph_ql_post('{dogsConnection(pagination:{first:-1}) {edges{node{dog_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "errors": [
+              {
+                  "message": "LIMIT must not be negative",
+                  "locations": "",
+                  "details": ""
+              }
+          ],
+          "data": {
+              "dogsConnection": {
+                  "edges": []
+              }
+          }
+      });
+
+    });
+
+    it('02. Update the person to associate with a dog', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {updatePerson(person_id:"instance1-01" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges {node {dog_id name}}}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updatePerson: {
+                person_id: "instance1-01",
+                name: "Anthony",
+                countFilteredDogs: 1,
+                dogsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        dog_id: "instance2-01",
+                        name: "Benji"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+    })
+
+    it('03. Update the other dog to associate with the person', function() {
+        let res = itHelpers.request_graph_ql_post('mutation {updateDog(dog_id:"instance2-02" addPerson:"instance1-01") {dog_id name person{person_id name countFilteredDogs}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updateDog: {
+                dog_id: "instance2-02",
+                name: "Hector",
+                person: {
+                  person_id: "instance1-01",
+                  name: "Anthony",
+                  countFilteredDogs: 2
+                }
+              }
+            }
+          });
+    });
+
+    it('04. Update the person to remove the second dog', function() {
+        let res = itHelpers.request_graph_ql_post('mutation{updatePerson(person_id:"instance1-01" removeDogs:"instance2-02") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updatePerson: {
+                person_id: "instance1-01",
+                name: "Anthony",
+                countFilteredDogs: 1,
+                dogsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        dog_id: "instance2-01",
+                        name: "Benji"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+    });
+
+    it('05. Update the first dog to remove the person', function() {
+        let res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-01") {dog_id name person{person_id name}}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updateDog: {
+                dog_id: "instance2-01",
+                name: "Benji",
+                person: null
+              }
+            }
+          });
+    });
+
+    // At this point, no associations between people and dogs should exist
+
+    it('06. Add another person and read all', function() {
+        let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-01" name:"Bertha") {person_id name countFilteredDogs}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance2-01",
+                name: "Bertha",
+                countFilteredDogs: 0
+              }
+            }
+          });
+        res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id name countFilteredDogs}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance2-01",
+                      name: "Bertha",
+                      countFilteredDogs: 0
+                    }
+                  }
+                ]
+              }
+            }
+          });
+    })
+
+    it('07. Search, pagination and sort', function() {
+        // Create a few additional entries so that pagination can be applied better
+        let res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-02" name:"Charlie") {person_id name}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance1-02",
+                name: "Charlie"
+              }
+            }
+          });
+        res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance2-02" name:"Dora") {person_id name}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance2-02",
+                name: "Dora"
+              }
+            }
+          });
+        res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-03" name:"Emily" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              addPerson: {
+                person_id: "instance1-03",
+                name: "Emily",
+                countFilteredDogs: 1,
+                dogsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        dog_id: "instance2-01",
+                        name: "Benji"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+        // Make sure that no person intended to be stored on server 1 was stored elsewhere
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"} excludeAdapterNames:"person_instance1"}) {edges{node{person_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: []
+              }
+            }
+          });
+        // Get infos about people on server 1
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-03",
+                      name: "Emily",
+                      countFilteredDogs: 1,
+                      dogsConnection: {
+                        edges: [
+                          {
+                            node: {
+                              dog_id: "instance2-01",
+                              name: "Benji"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          });
+          // The same search, but order by name descending
+          res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}} order:{field:name order:DESC}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+          resBody = JSON.parse(res.body.toString('utf8'));
+          expect(res.statusCode).to.equal(200);
+          expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-03",
+                      name: "Emily",
+                      countFilteredDogs: 1,
+                      dogsConnection: {
+                        edges: [
+                          {
+                            node: {
+                              dog_id: "instance2-01",
+                              name: "Benji"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          });
+        // Get the first 3 people by name
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{first:3}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance2-01",
+                      name: "Bertha",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie",
+                      countFilteredDogs: 0,
+                      dogsConnection: {
+                        edges: []
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          });
+        // 'Free' dog Benji so that the entries can be erased next
+        res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-03") {dog_id name person_id}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              updateDog: {
+                dog_id: "instance2-01",
+                name: "Benji",
+                person_id: null
+              }
+            }
+          });
+    });
+    it('08. Delete people and dogs', function() {
+        // Delete dog Hector
+        let res = itHelpers.request_graph_ql_post('mutation{deleteDog(dog_id:"instance2-02")}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deleteDog: "Item successfully deleted"
+            }
+          });
+        // Delete dog Benji
+        res = itHelpers.request_graph_ql_post('mutation{deleteDog(dog_id:"instance2-01")}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deleteDog: "Item successfully deleted"
+            }
+          });
+        // Make sure that no dog is left
+        res = itHelpers.request_graph_ql_post('{dogsConnection{edges{node{dog_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              dogsConnection: {
+                edges: []
+              }
+            }
+          });
+        // Delete Emily
+        res = itHelpers.request_graph_ql_post('mutation{deletePerson(person_id:"instance1-03")}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deletePerson: "Item successfully deleted"
+            }
+          });
+        // Delete Dora
+        res = itHelpers.request_graph_ql_post('mutation{deletePerson(person_id:"instance2-02")}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              deletePerson: "Item successfully deleted"
+            }
+          });
+        // Make sure that only Anthony, Bertha and Charlie are left
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}){edges{node{person_id name}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+            data: {
+              peopleConnection: {
+                edges: [
+                  {
+                    node: {
+                      person_id: "instance1-01",
+                      name: "Anthony"
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance2-01",
+                      name: "Bertha"
+                    }
+                  },
+                  {
+                    node: {
+                      person_id: "instance1-02",
+                      name: "Charlie"
+                    }
+                  }
+                ]
+              }
+            }
+          });
+    })
+    it('09. Delete all remaining people', async function() {
+        let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
+        let people = JSON.parse(res.body.toString('utf8')).data.peopleConnection.edges;
+
+        for(let i = 0; i < people.length; i++){
+            res = itHelpers.request_graph_ql_post(`mutation { deletePerson (person_id: "${people[i].node.person_id}") }`);
+            expect(res.statusCode).to.equal(200);
+        }
+
+        let cnt = await itHelpers.count_all_records('countPeople');
+        expect(cnt).to.equal(0);
+    })
+
+      //one_to_one associations where foreignKey is in the target model
+    it('10. one_to_one ddm associations setup', function() {
+      //setup
+      itHelpers.request_graph_ql_post('mutation { addPerson(person_id: "instance1-person01") {person_id} }');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody.data.peopleConnection.edges.length).equal(1);
+
+      itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot01", addUnique_person:"instance1-person01") {parrot_id} }');
+      res = itHelpers.request_graph_ql_post('{parrotsConnection{edges{node{parrot_id}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody.data.parrotsConnection.edges.length).equal(1);
+    });
+
+    it('11. one_to_one ddm associations success', function() {
+      //test success
+      let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id unique_parrot{parrot_id}}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal(
+        {
+          "data": {
+            "peopleConnection": {
+              "edges": [
+                {
+                  "node": {
+                    "person_id": "instance1-person01",
+                    "unique_parrot": {
+                      "parrot_id": "instance2-parrot01"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      )
+    });
+
+    it('12. one_to_one ddm associations error', function() {
+      //test error
+      itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot02", addUnique_person:"instance1-person01") {parrot_id} }');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection {edges {node {person_id unique_parrot {parrot_id}}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal(
+        {
+          errors:[
+            {
+              message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
+              details:"",
+              locations: ""
+            }
+          ],
+          data:{
+            peopleConnection:{
+              edges:[
+                {
+                  node:{
+                    person_id:"instance1-person01",
+                    unique_parrot:{
+                      parrot_id:"instance2-parrot01"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      )
+    });
+
+    it('13. one_to_one ddm associations deletion cleanup', function() {
+      //cleanup
+      let res = itHelpers.request_graph_ql_post('mutation { updatePerson(person_id: "instance1-person01", removeUnique_parrot:"instance2-parrot01") {person_id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { updatePerson(person_id: "instance1-person01", removeUnique_parrot:"instance2-parrot02") {person_id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { deletePerson(person_id: "instance1-person01")}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { deleteParrot(parrot_id: "instance2-parrot01")}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation { deleteParrot(parrot_id: "instance2-parrot02")}');
+      expect(res.statusCode).to.equal(200);
+    });
+  });
+
   describe('Cenzontle Webservice Data Models', function() {
     it('01. Create one accession', function() {
         let res = itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "cenz_1-to-instance1" collectors_name:"me"){ accession_id collectors_name}}');
@@ -2105,7 +2100,35 @@ describe(
         });
     });
 
-    it('11. Remove association(to-one) accession-location', function() {
+    it('11. Create record on remote server with failed Validation', function(){
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"faulty-accesion-instance1" collectors_name:"@#$%^&") {accession_id sampling_date}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(500);
+      expect(resBody).to.deep.equal({
+        "errors":[{
+          "message":"Web-service http://server1:3000/graphql returned attached (see below) error(s).",
+          "locations":[{"line":1,"column":10}],
+          "path":["addAccession"]},
+          {
+            "message":"validation failed",
+            "locations":[{"line":7,"column":15}],
+            "extensions":{
+              "validationErrors":[{
+                "keyword":"pattern",
+                "dataPath":".collectors_name",
+                "schemaPath":"#/properties/collectors_name/pattern",
+                "params":{"pattern":"^[a-zA-Z0-9_]+$"},
+                "message":"should match pattern \"^[a-zA-Z0-9_]+$\""
+              }],
+              "receivedFrom":["http://server1:3000/graphql"
+            ]},
+            "path":["addAccession"]
+          }],
+        "data":null
+      });
+    });
+
+    it('12. Remove association(to-one) accession-location', function() {
       /**
        * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
@@ -2123,7 +2146,7 @@ describe(
         });
     });
 
-    it('12. Update association(to-one) accession-location', function() {
+    it('13. Update association(to-one) accession-location', function() {
       /**
        * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
@@ -2146,7 +2169,7 @@ describe(
     });
 
 
-    it('13.Create with association(to-many) accession-measurement', function() {
+    it('14.Create with association(to-many) accession-measurement', function() {
       /**
        * Create measurements that will be associated to accession
        * */
@@ -2177,7 +2200,7 @@ describe(
         });
     });
 
-    it('14.Remove association(to-many) accession-measurement', function() {
+    it('15.Remove association(to-many) accession-measurement', function() {
       /**
        * This test assumes that association from previous test (13.Create with association(to-many) accession-measurement) still is stored in the DB.
        * */
@@ -2199,7 +2222,7 @@ describe(
         });
     });
 
-    it('15.Update add association(to-many) accession-measurement', function() {
+    it('16.Update add association(to-many) accession-measurement', function() {
       /**
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
@@ -2228,7 +2251,7 @@ describe(
 
     });
 
-    it('16. Read connection association(to-many) accession-measurement', function() {
+    it('17. Read connection association(to-many) accession-measurement', function() {
       /**
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
@@ -2268,7 +2291,7 @@ describe(
     });
 
 
-    it('17. Delete all remaining accessions', async function() {
+    it('18. Delete all remaining accessions', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{accessions{accession_id}}');
         let accessions = JSON.parse(res.body.toString('utf8')).data.accessions;
 
@@ -2282,7 +2305,7 @@ describe(
     });
 
 
-    it('18. Delete all remaining measurements', async function() {
+    it('19. Delete all remaining measurements', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{measurements{measurement_id}}');
         let measurements = JSON.parse(res.body.toString('utf8')).data.measurements;
 
@@ -2295,7 +2318,7 @@ describe(
         expect(cnt).to.equal(0);
     });
 
-    it('19. Delete all remaining locations', async function() {
+    it('20. Delete all remaining locations', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{locations{locationId}}');
         let locations = JSON.parse(res.body.toString('utf8')).data.locations;
 
