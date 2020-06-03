@@ -16,7 +16,8 @@ module.exports.resolvers_webservice_aminoAcid = `
     }, context) {
         if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
             await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
-            return await aminoAcidSequence.readAll(search, order, pagination);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await aminoAcidSequence.readAll(search, order, pagination, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -135,7 +136,8 @@ module.exports.transcriptCount_resolvers_camelcase=`
     }, context) {
         if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
             checkCountForOneAndReduceRecordsLimit(context);
-            return transcriptCount.readById(id);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await transcriptCount.readById(id, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

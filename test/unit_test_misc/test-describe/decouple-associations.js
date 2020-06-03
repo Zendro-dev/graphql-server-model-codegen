@@ -161,10 +161,7 @@ static async countRecords(search) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
-        return {
-            sum: await super.count(options),
-            errors: []
-        };
+        return super.count(options);
     }
 `
 

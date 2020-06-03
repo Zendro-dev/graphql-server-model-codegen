@@ -12,10 +12,7 @@ static async countRecords(search) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
-        return {
-            sum: await super.count(options),
-            errors: []
-        };
+        return super.count(options);
     }
 `
 
@@ -41,7 +38,8 @@ module.exports.count_in_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
-            return (await dog.countRecords(search)).sum;
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await dog.countRecords(search, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -108,7 +106,8 @@ module.exports.read_all_resolver = `
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
             await checkCountAndReduceRecordsLimit(search, context, "dogs");
-            return await dog.readAll(search, order, pagination);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await dog.readAll(search, order, pagination, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -154,7 +153,8 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let createdBook = await book.addOne(inputSanitized);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
             await createdBook.handleAssociations(inputSanitized, context);
             return createdBook;
         } else {
@@ -197,7 +197,8 @@ module.exports.delete_one_resolver = `
     }, context) {
         if (await checkAuthorization(context, 'Book', 'delete') === true) {
             if (await validForDeletion(id, context)) {
-                return book.deleteOne(id);
+                let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+                return book.deleteOne(id, benignErrorReporter);
             }
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -249,7 +250,8 @@ updateBook: async function(input, context) {
         if(!input.skipAssociationsExistenceChecks) {
             await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
         }
-        let updatedBook = await book.updateOne(inputSanitized);
+        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+        let updatedBook = await book.updateOne(inputSanitized, benignErrorReporter);
         await updatedBook.handleAssociations(inputSanitized, context);
         return updatedBook;
     } else {
@@ -320,7 +322,8 @@ module.exports.bulk_add_resolver = `
      */
     bulkAddBookCsv: async function(_, context) {
         if (await checkAuthorization(context, 'Book', 'create') === true) {
-            return book.bulkAddCsv(context);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return book.bulkAddCsv(context, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -342,7 +345,8 @@ module.exports.table_template_resolver = `
      */
     csvTableTemplateIndividual: async function(_, context) {
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            return individual.csvTableTemplate();
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return individual.csvTableTemplate(benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

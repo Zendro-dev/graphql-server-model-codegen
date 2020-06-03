@@ -3,172 +3,202 @@ module.exports.server_url = `
 `
 
 module.exports.read_by_id = `
-static readById(id) {
+static async readById( id, benignErrorReporter){
   let query = \`query readOneBook{ readOneBook(id: "\${id}"){id  title genre publisher_id} }\`
+  
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
-  return axios.post(url,{query:query}).then( res => {
-    //check
-    if(res&&res.data&&res.data.data) {
-      let item = new Book(res.data.data.readOneBook);
-      return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-          .then((valSuccess) => {
-              return item
-          })
+  try {
+    // Send an HTTP request to the remote server
+    let response = await axios.post(url, {query:query});
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if (response && response.data && response.data.data) {
+      let item = new Book(response.data.data.readOneBook);
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+      return item;
     } else {
       throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
     }
-  }).catch( error =>{
-    error['url'] = url;
-    handleError(error);
-  });
+  } catch(error) {
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
+
 `
 
 module.exports.read_all = `
-static readAll(search, order, pagination) {
+static async readAll(search, order, pagination, benignErrorReporter){
   let query = \`query
   books($search: searchBookInput $pagination: paginationInput $order: [orderBookInput] )
  {books(search:$search pagination:$pagination order:$order){id title genre publisher_id } }\`
 
- return axios.post(url,{query:query, variables: {
-   search: search,
-   order: order,
-   pagination: pagination
- }}).then( res => {
-    //check
-    if(res&&res.data&&res.data.data) {
-      let data = res.data.data.books;
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    // Send an HTTP request to the remote server
+    let response = await axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}});
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if(response&&response.data&&response.data.data) {
+      let data = response.data.data.books;
       return data.map(item => {return new Book(item)});
     } else {
       throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
     }
-  }).catch( error =>{
-    error['url'] = url;
-    handleError(error);
-  });
-
+  } catch(error){
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
+
 `
 module.exports.count_records = `
-static countRecords(search) {
-        let query = \`query countBooks($search: searchBookInput){
-      countBooks(search: $search)
-    }\`
+static async countRecords(search, benignErrorReporter){
+  let query = \`query countBooks($search: searchBookInput){
+    countBooks(search: $search)
+  }\`
 
-        return axios.post(url, {
-            query: query,
-            variables: {
-                search: search
-            }
-        }).then(res => {
-            return {
-                sum: res.data.data.countBooks,
-                errors: []
-            };
-        }).catch(error => {
-            error['url'] = url;
-            handleError(error);
-        });
-    }
-`
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
-module.exports.add_one = `
-
-static addOne(input) {
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-      .then(async (valSuccess) => {
-  let query = \`mutation addBook($title:String $genre:String){
-    addBook(title:$title genre:$genre){id  title genre publisher_id   }
-  }\`;
-
-  return axios.post(url, {query: query, variables: input}).then( res =>{
-    //check
-    if (res && res.data && res.data.data) {
-        return new Book(res.data.data.addBook);
+  try {
+    let response = await axios.post(url, {query:query, variables:{search: search}});
+    if(response&&response.data&&response.data.data) {
+      return response.data.data.countBooks;
     } else {
       throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
     }
-  }).catch(error =>{
-    error['url'] = url;
-    handleError(error);
-  });
-});
+  } catch(error){
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
+}
+`
+
+module.exports.add_one = `
+static async addOne(input, benignErrorReporter) {
+  let query = \`mutation addBook($title:String $genre:String){
+    addBook(title:$title genre:$genre){id  title genre publisher_id   }
+  }\`;
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
+    // Send an HTTP request to the remote server
+    let response = await axios.post(url, {query:query, variables:input});
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if(response&&response.data&&response.data.data) {
+      return new Book(response.data.data.addBook);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
+  } catch(error) {
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
 `
 module.exports.delete_by_id = `
-static deleteOne(id) {
+static async deleteOne(id, benignErrorReporter){
   let query = \`mutation deleteBook{ deleteBook(id: "\${id}" )}\`;
 
-  return axios.post(url, {query: query}).then(res => {
-      //check
-      if (res && res.data && res.data.data) {
-          return res.data.data.deleteBook;
-      } else {
-          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
-      }
-  }).catch(error => {
-      error['url'] = url;
-      handleError(error);
-  });
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    // Send an HTTP request to the remote server
+    let response = await axios.post(url, {query: query});
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if(response&&response.data&&response.data.data) {
+      return response.data.data.deleteBook;
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
+  } catch(error) {
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
 
 `
 
 module.exports.update_one = `
+static async updateOne(input, benignErrorReporter){
+  let query = \`mutation updateBook($id:ID! $title:String $genre:String){
+    updateBook(id:$id title:$title genre:$genre){id  title genre publisher_id  }
+  }\`
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
-static updateOne(input) {
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-      .then(async (valSuccess) => {
-      let query = \`mutation updateBook($id:ID! $title:String $genre:String){
-        updateBook(id:$id title:$title genre:$genre){id  title genre publisher_id  }
-      }\`
-
-      return axios.post(url, {query: query, variables: input}).then(res=>{
-        //check
-        if (res && res.data && res.data.data) {
-            return new Book(res.data.data.updateBook);
-        } else {
-          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
-        }
-      }).catch(error =>{
-        error['url'] = url;
-        handleError(error);
-      });
-    });
+  try {
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+    // Send an HTTP request to the remote server
+    let response = await axios.post(url, {query:query, variables:input});
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if(response&&response.data&&response.data.data) {
+      return new Book(response.data.data.updateBook);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+    }
+  } catch(error) {
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
+
 `
 
 module.exports.csv_template = `
-static csvTableTemplate() {
-    let query = \`query {csvTableTemplateBook}\`;
-    return axios.post(url, {query: query}).then(res =>{
-      return res.data.data.csvTableTemplateBook;
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+static async csvTableTemplate(benignErrorReporter){
+  let query = \`query {csvTableTemplateBook}\`;
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    let response = await axios.post(url, {query:query});
+    return response.data.data.csvTableTemplateBook;
+  } catch(error) {
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
 `
 module.exports.bulk_add_csv = `
-static bulkAddCsv(context) {
+static async bulkAddCsv(context, benignErrorReporter){
   let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
 
-  return context.request.files.csv_file.mv(tmpFile).then(() =>{
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
     let query = \`mutation {bulkAddBookCsv{id}}\`;
     let formData = new FormData();
     formData.append('csv_file', fs.createReadStream(tmpFile));
     formData.append('query', query);
 
-    return axios.post(url, formData,  {
+    let response = await axios.post(url, formData,  {
       headers: formData.getHeaders()
-    }).then(res =>{
-        return res.data.data.bulkAddBookCsv;
-      });
+    });
+    return response.data.data.bulkAddBookCsv;
 
-  }).catch(error =>{
-    error['url'] = url;
-    handleError(error);
-  });
+  } catch(error) {
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
 }
 `
 
@@ -228,26 +258,26 @@ const definition = {
 `
 
 module.exports.many_to_many_association_count = `
-static countRecords(search) {
-        let query = \`query countPeople($search: searchPersonInput){
-      countPeople(search: $search)
-    }\`
+static async countRecords(search, benignErrorReporter){
+  let query = \`query countPeople($search: searchPersonInput){
+    countPeople(search: $search)
+  }\`
 
-        return axios.post(url, {
-            query: query,
-            variables: {
-                search: search
-            }
-        }).then(res => {
-            return {
-                sum: res.data.data.countPeople,
-                errors: []
-            };
-        }).catch(error => {
-            error['url'] = url;
-            handleError(error);
-        });
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+
+  try {
+    let response = await axios.post(url, {query:query, variables:{search: search}});
+    if(response&&response.data&&response.data.data) {
+      return response.data.data.countPeople;
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
     }
+  } catch(error){
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+  }
+}
 `
 
 module.exports.add_personId = `

@@ -62,7 +62,8 @@ module.exports.delete_resolver = `
     }, context) {
             if (await checkAuthorization(context, 'Accession', 'delete') === true) {
                 if (await validForDeletion(accession_id, context)) {
-                    return accession.deleteOne(accession_id);
+                    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+                    return accession.deleteOne(accession_id, benignErrorReporter);
                 }
             } else {
                 throw new Error("You don't have authorization to perform this action");

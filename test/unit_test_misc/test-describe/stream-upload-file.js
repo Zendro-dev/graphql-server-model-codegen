@@ -7,7 +7,8 @@ module.exports.dog_resolvers = `
      */
     bulkAddDogCsv: async function(_, context) {
         if (await checkAuthorization(context, 'Dog', 'create') === true) {
-            return dog.bulkAddCsv(context);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return dog.bulkAddCsv(context, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
