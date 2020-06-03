@@ -190,3 +190,24 @@ module.exports.dog_ddm =  {
     },
     "internalId": "internalBookId"
   }
+
+module.exports.dog_ddm_integration_test = {
+    "model" : "dog",
+    "storageType" : "distributed-data-model",
+    "registry": ["dog_instance1", "dog_instance2"],
+    "attributes" : {
+        "name": "String",
+      "dog_id": "String",
+      "person_id": "String"
+    },
+    "associations": {
+      "person": {
+        "type" : "to_one",
+        "target" : "person",
+        "targetKey" : "person_id",
+        "keyIn": "dog",
+        "targetStorageType" : "distributed-data-model"
+      }
+    },
+    "internalId": "dog_id"
+  }

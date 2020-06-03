@@ -155,6 +155,10 @@ module.exports = class <%- name -%>{
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
 
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authAdapters.map(adapter => {
       /**
@@ -170,12 +174,12 @@ module.exports = class <%- name -%>{
       switch(adapter.adapterType) {
         case 'ddm-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter).catch(benignErrors => benignErrors);
+          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
 
         case 'generic-adapter':
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.readAllCursor(search, order, pagination, benignErrorReporter).catch(benignErrors => benignErrors);
+          return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
 
         default:
           throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
@@ -183,27 +187,27 @@ module.exports = class <%- name -%>{
     });
     let someHasNextPage = false;
     let someHasPreviousPage = false;
-    return Promise.all(promises)
+    return Promise.allSettled(promises)
     //phase 1: reduce
     .then( results => {
       return results.reduce( (total, current)=> {
         //check if current is Error
-        if (current instanceof Error) {
-          total.errors.push(current);
+        if (current.status === 'rejected') {
+            benignErrorReporter.reportError(current.reason);
         }
         //check current
-        else if(current && current.pageInfo && current.edges) {
-          someHasNextPage |= current.pageInfo.hasNextPage;
-          someHasPreviousPage |= current.pageInfo.hasPreviousPage;
-          total.nodes =  total.nodes.concat(current.edges.map(e => e.node));
+        else if (current.status === 'fulfilled') {
+          if (current.value && current.value.pageInfo && current.value.edges) {
+              someHasNextPage |= current.value.pageInfo.hasNextPage;
+              someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+              total = total.concat(current.value.edges.map(e => e.node));
+          }
         }
         return total;
-      }, {nodes: [], errors: []});
+      }, []);
     })
     //phase 2: order & paginate
-    .then( nodesAndErrors => {
-      let nodes = nodesAndErrors.nodes;
-      let errors = nodesAndErrors.errors;
+    .then( nodes => {
 
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
@@ -221,7 +225,6 @@ module.exports = class <%- name -%>{
       let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
 
       let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
-      graphQLConnection['errors'] = errors;
       return graphQLConnection;
     });
   }

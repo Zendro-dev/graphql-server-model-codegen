@@ -2391,11 +2391,19 @@ describe('Generic Adapter', function(){
 describe('Handle Errors in DDM', function(){
   let data_test = require('./unit_test_misc/test-describe/handle-error-ddm');
 
-  it('Handle benign errors ddm model- dog', async function(){
-    let opts = funks.getOptions(models_distributed.book_ddm);
+  it('Count - handle benign errors ddm model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_model =await funks.generateJs('create-distributed-model', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.count_dogs_model_ddm.replace(/\s/g, '');
+    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+  });
+
+  it('readAllCursor - handle benign errors ddm model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_model =await funks.generateJs('create-distributed-model', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.readAllCursor_dogs_model_ddm.replace(/\s/g, '');
     expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
   });
 });
