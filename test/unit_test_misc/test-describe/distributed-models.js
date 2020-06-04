@@ -1,5 +1,5 @@
 module.exports.book_adapter_readById = `
-static readById(iri) {
+static async readById(iri, benignErrorReporter) {
         let query = \`
           query
             readOneBook
@@ -13,50 +13,55 @@ static readById(iri) {
               }
             }\`;
 
-        return axios.post(remoteCenzontleURL, {
-            query: query
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-              return res.data.data.readOneBook;
-            } else {
+            try {
+              // Send an HTTP request to the remote server
+              let response = await axios.post(remoteCenzontleURL,, {query:query});
+              // STATUS-CODE is 200
+              // NO ERROR as such has been detected by the server (Express)
+              // check if data was send
+              if (response && response.data && response.data.data) {
+                return response.data.data.readOneBook;
+              } else {
                 throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+              }
+            } catch(error) {
+              //handle caught errors
+              errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
             }
-        }).catch(error => {
-            error['url'] = remoteCenzontleURL;
-            handleError(error);
-        });
     }
 `
 
 module.exports.book_adapter_count = `
-static countRecords(search) {
+static async countRecords(search, benignErrorReporter) {
         let query = \`
       query countBooks($search: searchBookInput){
         countBooks(search: $search)
       }\`
 
-        return axios.post(remoteCenzontleURL, {
-            query: query,
-            variables: {
-                search: search
-            }
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-                return res.data.data.countBooks;
-            } else {
-                throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
-            }
-        }).catch(error => {
-            error['url'] = remoteCenzontleURL;
-            handleError(error);
-        });
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: {search: search}});
+
+        //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+        errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if (response && response.data && response.data.data) {
+          return response.data.data.countBooks;
+        } else {
+          throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+      } catch(error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      }
     }
 `
 
 module.exports.book_adapter_read_all = `
-static readAllCursor(search, order, pagination) {
+static async readAllCursor(search, order, pagination, benignErrorReporter) {
         //check valid pagination arguments
         let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
         if (!argsValid) {
@@ -68,24 +73,23 @@ static readAllCursor(search, order, pagination) {
          publisher_id
         } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
-        return axios.post(remoteCenzontleURL, {
-            query: query,
-            variables: {
-                search: search,
-                order: order,
-                pagination: pagination
-            }
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-                return res.data.data.booksConnection;
-            } else {
-                throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
-            }
-        }).catch(error => {
-            error['url'] = remoteCenzontleURL;
-            handleError(error);
-        });
+        try {
+          // Send an HTTP request to the remote server
+          let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+          //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+          errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+          // STATUS-CODE is 200
+          // NO ERROR as such has been detected by the server (Express)
+          // check if data was send
+          if(response && response.data && response.data.data) {
+            return response.data.data.booksConnection;
+          } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+          }
+        } catch(error) {
+          //handle caught errors
+          errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+        }
     }
 `
 
@@ -94,7 +98,7 @@ module.exports.book_ddm_registry = `
 `
 
 module.exports.book_ddm_readById = `
-static readById(id) {
+static readById(id, benignErrorReporter) {
   if(id!==null){
   let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -103,8 +107,9 @@ static readById(id) {
   }else if(responsibleAdapter.length === 0){
     throw new Error("IRI has no match WS");
   }
-
-  return adapters[responsibleAdapter[0] ].readById(id).then(result => {
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+  return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
     let item  = new Book(result);
     return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
         .then((valSuccess) => {
@@ -117,7 +122,7 @@ static readById(id) {
 `
 
 module.exports.book_ddm_count = `
-static countRecords(search, authorizedAdapters) {
+static countRecords(search, authorizedAdapters, benignErrorReporter) {
         let authAdapters = [];
         /**
          * Differentiated cases:
@@ -134,6 +139,9 @@ static countRecords(search, authorizedAdapters) {
         } else {
             authAdapters = Array.from(authorizedAdapters)
         }
+
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
         let promises = authAdapters.map(adapter => {
             /**
@@ -150,38 +158,35 @@ static countRecords(search, authorizedAdapters) {
                 case 'ddm-adapter':
                 case 'generic-adapter':
                     let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                    return adapter.countRecords(nsearch).catch(benignErrors => benignErrors);
+                    return adapter.countRecords(nsearch, benignErrorReporter);
 
                 case 'sql-adapter':
                 case 'cenzontle-webservice-adapter':
-                    return adapter.countRecords(search).catch(benignErrors => benignErrors);
+                    return adapter.countRecords(search, benignErrorReporter);
 
                 case 'default':
                     throw new Error(\`Adapter type: '\${adapter.adapterType}' is not supported\`);
             }
         });
 
-        return Promise.all(promises).then(results => {
+        return Promise.allSettled(promises).then(results => {
             return results.reduce((total, current) => {
                 //check if current is Error
-                if (current instanceof Error) {
-                    total.errors.push(current);
+                if (current.status === 'rejected') {
+                    benignErrorReporter.reportError(current.reason);
                 }
                 //check current result
-                else if (current) {
-                    total.sum += current;
+                else if (current.status === 'fulfilled') {
+                    total += current.value;
                 }
                 return total;
-            }, {
-                sum: 0,
-                errors: []
-            });
+            }, 0 );
         });
     }
 `
 
 module.exports.book_ddm_read_all = `
-static readAllCursor(search, order, pagination, authorizedAdapters) {
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
         let authAdapters = [];
         /**
          * Differentiated cases:
@@ -204,6 +209,11 @@ static readAllCursor(search, order, pagination, authorizedAdapters) {
         if (!argsValid) {
             throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
         }
+
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+
 
         let isForwardPagination = !pagination || !(pagination.last != undefined);
         let promises = authAdapters.map(adapter => {
@@ -220,12 +230,12 @@ static readAllCursor(search, order, pagination, authorizedAdapters) {
             switch (adapter.adapterType) {
                 case 'ddm-adapter':
                     let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                    return adapter.readAllCursor(nsearch, order, pagination).catch(benignErrors => benignErrors);
+                    return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
 
                 case 'generic-adapter':
                 case 'sql-adapter':
                 case 'cenzontle-webservice-adapter':
-                    return adapter.readAllCursor(search, order, pagination).catch(benignErrors => benignErrors);
+                    return adapter.readAllCursor(search, order, pagination,benignErrorReporter );
 
                 default:
                     throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
@@ -233,59 +243,55 @@ static readAllCursor(search, order, pagination, authorizedAdapters) {
         });
         let someHasNextPage = false;
         let someHasPreviousPage = false;
-        return Promise.all(promises)
-            //phase 1: reduce
-            .then(results => {
-                return results.reduce((total, current) => {
-                    //check if current is Error
-                    if (current instanceof Error) {
-                        total.errors.push(current);
-                    }
-                    //check current
-                    else if (current && current.pageInfo && current.edges) {
-                        someHasNextPage |= current.pageInfo.hasNextPage;
-                        someHasPreviousPage |= current.pageInfo.hasPreviousPage;
-                        total.nodes = total.nodes.concat(current.edges.map(e => e.node));
-                    }
-                    return total;
-                }, {
-                    nodes: [],
-                    errors: []
-                });
-            })
-            //phase 2: order & paginate
-            .then(nodesAndErrors => {
-                let nodes = nodesAndErrors.nodes;
-                let errors = nodesAndErrors.errors;
-
-                if (order === undefined) {
-                    order = [{
-                        field: "id",
-                        order: 'ASC'
-                    }];
+        return Promise.allSettled(promises)
+        //phase 1: reduce
+        .then( results => {
+            return results.reduce( (total, current)=> {
+              //check if current is Error
+              if (current.status === 'rejected') {
+                  benignErrorReporter.reportError(current.reason);
+              }
+              //check current
+              else if (current.status === 'fulfilled') {
+                if (current.value && current.value.pageInfo && current.value.edges) {
+                    someHasNextPage |= current.value.pageInfo.hasNextPage;
+                    someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+                    total = total.concat(current.value.edges.map(e => e.node));
                 }
-                if (pagination === undefined) {
-                    pagination = {
-                        first: Math.min(globals.LIMIT_RECORDS, nodes.length)
-                    }
-                }
+              }
+              return total;
+            }, []);
+          })
+          //phase 2: order & paginate
+          .then(nodes => {
 
-                let ordered_records = helper.orderRecords(nodes, order);
-                let paginated_records = [];
+              if (order === undefined) {
+                  order = [{
+                      field: "id",
+                      order: 'ASC'
+                  }];
+              }
+              if (pagination === undefined) {
+                  pagination = {
+                      first: Math.min(globals.LIMIT_RECORDS, nodes.length)
+                  }
+              }
 
-                if (isForwardPagination) {
-                    paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
-                } else {
-                    paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
-                }
+              let ordered_records = helper.orderRecords(nodes, order);
+              let paginated_records = [];
 
-                let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-                let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
+              if (isForwardPagination) {
+                  paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
+              } else {
+                  paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
+              }
 
-                let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
-                graphQLConnection['errors'] = errors;
-                return graphQLConnection;
-            });
+              let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+              let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
+
+              let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
+              return graphQLConnection;
+          });
     }
 `
 
@@ -440,7 +446,7 @@ module.exports.person_ddm_resolver_one_to_one = `
  */
 person.prototype.parrot = async function({
     search
-}, context) {                                   
+}, context) {
         //build new search filter
         let nsearch = helper.addSearchField({
             "search": search,

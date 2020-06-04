@@ -12,6 +12,7 @@ const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 const globals = require('../config/globals');
+const errorHelper = require('../utils/errors');
 
 <% associations_temp = associationsArguments["to_one"].concat(associationsArguments["to_many"]).concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_one"]).concat(associationsArguments["generic_to_many"])-%>
 const associationArgsDef = {
@@ -56,9 +57,9 @@ const associationArgsDef = {
     <%}else{-%>
         //build new search filter
         let nsearch = helper.addSearchField({
-          "search": search, 
-          "field": "<%=associations_one[i].targetKey%>", 
-          "value": {"value": this.getIdValue()}, 
+          "search": search,
+          "field": "<%=associations_one[i].targetKey%>",
+          "value": {"value": this.getIdValue()},
           "operator": "eq"
         });
 
@@ -128,16 +129,16 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 3.d
  * Query resolvers for associations fields for:
- * 
+ *
  * < generic_to_one >
- * 
+ *
  * Methods:
  * model.prototype.assoc()
- * 
+ *
  */
 -%>
 <%let associations_generic_one = associationsArguments["generic_to_one"]-%>
@@ -164,24 +165,24 @@ const associationArgsDef = {
   }
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 3.e
  * Query resolvers for associations fields for:
- * 
+ *
  * < generic_to_many >
- * 
+ *
  * Methods:
  * model.prototype.assocFilter()
  * model.prototype.assocConnection()
  * model.prototype.countFilteredAssoc()
- * 
+ *
  */
 -%>
 <% associations_generic_many = associationsArguments["generic_to_many"]-%>
 <% for(let i=0; i < associations_generic_many.length; i++){ -%>
   /**
-   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter - Check user authorization and return certain 
+   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter - Check user authorization and return certain
    * number, specified in pagination argument, of records associated with the current instance, this records should also
    * holds the condition of search argument, all of them sorted as specified by the order argument.
    *
@@ -206,7 +207,7 @@ const associationArgsDef = {
   }
 
   /**
-   * <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> - Count number of associated records that 
+   * <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> - Count number of associated records that
    * holds the conditions specified in the search argument.
    *
    * @param  {object} {search}  Search argument for filtering associated records.
@@ -228,8 +229,8 @@ const associationArgsDef = {
   }
 
   /**
-   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection - Check user authorization and return 
-   * certain number, specified in pagination argument, of records associated with the current instance, this records 
+   * <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection - Check user authorization and return
+   * certain number, specified in pagination argument, of records associated with the current instance, this records
    * should also holds the condition of search argument, all of them sorted as specified by the order argument.
    *
    * @param  {object} search      Search argument for filtering associated records.
@@ -269,14 +270,14 @@ const associationArgsDef = {
 <%- include('./includes/handleAssociations'); -%>
 <%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%>
 <%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); -%>
-<%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "add"}); -%> 
+<%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "add"}); -%>
 <%- include('./includes/create-resolvers-fieldMutations-generic-associations', {op: "remove"}); -%>
 
-<%# 
+<%#
 /**
  * Section 5
  * Local helper fuctions.
- * 
+ *
  * Functions:
  * errorMessageForRecordsLimit()
  * checkCountAndReduceRecordsLimit()
@@ -378,6 +379,9 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- namePl -%>Connection: async function({search, order, pagination}, context){
+
+    //construct benignErrors reporter with context
+    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
     //check: adapters
     let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
     if(registeredAdapters.length === 0) {
@@ -393,17 +397,11 @@ module.exports = {
       //check: auth adapters
       let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
       if (authorizationCheck.authorizedAdapters.length > 0) {
-        let connectionObj = await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters);
         //check adapter authorization Errors
         if (authorizationCheck.authorizationErrors.length > 0) {
           context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
         }
-        //check Errors returned by the model layer (time-outs, unreachable, etc...)
-        if ( connectionObj.errors !== undefined && Array.isArray(connectionObj.errors) && connectionObj.errors.length > 0 ) {
-          context.benignErrors = context.benignErrors.concat(connectionObj.errors)
-          delete connectionObj['errors']
-        }
-        return connectionObj;
+        return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
       } else { //adapters not auth || errors
           // else new Error
           if (authorizationCheck.authorizationErrors.length > 0) {
@@ -426,7 +424,10 @@ module.exports = {
     //check: adapters auth
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
       if (authorizationCheck === true) {
-        return <%- nameLc _%>.readById(<%- idAttribute _%>);
+        //construct benignErrors reporter with context
+        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+        return <%- nameLc _%>.readById(<%- idAttribute _%>, benignErrorReporter);
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
@@ -454,7 +455,10 @@ module.exports = {
          if(!input.skipAssociationsExistenceChecks) {
            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
          }
-          let createdRecord = await <%- nameLc _%>.addOne(inputSanitized);
+         //construct benignErrors reporter with context
+         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+          let createdRecord = await <%- nameLc _%>.addOne(inputSanitized, benignErrorReporter);
           await createdRecord.handleAssociations(inputSanitized, context);
           return createdRecord;
       } else {//adapter not auth
@@ -471,7 +475,9 @@ module.exports = {
    */
   bulkAdd<%- nameCp -%>Csv: async function(_, context) {
       if (await checkAuthorization(context, '<%- name -%>', 'create') === true) {
-        return <%- nameLc -%>.bulkAddCsv(context);
+        //construct benignErrors reporter with context
+        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+        return <%- nameLc -%>.bulkAddCsv(context, benignErrorReporter);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -489,7 +495,9 @@ module.exports = {
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'delete');
       if (authorizationCheck === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
-          return <%- nameLc _%>.deleteOne(<%- idAttribute _%>);
+          //construct benignErrors reporter with context
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+          return <%- nameLc _%>.deleteOne(<%- idAttribute _%>, benignErrorReporter);
         }
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
@@ -518,7 +526,9 @@ module.exports = {
          if(!input.skipAssociationsExistenceChecks) {
            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
          }
-         let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized);
+         //construct benignErrors reporter with context
+         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+         let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized, benignErrorReporter);
          await updatedRecord.handleAssociations(inputSanitized, context);
          return updatedRecord;
       } else {//adapter not auth
@@ -535,6 +545,9 @@ module.exports = {
    */
 
   count<%-namePlCp-%>: async function({search}, context){
+    //construct benignErrors reporter with context
+    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
     //check: adapters
     let registeredAdapters = Object.values(<%- nameLc _%>.registeredAdapters);
     if(registeredAdapters.length === 0) {
@@ -550,18 +563,12 @@ module.exports = {
       //check: auth adapters
       let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
       if (authorizationCheck.authorizedAdapters.length > 0) {
-
-        let countObj = await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters);
         //check adapter authorization Errors
         if (authorizationCheck.authorizationErrors.length > 0) {
           context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
         }
-        //check Errors returned by the model layer (time-outs, unreachable, etc...)
-        if ( countObj.errors !== undefined && Array.isArray(countObj.errors) && countObj.errors.length > 0 ) {
-          context.benignErrors = context.benignErrors.concat(countObj.errors)
-          delete countObj['errors']
-        }
-        return countObj.sum;
+
+        return await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter);
       } else { //adapters not auth || errors
           // else new Error
           if (authorizationCheck.authorizationErrors.length > 0) {
@@ -581,7 +588,9 @@ module.exports = {
    */
   csvTableTemplate<%- nameCp-%>: async function(_, context){
         if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-            return <%- nameLc -%>.csvTableTemplate();
+          //construct benignErrors reporter with context
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return <%- nameLc -%>.csvTableTemplate(benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

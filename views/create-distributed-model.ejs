@@ -5,6 +5,8 @@ const globals = require('../config/globals');
 const helper = require('../utils/helper');
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 const validatorUtil = require('../utils/validatorUtil');
+const errorHelper = require('../utils/errors');
+
 
 const definition = <%- definition -%>;
 
@@ -49,7 +51,7 @@ module.exports = class <%- name -%>{
     return responsibleAdapter[0];
   }
 
-  static readById(id) {
+  static readById(id, benignErrorReporter) {
     if(id!==null){
       let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -59,7 +61,9 @@ module.exports = class <%- name -%>{
         throw new Error("IRI has no match WS");
       }
 
-      return adapters[responsibleAdapter[0]].readById(id).then(result => {
+      //use default BenignErrorReporter if no BenignErrorReporter defined
+      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+      return adapters[responsibleAdapter[0]].readById(id, benignErrorReporter).then(result => {
         let item = new <%- name -%>(result);
         return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
             .then((valSuccess) => {
@@ -69,7 +73,7 @@ module.exports = class <%- name -%>{
     }
   }
 
-  static countRecords(search, authorizedAdapters){
+  static countRecords(search, authorizedAdapters, benignErrorReporter){
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -87,6 +91,9 @@ module.exports = class <%- name -%>{
       authAdapters = Array.from(authorizedAdapters)
     }
 
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
     let promises = authAdapters.map( adapter => {
       /**
        * Differentiated cases:
@@ -102,33 +109,33 @@ module.exports = class <%- name -%>{
         case 'ddm-adapter':
         case 'generic-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.countRecords(nsearch).catch(benignErrors => benignErrors);
+          return adapter.countRecords(nsearch, benignErrorReporter);
 
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.countRecords(search).catch(benignErrors => benignErrors);
+          return adapter.countRecords(search, benignErrorReporter);
 
         case 'default':
           throw new Error(`Adapter type: '${adapter.adapterType}' is not supported`);
       }
     });
 
-    return Promise.all(promises).then( results =>{
-      return results.reduce( (total, current)=> {
-        //check if current is Error
-        if (current instanceof Error) {
-          total.errors.push(current);
-        }
-        //check current result
-        else if(current) {
-          total.sum += current;
-        }
-        return total;
-      }, {sum:0, errors:[]});
+    return Promise.allSettled(promises).then(results => {
+        return results.reduce((total, current) => {
+            //check if current is Error
+            if (current.status === 'rejected') {
+                benignErrorReporter.reportError(current.reason);
+            }
+            //check current result
+            else if (current.status === 'fulfilled') {
+                total += current.value;
+            }
+            return total;
+        }, 0 );
     });
   }
 
-  static readAllCursor(search, order, pagination, authorizedAdapters) {
+  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -152,6 +159,10 @@ module.exports = class <%- name -%>{
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
 
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authAdapters.map(adapter => {
       /**
@@ -167,12 +178,12 @@ module.exports = class <%- name -%>{
       switch(adapter.adapterType) {
         case 'ddm-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.readAllCursor(nsearch, order, pagination).catch(benignErrors => benignErrors);
+          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
 
         case 'generic-adapter':
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-          return adapter.readAllCursor(search, order, pagination).catch(benignErrors => benignErrors);
+          return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
 
         default:
           throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
@@ -180,27 +191,27 @@ module.exports = class <%- name -%>{
     });
     let someHasNextPage = false;
     let someHasPreviousPage = false;
-    return Promise.all(promises)
+    return Promise.allSettled(promises)
     //phase 1: reduce
     .then( results => {
       return results.reduce( (total, current)=> {
         //check if current is Error
-        if (current instanceof Error) {
-          total.errors.push(current);
+        if (current.status === 'rejected') {
+            benignErrorReporter.reportError(current.reason);
         }
         //check current
-        else if(current && current.pageInfo && current.edges) {
-          someHasNextPage |= current.pageInfo.hasNextPage;
-          someHasPreviousPage |= current.pageInfo.hasPreviousPage;
-          total.nodes =  total.nodes.concat(current.edges.map(e => e.node));
+        else if (current.status === 'fulfilled') {
+          if (current.value && current.value.pageInfo && current.value.edges) {
+              someHasNextPage |= current.value.pageInfo.hasNextPage;
+              someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+              total = total.concat(current.value.edges.map(e => e.node));
+          }
         }
         return total;
-      }, {nodes: [], errors: []});
+      }, []);
     })
     //phase 2: order & paginate
-    .then( nodesAndErrors => {
-      let nodes = nodesAndErrors.nodes;
-      let errors = nodesAndErrors.errors;
+    .then( nodes => {
 
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
@@ -218,7 +229,6 @@ module.exports = class <%- name -%>{
       let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
 
       let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
-      graphQLConnection['errors'] = errors;
       return graphQLConnection;
     });
   }
@@ -280,26 +290,32 @@ module.exports = class <%- name -%>{
     return true;
   }
 
-  static addOne(input) {
+  static addOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
         let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-        return adapters[responsibleAdapter].addOne(input).then(result => new <%- name -%>(result));
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+        return adapters[responsibleAdapter].addOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
       });
   }
 
-  static deleteOne(id) {
+  static deleteOne(id, benignErrorReporter) {
     let responsibleAdapter = this.adapterForIri(id);
-    return adapters[responsibleAdapter].deleteOne(id);
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter);
   }
 
-  static updateOne(input) {
+  static updateOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
         .then(async (valSuccess) => {
         let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-        return adapters[responsibleAdapter].updateOne(input).then(result => new <%- name -%>(result));
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+        return adapters[responsibleAdapter].updateOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
     });
   }
 
@@ -314,7 +330,7 @@ module.exports = class <%- name -%>{
 <%# generic_to_one -%>
   <% associations_temp = associationsArguments["generic_to_one"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
-    
+
     async <%=associations_temp[i].name%>Impl({search}, context){
       /*
       YOUR CODE GOES HERE
@@ -322,7 +338,7 @@ module.exports = class <%- name -%>{
       throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
     }
   <%}-%>
-  
+
 <%# generic_to_many -%>
   <% associations_temp = associationsArguments["generic_to_many"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -358,7 +374,7 @@ module.exports = class <%- name -%>{
   -%>
   <%- include('./includes/create-ddm-models-fields-mutations', {op: "add"}); %>
   <%- include('./includes/create-ddm-models-fields-mutations', {op: "remove"}); %>
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
 
 }

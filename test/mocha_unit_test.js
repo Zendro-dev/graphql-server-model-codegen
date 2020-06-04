@@ -1939,7 +1939,7 @@ describe('Refactor associations in distributed data case - add - remove', functi
 
 });
 
-/** 
+/**
  * Generic Models - GraphQL Schema Layer
  */
 describe('Generic Models - GraphQL Schema Layer', function(){
@@ -2011,7 +2011,7 @@ describe('Generic Models - GraphQL Schema Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Models - Resolvers Layer
  */
 describe('Generic Models - Resolvers Layer', function(){
@@ -2084,7 +2084,7 @@ describe('Generic Models - Resolvers Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Models - Model Layer
  */
 describe('Generic Models - Model Layer', function(){
@@ -2168,7 +2168,7 @@ describe('Generic Models - Model Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Associations - GraphQL Schema Layer
  */
 describe('Generic Associations - GraphQL Schema Layer', function(){
@@ -2223,7 +2223,7 @@ describe('Generic Associations - GraphQL Schema Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Associations - Resolvers Layer
  */
 describe('Generic Associations - Resolvers Layer', function(){
@@ -2306,7 +2306,7 @@ describe('Generic Associations - Resolvers Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Associations - Model Layer
  */
 describe('Generic Associations - Model Layer', function(){
@@ -2323,7 +2323,7 @@ describe('Generic Associations - Model Layer', function(){
       .to.match(data_test.test18_4).and
       .to.match(data_test.test18_5);
   });
-  
+
   it('19. generic <generic_to_one> - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
     let generated_schema =await funks.generateJs('create-models-generic', opts);
@@ -2345,7 +2345,7 @@ describe('Generic Associations - Model Layer', function(){
       .to.match(data_test.test18_4).and
       .to.match(data_test.test18_5);
   });
-  
+
   it('19_b. generic <generic_to_one> - dog', async function(){
     let opts = funks.getOptions(models_generic.dogDdm_genericToOne_person);
     let generated_schema =await funks.generateJs('create-distributed-model', opts);
@@ -2358,7 +2358,7 @@ describe('Generic Associations - Model Layer', function(){
 
 });
 
-/** 
+/**
  * Generic Adapter
  */
 describe('Generic Adapter', function(){
@@ -2384,4 +2384,51 @@ describe('Generic Adapter', function(){
       .to.match(data_test.test20_13).and
       .to.match(data_test.test20_14);
   });
+});
+
+
+
+describe('Handle Errors in DDM', function(){
+  let data_test = require('./unit_test_misc/test-describe/handle-error-ddm');
+
+  it('Count in model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_model =await funks.generateJs('create-distributed-model', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.count_dogs_model_ddm.replace(/\s/g, '');
+    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+  });
+
+  it('readAllCursor in model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_model =await funks.generateJs('create-distributed-model', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.readAllCursor_dogs_model_ddm.replace(/\s/g, '');
+    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+  });
+
+  it('count in resolver - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.count_dogs_resolver_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('connection in resolver - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.connections_dogs_resolver_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('readAllCursor in cenzontle-webservice-adapter - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_cenz_adapter_integration_test);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.readAllCursor_dogs_adapter_ddm.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });

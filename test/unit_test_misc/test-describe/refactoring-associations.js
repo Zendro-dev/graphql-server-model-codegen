@@ -456,7 +456,9 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-           let createdRecord = await accession.addOne(inputSanitized);
+            //construct benignErrors reporter with context
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+           let createdRecord = await accession.addOne(inputSanitized, benignErrorReporter);
            await createdRecord.handleAssociations(inputSanitized, context);
            return createdRecord;
          } else { //adapter not auth
@@ -487,7 +489,9 @@ module.exports.update_one_resolver = `
               if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
               }
-               let updatedRecord = await accession.updateOne(inputSanitized);
+              //construct benignErrors reporter with context
+              let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+               let updatedRecord = await accession.updateOne(inputSanitized, benignErrorReporter);
                await updatedRecord.handleAssociations(inputSanitized, context);
                return updatedRecord;
            } else {//adapter not auth
@@ -497,7 +501,7 @@ module.exports.update_one_resolver = `
 `
 
 module.exports.add_one_cenz_adapter = `
-static addOne(input) {
+static async addOne(input, benignErrorReporter) {
     let query = \`
     mutation addAccession(
       $accession_id:ID!
@@ -517,26 +521,24 @@ static addOne(input) {
         locationId
       }
     }\`;
-    return axios.post(remoteCenzontleURL, {
-        query: query,
-        variables: input
-    }).then(res => {
-        //check
-        if (res && res.data && res.data.data) {
-            return res.data.data.addAccession;
-        } else {
-            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
-        }
-    }).catch(error => {
-        error['url'] = remoteCenzontleURL;
-        handleError(error);
-    });
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL,, {query:query,variables: input});
+      if (response && response.data && response.data.data) {
+        return response.data.data.addAccession;
+      } else {
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
 
 }
 `
 
 module.exports.update_one_cenz_adapter = `
-static updateOne(input) {
+static async updateOne(input, benignErrorReporter) {
     let query = \`
       mutation
         updateAccession(
@@ -557,19 +559,17 @@ static updateOne(input) {
             locationId
           }
         }\`
-    return axios.post(remoteCenzontleURL, {
-        query: query,
-        variables: input
-    }).then(res => {
-        //check
-        if (res && res.data && res.data.data) {
-            return res.data.data.updateAccession;
-        } else {
-            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
-        }
-    }).catch(error => {
-        error['url'] = remoteCenzontleURL;
-        handleError(error);
-    });
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL,, {query:query, variables:input});
+      if (response && response.data && response.data.data) {
+        return response.data.data.updateAccession;
+      } else {
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
 }
 `
