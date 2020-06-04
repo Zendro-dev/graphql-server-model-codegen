@@ -1300,7 +1300,7 @@ describe(
 
   });
 
-  describe.skip('Distributed Data Models', function() {
+  describe('Distributed Data Models', function() {
     // The entries created in this test are used in the following ones as well
     it('01. Create a person and 2 dogs', function() {
         let res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}');
@@ -1348,8 +1348,11 @@ describe(
           "errors": [
               {
                   "message": "LIMIT must not be negative",
-                  "locations": "",
-                  "details": ""
+                  "locations": ""
+              },
+              {
+                "message": "LIMIT must not be negative",
+                "locations": ""
               }
           ],
           "data": {
@@ -1842,7 +1845,6 @@ describe(
           errors:[
             {
               message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
-              details:"",
               locations: ""
             }
           ],

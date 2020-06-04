@@ -15,7 +15,7 @@ static async readById(iri, benignErrorReporter) {
 
             try {
               // Send an HTTP request to the remote server
-              let response = await axios.post(remoteCenzontleURL,, {query:query});
+              let response = await axios.post(remoteCenzontleURL, {query:query});
               // STATUS-CODE is 200
               // NO ERROR as such has been detected by the server (Express)
               // check if data was send
@@ -40,7 +40,7 @@ static async countRecords(search, benignErrorReporter) {
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: {search: search}});
+        let response = await axios.post(remoteCenzontleURL, {query:query,variables: {search: search}});
 
         //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
         errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);

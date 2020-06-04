@@ -42,6 +42,8 @@ static async readAll(search, order, pagination, benignErrorReporter){
   try {
     // Send an HTTP request to the remote server
     let response = await axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}});
+    // check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
@@ -68,7 +70,13 @@ static async countRecords(search, benignErrorReporter){
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
   try {
+    // Send an HTTP request to the remote server
     let response = await axios.post(url, {query:query, variables:{search: search}});
+    // check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
     if(response&&response.data&&response.data.data) {
       return response.data.data.countBooks;
     } else {
@@ -267,7 +275,13 @@ static async countRecords(search, benignErrorReporter){
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
   try {
+    // Send an HTTP request to the remote server
     let response = await axios.post(url, {query:query, variables:{search: search}});
+    // check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
     if(response&&response.data&&response.data.data) {
       return response.data.data.countPeople;
     } else {

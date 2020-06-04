@@ -523,7 +523,7 @@ static async addOne(input, benignErrorReporter) {
     }\`;
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL,, {query:query,variables: input});
+      let response = await axios.post(remoteCenzontleURL, {query:query,variables: input});
       if (response && response.data && response.data.data) {
         return response.data.data.addAccession;
       } else {
@@ -561,7 +561,7 @@ static async updateOne(input, benignErrorReporter) {
         }\`
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL,, {query:query, variables:input});
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
       if (response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {

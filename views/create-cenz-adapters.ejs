@@ -41,7 +41,7 @@ module.exports = class <%- adapterName -%>{
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL,, {query:query});
+        let response = await axios.post(remoteCenzontleURL, {query:query});
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
@@ -64,7 +64,7 @@ module.exports = class <%- adapterName -%>{
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: {search: search}});
+        let response = await axios.post(remoteCenzontleURL, {query:query,variables: {search: search}});
 
         //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
         errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
@@ -133,7 +133,7 @@ module.exports = class <%- adapterName -%>{
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: input});
+        let response = await axios.post(remoteCenzontleURL, {query:query,variables: input});
         if (response && response.data && response.data.data) {
           return response.data.data.add<%- nameCp -%>;
         } else {
@@ -154,7 +154,7 @@ module.exports = class <%- adapterName -%>{
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL,, {query:query});
+      let response = await axios.post(remoteCenzontleURL, {query:query});
       if (response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
@@ -184,7 +184,7 @@ module.exports = class <%- adapterName -%>{
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL,, {query:query, variables:input});
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
       if (response && response.data && response.data.data) {
         return response.data.data.update<%- nameCp -%>;
       } else {
