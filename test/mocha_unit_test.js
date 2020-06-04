@@ -2423,4 +2423,12 @@ describe('Handle Errors in DDM', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
+  it('readAllCursor in cenzontle-webservice-adapter - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_cenz_adapter_integration_test);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.readAllCursor_dogs_adapter_ddm.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });

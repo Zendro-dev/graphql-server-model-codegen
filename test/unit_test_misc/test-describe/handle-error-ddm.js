@@ -264,3 +264,36 @@ countDogs: async function({
     }
 }
 `
+
+module.exports.readAllCursor_dogs_adapter_ddm = `
+static async readAllCursor(search, order, pagination, benignErrorReporter) {
+    //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+        throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
+    let query = \`query dogsConnection($search: searchDogInput $pagination: paginationCursorInput $order: [orderDogInput]){
+  dogsConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  dog_id  name
+     person_id
+   } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
+
+
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+      errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        return response.data.data.dogsConnection;
+      } else {
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
+}
+`

@@ -1,5 +1,5 @@
 module.exports.book_adapter_readById = `
-static readById(iri) {
+static async readById(iri, benignErrorReporter) {
         let query = \`
           query
             readOneBook
@@ -13,50 +13,55 @@ static readById(iri) {
               }
             }\`;
 
-        return axios.post(remoteCenzontleURL, {
-            query: query
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-              return res.data.data.readOneBook;
-            } else {
+            try {
+              // Send an HTTP request to the remote server
+              let response = await axios.post(remoteCenzontleURL,, {query:query});
+              // STATUS-CODE is 200
+              // NO ERROR as such has been detected by the server (Express)
+              // check if data was send
+              if (response && response.data && response.data.data) {
+                return response.data.data.readOneBook;
+              } else {
                 throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+              }
+            } catch(error) {
+              //handle caught errors
+              errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
             }
-        }).catch(error => {
-            error['url'] = remoteCenzontleURL;
-            handleError(error);
-        });
     }
 `
 
 module.exports.book_adapter_count = `
-static countRecords(search) {
+static async countRecords(search, benignErrorReporter) {
         let query = \`
       query countBooks($search: searchBookInput){
         countBooks(search: $search)
       }\`
 
-        return axios.post(remoteCenzontleURL, {
-            query: query,
-            variables: {
-                search: search
-            }
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-                return res.data.data.countBooks;
-            } else {
-                throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
-            }
-        }).catch(error => {
-            error['url'] = remoteCenzontleURL;
-            handleError(error);
-        });
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: {search: search}});
+
+        //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+        errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if (response && response.data && response.data.data) {
+          return response.data.data.countBooks;
+        } else {
+          throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+      } catch(error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      }
     }
 `
 
 module.exports.book_adapter_read_all = `
-static readAllCursor(search, order, pagination) {
+static async readAllCursor(search, order, pagination, benignErrorReporter) {
         //check valid pagination arguments
         let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
         if (!argsValid) {
@@ -68,24 +73,23 @@ static readAllCursor(search, order, pagination) {
          publisher_id
         } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
-        return axios.post(remoteCenzontleURL, {
-            query: query,
-            variables: {
-                search: search,
-                order: order,
-                pagination: pagination
-            }
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-                return res.data.data.booksConnection;
-            } else {
-                throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
-            }
-        }).catch(error => {
-            error['url'] = remoteCenzontleURL;
-            handleError(error);
-        });
+        try {
+          // Send an HTTP request to the remote server
+          let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+          //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+          errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+          // STATUS-CODE is 200
+          // NO ERROR as such has been detected by the server (Express)
+          // check if data was send
+          if(response && response.data && response.data.data) {
+            return response.data.data.booksConnection;
+          } else {
+            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+          }
+        } catch(error) {
+          //handle caught errors
+          errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+        }
     }
 `
 

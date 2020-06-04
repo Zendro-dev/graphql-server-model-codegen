@@ -4,6 +4,7 @@ const {
     handleError
 } = require('../utils/errors');
 const validatorUtil = require('../utils/validatorUtil');
+const errorHelper = require('../utils/errors');
 
 let axios = axios_general.create();
 axios.defaults.timeout = globals.MAX_TIME_OUT;
@@ -25,7 +26,7 @@ module.exports = class <%- adapterName -%>{
     return iriRegex.test(iri);
   }
 
-  static readById(iri){
+  static async readById(iri, benignErrorReporter){
     let query = `
           query
             readOne<%- nameCp %>
@@ -37,46 +38,53 @@ module.exports = class <%- adapterName -%>{
               }
             }`;
 
-    return axios.post( remoteCenzontleURL, {
-      query: query
-    }).then(res =>{
-      //check
-      if(res&&res.data&&res.data.data) {
-          return res.data.data.readOne<%- nameCp -%>;
-      } else {
-        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL,, {query:query});
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if (response && response.data && response.data.data) {
+          return response.data.data.readOne<%- nameCp -%>;
+        } else {
+          throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+        }
+      } catch(error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
       }
-    }).catch(error =>{
-      error['url'] = remoteCenzontleURL;
-      handleError(error);
-    });
   }
 
-  static countRecords(search){
+  static async countRecords(search, benignErrorReporter){
     let query = `
       query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
         count<%- namePlCp -%>(search: $search)
       }`
 
-    return axios.post(remoteCenzontleURL, {
-        query: query,
-        variables: {
-            search: search
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: {search: search}});
+
+        //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+        errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if (response && response.data && response.data.data) {
+          return response.data.data.count<%- namePlCp -%>;
+        } else {
+          throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
         }
-    }).then(res => {
-      //check
-      if(res&&res.data&&res.data.data) {
-        return res.data.data.count<%- namePlCp -%>;
-      } else {
-        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      } catch(error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
       }
-    }).catch(error => {
-        error['url'] = remoteCenzontleURL;
-        handleError(error);
-    });
+
   }
 
-  static readAllCursor(search, order, pagination){
+  static async readAllCursor(search, order, pagination, benignErrorReporter){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -86,27 +94,27 @@ module.exports = class <%- adapterName -%>{
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
 
-      return axios.post(remoteCenzontleURL, {
-        query:query,
-        variables: {
-          search: search,
-          order:order,
-          pagination: pagination
+
+        try {
+          // Send an HTTP request to the remote server
+          let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+          //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+          errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+          // STATUS-CODE is 200
+          // NO ERROR as such has been detected by the server (Express)
+          // check if data was send
+          if(response && response.data && response.data.data) {
+            return response.data.data.<%- namePl -%>Connection;
+          } else {
+            throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+          }
+        } catch(error) {
+          //handle caught errors
+          errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
         }
-      }).then(res =>{
-        //check
-        if(res&&res.data&&res.data.data) {
-          return res.data.data.<%- namePl -%>Connection;
-        } else {
-          throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
-        }
-    }).catch(error=>{
-      error['url'] = remoteCenzontleURL;
-      handleError(error);
-    });
   }
 
-  static addOne(input){
+  static async addOne(input, benignErrorReporter){
       let query = `
           mutation add<%- nameCp _%>(
   <%if(!defaultId){-%>
@@ -123,40 +131,42 @@ module.exports = class <%- adapterName -%>{
             }
           }`;
 
-      return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res =>{
-        //check
-        if(res&&res.data&&res.data.data) {
-          return res.data.data.add<%- nameCp -%>;
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL,, {query:query,variables: input});
+        if (response && response.data && response.data.data) {
+          return response.data.data.add<%- nameCp -%>;
         } else {
           throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
         }
-      }).catch(error =>{
-        error['url'] = remoteCenzontleURL;
-        handleError(error);
-      });
+      } catch(error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      }
   }
 
-  static deleteOne(id){
+  static async deleteOne(id, benignErrorReporter){
     let query = `
           mutation
             delete<%- nameCp -%>{
               delete<%- nameCp -%>(
                 <%- idAttribute -%>: "${id}" )}`;
 
-    return axios.post(remoteCenzontleURL, {query: query}).then(res =>{
-      //check
-      if(res&&res.data&&res.data.data) {
-        return res.data.data.delete<%- nameCp -%>;
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL,, {query:query});
+      if (response && response.data && response.data.data) {
+        return response.data.data.delete<%- nameCp -%>;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
       }
-    }).catch(error =>{
-      error['url'] = remoteCenzontleURL;
-      handleError(error);
-    });
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static updateOne(input){
+  static async updateOne(input, benignErrorReporter){
     let query = `
           mutation
             update<%- nameCp-%>(
@@ -172,17 +182,18 @@ module.exports = class <%- adapterName -%>{
               }
             }`
 
-    return axios.post(remoteCenzontleURL, {query:query, variables:input}).then(res => {
-      //check
-      if(res&&res.data&&res.data.data) {
-        return res.data.data.update<%- nameCp -%>;
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL,, {query:query, variables:input});
+      if (response && response.data && response.data.data) {
+        return response.data.data.update<%- nameCp -%>;
       } else {
         throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
       }
-    }).catch(error =>{
-      error['url'] = remoteCenzontleURL;
-      handleError(error);
-    });
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
 
@@ -200,18 +211,16 @@ module.exports = class <%- adapterName -%>{
     throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
   }
 
-  static  csvTableTemplate(){
+  static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
-    return axios.post(remoteCenzontleURL, {query:query}).then(res =>{
-      //check
-      if(res&&res.data&&res.data.data) {
-        return res.data.data.csvTableTemplate<%- nameCp -%>;
-      } else {
-        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
-      }
-    }).catch(error =>{
-      error['url'] = remoteCenzontleURL;
-      handleError(error);
-    });
+
+    try {
+      let response = await axios.post(remoteCenzontleURL, {query:query});
+      return response.data.data.csvTableTemplate<%- nameCp-%>;
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
+  
 }
