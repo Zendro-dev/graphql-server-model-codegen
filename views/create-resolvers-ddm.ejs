@@ -424,7 +424,10 @@ module.exports = {
     //check: adapters auth
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
       if (authorizationCheck === true) {
-        return <%- nameLc _%>.readById(<%- idAttribute _%>);
+        //construct benignErrors reporter with context
+        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+        return <%- nameLc _%>.readById(<%- idAttribute _%>, benignErrorReporter);
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
@@ -452,7 +455,10 @@ module.exports = {
          if(!input.skipAssociationsExistenceChecks) {
            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
          }
-          let createdRecord = await <%- nameLc _%>.addOne(inputSanitized);
+         //construct benignErrors reporter with context
+         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+          let createdRecord = await <%- nameLc _%>.addOne(inputSanitized, benignErrorReporter);
           await createdRecord.handleAssociations(inputSanitized, context);
           return createdRecord;
       } else {//adapter not auth
@@ -469,7 +475,9 @@ module.exports = {
    */
   bulkAdd<%- nameCp -%>Csv: async function(_, context) {
       if (await checkAuthorization(context, '<%- name -%>', 'create') === true) {
-        return <%- nameLc -%>.bulkAddCsv(context);
+        //construct benignErrors reporter with context
+        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+        return <%- nameLc -%>.bulkAddCsv(context, benignErrorReporter);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -487,7 +495,9 @@ module.exports = {
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'delete');
       if (authorizationCheck === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
-          return <%- nameLc _%>.deleteOne(<%- idAttribute _%>);
+          //construct benignErrors reporter with context
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+          return <%- nameLc _%>.deleteOne(<%- idAttribute _%>, benignErrorReporter);
         }
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
@@ -516,7 +526,9 @@ module.exports = {
          if(!input.skipAssociationsExistenceChecks) {
            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
          }
-         let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized);
+         //construct benignErrors reporter with context
+         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+         let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized, benignErrorReporter);
          await updatedRecord.handleAssociations(inputSanitized, context);
          return updatedRecord;
       } else {//adapter not auth
@@ -576,7 +588,9 @@ module.exports = {
    */
   csvTableTemplate<%- nameCp-%>: async function(_, context){
         if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-            return <%- nameLc -%>.csvTableTemplate();
+          //construct benignErrors reporter with context
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return <%- nameLc -%>.csvTableTemplate(benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

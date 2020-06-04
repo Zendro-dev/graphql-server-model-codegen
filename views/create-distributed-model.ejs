@@ -5,6 +5,8 @@ const globals = require('../config/globals');
 const helper = require('../utils/helper');
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 const validatorUtil = require('../utils/validatorUtil');
+const errorHelper = require('../utils/errors');
+
 
 const definition = <%- definition -%>;
 
@@ -49,7 +51,7 @@ module.exports = class <%- name -%>{
     return responsibleAdapter[0];
   }
 
-  static readById(id) {
+  static readById(id, benignErrorReporter) {
     if(id!==null){
       let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -59,7 +61,9 @@ module.exports = class <%- name -%>{
         throw new Error("IRI has no match WS");
       }
 
-      return adapters[responsibleAdapter[0]].readById(id).then(result => {
+      //use default BenignErrorReporter if no BenignErrorReporter defined
+      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+      return adapters[responsibleAdapter[0]].readById(id, benignErrorReporter).then(result => {
         let item = new <%- name -%>(result);
         return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
             .then((valSuccess) => {
@@ -286,26 +290,32 @@ module.exports = class <%- name -%>{
     return true;
   }
 
-  static addOne(input) {
+  static addOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
         let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-        return adapters[responsibleAdapter].addOne(input).then(result => new <%- name -%>(result));
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+        return adapters[responsibleAdapter].addOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
       });
   }
 
-  static deleteOne(id) {
+  static deleteOne(id, benignErrorReporter) {
     let responsibleAdapter = this.adapterForIri(id);
-    return adapters[responsibleAdapter].deleteOne(id);
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter);
   }
 
-  static updateOne(input) {
+  static updateOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
         .then(async (valSuccess) => {
         let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-        return adapters[responsibleAdapter].updateOne(input).then(result => new <%- name -%>(result));
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+        return adapters[responsibleAdapter].updateOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
     });
   }
 

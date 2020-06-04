@@ -94,7 +94,7 @@ module.exports.book_ddm_registry = `
 `
 
 module.exports.book_ddm_readById = `
-static readById(id) {
+static readById(id, benignErrorReporter) {
   if(id!==null){
   let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -103,8 +103,9 @@ static readById(id) {
   }else if(responsibleAdapter.length === 0){
     throw new Error("IRI has no match WS");
   }
-
-  return adapters[responsibleAdapter[0] ].readById(id).then(result => {
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+  return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
     let item  = new Book(result);
     return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
         .then((valSuccess) => {

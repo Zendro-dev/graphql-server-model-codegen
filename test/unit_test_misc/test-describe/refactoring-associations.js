@@ -455,7 +455,9 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-           let createdRecord = await accession.addOne(inputSanitized);
+            //construct benignErrors reporter with context
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+           let createdRecord = await accession.addOne(inputSanitized, benignErrorReporter);
            await createdRecord.handleAssociations(inputSanitized, context);
            return createdRecord;
          } else { //adapter not auth
@@ -486,7 +488,9 @@ module.exports.update_one_resolver = `
               if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
               }
-               let updatedRecord = await accession.updateOne(inputSanitized);
+              //construct benignErrors reporter with context
+              let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+               let updatedRecord = await accession.updateOne(inputSanitized, benignErrorReporter);
                await updatedRecord.handleAssociations(inputSanitized, context);
                return updatedRecord;
            } else {//adapter not auth
