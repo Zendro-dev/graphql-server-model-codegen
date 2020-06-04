@@ -2407,6 +2407,14 @@ describe('Handle Errors in DDM', function(){
     expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
   });
 
+  it('count in resolver - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.count_dogs_resolver_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
   it('connection in resolver - dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);

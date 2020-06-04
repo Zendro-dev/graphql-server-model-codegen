@@ -188,7 +188,7 @@ dogsConnection: async function({
     order,
     pagination
 }, context) {
-  
+
   //construct benignErrors reporter with context
   let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
 
@@ -224,4 +224,43 @@ dogsConnection: async function({
     }
 }
 
+`
+
+module.exports.count_dogs_resolver_ddm = `
+countDogs: async function({
+    search
+}, context) {
+    //construct benignErrors reporter with context
+    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+    //check: adapters
+    let registeredAdapters = Object.values(dog.registeredAdapters);
+    if (registeredAdapters.length === 0) {
+        throw new Error('No adapters registered for data model "dog"');
+    } //else
+
+    //exclude adapters
+    let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
+    if (adapters.length === 0) {
+        throw new Error('All adapters was excluded for data model "dog"');
+    } //else
+
+    //check: auth adapters
+    let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+    if (authorizationCheck.authorizedAdapters.length > 0) {
+        //check adapter authorization Errors
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
+        }
+
+        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter);
+    } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => \`\${a}, \${c.message}\`));
+        } else {
+            throw new Error('No available adapters for data model "dog"');
+        }
+    }
+}
 `
