@@ -171,3 +171,57 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 }
 
 `
+
+module.exports.connections_dogs_resolver_ddm = `
+/**
+ * dogsConnection - Check user authorization and return certain number, specified in pagination argument, of records that
+ * holds the condition of search argument, all of them sorted as specified by the order argument.
+ *
+ * @param  {object} search     Search argument for filtering records
+ * @param  {array} order       Type of sorting (ASC, DESC) for each field
+ * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
+ * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
+ */
+dogsConnection: async function({
+    search,
+    order,
+    pagination
+}, context) {
+  
+  //construct benignErrors reporter with context
+  let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+    //check: adapters
+    let registeredAdapters = Object.values(dog.registeredAdapters);
+    if (registeredAdapters.length === 0) {
+        throw new Error('No adapters registered for data model "dog"');
+    } //else
+
+    //exclude adapters
+    let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
+    if (adapters.length === 0) {
+        throw new Error('All adapters was excluded for data model "dog"');
+    } //else
+
+
+    //check: auth adapters
+    let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+    if (authorizationCheck.authorizedAdapters.length > 0) {
+        //check adapter authorization Errors
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
+        }
+
+        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
+    } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => \`\${a}, \${c.message}\`));
+        } else {
+            throw new Error('No available adapters for data model "dog" ');
+        }
+    }
+}
+
+`

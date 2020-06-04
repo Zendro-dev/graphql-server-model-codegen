@@ -2391,7 +2391,7 @@ describe('Generic Adapter', function(){
 describe('Handle Errors in DDM', function(){
   let data_test = require('./unit_test_misc/test-describe/handle-error-ddm');
 
-  it('Count - handle benign errors ddm model- dog', async function(){
+  it('Count in model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_model =await funks.generateJs('create-distributed-model', opts);
     let g_model = generated_model.replace(/\s/g, '');
@@ -2399,11 +2399,20 @@ describe('Handle Errors in DDM', function(){
     expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
   });
 
-  it('readAllCursor - handle benign errors ddm model- dog', async function(){
+  it('readAllCursor in model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_model =await funks.generateJs('create-distributed-model', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.readAllCursor_dogs_model_ddm.replace(/\s/g, '');
     expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
   });
+
+  it('connection in resolver - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.connections_dogs_resolver_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
 });
