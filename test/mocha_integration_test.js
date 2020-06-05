@@ -1348,7 +1348,10 @@ describe(
           "errors": [
               {
                   "message": "LIMIT must not be negative",
-                  "locations": ""
+                  "locations": "",
+                  "extensions": {
+                      "receivedFrom": ["http://server2:3030/graphql"]
+                  }              
               },
               {
                 "message": "LIMIT must not be negative",
