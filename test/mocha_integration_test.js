@@ -713,7 +713,6 @@ describe(
     const errorObject_Individual = {
         errors:[{
             message:"Max record limit of 25 exceeded in individuals",
-            details:"",
             locations: [
               {
                 column: 3,

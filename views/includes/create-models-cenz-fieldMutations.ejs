@@ -5,8 +5,9 @@
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
     */
-    static <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
       let query = `
             mutation
               update<%- nameCp-%>{
@@ -18,17 +19,29 @@
                   <%-associationsArguments["to_one"][i].targetKey-%>
                 }
               }`
-      return axios.post(url, {query:query}).then(res => {
-        //check
-        if(res&&res.data&&res.data.data) {
-          return new <%- name -%>(res.data.data.update<%- nameCp -%>);
+
+      //use default BenignErrorReporter if no BenignErrorReporter defined
+      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL, {query:query});
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+        if(helper.isNonEmptyArray(response.data.errors)) {
+          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        } 
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if(response && response.data && response.data.data) {
+          return new <%- name -%>(response.data.data.update<%- nameCp -%>);
         } else {
-          throw new Error(`Invalid response from remote cenz-server: ${url}`);
+          throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
         }
-      }).catch(error =>{
-        error['url'] = url;
-        handleError(error);
-      });
+      } catch(error){
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      }
     }
   <%}-%>
 <%}-%>

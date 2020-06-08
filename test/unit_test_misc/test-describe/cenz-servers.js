@@ -1,5 +1,5 @@
 module.exports.server_url = `
-  const url = "http://something.other:7000/graphql";
+  const remoteCenzontleURL = "http://something.other:7000/graphql";
 `
 
 module.exports.read_by_id = `
@@ -11,7 +11,11 @@ static async readById( id, benignErrorReporter){
 
   try {
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query:query});
+    let response = await axios.post(remoteCenzontleURL, {query:query});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
@@ -20,11 +24,11 @@ static async readById( id, benignErrorReporter){
       await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
       return item;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 
@@ -41,9 +45,11 @@ static async readAll(search, order, pagination, benignErrorReporter){
 
   try {
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}});
-    // check if remote service returned benign Errors in the response and add them to the benignErrorReporter
-    errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+    let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
@@ -51,11 +57,11 @@ static async readAll(search, order, pagination, benignErrorReporter){
       let data = response.data.data.books;
       return data.map(item => {return new Book(item)});
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 
@@ -71,20 +77,22 @@ static async countRecords(search, benignErrorReporter){
 
   try {
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query:query, variables:{search: search}});
-    // check if remote service returned benign Errors in the response and add them to the benignErrorReporter
-    errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+    let response = await axios.post(remoteCenzontleURL, {query:query, variables:{search: search}});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
       return response.data.data.countBooks;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 `
@@ -100,18 +108,22 @@ static async addOne(input, benignErrorReporter) {
   try {
     await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query:query, variables:input});
+    let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
       return new Book(response.data.data.addBook);
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 `
@@ -124,18 +136,22 @@ static async deleteOne(id, benignErrorReporter){
 
   try {
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query: query});
+    let response = await axios.post(remoteCenzontleURL, {query: query});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
       return response.data.data.deleteBook;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 
@@ -152,18 +168,22 @@ static async updateOne(input, benignErrorReporter){
   try {
     await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query:query, variables:input});
+    let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
       return new Book(response.data.data.updateBook);
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 
@@ -176,11 +196,15 @@ static async csvTableTemplate(benignErrorReporter){
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
   try {
-    let response = await axios.post(url, {query:query});
+    let response = await axios.post(remoteCenzontleURL, {query:query});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     return response.data.data.csvTableTemplateBook;
   } catch(error) {
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 `
@@ -198,14 +222,18 @@ static async bulkAddCsv(context, benignErrorReporter){
     formData.append('csv_file', fs.createReadStream(tmpFile));
     formData.append('query', query);
 
-    let response = await axios.post(url, formData,  {
+    let response = await axios.post(remoteCenzontleURL, formData,  {
       headers: formData.getHeaders()
     });
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     return response.data.data.bulkAddBookCsv;
 
   } catch(error) {
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 `
@@ -276,20 +304,22 @@ static async countRecords(search, benignErrorReporter){
 
   try {
     // Send an HTTP request to the remote server
-    let response = await axios.post(url, {query:query, variables:{search: search}});
-    // check if remote service returned benign Errors in the response and add them to the benignErrorReporter
-    errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+    let response = await axios.post(remoteCenzontleURL, {query:query, variables:{search: search}});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
       return response.data.data.countPeople;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
   }
 }
 `
@@ -300,8 +330,9 @@ module.exports.add_personId = `
  *
  * @param {Id}   id   IdAttribute of the root model to be updated
  * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated.
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
  */
-static add_personId(id, personId) {
+static async add_personId(id, personId, benignErrorReporter) {
   let query = \`
       mutation
         updateDog{
@@ -311,19 +342,29 @@ static add_personId(id, personId) {
           ){
             id                  personId                }
         }\`
-  return axios.post(url, {
-      query: query
-  }).then(res => {
-      //check
-      if (res && res.data && res.data.data) {
-          return new Dog(res.data.data.updateDog);
-      } else {
-          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
-      }
-  }).catch(error => {
-      error['url'] = url;
-      handleError(error);
-  });
+
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    // Send an HTTP request to the remote server
+    let response = await axios.post(remoteCenzontleURL, {query:query});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    } 
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if(response && response.data && response.data.data) {
+      return new Dog(response.data.data.updateDog);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+    }
+  } catch(error){
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+  }
 }
 `
 module.exports.remove_personId = `
@@ -332,8 +373,9 @@ module.exports.remove_personId = `
  *
  * @param {Id}   id   IdAttribute of the root model to be updated
  * @param {Id}   personId Foreign Key (stored in "Me") of the Association to be updated.
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
  */
-static remove_personId(id, personId) {
+static async remove_personId(id, personId, benignErrorReporter) {
   let query = \`
       mutation
         updateDog{
@@ -343,18 +385,29 @@ static remove_personId(id, personId) {
           ){
             id                  personId                }
         }\`
-  return axios.post(url, {
-      query: query
-  }).then(res => {
-      //check
-      if (res && res.data && res.data.data) {
-          return new Dog(res.data.data.updateDog);
-      } else {
-          throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
-      }
-  }).catch(error => {
-      error['url'] = url;
-      handleError(error);
-  });
+
+
+  //use default BenignErrorReport er if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+  try {
+    // Send an HTTP request to the remote server
+    let response = await axios.post(remoteCenzontleURL, {query:query});
+    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+    if(helper.isNonEmptyArray(response.data.errors)) {
+      benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+    } 
+    // STATUS-CODE is 200
+    // NO ERROR as such has been detected by the server (Express)
+    // check if data was send
+    if(response && response.data && response.data.data) {
+      return new Dog(response.data.data.updateDog);
+    } else {
+      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+    }
+  } catch(error){
+    //handle caught errors
+    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+  }
 }
 `

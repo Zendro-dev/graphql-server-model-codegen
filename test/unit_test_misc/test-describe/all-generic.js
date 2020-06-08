@@ -88,10 +88,10 @@ module.exports.test7_1 = /.+constassociationArgsDef={'addDogs':'dog'}/;
 module.exports.test7_2 = /person\.prototype\.dogsFilter=function\({/;
 module.exports.test7_3 = /person\.prototype\.countFilteredDogs=function\({/;
 module.exports.test7_4 = /person\.prototype\.dogsConnection=function\({/;
-module.exports.test7_5 = /promises\.push\(this\.add_dogs\(input,context\)\);/;
-module.exports.test7_6 = /promises\.push\(this\.remove_dogs\(input,context\)\);/;
-module.exports.test7_7 = /person\.prototype\.add_dogs=asyncfunction\(input\){/;
-module.exports.test7_8 = /person\.prototype\.remove_dogs=asyncfunction\(input\){/;
+module.exports.test7_5 = /promises\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test7_6 = /promises\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test7_7 = /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){/;
+module.exports.test7_8 = /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter\){/;
 
 /**
  * 8. generic <to_one> sql - dog
@@ -209,8 +209,8 @@ module.exports.test16_1 = /.+constassociationArgsDef={'addDogs':'dog'}/;
 module.exports.test16_2 = /person\.prototype\.dogsFilter=function\({.+this\.dogsFilterImpl\({/;
 module.exports.test16_3 = /person\.prototype\.countFilteredDogs=function\({.+this\.countFilteredDogsImpl\({/;
 module.exports.test16_4 = /person\.prototype\.dogsConnection=function\({.+this\.dogsConnectionImpl\({/;
-module.exports.test16_5 = /promises\.push\(this\.add_dogs\(input,context\)\);/;
-module.exports.test16_6 = /promises\.push\(this\.remove_dogs\(input,context\)\);/;
+module.exports.test16_5 = /promises\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test16_6 = /promises\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
 module.exports.test16_7 = /person\.prototype\.add_dogs=asyncfunction\(input\){.+person\.add_dogsImpl\(input\);/;
 module.exports.test16_8 = /person\.prototype\.remove_dogs=asyncfunction\(input\){.+person\.remove_dogsImpl\(input\);/;
 module.exports.test16_9 = /countAllAssociatedRecords.+{.+letpromises_generic_to_many=\[\];/;
@@ -226,8 +226,8 @@ module.exports.test16_13 = /countAllAssociatedRecords.+returnget_to_one_associat
 //to_one firms (particular firms)
 module.exports.test17_1 = /constassociationArgsDef={'addOwner':'person'}/;
 module.exports.test17_2 = /dog\.prototype\.owner=asyncfunction\({.+this\.ownerImpl\({/;
-module.exports.test17_3 = /promises\.push\(this\.add_owner\(input,context\)\);/;
-module.exports.test17_4 = /promises\.push\(this\.remove_owner\(input,context\)\);/;
+module.exports.test17_3 = /promises\.push\(this\.add_owner\(input,benignErrorReporter\)\);/;
+module.exports.test17_4 = /promises\.push\(this\.remove_owner\(input,benignErrorReporter\)\);/;
 module.exports.test17_5 = /dog\.prototype\.add_owner=asyncfunction\(input\){.+dog\.add_ownerImpl\(input\);/;
 module.exports.test17_6 = /dog\.prototype\.remove_owner=asyncfunction\(input\){.+dog\.remove_ownerImpl\(input\);/;
 module.exports.test17_7 = /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;

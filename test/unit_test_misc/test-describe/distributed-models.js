@@ -16,6 +16,10 @@ static async readById(iri, benignErrorReporter) {
             try {
               // Send an HTTP request to the remote server
               let response = await axios.post(remoteCenzontleURL, {query:query});
+              //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+              if(helper.isNonEmptyArray(response.data.errors)) {
+                benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+              }
               // STATUS-CODE is 200
               // NO ERROR as such has been detected by the server (Express)
               // check if data was send
@@ -37,12 +41,11 @@ static async countRecords(search, benignErrorReporter) {
       query countBooks($search: searchBookInput){
         countBooks(search: $search)
       }\`
-
       try {
         // Send an HTTP request to the remote server
         let response = await axios.post(remoteCenzontleURL, {query:query,variables: {search: search}});
 
-        //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
           benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
         }
@@ -74,11 +77,10 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
          genre
          publisher_id
         } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
-
         try {
           // Send an HTTP request to the remote server
           let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
-          //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+          //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
           }

@@ -417,9 +417,11 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
-      errorHelper.handleErrorsInGraphQlResponse(response.data, benignErrorReporter);
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      } 
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
@@ -436,11 +438,11 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
         return { edges, pageInfo };
       } else {
-        throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
     }
   }
 `
@@ -466,18 +468,22 @@ static async updateOne(input, benignErrorReporter){
     try {
         await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
         // Send an HTTP request to the remote server
-        let response = await axios.post(url, {query:query, variables:input});
+        let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+        if(helper.isNonEmptyArray(response.data.errors)) {
+            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        } 
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
         if(response&&response.data&&response.data.data) {
         return new Person(response.data.data.updatePerson);
         } else {
-        throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
         }
     } catch(error) {
         //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, url);
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
     }
 }
 `

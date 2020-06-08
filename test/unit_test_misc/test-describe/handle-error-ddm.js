@@ -281,7 +281,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
-      //check if remote service returned benign Errors in te response and add them to the benignErrorReporter
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
       }
