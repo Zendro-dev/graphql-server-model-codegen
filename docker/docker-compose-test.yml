@@ -10,10 +10,25 @@ services:
     networks:
      - instance1
 
+  gql_cassandra1:
+    container_name: cassandra1
+    build:
+      context: .
+      dockerfile: Dockerfile.cassandra
+    ports: 
+      - 9041:9041
+    environment: 
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=128M
+    restart: always
+    networks: 
+      - instance1
+
   gql_science_db_graphql_server1:
     container_name: server1
     depends_on:
       - gql_postgres1
+      - gql_cassandra1
     build:
       context: .
       dockerfile: Dockerfile.graphql_server
@@ -27,6 +42,7 @@ services:
       - ./integration_test_run/instance1/models-webservice:/usr/src/app/models-webservice
       - ./integration_test_run/instance1/models-cenz-server:/usr/src/app/models-cenz-server
       - ./integration_test_run/instance1/models-generic:/usr/src/app/models-generic
+      - ./integration_test_run/instance1/models-cassandra:/usr/src/app/models-cassandra
       - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance1/validations:/usr/src/app/validations
       - ./integration_test_run/instance1/patches:/usr/src/app/patches
@@ -39,6 +55,7 @@ services:
       PORT: 3000
       REQUIRE_SIGN_IN: "false"
       LIMIT_RECORDS: 25
+      CASSANDRA_HOST: "cassandra1:9041"
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
       - integrationtest
@@ -88,10 +105,25 @@ services:
     networks:
       - instance2
 
+  gql_cassandra2:
+    container_name: cassandra2
+    build:
+      context: .
+      dockerfile: Dockerfile.cassandra
+    ports: 
+      - 9043:9043
+    environment: 
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=128M
+    restart: always
+    networks:
+      - instance2
+
   gql_science_db_graphql_server2:
     container_name: server2
     depends_on:
       - gql_postgres2
+      - gql_cassandra2
     build:
       context: .
       dockerfile: Dockerfile.graphql_server
@@ -105,6 +137,7 @@ services:
       - ./integration_test_run/instance2/models-webservice:/usr/src/app/models-webservice
       - ./integration_test_run/instance2/models-cenz-server:/usr/src/app/models-cenz-server
       - ./integration_test_run/instance2/models-generic:/usr/src/app/models-generic
+      - ./integration_test_run/instance2/models-cassandra:/usr/src/app/models-cassandra
       - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance2/validations:/usr/src/app/validations
       - ./integration_test_run/instance2/patches:/usr/src/app/patches
@@ -117,6 +150,7 @@ services:
       PORT: 3030
       REQUIRE_SIGN_IN: "false"
       LIMIT_RECORDS: 25
+      CASSANDRA_HOST: "cassandra2:9043"
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
       - integrationtest

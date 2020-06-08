@@ -791,6 +791,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'models-cenz':
       case 'distributed-model':
       case 'models-generic':  
+      case 'models-cassandra':
       //adapters
       case 'sql-adapter':
       case 'cenz-adapters':
@@ -874,6 +875,7 @@ getStorageType = function(dataModel) {
         case 'webservice':
         case 'cenz-server':
         case 'generic':
+        case 'cassandra':
         //adapters
         case 'sql-adapter':
         case 'ddm-adapter': 
@@ -1077,6 +1079,14 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers-generic', fileName: opts.nameLc},
           {dir: 'models-generic', template: 'models-generic', fileName: opts.nameLc},
+        ]
+        break;
+
+      case 'cassandra':
+        sections = [
+          {dir: 'schemas', template: 'schemas', fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
+          {dir: 'models-cassandra', template: 'models-cassandra', fileName: opts.nameLc},
         ]
         break;
 
