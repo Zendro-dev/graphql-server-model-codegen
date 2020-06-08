@@ -13,7 +13,6 @@ const <%-  nameLc  -%> = require(path.join(__dirname, '..', 'models_index.js')).
 const helper = require('../utils/helper');
 const checkAuthorization = require('../utils/check-authorization');
 const fs = require('fs');
-const {handleError} = require('../utils/errors');
 const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models_index.js'));
@@ -299,17 +298,12 @@ const associationArgsDef = {
    * @return {type}             Associated record.
    */
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
-    return checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read').then(async authorization =>{
-      if (authorization === true) {
+    if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
         checkCountForOneAndReduceRecordsLimit(context);
         return await this.<%=associations_generic_one[i].name%>Impl({search}, context);
-      } else {
-          throw new Error("You don't have authorization to perform this action");
-      }
-    }).catch( error =>{
-          console.error(error);
-          handleError( error);
-    });
+    } else {
+        throw new Error("You don't have authorization to perform this action");
+    }
   }
 <%}-%>
 
@@ -341,17 +335,12 @@ const associationArgsDef = {
    * @return {array}              Array of associated records holding conditions specified by search, order and pagination argument.
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
-    return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
-      if (authorization === true) {
-        await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter");
-        return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
-      } else {
-          throw new Error("You don't have authorization to perform this action");
-      }
-    }).catch( error =>{
-          console.error(error);
-          handleError( error);
-    });
+    if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
+      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter");
+      return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context);
+    } else {
+        throw new Error("You don't have authorization to perform this action");
+    }
   }
 
   /**
@@ -370,10 +359,6 @@ const associationArgsDef = {
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
-    }).catch( error =>{
-          console.error(error);
-          handleError( error);
-    });
   }
 
   /**
@@ -388,17 +373,12 @@ const associationArgsDef = {
    * @return {array}              Array of records as grapqhql connections holding conditions specified by search, order and pagination argument.
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
-    return checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read').then(async authorization =>{
-      if (authorization === true) {
-        await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection");
-        return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
-      } else {
-          throw new Error("You don't have authorization to perform this action");
-      }
-    }).catch( error =>{
-          console.error(error);
-          handleError( error);
-    });
+    if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
+      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection");
+      return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context);
+    } else {
+        throw new Error("You don't have authorization to perform this action");
+    }
   }
 <%}-%>
 
