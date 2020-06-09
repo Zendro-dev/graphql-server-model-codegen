@@ -149,6 +149,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/adapters" \
               $TARGET_DIR_INSTANCE1"/models" \
               $TARGET_DIR_INSTANCE1"/models-distributed" \
               $TARGET_DIR_INSTANCE1"/models-webservice" \
+              $TARGET_DIR_INSTANCE1"/models-cassandra" \
               $TARGET_DIR_INSTANCE1"/models-cenz-server"
               $TARGET_DIR_INSTANCE1"/migrations" \
               $TARGET_DIR_INSTANCE1"/schemas" \
@@ -159,6 +160,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/adapters" \
               $TARGET_DIR_INSTANCE2"/models" \
               $TARGET_DIR_INSTANCE2"/models-distributed" \
               $TARGET_DIR_INSTANCE2"/models-webservice" \
+              $TARGET_DIR_INSTANCE2"/models-cassandra" \
               $TARGET_DIR_INSTANCE2"/models-cenz-server"
               $TARGET_DIR_INSTANCE2"/migrations" \
               $TARGET_DIR_INSTANCE2"/schemas" \

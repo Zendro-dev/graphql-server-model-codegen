@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.7"
 
 services:
   gql_postgres1:
@@ -15,12 +15,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.cassandra
+    volumes: 
+      - ./cassandra1.yaml:/etc/cassandra/cassandra.yaml
+      - ./cqlshrc.1:/.cassandra/cqlshrc
     ports: 
       - 9041:9041
+      - 7050:7050
+      - 7051:7051
+      - 7197:7199
+      - 9161:9161
     environment: 
       - MAX_HEAP_SIZE=256M
       - HEAP_NEWSIZE=128M
-    restart: always
+      - CPORT=9041
     networks: 
       - instance1
 
@@ -55,7 +62,8 @@ services:
       PORT: 3000
       REQUIRE_SIGN_IN: "false"
       LIMIT_RECORDS: 25
-      CASSANDRA_HOST: "cassandra1:9041"
+      CASSANDRA_HOST: "cassandra1"
+      CASSANDRA_PORT: 9041
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
       - integrationtest
@@ -110,12 +118,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.cassandra
+    volumes: 
+      - ./cassandra2.yaml:/etc/cassandra/cassandra.yaml
+      - ./cqlshrc.2:/.cassandra/cqlshrc
     ports: 
       - 9043:9043
+      - 7060:7060
+      - 7061:7061
+      - 7198:7199
+      - 9162:9162
     environment: 
       - MAX_HEAP_SIZE=256M
       - HEAP_NEWSIZE=128M
-    restart: always
+      - CPORT=9043
     networks:
       - instance2
 
@@ -150,7 +165,8 @@ services:
       PORT: 3030
       REQUIRE_SIGN_IN: "false"
       LIMIT_RECORDS: 25
-      CASSANDRA_HOST: "cassandra2:9043"
+      CASSANDRA_HOST: "cassandra2"
+      CASSANDRA_PORT: 9043
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
       - integrationtest

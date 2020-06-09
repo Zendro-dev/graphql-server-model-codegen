@@ -7,4 +7,6 @@ until echo $CQL | cqlsh; do
   sleep 2
 done &
 
+echo "** Keyspace created **"
+
 exec /docker-entrypoint.sh "$@"
