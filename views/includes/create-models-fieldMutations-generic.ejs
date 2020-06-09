@@ -5,12 +5,16 @@
      *
      * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
      * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
+     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+     * is invoked, the server will include any so reported errors in the final response, i.e. the 
+     * GraphQL response will have a non empty errors property.
      */
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
       let updated = await <%- name -%>.updateOne({ 
         <%- idAttribute -%>: <%- idAttribute %>,
         <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
-      });
+      }, benignErrorReporter);
       return updated;
     }
   <%} -%>

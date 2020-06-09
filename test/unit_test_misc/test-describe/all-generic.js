@@ -109,41 +109,41 @@ module.exports.test8_4 = /dog\.prototype\.remove_owner=asyncfunction\(input,beni
  * 9. generic with no associations - person
  */
 //general firms
-module.exports.test9_1 = /staticasyncreadById\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_2 = /staticasynccountRecords\(search\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_3 = /staticasyncreadAllCursor\(search,order,pagination\){/;
-module.exports.test9_4 = /staticasyncaddOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_5 = /staticasyncupdateOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_6 = /staticasyncdeleteOne\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_7 = /staticasyncbulkAddCsv\(context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_8 = /staticasynccsvTableTemplate\(\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_1 = /staticasyncreadById\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_2 = /staticasynccountRecords\(search,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_3 = /staticasyncreadAllCursor\(search,order,pagination,benignErrorReporter\){/;
+module.exports.test9_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 //not match (to_one firms)
-module.exports.test9_9 = /staticasyncadd_.+\(.+,.+\){/;
-module.exports.test9_10 = /staticasyncremove_.+\(.+,.+\){/;
+module.exports.test9_9 = /staticasyncadd_.+\(.+,.+,benignErrorReporter\){/;
+module.exports.test9_10 = /staticasyncremove_.+\(.+,.+,benignErrorReporter\){/;
 
 /**
  * 10. sql <to_many> generic - person
  */
 //to_one firms
 //not match
-module.exports.test10_1 = /staticasyncadd_.+\(.+,.+\){/;
-module.exports.test10_2 = /staticasyncremove_.+\(.+,.+\){/;
+module.exports.test10_1 = /staticasyncadd_.+\(.+,.+,benignErrorReporter\){/;
+module.exports.test10_2 = /staticasyncremove_.+\(.+,.+,benignErrorReporter\){/;
 
 /**
  * 11. generic <to_one> sql - dog
  */
 //general firms
-module.exports.test11_1 = /staticasyncreadById\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_2 = /staticasynccountRecords\(search\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_3 = /staticasyncreadAllCursor\(search,order,pagination\){/;
-module.exports.test11_4 = /staticasyncaddOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_5 = /staticasyncupdateOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_6 = /staticasyncdeleteOne\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_7 = /staticasyncbulkAddCsv\(context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_8 = /staticasynccsvTableTemplate\(\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_1 = /staticasyncreadById\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_2 = /staticasynccountRecords\(search,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_3 = /staticasyncreadAllCursor\(search,order,pagination,benignErrorReporter\){/;
+module.exports.test11_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 //to_one firms
-module.exports.test11_9 = /staticasyncadd_personId\(id,personId\){/;
-module.exports.test11_10 = /staticasyncremove_personId\(id,personId\){/;
+module.exports.test11_9 = /staticasyncadd_personId\(id,personId,benignErrorReporter\){/;
+module.exports.test11_10 = /staticasyncremove_personId\(id,personId,benignErrorReporter\){/;
 
 /**
  * 12. sql <to_one> generic - person
@@ -156,18 +156,18 @@ module.exports.test12_2 = /staticasyncremove_hometownId\(personId,hometownId\){/
  * 13. generic <to_many> sql - hometown
  */
 //general firms
-module.exports.test13_1 = /staticasyncreadById\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_2 = /staticasynccountRecords\(search\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_3 = /staticasyncreadAllCursor\(search,order,pagination\){/;
-module.exports.test13_4 = /staticasyncaddOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_5 = /staticasyncupdateOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_6 = /staticasyncdeleteOne\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_7 = /staticasyncbulkAddCsv\(context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_8 = /staticasynccsvTableTemplate\(\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_1 = /staticasyncreadById\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_2 = /staticasynccountRecords\(search,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_3 = /staticasyncreadAllCursor\(search,order,pagination,benignErrorReporter\){/;
+module.exports.test13_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 //to_one firms
 //not match
-module.exports.test13_9 = /staticasyncadd_.+\(.+,.+\){/;
-module.exports.test13_10 = /staticasyncremove_.+\(.+,.+\){/;
+module.exports.test13_9 = /staticasyncadd_.+\(.+,.+,benignErrorReporter\){/;
+module.exports.test13_10 = /staticasyncremove_.+\(.+,.+,benignErrorReporter\){/;
 
 
 /**
@@ -243,20 +243,20 @@ module.exports.test17_11 = /countAllAssociatedRecords.+returnget_to_one_associat
  * 18_b.  ddm <generic_to_many> - person
  */
 //to_many firms (particular firms)
-module.exports.test18_1 = /asyncdogsFilterImpl\({search,order,pagination},context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test18_2 = /asyncdogsConnectionImpl\({search,order,pagination},context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test18_3 = /asynccountFilteredDogsImpl\({search},context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test18_4 = /staticasyncadd_dogsImpl\(person_input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test18_5 = /staticasyncremove_dogsImpl\(person_input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test18_1 = /asyncdogsFilterImpl\({search,order,pagination},context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test18_2 = /asyncdogsConnectionImpl\({search,order,pagination},context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test18_3 = /asynccountFilteredDogsImpl\({search},context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test18_4 = /staticasyncadd_dogsImpl\(person_input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test18_5 = /staticasyncremove_dogsImpl\(person_input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 
 /**
  * 19.    generic <generic_to_one> - dog
  * 19_b.  ddm <generic_to_one> - dog
  */
 //to_one firms (particular firms)
-module.exports.test19_1 = /asyncownerImpl\({search},context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test19_2 = /staticasyncadd_ownerImpl\(dog_input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test19_3 = /staticasyncremove_ownerImpl\(dog_input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test19_1 = /asyncownerImpl\({search},context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test19_2 = /staticasyncadd_ownerImpl\(dog_input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test19_3 = /staticasyncremove_ownerImpl\(dog_input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 
 /**
  * PART III: Generic adapter
@@ -266,14 +266,14 @@ module.exports.test19_3 = /staticasyncremove_ownerImpl\(dog_input\){\/\*YOURCODE
  * 20. generic-adapter - person-a
  */
 //general firms
-module.exports.test20_1 = /staticasyncreadById\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test20_2 = /staticasynccountRecords\(search\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test20_3 = /staticasyncreadAllCursor\(search,order,pagination\){/;
-module.exports.test20_4 = /staticasyncaddOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test20_5 = /staticasyncupdateOne\(input\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test20_6 = /staticasyncdeleteOne\(id\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test20_7 = /staticasyncbulkAddCsv\(context\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test20_8 = /staticasynccsvTableTemplate\(\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_1 = /staticasyncreadById\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_2 = /staticasynccountRecords\(search,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_3 = /staticasyncreadAllCursor\(search,order,pagination,benignErrorReporter\){/;
+module.exports.test20_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test20_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test20_9 = /staticgetadapterName\(\){return'person_a';}/;
 module.exports.test20_10 = /staticgetadapterType\(\){return'generic-adapter';}/;
 module.exports.test20_11 = /staticrecognizeId\(iri\){returniriRegex\.test\(iri\);}/;
