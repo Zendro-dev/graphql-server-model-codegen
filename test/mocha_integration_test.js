@@ -1689,6 +1689,7 @@ describe(
               }
             }
           });
+
         // 'Free' dog Benji so that the entries can be erased next
         res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-03") {dog_id name person_id}}');
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -1702,6 +1703,124 @@ describe(
               }
             }
           });
+
+        //illegal cursor based pagination Arguments
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}\
+           pagination:{last:2, after:"eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9"})\
+             {edges{node{person_id name countFilteredDogs}cursor}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+          {
+            "errors": [
+              {
+                "message": "Illegal cursor based pagination arguments. Use either \"first\" and optionally \"after\", or \"last\" and optionally \"before\"!",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 2
+                  }
+                ],
+                "path": [
+                  "peopleConnection"
+                ]
+              }
+            ],
+            "data": {
+              "peopleConnection": null
+            }
+          }
+        )
+
+        //parseOrderCursor Tests (after)
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
+          first:2, after:"eyJuYW1lIjoiQmVydGhhIiwicGVyc29uX2lkIjoiaW5zdGFuY2UyLTAxIn0="}) \
+          {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+          {
+            "data": {
+              "peopleConnection": {
+                "edges": [
+                  {
+                    "node": {
+                      "person_id": "instance1-02",
+                      "name": "Charlie",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9"
+                  },
+                  {
+                    "node": {
+                      "person_id": "instance2-02",
+                      "name": "Dora",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9"
+                  }
+                ],
+                "pageInfo": {
+                  "startCursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9",
+                  "endCursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9",
+                  "hasNextPage": true,
+                  "hasPreviousPage": true
+                }
+              }
+            }
+          }
+        )
+        //parseOrderCursor Tests (before + includeCursor)
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
+          last:2, before:"eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9", includeCursor:true})\
+          {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor}\
+          pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+          {
+            "data": {
+              "peopleConnection": {
+                "edges": [
+                  {
+                    "node": {
+                      "person_id": "instance1-02",
+                      "name": "Charlie",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9"
+                  },
+                  {
+                    "node": {
+                      "person_id": "instance2-02",
+                      "name": "Dora",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9"
+                  }
+                ],
+                "pageInfo": {
+                  "startCursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9",
+                  "endCursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9",
+                  "hasPreviousPage": true,
+                  "hasNextPage": true
+                }
+              }
+            }
+          }
+        )
     });
     it('08. Delete people and dogs', function() {
         // Delete dog Hector
