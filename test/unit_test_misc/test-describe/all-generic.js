@@ -99,8 +99,8 @@ module.exports.test7_8 = /person\.prototype\.remove_dogs=asyncfunction\(input,be
 //to_one firms (particular firms)
 module.exports.test8_1 = /.+constassociationArgsDef={'addOwner':'person'}/;
 module.exports.test8_2 = /dog\.prototype\.owner=asyncfunction\({/;
-module.exports.test8_3 = /dog\.prototype\.add_owner=asyncfunction\(input\){/;
-module.exports.test8_4 = /dog\.prototype\.remove_owner=asyncfunction\(input\){/;
+module.exports.test8_3 = /dog\.prototype\.add_owner=asyncfunction\(input,benignErrorReporter\){/;
+module.exports.test8_4 = /dog\.prototype\.remove_owner=asyncfunction\(input,benignErrorReporter\){/;
 
 
 /* Models */
@@ -211,8 +211,8 @@ module.exports.test16_3 = /person\.prototype\.countFilteredDogs=function\({.+thi
 module.exports.test16_4 = /person\.prototype\.dogsConnection=function\({.+this\.dogsConnectionImpl\({/;
 module.exports.test16_5 = /promises\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
 module.exports.test16_6 = /promises\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
-module.exports.test16_7 = /person\.prototype\.add_dogs=asyncfunction\(input\){.+person\.add_dogsImpl\(input\);/;
-module.exports.test16_8 = /person\.prototype\.remove_dogs=asyncfunction\(input\){.+person\.remove_dogsImpl\(input\);/;
+module.exports.test16_7 = /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.add_dogsImpl\(input,benignErrorReporter\);/;
+module.exports.test16_8 = /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.remove_dogsImpl\(input,benignErrorReporter\);/;
 module.exports.test16_9 = /countAllAssociatedRecords.+{.+letpromises_generic_to_many=\[\];/;
 module.exports.test16_10 = /countAllAssociatedRecords.+promises_generic_to_many\.push\(person\.countFilteredDogs\({},context\)\);/;
 module.exports.test16_11 = /countAllAssociatedRecords.+letresult_generic_to_many=awaitPromise\.all\(promises_generic_to_many\);/;
@@ -228,8 +228,8 @@ module.exports.test17_1 = /constassociationArgsDef={'addOwner':'person'}/;
 module.exports.test17_2 = /dog\.prototype\.owner=asyncfunction\({.+this\.ownerImpl\({/;
 module.exports.test17_3 = /promises\.push\(this\.add_owner\(input,benignErrorReporter\)\);/;
 module.exports.test17_4 = /promises\.push\(this\.remove_owner\(input,benignErrorReporter\)\);/;
-module.exports.test17_5 = /dog\.prototype\.add_owner=asyncfunction\(input\){.+dog\.add_ownerImpl\(input\);/;
-module.exports.test17_6 = /dog\.prototype\.remove_owner=asyncfunction\(input\){.+dog\.remove_ownerImpl\(input\);/;
+module.exports.test17_5 = /dog\.prototype\.add_owner=asyncfunction\(input,benignErrorReporter\){.+dog\.add_ownerImpl\(input,benignErrorReporter\);/;
+module.exports.test17_6 = /dog\.prototype\.remove_owner=asyncfunction\(input,benignErrorReporter\){.+dog\.remove_ownerImpl\(input,benignErrorReporter\);/;
 module.exports.test17_7 = /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;
 module.exports.test17_8 = /countAllAssociatedRecords.+promises_generic_to_one\.push\(dog\.owner\({},context\)\);/;
 module.exports.test17_9 = /countAllAssociatedRecords.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;

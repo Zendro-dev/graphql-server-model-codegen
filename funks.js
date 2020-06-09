@@ -1085,7 +1085,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'generic':
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
-          {dir: 'resolvers', template: 'resolvers-generic', fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-generic', template: 'models-generic', fileName: opts.nameLc},
         ]
         break;

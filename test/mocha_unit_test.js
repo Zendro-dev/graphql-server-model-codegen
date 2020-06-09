@@ -2019,7 +2019,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.1. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.match(data_test.test6_1);
@@ -2027,7 +2027,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.2. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_2);
@@ -2035,7 +2035,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.3. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_3);
@@ -2043,7 +2043,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.4. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_4);
@@ -2051,7 +2051,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.5. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_5);
@@ -2074,7 +2074,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('8. generic <to_one> sql - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_toOne_personSql);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.match(data_test.test8_1).and
@@ -2251,7 +2251,7 @@ describe('Generic Associations - Resolvers Layer', function(){
 
   it('17. generic <generic_to_one> - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.match(data_test.test17_1).and
