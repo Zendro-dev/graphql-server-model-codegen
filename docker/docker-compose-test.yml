@@ -17,7 +17,9 @@ services:
       dockerfile: Dockerfile.cassandra
     volumes: 
       - ./cassandra1.yaml:/etc/cassandra/cassandra.yaml
-      - ./cqlshrc.1:/.cassandra/cqlshrc
+      - ./cqlshrc.1:/a.cqlshrc
+      - ./docker-entrypoint.sh.cassandra:/docker-entrypoint.sh
+      - ./cassandra-keyspace.cql:/docker-entrypoint-initdb.d/cassandra-keyspace.cql
     ports: 
       - 9041:9041
       - 7050:7050
@@ -120,7 +122,9 @@ services:
       dockerfile: Dockerfile.cassandra
     volumes: 
       - ./cassandra2.yaml:/etc/cassandra/cassandra.yaml
-      - ./cqlshrc.2:/.cassandra/cqlshrc
+      - ./cqlshrc.2:/a.cqlshrc
+      - ./docker-entrypoint.sh.cassandra:/docker-entrypoint.sh
+      - ./cassandra-keyspace.cql:/docker-entrypoint-initdb.d/cassandra-keyspace.cql
     ports: 
       - 9043:9043
       - 7060:7060
