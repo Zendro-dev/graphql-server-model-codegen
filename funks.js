@@ -390,7 +390,7 @@ writeIndexAdapters = function(dir_write){
   const fs = require('fs');
   const path = require('path');
   const Sequelize = require('sequelize');
-  sequelize = require('../connection');
+  sequelize = require('../../connection');
 
   let adapters = {};
   module.exports = adapters;
@@ -419,7 +419,7 @@ writeIndexAdapters = function(dir_write){
         throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
     }
 
-    let patches_patch = path.join(__dirname,'..','patches', file);
+    let patches_patch = path.join(__dirname,'..','..','patches', file);
     if(fs.existsSync(patches_patch)){
         adapter = require(\`\${patches_patch}\`).logic_patch(adapter);
     }
@@ -845,7 +845,8 @@ generateSections = async function(sections, opts, dir_write) {
  */
 writeCommons = async function(dir_write, models){
   writeSchemaCommons(dir_write);
-  writeIndexAdapters(dir_write);
+  console.log(path.join(dir_write,'models'))
+  writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
@@ -914,7 +915,7 @@ getStorageType = function(dataModel) {
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
-  let sectionsDirsB = ['models-cenz-server', 'adapters', 'models-distributed', 'models-generic'];
+  let sectionsDirsB = ['models/sql','models/cenz-server', 'models/adapters', 'models/distributed', 'models/generic'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
@@ -1044,7 +1045,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',    template: 'schemas',    fileName: opts.nameLc},
           {dir: 'resolvers',  template: 'resolvers',  fileName: opts.nameLc},
-          {dir: 'models',     template: 'models',     fileName: opts.nameLc},
+          {dir: 'models/sql',     template: 'models',     fileName: opts.nameLc},
           {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
@@ -1055,7 +1056,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
-          {dir: 'models-cenz-server', template: 'models-cenz', fileName: opts.nameLc},
+          {dir: 'models/cenz-server', template: 'models-cenz', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
@@ -1065,7 +1066,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',    template: 'schemas-ddm',   fileName: opts.nameLc},
           {dir: 'resolvers',  template: 'resolvers-ddm', fileName: opts.nameLc},
-          {dir: 'models-distributed', template: 'distributed-model', fileName: opts.nameLc},
+          {dir: 'models/distributed', template: 'distributed-model', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
         ]
         break;
@@ -1074,7 +1075,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
-          {dir: 'models-generic', template: 'models-generic', fileName: opts.nameLc},
+          {dir: 'models/generic', template: 'models-generic', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
         ]
@@ -1082,21 +1083,21 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
       case 'cenzontle-webservice-adapter':
         sections = [
-          {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'cenz-adapters', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
       case 'ddm-adapter':
         sections = [
-          {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'cenz-adapters', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
       case 'sql-adapter':
         sections = [
-          {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
+          {dir: 'models/adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
@@ -1104,7 +1105,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
       case 'generic-adapter':
         sections = [
-          {dir: 'adapters', template: 'generic-adapter', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'generic-adapter', fileName: opts.adapterName},
         ]
         break;
 

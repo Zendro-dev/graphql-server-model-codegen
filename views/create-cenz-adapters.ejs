@@ -1,8 +1,8 @@
 const axios_general = require('axios');
-const globals = require('../config/globals');
-const validatorUtil = require('../utils/validatorUtil');
-const errorHelper = require('../utils/errors');
-const helper = require('../utils/helper');
+const globals = require('../../config/globals');
+const validatorUtil = require('../../utils/validatorUtil');
+const errorHelper = require('../../utils/errors');
+const helper = require('../../utils/helper');
 
 let axios = axios_general.create();
 axios.defaults.timeout = globals.MAX_TIME_OUT;

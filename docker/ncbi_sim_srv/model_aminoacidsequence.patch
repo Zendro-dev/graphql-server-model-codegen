@@ -2,8 +2,8 @@
 +++ aminoacidsequence_update.js	2020-06-09 19:16:53.527756704 -0500
 @@ -1,6 +1,9 @@
  const _ = require('lodash');
- const globals = require('../config/globals');
- const helper = require('../utils/helper');
+ const globals = require('../../config/globals');
+ const helper = require('../../utils/helper');
 +const request = require('sync-request');
 +const baseUrl = 'http://gql_ncbi_sim_srv:3344/aminoAcidSequence/';
 +

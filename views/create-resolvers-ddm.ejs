@@ -3,13 +3,13 @@
 */
 
 const path = require('path');
-const <%-  nameLc  -%> = require(path.join(__dirname, '..', 'models_index.js')).<%- nameLc -%>;
+const <%-  nameLc  -%> = require(path.join(__dirname, '..', 'models', 'index.js')).<%- nameLc -%>;
 const helper = require('../utils/helper');
 const checkAuthorization = require('../utils/check-authorization');
 const fs = require('fs');
 const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
-const models = require(path.join(__dirname, '..', 'models_index.js'));
+const models = require(path.join(__dirname, '..', 'models', 'index.js'));
 const globals = require('../config/globals');
 const errorHelper = require('../utils/errors');
 

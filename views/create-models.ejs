@@ -2,19 +2,19 @@
 
 const _ = require('lodash');
 const Sequelize = require('sequelize');
-const dict = require('../utils/graphql-sequelize-types');
-const searchArg = require('../utils/search-argument');
-const globals = require('../config/globals');
-const validatorUtil = require('../utils/validatorUtil');
-const fileTools = require('../utils/file-tools');
-const helpersAcl = require('../utils/helpers-acl');
-const email = require('../utils/email');
+const dict = require('../../utils/graphql-sequelize-types');
+const searchArg = require('../../utils/search-argument');
+const globals = require('../../config/globals');
+const validatorUtil = require('../../utils/validatorUtil');
+const fileTools = require('../../utils/file-tools');
+const helpersAcl = require('../../utils/helpers-acl');
+const email = require('../../utils/email');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const uuidv4 = require('uuidv4').uuid;
-const helper = require('../utils/helper');
-const models = require(path.join(__dirname, '..', 'models_index.js'));
+const helper = require('../../utils/helper');
+const models = require(path.join(__dirname, '..', 'index.js'));
 const moment = require('moment');
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;

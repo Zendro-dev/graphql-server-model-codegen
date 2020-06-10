@@ -16,7 +16,10 @@ module.exports.validator_patch = function(<%- nameLc -%>){
     )
 
     <%- nameLc -%>.prototype.validateForCreate = async function(record) {
-        return await <%- nameLc -%>.prototype.asyncValidate(record)
+        let ret = await <%- nameLc -%>.prototype.asyncValidate(record);
+        console.log("\n\nret: "+ ret + "\n\n")
+        console.log("\n\nret: "+ JSOn.stringify(ret) + "\n\n")
+        return ret;
     }
 
     <%- nameLc -%>.prototype.validateForUpdate = async function(record) {

@@ -1,11 +1,11 @@
 const _ = require('lodash');
 const path = require('path');
 const adapters = require('../adapters/index');
-const globals = require('../config/globals');
-const helper = require('../utils/helper');
-const models = require(path.join(__dirname, '..', 'models_index.js'));
-const validatorUtil = require('../utils/validatorUtil');
-const errorHelper = require('../utils/errors');
+const globals = require('../../config/globals');
+const helper = require('../../utils/helper');
+const models = require(path.join(__dirname, '..', 'index.js'));
+const validatorUtil = require('../../utils/validatorUtil');
+const errorHelper = require('../../utils/errors');
 
 
 const definition = <%- definition -%>;

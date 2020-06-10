@@ -1,18 +1,18 @@
 const _ = require('lodash');
-const globals = require('../config/globals');
+const globals = require('../../config/globals');
 const Sequelize = require('sequelize');
-const dict = require('../utils/graphql-sequelize-types');
-const validatorUtil = require('../utils/validatorUtil');
-const helper = require('../utils/helper');
-const searchArg = require('../utils/search-argument');
+const dict = require('../../utils/graphql-sequelize-types');
+const validatorUtil = require('../../utils/validatorUtil');
+const helper = require('../../utils/helper');
+const searchArg = require('../../utils/search-argument');
 const path = require('path');
-const fileTools = require('../utils/file-tools');
-const helpersAcl = require('../utils/helpers-acl');
-const email = require('../utils/email');
+const fileTools = require('../../utils/file-tools');
+const helpersAcl = require('../../utils/helpers-acl');
+const email = require('../../utils/email');
 const fs = require('fs');
 const os = require('os');
 const uuidv4 = require('uuidv4').uuid;
-const models = require(path.join(__dirname, '..', 'models_index.js'));
+const models = require(path.join(__dirname, '..', 'index.js'));
 
 const remoteCenzontleURL = "<%- url -%>";
 const iriRegex = new RegExp('<%- regex -%>');
