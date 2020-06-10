@@ -419,7 +419,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   }
 
   static csvTableTemplate(){
-    return helper.csvTableTemplate(<%- name -%>);
+    return helper.csvTableTemplate(definition);
   }
 
   <% associations_temp = associationsArguments["to_many_through_sql_cross_table"]-%>
