@@ -28,7 +28,11 @@ const definition = <%- definition -%>;
  * @return {object}           Sequelize model with associations defined
  */
 
-module.exports = class <%- name -%> extends Sequelize.Model{
+module.exports = class <%- name -%> /* extends Sequelize.Model */ {
+  constructor() {
+    console.log('Class <%- name -%> created.');
+  }
+
   /*static init(sequelize, DataTypes){
     return super.init({
 

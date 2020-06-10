@@ -180,6 +180,22 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "type": "null" }
         ]
       }
+    } else if (jsonSchemaProps[key] === 'uuid') {
+      jsonSchemaProps[key] = {
+        "type": ["uuid", "null"]
+      }
+    } else if (jsonSchemaProps[key] === 'text') {
+      jsonSchemaProps[key] = {
+        "type": ["text", "null"]
+      }
+    } else if (jsonSchemaProps[key] === 'int') {
+      jsonSchemaProps[key] = {
+        "type": ["int", "null"]
+      }
+    } else if (jsonSchemaProps[key] === 'tinyint') {
+      jsonSchemaProps[key] = {
+        "type": ["tinyint", "null"]
+      }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
     }
@@ -317,12 +333,65 @@ writeSchemaCommons = function(dir_write){
   scalar DateTime
 \`;`;
 
+let commonsCassandra = `module.exports = \`
+
+enum Operator{
+  eq
+  lt
+  gt
+  le
+  ge
+  ne
+  _in
+  cont   # CONTAINS
+  ctk    # CONTAINS KEY
+  and
+}
+
+enum Order{
+  DESC
+  ASC
+}
+
+input typeValue{
+  type: String
+  value: String!
+}
+
+type paginationCursorInput{
+  first: Int
+  last: Int
+  after: String
+  before: String # Needs to be saved before, calling "before" a given cursor is not possible in Cassandra
+  includeCursor: Boolean
+}
+
+type pageInfo{
+  startCursor: String
+  endCursor: String
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+scalar Date
+scalar Time
+scalar DateTime
+
+\`;`;
+
   try {
     let file_name = dir_write + '/schemas/' +  'commons.js';
 
     fs.writeFileSync(file_name, commons);
+
     //success
     console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+
+    let file_name_cassandra = dir_write + '/schemas/commons-cassandra.js';
+
+    fs.writeFileSync(file_name_cassandra, commonsCassandra);
+
+    console.log('@@@ File:', colors.dim(file_name_cassandra), colors.green('written successfully!'));
 
   } catch(e) {
     //error
@@ -441,6 +510,23 @@ writeIndexResolvers = async function(dir_write, models){
   let file_name = dir_write + '/resolvers/index.js';
   //generate
   await generateSection('resolvers-index', {models: models}, file_name)
+  .then(() => {
+    //success
+    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+  })
+  .catch((e) => {
+    //error
+    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+    console.log(e);
+    throw e;
+  });
+}
+
+writeIndexMigrationsCassandra = async function(dir_write, models){
+  //set file name
+  let file_name = dir_write + '/migrations-cassandra/index.js';
+  //generate
+  await generateSection('migrations-cassandra-index', {models: models}, file_name)
   .then(() => {
     //success
     console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
@@ -802,6 +888,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'migrations':
         file_name = createNameMigration(dir_write, section.fileName);
         break;
+      case 'migrations-cassandra':
       //validations & patches 
       case 'validations':
       case 'patches':
@@ -843,6 +930,7 @@ writeCommons = async function(dir_write, models){
   writeSchemaCommons(dir_write);
   writeIndexAdapters(dir_write);
   await writeIndexResolvers(dir_write, models);
+  await writeIndexMigrationsCassandra(dir_write, models);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
@@ -887,7 +975,7 @@ getStorageType = function(dataModel) {
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`)); 
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, cassandra, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`)); 
           break;
       }
     }
@@ -911,8 +999,8 @@ getStorageType = function(dataModel) {
  * @param  {object} options   Object with additional options.
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
-  let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
-  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed', 'models-generic'];
+  let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches', 'migrations-cassandra'];
+  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed', 'models-generic', 'models-cassandra'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
@@ -1084,9 +1172,10 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
       case 'cassandra':
         sections = [
-          {dir: 'schemas', template: 'schemas', fileName: opts.nameLc},
+          {dir: 'schemas', template: 'schemas-cassandra', fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-cassandra', template: 'models-cassandra', fileName: opts.nameLc},
+          {dir: 'migrations-cassandra', template: 'migrations-cassandra', fileName: opts.nameLc},
         ]
         break;
 

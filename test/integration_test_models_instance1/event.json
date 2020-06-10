@@ -1,0 +1,22 @@
+{
+    "model": "Event",
+    "storageType": "cassandra",
+    "attributes": {
+      "event_id": "uuid",
+      "event_description": "text"
+    },
+  
+    "associations": {
+  
+      "time": {
+        "type": "to_many",
+        "target": "Time",
+        "targetKey": "eventId",
+        "keyIn" : "Time",
+        "targetStorageType": "cassandra"
+      }
+  
+    },
+  
+    "internalId" : "event_id"
+  }

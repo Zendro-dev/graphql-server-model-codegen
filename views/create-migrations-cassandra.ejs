@@ -1,0 +1,49 @@
+'use strict';
+const client = require('../utils/cassandra-client');
+const dict = require('../utils/graphql-sequelize-types');
+
+/**
+ * @module - Migrations to create and to undo a table correpondant to a sequelize model.
+ */
+module.exports = {
+
+  /**
+   * up - Creates a table with the fields specified in the the createTable function.
+   *
+   * @param  {object} queryInterface Used to modify the table in the database.
+   * @param  {object} Sequelize      Sequelize instance with data types included
+   * @return {promise}                Resolved if the table was created successfully, rejected otherwise.
+   */
+  up: async function(){
+    let createString = "CREATE TABLE <%-namePl-%>(<%- idAttribute -%> <%= idAttributeType %> PRIMARY KEY";
+    let indexCreationStrings = [];
+
+    <% let keys = Object.keys(attributes) -%>
+      <%for (let i=0; i< keys.length; i++) {-%>
+        <% let type_seq =  attributes[ keys[i] ] -%>
+          createString += ",\n <%=  keys[i] %> <%= type_seq %>";
+          indexCreationStrings.push(keys[i]);
+       <%}-%>
+    
+    createString += ");";
+
+    await client.execute(createString);
+
+    for await (let i = 0; i < indexCreationStrings.length; i++) {
+      client.execute('CREATE INDEX IF NOT EXISTS ' + indexCreationStrings[i] + '_index ON <%-namePl-%> (indexCreationStrings[i]);');
+    }
+
+  },
+
+  /**
+   * down - Deletes a table.
+   *
+   * @param  {object} queryInterface Used to modify the table in the database.
+   * @param  {object} Sequelize      Sequelize instance with data types included
+   * @return {promise}                Resolved if the table was deleted successfully, rejected otherwise.
+   */
+  down: async function(){
+    await client.execute('DROP TABLE IF EXISTS <%-namePl-%>');
+  }
+
+};
