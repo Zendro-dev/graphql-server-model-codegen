@@ -273,7 +273,7 @@ const definition = {
             target: 'publi_sher',
             targetKey: 'companyId',
             keyIn: 'Person',
-            targetStorageType: 'webservice',
+            targetStorageType: 'generic',
             name: 'company',
             name_lc: 'company',
             name_cp: 'Company',

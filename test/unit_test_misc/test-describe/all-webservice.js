@@ -46,11 +46,10 @@ type book{
 `
 module.exports.model_book = `
 /**
- * constructor - Creates an instance of the model stored in webservice
+ * constructor - Creates an instance of the generic model book.
  *
  * @param  {obejct} input    Data for the new instances. Input for each field of the model.
  */
-
 constructor({
     id,
     title,
@@ -125,11 +124,12 @@ bulkAddPersonCsv: [Person] }
 
 `
 module.exports.model_person = `
-static readById( id ){
+static async readById(id, benignErrorReporter) {
+
   /*
   YOUR CODE GOES HERE
-  */
-  throw new Error('readOnePerson is not implemented');
+   */
+  throw new Error('readById() is not implemented for model Person');
 }
 `
 

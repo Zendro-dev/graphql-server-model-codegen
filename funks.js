@@ -793,7 +793,6 @@ generateSections = async function(sections, opts, dir_write) {
       case 'resolvers-generic':
       //models
       case 'models':
-      case 'models-webservice':
       case 'models-cenz':
       case 'distributed-model':
       case 'models-generic':
@@ -877,7 +876,6 @@ getStorageType = function(dataModel) {
         //models
         case 'sql':
         case 'distributed-data-model':
-        case 'webservice':
         case 'cenz-server':
         case 'generic':
         //adapters
@@ -891,7 +889,7 @@ getStorageType = function(dataModel) {
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, cenz-server, generic, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
           break;
       }
     }
@@ -916,7 +914,7 @@ getStorageType = function(dataModel) {
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
-  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed', 'models-generic'];
+  let sectionsDirsB = ['models-cenz-server', 'adapters', 'models-distributed', 'models-generic'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
@@ -1053,16 +1051,6 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         ]
         break;
 
-      case 'webservice':
-        sections = [
-          {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
-          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
-          {dir: 'models-webservice', template: 'models-webservice', fileName: opts.nameLc},
-          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
-        ]
-        break;
-
       case 'cenz-server':
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
@@ -1087,6 +1075,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models-generic', template: 'models-generic', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
         ]
         break;
 

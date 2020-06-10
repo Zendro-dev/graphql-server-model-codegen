@@ -22,7 +22,7 @@
       "target" : "aminoacidsequence",
       "targetKey" : "aminoacidsequence_id",
       "keyIn": "transcript_count",
-      "targetStorageType" : "Webservice"
+      "targetStorageType" : "generic"
     }
   }
 }

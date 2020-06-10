@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 //const test = require('./unit_test_misc/data_test');
 const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
-const models_webservice = require('./unit_test_misc/data_models_webservice');
+const models_generic_webservice = require('./unit_test_misc/data_models_generic_webservice');
 const models_cenz = require('./unit_test_misc/data_models_cenz');
 const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
@@ -221,7 +221,7 @@ describe('Model naming cases ', function(){
 
   it('Model - aminoAcidSequence', async function(){
     let opts = funks.getOptions(models.aminoAcidSequence);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.model_webservice_aminoAcid.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
@@ -366,12 +366,12 @@ describe('Monkey patching templates', function(){
     });
 });
 
-describe('All webservice models', function(){
+describe('All webservice (generic) models', function(){
 
   let data_test = require('./unit_test_misc/test-describe/all-webservice');
 
   it('GraphQL Schema - book', async function(){
-    let opts = funks.getOptions(models_webservice.book);
+    let opts = funks.getOptions(models_generic_webservice.book);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     let test_schema = data_test.schema_book.replace(/\s/g, '');
@@ -379,7 +379,7 @@ describe('All webservice models', function(){
   });
 
   it('Resolvers - book', async function(){
-    let opts = funks.getOptions(models_webservice.book);
+    let opts = funks.getOptions(models_generic_webservice.book);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.resolvers_book.replace(/\s/g, '');
@@ -387,15 +387,15 @@ describe('All webservice models', function(){
   });
 
   it('Model - book', async function(){
-    let opts = funks.getOptions(models_webservice.book);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.book);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.model_book.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
   it('GraphQL Schema - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
+    let opts = funks.getOptions(models_generic_webservice.person);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     let test_schema = data_test.schema_person.replace(/\s/g, '');
@@ -403,7 +403,7 @@ describe('All webservice models', function(){
   });
 
   it('Resolvers - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
+    let opts = funks.getOptions(models_generic_webservice.person);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.resolvers_person.replace(/\s/g, '');
@@ -411,16 +411,16 @@ describe('All webservice models', function(){
   });
 
   it('Model - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.person);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.model_person.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
   it('Model name class - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.person);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.class_name_model_person.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
@@ -448,8 +448,8 @@ describe('All webservice models', function(){
 //   });
 //
 //   it('Access web-service model definition property', async function(){
-//     let opts = funks.getOptions(models_webservice.publisher);
-//     let generated_model =await funks.generateJs('create-models-webservice', opts);
+//     let opts = funks.getOptions(models_generic_webservice.publisher);
+//     let generated_model =await funks.generateJs('create-models-generic', opts);
 //     let model = requireFromString(generated_model);
 //
 //     // check any existing property of the 'publisher' definition
@@ -539,8 +539,8 @@ describe('Model Layer', function(){
   });
 
   it('Model - publisher', async function(){
-    let opts = funks.getOptions(models_webservice.publisher);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.publisher);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.count_in_webservice_model.replace(/\s/g, '');
     expect(g_model, 'No count method found').to.have.string(test_model);

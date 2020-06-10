@@ -17,12 +17,12 @@ static async countRecords(search) {
 `
 
 module.exports.count_in_webservice_model = `
-static countRecords(search){
+static async countRecords(search, benignErrorReporter) {
 
   /*
   YOUR CODE GOES HERE
   */
-  throw new Error('countPubli_shers is not implemented');
+  throw new Error('countRecords() is not implemented for model publi_sher');
 }
 `
 

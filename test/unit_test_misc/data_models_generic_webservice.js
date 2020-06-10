@@ -1,7 +1,7 @@
 module.exports.book =
 {
   "model": "book",
-  "storageType": "webservice",
+  "storageType": "generic",
   "attributes": {
     "title": "String",
     "subject": "String",
@@ -14,7 +14,7 @@ module.exports.book =
         "target": "publi_sher",
         "targetKey": "publisher_id",
         "keyIn": "book",
-        "targetStorageType": "webservice"
+        "targetStorageType": "generic"
       },
 
       "authors": {
@@ -22,7 +22,7 @@ module.exports.book =
         "target": "Person",
         "targetKey": "person_id",
         "sourceKey": "book_id",
-        "targetStorageType": "webservice"
+        "targetStorageType": "generic"
       }
   }
 }
@@ -30,7 +30,7 @@ module.exports.book =
 module.exports.person =
 {
   "model": "Person",
-  "storageType": "webservice",
+  "storageType": "generic",
   "attributes" :{
     "firstName": "String",
     "lastName": "String",
@@ -44,7 +44,7 @@ module.exports.person =
       "target": "book",
       "targetKey": "book_id",
       "sourceKey": "person_id",
-      "targetStorageType": "webservice"
+      "targetStorageType": "generic"
     },
 
     "company":{
@@ -52,7 +52,7 @@ module.exports.person =
       "target": "publi_sher",
       "targetKey": "companyId",
       "keyIn": "Person",
-      "targetStorageType": "webservice"
+      "targetStorageType": "generic"
     }
   }
 
@@ -61,7 +61,7 @@ module.exports.person =
 module.exports.publisher =
 {
   "model" : "publi_sher",
-  "storageType" : "webservice",
+  "storageType" : "generic",
   "attributes": {
     "name" : "String",
     "phone" : "String"
@@ -73,7 +73,7 @@ module.exports.publisher =
       "target": "book",
       "targetKey": "publisher_id",
       "keyIn": "book",
-      "targetStorageType": "webservice"
+      "targetStorageType": "generic"
     },
 
     "director":{
@@ -81,7 +81,7 @@ module.exports.publisher =
       "target": "Person",
       "targetKey": "companyId",
       "keyIn": "Person",
-      "targetStorageType": "webservice"
+      "targetStorageType": "generic"
     }
   }
 }
