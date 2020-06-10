@@ -8,12 +8,16 @@ package-lock.json
 
 # ModelGen output folders
 migrations
-models
-models-webservice
-models-distributed
-models-cenz-server
+generic
+sql
+distributed
 adapters
+cenz-server
 resolvers
 schemas
+validations
+patches
+adapters
+seeders
 TestConcept.js
 .eslintrc.js

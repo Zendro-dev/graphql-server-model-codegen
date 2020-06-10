@@ -942,7 +942,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         //err
         console.log(colors.red("! mkdir.error: "), "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS");
         console.log(colors.red("!@ mkdir.error: "), e);
-        console.log(colors.red("\done"));
+        console.log(colors.red("done"));
         process.exit(1);
       }
     } else {
