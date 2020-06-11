@@ -1106,6 +1106,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'generic-adapter':
         sections = [
           {dir: 'models/adapters', template: 'generic-adapter', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 

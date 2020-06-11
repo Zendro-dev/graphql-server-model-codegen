@@ -116,7 +116,7 @@ module.exports.test9_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YOU
 module.exports.test9_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test9_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test9_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test9_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test9_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){returnhelper\.csvTableTemplate\(definition\);/;
 //not match (to_one firms)
 module.exports.test9_9 = /staticasyncadd_.+\(.+,.+,benignErrorReporter\){/;
 module.exports.test9_10 = /staticasyncremove_.+\(.+,.+,benignErrorReporter\){/;
@@ -140,7 +140,7 @@ module.exports.test11_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YO
 module.exports.test11_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test11_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test11_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test11_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test11_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){returnhelper\.csvTableTemplate\(definition\);/;
 //to_one firms
 module.exports.test11_9 = /staticasyncadd_personId\(id,personId,benignErrorReporter\){/;
 module.exports.test11_10 = /staticasyncremove_personId\(id,personId,benignErrorReporter\){/;
@@ -163,7 +163,7 @@ module.exports.test13_4 = /staticasyncaddOne\(input,benignErrorReporter\){\/\*YO
 module.exports.test13_5 = /staticasyncupdateOne\(input,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test13_6 = /staticasyncdeleteOne\(id,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
 module.exports.test13_7 = /staticasyncbulkAddCsv\(context,benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
-module.exports.test13_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){\/\*YOURCODEGOESHERE\*\/thrownewError/;
+module.exports.test13_8 = /staticasynccsvTableTemplate\(benignErrorReporter\){returnhelper\.csvTableTemplate\(definition\);/;
 //to_one firms
 //not match
 module.exports.test13_9 = /staticasyncadd_.+\(.+,.+,benignErrorReporter\){/;

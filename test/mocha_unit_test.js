@@ -368,7 +368,7 @@ describe('Monkey patching templates', function(){
 
 describe('All webservice (generic) models', function(){
 
-  let data_test = require('./unit_test_misc/test-describe/all-webservice');
+  let data_test = require('./unit_test_misc/test-describe/all-generic-webservice');
 
   it('GraphQL Schema - book', async function(){
     let opts = funks.getOptions(models_generic_webservice.book);

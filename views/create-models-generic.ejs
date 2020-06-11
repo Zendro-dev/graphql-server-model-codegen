@@ -426,11 +426,8 @@ module.exports = class <%- name -%>{
    * GraphQL response will have a non empty errors property.
    */
   static async csvTableTemplate(benignErrorReporter){
-      /*
-      YOUR CODE GOES HERE
-      */
-      throw new Error('csvTableTemplate() is not implemented for model <%- name -%>');
-    }
+      return helper.csvTableTemplate(definition);
+  }
 
 <%# generic_to_one -%>
   <% associations_temp = associationsArguments["generic_to_one"]-%>

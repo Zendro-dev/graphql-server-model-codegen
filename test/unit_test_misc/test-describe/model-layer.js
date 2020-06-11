@@ -330,7 +330,7 @@ module.exports.bulk_add_resolver = `
     },
 `
 module.exports.table_template_model = `
-static csvTableTemplate(){
+static async csvTableTemplate(benignErrorReporter){
   return helper.csvTableTemplate(definition);
 }
 `

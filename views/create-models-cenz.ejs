@@ -315,6 +315,15 @@ module.exports = class <%- name -%>{
     }
   }
 
+  /**
+   * csvTableTemplate - Allows the user to download a template in CSV format with the
+   * properties and types of this model.
+   *
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the 
+   * GraphQL response will have a non empty errors property.
+   */
   static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
     //use default BenignErrorReporter if no BenignErrorReporter defined
