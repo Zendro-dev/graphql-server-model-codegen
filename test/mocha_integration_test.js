@@ -1843,18 +1843,11 @@ describe(
           }
         )
 
-        //parseOrderCursor Tests (after)
+        //parseOrderCursor Tests (after)      
         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
           first:2, after:"eyJuYW1lIjoiQmVydGhhIiwicGVyc29uX2lkIjoiaW5zdGFuY2UyLTAxIn0="}) \
           {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
-
-        // res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}) \
-        //   {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
-
         resBody = JSON.parse(res.body.toString('utf8'));
-
-        console.log("@@resBody: ", JSON.stringify(resBody.data));
-
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal(
           {
