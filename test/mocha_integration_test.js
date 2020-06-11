@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const should = require('chai').should();
 const path = require('path');
 const delay = require('delay');
 const itHelpers = require('./integration_test_misc/integration_test_helpers');
@@ -952,54 +953,164 @@ describe(
   res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "@#$%^&") { name } }');
   resBody = JSON.parse(res.body.toString('utf8'));
   expect(res.statusCode).to.equal(500);
-  expect(resBody).to.deep.equal({
-    errors: [
+    expect(resBody).to.deep.equal({
+      errors: [
         {
-            message: "validation failed",
-            locations: [
-                {
-                    line: 1,
-                    column: 12
-                }
-            ],
-            extensions: {
-              "validationErrors": [
-                {
-                    keyword: "type",
-                    dataPath: ".name",
-                    schemaPath: "#/properties/name/anyOf/0/type",
-                    params: {
-                        type: "null"
-                    },
-                    message: "should be null"
+          message: "validation failed",
+          locations: [
+            {
+              line: 1,
+              column: 12
+            }
+          ],
+          extensions: {
+            "validationErrors": [
+              {
+                keyword: "type",
+                dataPath: ".name",
+                schemaPath: "#/properties/name/anyOf/0/type",
+                params: {
+                  type: "null"
                 },
-                {
-                    keyword: "pattern",
-                    dataPath: ".name",
-                    schemaPath: "#/properties/name/anyOf/1/pattern",
-                    params: {
-                        pattern: "^[a-zA-Z0-9]+$"
-                    },
-                    message: "should match pattern \"^[a-zA-Z0-9]+$\""
+                message: "should be null"
+              },
+              {
+                keyword: "pattern",
+                dataPath: ".name",
+                schemaPath: "#/properties/name/anyOf/1/pattern",
+                params: {
+                  pattern: "^[a-zA-Z0-9]+$"
                 },
-                {
-                    keyword: "anyOf",
-                    dataPath: ".name",
-                    schemaPath: "#/properties/name/anyOf",
-                    params: {},
-                    message: "should match some schema in anyOf"
-                }
-              ]},
-            path: [
-                "addIndividual"
+                message: "should match pattern \"^[a-zA-Z0-9]+$\""
+              },
+              {
+                keyword: "anyOf",
+                dataPath: ".name",
+                schemaPath: "#/properties/name/anyOf",
+                params: {},
+                message: "should match some schema in anyOf"
+              }
             ]
+          },
+          path: [
+            "addIndividual"
+          ]
         }
-    ],
-    data: null
-});
+      ],
+      data: null
+    });
+  });
 
-  })
+  it('28. Complementary search operators', async () => {
+    //items
+    let ita = null;
+    let itb = null;
+    let itc = null;
+    
+    //item a
+    res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-a") { id, gene } }');
+    resBody = JSON.parse(res.body.toString('utf8'));
 
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.addTranscript_count);
+    should.exist(resBody.data.addTranscript_count.id);
+    should.exist(resBody.data.addTranscript_count.gene);
+    ita =  resBody.data.addTranscript_count;
+
+    //item b
+    res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-b") { id, gene } }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.addTranscript_count);
+    should.exist(resBody.data.addTranscript_count.id);
+    should.exist(resBody.data.addTranscript_count.gene);
+    itb =  resBody.data.addTranscript_count;
+
+    //item c
+    res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-c") { id, gene } }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.addTranscript_count);
+    should.exist(resBody.data.addTranscript_count.id);
+    should.exist(resBody.data.addTranscript_count.gene);
+    itc =  resBody.data.addTranscript_count;
+
+    /**
+     * op: in ['ita.id', 'itb.id']
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(ita);
+    expect(resBody.data.transcript_counts).to.deep.include(itb);
+    expect(resBody.data.transcript_counts.length).to.equal(2);
+    
+    /**
+     * op: notIn ('ita.id', 'itb.id')
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(itc);
+    expect(resBody.data.transcript_counts).to.not.include(ita);
+    expect(resBody.data.transcript_counts).to.not.include(itb);
+
+    /**
+     * op: like '%ene-28%'
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: {value: "%ene-28%"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(ita);
+    expect(resBody.data.transcript_counts).to.deep.include(itb);
+    expect(resBody.data.transcript_counts).to.deep.include(itc);
+    expect(resBody.data.transcript_counts.length).to.equal(3);
+    
+    /**
+     * op: notLike '%ene-28%'
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: {value: "%ene-28%"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.not.include(ita);
+    expect(resBody.data.transcript_counts).to.not.include(itb);
+    expect(resBody.data.transcript_counts).to.not.include(itc);
+
+    /**
+     * op: between ['ita.id', 'itc.id']
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(ita);
+    expect(resBody.data.transcript_counts).to.deep.include(itb);
+    expect(resBody.data.transcript_counts).to.deep.include(itc);
+    expect(resBody.data.transcript_counts.length).to.equal(3);
+    
+    /**
+     * op: notBetween ['ita.id', 'itc.id']
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.not.include(ita);
+    expect(resBody.data.transcript_counts).to.not.include(itb);
+    expect(resBody.data.transcript_counts).to.not.include(itc);
+  });
 });
 
 
@@ -1736,7 +1847,14 @@ describe(
         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
           first:2, after:"eyJuYW1lIjoiQmVydGhhIiwicGVyc29uX2lkIjoiaW5zdGFuY2UyLTAxIn0="}) \
           {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
+
+        // res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}) \
+        //   {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
+
         resBody = JSON.parse(res.body.toString('utf8'));
+
+        console.log("@@resBody: ", JSON.stringify(resBody.data));
+
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal(
           {

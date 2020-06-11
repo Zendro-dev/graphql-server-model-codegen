@@ -268,11 +268,14 @@ writeSchemaCommons = function(dir_write){
 
   enum Operator{
     like
+    notLike
     or
     and
     eq
     between
+    notBetween
     in
+    notIn
     gt
     gte
     lt
