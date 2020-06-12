@@ -3,20 +3,20 @@
     "storageType": "cassandra",
     "attributes": {
       "time_id": "uuid",
-      "event_id": "uuid",
-      "year": "int",
-      "month": "tinyint",
-      "day": "tinyint",
-      "hour": "tinyint",
-      "minute": "tinyint"
+      "incident_assoc_id": "uuid",
+      "year": "Int",
+      "month": "Int",
+      "day": "Int",
+      "hour": "Int",
+      "minute": "Int"
     },
   
     "associations": {
   
       "event": {
         "type": "to_one",
-        "target": "Event",
-        "targetKey": "eventId",
+        "target": "Incident",
+        "targetKey": "incident_assoc_id",
         "keyIn" : "Time",
         "targetStorageType": "cassandra"
       }

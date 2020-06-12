@@ -2074,3 +2074,13 @@ describe(
     });
 
   });
+
+  describe('Cassandra', function() {
+    it('01. Add an incident', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db", incident_description: "An event" ) {incident_id incident_description}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      console.log('Status code: ' + res.statusCode);
+      console.log('Result: ' + JSON.stringify(resBody, null, 4));
+    })
+    
+  })

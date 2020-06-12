@@ -53,9 +53,11 @@ services:
       - ./integration_test_run/instance1/models-generic:/usr/src/app/models-generic
       - ./integration_test_run/instance1/models-cassandra:/usr/src/app/models-cassandra
       - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
+      - ./integration_test_run/instance1/migrations-cassandra:/usr/src/app/migrations-cassandra
       - ./integration_test_run/instance1/validations:/usr/src/app/validations
       - ./integration_test_run/instance1/patches:/usr/src/app/patches
       - ./sequelize_config_instance1.json:/usr/src/app/config/config.json
+      - /home/thomas/ScienceDbStarterPack/graphql-server/utils/setup_cassandra_db.js:/usr/src/app/utils/setup_cassandra_db.js
 
     ports:
       - "3000:3000"
@@ -158,9 +160,11 @@ services:
       - ./integration_test_run/instance2/models-generic:/usr/src/app/models-generic
       - ./integration_test_run/instance2/models-cassandra:/usr/src/app/models-cassandra
       - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
+      - ./integration_test_run/instance2/migrations-cassandra:/usr/src/app/migrations-cassandra
       - ./integration_test_run/instance2/validations:/usr/src/app/validations
       - ./integration_test_run/instance2/patches:/usr/src/app/patches
       - ./sequelize_config_instance2.json:/usr/src/app/config/config.json
+      - /home/thomas/ScienceDbStarterPack/graphql-server/utils/setup_cassandra_db.js:/usr/src/app/utils/setup_cassandra_db.js
 
     ports:
       - "3030:3030"

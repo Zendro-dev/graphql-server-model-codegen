@@ -1,9 +1,9 @@
 {
-    "model": "Event",
+    "model": "Incident",
     "storageType": "cassandra",
     "attributes": {
-      "event_id": "uuid",
-      "event_description": "text"
+      "incident_id": "uuid",
+      "incident_description": "String"
     },
   
     "associations": {
@@ -11,12 +11,12 @@
       "time": {
         "type": "to_many",
         "target": "Time",
-        "targetKey": "eventId",
+        "targetKey": "incident_assoc_id",
         "keyIn" : "Time",
         "targetStorageType": "cassandra"
       }
   
     },
   
-    "internalId" : "event_id"
+    "internalId" : "incident_id"
   }

@@ -334,10 +334,10 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
           try{
-            const result = await sequelize.transaction( async(t) =>{
-              let item = await super.create(input, {transaction:t});
-              return item;
-            });
+            const fields = Object.keys(input).join(', ');
+            const values = Object.values(input).join(', ');
+            const query = 'INSERT INTO <%- name -%> (' + fields + ') VALUES (' + values + ')';
+            const result = (await client.execute(query)).first();
             return result;
           }catch(error){
             throw error;

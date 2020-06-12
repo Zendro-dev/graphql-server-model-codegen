@@ -152,6 +152,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/adapters" \
               $TARGET_DIR_INSTANCE1"/models-cassandra" \
               $TARGET_DIR_INSTANCE1"/models-cenz-server"
               $TARGET_DIR_INSTANCE1"/migrations" \
+              $TARGET_DIR_INSTANCE1"/migrations-cassandra" \
               $TARGET_DIR_INSTANCE1"/schemas" \
               $TARGET_DIR_INSTANCE1"/resolvers" \
               $TARGET_DIR_INSTANCE1"/validations" \
@@ -163,6 +164,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/adapters" \
               $TARGET_DIR_INSTANCE2"/models-cassandra" \
               $TARGET_DIR_INSTANCE2"/models-cenz-server"
               $TARGET_DIR_INSTANCE2"/migrations" \
+              $TARGET_DIR_INSTANCE2"/migrations-cassandra" \
               $TARGET_DIR_INSTANCE2"/schemas" \
               $TARGET_DIR_INSTANCE2"/resolvers" \
               $TARGET_DIR_INSTANCE2"/validations" \

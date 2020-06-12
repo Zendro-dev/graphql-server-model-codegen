@@ -186,15 +186,19 @@ attributesToJsonSchemaProperties = function(attributes) {
       }
     } else if (jsonSchemaProps[key] === 'text') {
       jsonSchemaProps[key] = {
-        "type": ["text", "null"]
+        "type": ["string", "null"]
       }
     } else if (jsonSchemaProps[key] === 'int') {
       jsonSchemaProps[key] = {
-        "type": ["int", "null"]
+        "type": ["integer", "null"]
       }
     } else if (jsonSchemaProps[key] === 'tinyint') {
       jsonSchemaProps[key] = {
-        "type": ["tinyint", "null"]
+        "type": ["integer", "null"]
+      }
+    } else if (jsonSchemaProps[key] === 'smallint') {
+      jsonSchemaProps[key] = {
+        "type": ["integer", "null"]
       }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
@@ -241,6 +245,36 @@ getOnlyTypeAttributes = function(attributes){
         only_type[ key ] = attributes[key].type;
       }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
         only_type[key] =  attributes[key];
+      }
+
+    }
+
+    return only_type;
+}
+
+getCassandraType = function(type) {
+  switch (type.toLowerCase()) {
+    case 'string':
+      return 'text';
+    case 'integer':
+    case 'int':
+      return 'int';
+    default:
+      return type;
+  }
+}
+
+getOnlyCassandraTypeAttributes = function(attributes, idAttribute) {
+  let only_type = {};
+
+    for(key in attributes){
+      if (key == idAttribute) {
+        continue;
+      }
+      if(attributes[key] && typeof attributes[key]==='object' && attributes[key].constructor === Object ){
+        only_type[ key ] = attributes[key].type;
+      }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
+        only_type[key] =  getCassandraType(attributes[key]);
       }
 
     }
@@ -574,6 +608,7 @@ module.exports.getOptions = function(dataModel){
       namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
+      cassandraAttributes: getOnlyCassandraTypeAttributes(dataModel.attributes, getIdAttribute(dataModel)),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
       associationsArguments: module.exports.parseAssociations(dataModel.associations),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
@@ -867,6 +902,7 @@ generateSections = async function(sections, opts, dir_write) {
       //schemas
       case 'schemas':
       case 'schemas-ddm':
+      case 'schemas-cassandra':
       //resolvers
       case 'resolvers':
       case 'resolvers-ddm':
