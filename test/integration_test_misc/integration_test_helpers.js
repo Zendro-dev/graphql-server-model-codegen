@@ -5,6 +5,7 @@ const fs = require('fs');
 const request = require('sync-request');
 const graphqlUrl = 'http://0.0.0.0:3000/graphql';
 const joinSrvUrl = 'http://0.0.0.0:3000/join';
+const csvExportUrl =  'http://0.0.0.0:3000/export';
 const metaqueryUrl = 'http://0.0.0.0:3000/meta_query';
 const srvUrl = 'http://0.0.0.0:3344';
 const graphqlUrlInstance2 = 'http://0.0.0.0:3030/graphql';
@@ -39,7 +40,7 @@ module.exports.request_graph_ql_post_instance2 = function (query){
 
 /**
 * request_metaquery_post - Send "POST" request to meta_query route. Either jq or jsonPath must be non-null.
-* 
+*
 * @param {queries} {string}  Any queries to GraphQL as a string
 * @param {jq} {string}       A jq command
 * @param {jsonPath} {string} A jsonPath command
@@ -79,6 +80,10 @@ module.exports.request_join_post = async function (modelAdjacencies){
         }
     });
 };
+
+module.exports.request_export = async function(model){
+  return await axios.get(csvExportUrl+ '?model='+model);
+}
 
 /**
  * request_graph_ql_get - Send "GET" request to the local GraphQL server

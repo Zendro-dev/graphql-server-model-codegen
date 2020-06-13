@@ -932,7 +932,7 @@ describe(
           individualsConnection: null
       }
   });
-  
+
   res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"acc1" sampling_date:"today") {accession_id sampling_date}}');
   resBody = JSON.parse(res.body.toString('utf8'));
   expect(res.statusCode).to.equal(400);
@@ -1006,7 +1006,7 @@ describe(
     let ita = null;
     let itb = null;
     let itc = null;
-    
+
     //item a
     res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-a") { id, gene } }');
     resBody = JSON.parse(res.body.toString('utf8'));
@@ -1042,19 +1042,19 @@ describe(
      */
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(res.statusCode).to.equal(200);
     should.exist(resBody.data.transcript_counts);
     expect(resBody.data.transcript_counts).to.deep.include(ita);
     expect(resBody.data.transcript_counts).to.deep.include(itb);
     expect(resBody.data.transcript_counts.length).to.equal(2);
-    
+
     /**
      * op: notIn ('ita.id', 'itb.id')
      */
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(res.statusCode).to.equal(200);
     should.exist(resBody.data.transcript_counts);
     expect(resBody.data.transcript_counts).to.deep.include(itc);
@@ -1066,20 +1066,20 @@ describe(
      */
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: {value: "%ene-28%"}}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(res.statusCode).to.equal(200);
     should.exist(resBody.data.transcript_counts);
     expect(resBody.data.transcript_counts).to.deep.include(ita);
     expect(resBody.data.transcript_counts).to.deep.include(itb);
     expect(resBody.data.transcript_counts).to.deep.include(itc);
     expect(resBody.data.transcript_counts.length).to.equal(3);
-    
+
     /**
      * op: notLike '%ene-28%'
      */
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: {value: "%ene-28%"}}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(res.statusCode).to.equal(200);
     should.exist(resBody.data.transcript_counts);
     expect(resBody.data.transcript_counts).to.not.include(ita);
@@ -1091,20 +1091,20 @@ describe(
      */
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(res.statusCode).to.equal(200);
     should.exist(resBody.data.transcript_counts);
     expect(resBody.data.transcript_counts).to.deep.include(ita);
     expect(resBody.data.transcript_counts).to.deep.include(itb);
     expect(resBody.data.transcript_counts).to.deep.include(itc);
     expect(resBody.data.transcript_counts.length).to.equal(3);
-    
+
     /**
      * op: notBetween ['ita.id', 'itc.id']
      */
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(res.statusCode).to.equal(200);
     should.exist(resBody.data.transcript_counts);
     expect(resBody.data.transcript_counts).to.not.include(ita);
@@ -1461,7 +1461,7 @@ describe(
                   "locations": "",
                   "extensions": {
                       "receivedFrom": ["http://server2:3030/graphql"]
-                  }              
+                  }
               },
               {
                 "message": "LIMIT must not be negative",
@@ -1843,7 +1843,7 @@ describe(
           }
         )
 
-        //parseOrderCursor Tests (after)      
+        //parseOrderCursor Tests (after)
         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
           first:2, after:"eyJuYW1lIjoiQmVydGhhIiwicGVyc29uX2lkIjoiaW5zdGFuY2UyLTAxIn0="}) \
           {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
@@ -2525,7 +2525,23 @@ describe(
     });
 
 
-    it('18. Delete all remaining accessions', async function() {
+    it('18 CSV Export - Accessions', async function() {
+      /**
+       * This test assumes that accessions from previous test are still in the DB
+       * */
+
+        let res = await itHelpers.request_export('Accession');
+
+        expect(res.data).to.equal('accession_id,collectors_name,collectors_initials,sampling_date,locationId\n' +
+         'a-instance1,aa,NULL,NULL,NULL\n'+
+         'b-instance1,bb,NULL,NULL,NULL\n' +
+         'c-instance1,cc,NULL,NULL,NULL\n' +
+         'cenz-2-accession,NULL,NULL,NULL,NULL\n' +
+         'cenz-3-accession,NULL,NULL,NULL,NULL\n' +
+         'd-instance1,dd,NULL,NULL,NULL\n');
+    });
+
+    it('19. Delete all remaining accessions', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{accessions{accession_id}}');
         let accessions = JSON.parse(res.body.toString('utf8')).data.accessions;
 
@@ -2539,7 +2555,7 @@ describe(
     });
 
 
-    it('19. Delete all remaining measurements', async function() {
+    it('20. Delete all remaining measurements', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{measurements{measurement_id}}');
         let measurements = JSON.parse(res.body.toString('utf8')).data.measurements;
 
@@ -2552,7 +2568,7 @@ describe(
         expect(cnt).to.equal(0);
     });
 
-    it('20. Delete all remaining locations', async function() {
+    it('21. Delete all remaining locations', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{locations{locationId}}');
         let locations = JSON.parse(res.body.toString('utf8')).data.locations;
 
