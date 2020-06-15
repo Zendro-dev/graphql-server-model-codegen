@@ -2117,5 +2117,12 @@ describe(
         }
     });
     })
+
+    xit('04. Delete an incident', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db")}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      console.log(res.statusCode);
+      console.log(JSON.stringify(resBody));
+    })
     
   })

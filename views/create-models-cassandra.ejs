@@ -365,24 +365,16 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
         });
   }
 
-  static deleteOne(id){
-    return super.findByPk(id)
-        .then(item => {
-
-            if (item === null) return new Error(`Record with ID = ${id} does not exist`);
-
-            return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
-                .then((valSuccess) => {
-                    return item
-                        .destroy()
-                        .then(() => {
-                            return 'Item successfully deleted';
-                        });
-                }).catch((err) => {
-                    return err
-                })
-        });
-
+  static async deleteOne(id){
+    const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
+    let queryResponse = await client.execute(query);
+    let validationSuccess = await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, queryResponse.rows[0]);
+    if (validationSuccess) {
+      const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
+      await client.execute(mutation);
+      queryResponse = await client.execute(query);
+      console.log(JSON.stringify(queryResponse));
+    }
   }
 
   static updateOne(input){
