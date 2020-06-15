@@ -107,8 +107,8 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
   }
 
   static async readById(id){
-    const query = `SELECT * FROM <%- name -%> WHERE <%- idAttribute -%> = ?`;
-    let item = (await client.execute(query, [ id ], { prepare: true })).first(); // await <%- name -%>.findByPk(id);
+    const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
+    let item = (await client.execute(query, [ id ], { prepare: true })).first();
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }

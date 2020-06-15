@@ -2089,5 +2089,19 @@ describe(
         }
       });
     })
+
+    it('02. Read an incident', function() {
+      let res = itHelpers.request_graph_ql_post('{readOneIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db") {incident_id incident_description}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            readOneIncident: {
+                incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+                incident_description: "An event"
+            }
+        }
+      });
+    })
     
   })
