@@ -1244,7 +1244,7 @@ describe( 'Batch Upload', function() {
         // batch_upload_csv start new background, there is no way to test the actual result
         // without explicit delay. The test may fail if delay is too small, just check the
         // resulting DB table to be sure that all records from file individual_valid.csv were added.
-        let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{id}}');
+        let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv}');
         expect(success).equal(true);
         await delay(500);
 
@@ -1337,7 +1337,7 @@ describe(
             // batch_upload_csv start new background, it returns a response without
             // an error independently if there are validation errors during batch add or not.
             // These errors will be sent to the user's e-mail.
-            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{ id}}');
+            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv}');
             expect(success).equal(true);
             await delay(500);
 
@@ -1355,7 +1355,7 @@ describe(
             // batch_upload_csv start new background, it returns a response without
             // an error independently if there are validation errors during batch add or not.
             // These errors will be sent to the user's e-mail.
-            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation { bulkAddTranscript_countCsv {id}}');
+            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation { bulkAddTranscript_countCsv }');
             expect(success).equal(true);
             await delay(500);
 

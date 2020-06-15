@@ -120,7 +120,7 @@ type Query {
 
 
 deletePerson(id: ID!): String!
-bulkAddPersonCsv: [Person] }
+bulkAddPersonCsv: String! }
 
 `
 module.exports.model_person = `

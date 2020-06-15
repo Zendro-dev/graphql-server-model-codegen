@@ -14,7 +14,7 @@ type Query {
 
 
 deleteTranscript_count(id: ID!): String!
-bulkAddTranscript_countCsv: [transcript_count] }
+bulkAddTranscript_countCsv: String! }
 `
 
 module.exports.individual_no_assoc_resolvers = `

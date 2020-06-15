@@ -80,7 +80,7 @@ updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscr
 
 
 deleteInDiVIdual(id: ID!): String!
-bulkAddInDiVIdualCsv: [inDiVIdual] }
+bulkAddInDiVIdualCsv: String! }
 `
 
 module.exports.individual_model_camelcase = `

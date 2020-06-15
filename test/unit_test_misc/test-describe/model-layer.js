@@ -309,6 +309,7 @@ static bulkAddCsv(context){
     }).catch((error) => {
         throw new Error(error);
     });
+    return \`Bulk import of Book records started. You will be send an email to \$\{helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
 }
 `
 
