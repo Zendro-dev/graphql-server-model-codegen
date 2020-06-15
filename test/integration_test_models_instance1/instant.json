@@ -1,9 +1,9 @@
 {
-    "model": "Time",
+    "model": "Instant",
     "storageType": "cassandra",
     "attributes": {
-      "time_id": "uuid",
-      "incident_assoc_id": "uuid",
+      "instant_id": "uuid",
+      "incident_assoc_id": "String",
       "year": "Int",
       "month": "Int",
       "day": "Int",
@@ -17,11 +17,11 @@
         "type": "to_one",
         "target": "Incident",
         "targetKey": "incident_assoc_id",
-        "keyIn" : "Time",
+        "keyIn" : "Instant",
         "targetStorageType": "cassandra"
       }
   
     },
   
-    "internalId" : "time_id"
+    "internalId" : "instant_id"
   }

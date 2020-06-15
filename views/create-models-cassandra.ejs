@@ -29,8 +29,11 @@ const definition = <%- definition -%>;
  */
 
 module.exports = class <%- name -%> /* extends Sequelize.Model */ {
-  constructor() {
-    console.log('Class <%- name -%> created.');
+  constructor(input, initMessage) {
+    this.initMessage = initMessage;
+    for (let key of Object.keys(input)) {
+      this[key] = input[key];
+    }
   }
 
   /*static init(sequelize, DataTypes){
@@ -330,15 +333,32 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     });
   }
 
+  <%# For a proper response at the end of the add-function, a SELECT query is performed to get the information from the database.
+      Usually, this would be a bad idea, because Cassandra is said to be quick at writing, but slow at querying.
+      However, this is only true for queries over *several partitions* (see https://www.scnsoft.com/blog/cassandra-performance), 
+      but we are using only one node here (no DDM).
+      Furthermore, we query for a single ID, so even in a distributed case, we wouldn't query over more than one partition. %>
+
   static addOne(input){
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
           try{
-            const fields = Object.keys(input).join(', ');
-            const values = Object.values(input).join(', ');
-            const query = 'INSERT INTO <%- name -%> (' + fields + ') VALUES (' + values + ')';
-            const result = (await client.execute(query)).first();
-            return result;
+            let inputCopy = JSON.parse(JSON.stringify(input));
+            if (inputCopy.skipAssociationsExistenceChecks) {
+              delete inputCopy.skipAssociationsExistenceChecks;
+            }
+            for (let key of Object.keys(inputCopy)) {
+              if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
+                inputCopy[key] = `'${inputCopy[key]}'`;
+              }
+            }
+            const fields = Object.keys(inputCopy).join(', ');
+            const values = Object.values(inputCopy).join(', ');
+            const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
+            let mutationResponse = await client.execute(query);
+            let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
+            let response = new <%- name -%>(checkQuery, mutationResponse);
+            return response;
           }catch(error){
             throw error;
           }

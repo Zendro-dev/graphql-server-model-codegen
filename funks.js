@@ -259,6 +259,8 @@ getCassandraType = function(type) {
     case 'integer':
     case 'int':
       return 'int';
+    case 'id':
+      return 'uuid';
     default:
       return type;
   }
@@ -332,6 +334,19 @@ writeSchemaCommons = function(dir_write){
     notRegexp
   }
 
+  enum CassandraOperator{
+    eq
+    lt
+    gt
+    le
+    ge
+    ne
+    _in
+    cont   # CONTAINS
+    ctk    # CONTAINS KEY
+    and
+  }
+
   enum Order{
     DESC
     ASC
@@ -367,9 +382,9 @@ writeSchemaCommons = function(dir_write){
   scalar DateTime
 \`;`;
 
-let commonsCassandra = `module.exports = \`
+/*let commonsCassandra = `module.exports = \`
 
-enum Operator{
+enum CassandraOperator{
   eq
   lt
   gt
@@ -411,7 +426,7 @@ scalar Date
 scalar Time
 scalar DateTime
 
-\`;`;
+\`;`;*/
 
   try {
     let file_name = dir_write + '/schemas/' +  'commons.js';
@@ -421,11 +436,11 @@ scalar DateTime
     //success
     console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
 
-    let file_name_cassandra = dir_write + '/schemas/commons-cassandra.js';
+    /*let file_name_cassandra = dir_write + '/schemas/commons-cassandra.js';
 
     fs.writeFileSync(file_name_cassandra, commonsCassandra);
 
-    console.log('@@@ File:', colors.dim(file_name_cassandra), colors.green('written successfully!'));
+    console.log('@@@ File:', colors.dim(file_name_cassandra), colors.green('written successfully!'));*/
 
   } catch(e) {
     //error

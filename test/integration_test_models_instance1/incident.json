@@ -8,11 +8,11 @@
   
     "associations": {
   
-      "time": {
+      "instant": {
         "type": "to_many",
-        "target": "Time",
+        "target": "Instant",
         "targetKey": "incident_assoc_id",
-        "keyIn" : "Time",
+        "keyIn" : "Instant",
         "targetStorageType": "cassandra"
       }
   
