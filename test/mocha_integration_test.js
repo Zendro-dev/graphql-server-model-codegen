@@ -2103,5 +2103,19 @@ describe(
         }
       });
     })
+
+    it('03. Update an incident', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { updateIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db", incident_description: "Another event" ) {incident_id incident_description}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            updateIncident: {
+                incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+                incident_description: "Another event"
+            }
+        }
+    });
+    })
     
   })

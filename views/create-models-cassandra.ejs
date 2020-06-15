@@ -389,16 +389,26 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
         .then(async (valSuccess) => {
           try{
-            let result = await sequelize.transaction( async (t) =>{
-              let promises_associations = [];
-              let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
-              if(item === null) {
-                throw new Error(`Record with ID = ${id} does not exist`);
+            let inputCopy = JSON.parse(JSON.stringify(input));
+            if (inputCopy.skipAssociationsExistenceChecks) {
+              delete inputCopy.skipAssociationsExistenceChecks;
+            }
+            for (let key of Object.keys(inputCopy)) {
+              if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
+                inputCopy[key] = `'${inputCopy[key]}'`;
               }
-              let updated = await item.update(input, {transaction: t});
-              return updated;
-            });
-            return result;
+            }
+            let idValue = input[this.idAttribute()];
+            delete inputCopy[this.idAttribute()];
+            const fields = Object.keys(inputCopy).join(', ');
+            const values = Object.values(inputCopy).join(', ');
+            let mutation = `UPDATE <%- namePl -%> SET `;
+            mutation += Object.keys(inputCopy).map(key => `${key} = ${inputCopy[key]}`).join(', ');
+            mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
+            let mutationResponse = await client.execute(mutation);
+            let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
+            let response = new <%- name -%>(checkQuery, mutationResponse);
+            return response;
           }catch(error){
             throw error;
           }
