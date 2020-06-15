@@ -357,6 +357,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       }).catch((error) => {
           throw new Error(error);
       });
+      return `Bulk import of <%- adapterName -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
   }
 
   static csvTableTemplate(){
