@@ -2121,7 +2121,7 @@ describe(
     // The following produces a warning that is omitted in the return of the model function: 'Aggregation query used without partition key'
     // The server response can return an array of warnings in info.warnings - in this case it has one element
     // The warning itself should be taken seriously in large databases, but here there is only one element.
-    
+
     it('04. Count incidents', function() {
       let res = itHelpers.request_graph_ql_post(`{countIncidents}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
@@ -2133,11 +2133,15 @@ describe(
       });
     });
 
-    xit('05. Delete an incident', function() {
+    it('05. Delete an incident', function() {
       let res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db")}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
-      console.log(res.statusCode);
-      console.log(JSON.stringify(resBody));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            deleteIncident: "Item successfully deleted"
+        }
+    });
     })
     
   })

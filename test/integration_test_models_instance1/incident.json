@@ -8,7 +8,7 @@
   
     "associations": {
   
-      "instant": {
+      "instants": {
         "type": "to_many",
         "target": "Instant",
         "targetKey": "incident_assoc_id",

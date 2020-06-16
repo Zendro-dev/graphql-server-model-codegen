@@ -390,7 +390,6 @@ enum CassandraOperator{
   gt
   le
   ge
-  ne
   _in
   cont   # CONTAINS
   ctk    # CONTAINS KEY

@@ -13,7 +13,7 @@
   
     "associations": {
   
-      "event": {
+      "incident": {
         "type": "to_one",
         "target": "Incident",
         "targetKey": "incident_assoc_id",

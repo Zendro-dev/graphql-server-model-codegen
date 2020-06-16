@@ -32,7 +32,7 @@ module.exports = {
     let indexCreationPromises = indexCreationStrings.map(async i =>  
       await client.execute('CREATE INDEX IF NOT EXISTS ' + i + '_index ON <%-namePl-%> (' + i + ');'));
 
-    await Promise.all(indexCreationPromises);
+    await Promise.allSettled(indexCreationPromises);
 
   },
 

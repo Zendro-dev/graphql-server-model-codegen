@@ -77,7 +77,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>
         <%if (key !== 'associations'){-%>
-          <%if(associationsArguments[key][i].targetStorageType === 'sql'){-%>
+          <%if(associationsArguments[key][i].targetStorageType === 'cassandra'){-%>
             <%if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
               <%- name -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
@@ -108,7 +108,9 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
 
   static async readById(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
-    let item = (await client.execute(query, [ id ], { prepare: true })).first();
+    let queryResult = await client.execute(query, [ id ], { prepare: true });
+    let firstResult = queryResult.first();
+    let item = new <%- name -%>(firstResult, queryResult);
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
@@ -134,7 +136,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       let arg = new searchArg(search);
       /*let arg_sequelize = arg.toSequelize();
       options['where'] = arg_sequelize;*/
-      arg_cassandra = ' ' + arg.toCassandra();
+      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>');
     }
     const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
     let queryResult = await client.execute(query);
@@ -371,12 +373,13 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
     let queryResponse = await client.execute(query);
     let validationSuccess = await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, queryResponse.rows[0]);
-    if (validationSuccess) {
-      const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
-      await client.execute(mutation);
-      queryResponse = await client.execute(query);
-      console.log(JSON.stringify(queryResponse));
+    const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
+    await client.execute(mutation);
+    queryResponse = await client.execute(query);
+    if (helper.isEmptyArray(queryResponse.rows)) {
+      return 'Item successfully deleted';
     }
+    throw new Error('Record was not deleted!');
   }
 
   static updateOne(input){
