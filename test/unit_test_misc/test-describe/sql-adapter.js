@@ -265,16 +265,14 @@ module.exports.deleteOne = `
 module.exports.updateOne = `
     static async updateOne(input) {
       try {
-          let result = await sequelize.transaction(async (t) => {
-              let item = await super.findByPk(input[this.idAttribute()], {
-                  transaction: t
-              });
-              let updated = await item.update(input, {
-                  transaction: t
-              });
-              return updated;
+        let result = await sequelize.transaction( async (t) =>{
+          let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+          return updated;
           });
-          return result;
+          if(result[0] === 0){
+            throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+          }
+          return result[1][0];
       } catch (error) {
           throw error;
       }

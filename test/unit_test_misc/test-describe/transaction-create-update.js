@@ -4,7 +4,7 @@ static updateOne(input) {
             .then(async (valSuccess) => {
                 try {
                     let result = await sequelize.transaction(async (t) => {
-                      let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true } );
+                      let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
                       return updated;
                     });
                     if(result[0] === 0){
