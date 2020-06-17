@@ -257,33 +257,14 @@ const definition = {
             sourceKey: 'personId',
             keysIn: 'books_to_people',
             targetStorageType: 'cenz-server',
-            label: 'title',
-            name: 'works',
-            name_lc: 'works',
-            name_cp: 'Works',
-            target_lc: 'book',
-            target_lc_pl: 'books',
-            target_pl: 'Books',
-            target_cp: 'Book',
-            target_cp_pl: 'Books',
-            holdsForeignKey: false
+            label: 'title'
         },
         company: {
             type: 'to_one',
             target: 'publi_sher',
             targetKey: 'companyId',
             keyIn: 'Person',
-            targetStorageType: 'generic',
-            name: 'company',
-            name_lc: 'company',
-            name_cp: 'Company',
-            target_lc: 'publi_sher',
-            target_lc_pl: 'publi_shers',
-            target_pl: 'publi_shers',
-            target_cp: 'Publi_sher',
-            target_cp_pl: 'Publi_shers',
-            keyIn_lc: 'person',
-            holdsForeignKey: true
+            targetStorageType: 'generic'
         }
     },
     id: {
@@ -291,6 +272,10 @@ const definition = {
         type: 'Int'
     }
 };
+
+
+
+
 `
 
 module.exports.many_to_many_association_count = `

@@ -1307,61 +1307,55 @@ describe('Parse associations', function() {
       let associations = models.transcript_count.associations;
       let res = funks.parseAssociations(associations, 'sql');
       expect(res).to.deep.equal({
-        schema_attributes: {
-          many:{},
-          one:{
-            individual:["individual", "Individual", "Individual"]
+        "schema_attributes": {
+          "many": {},
+          "one": {
+            "individual": [
+              "individual",
+              "Individual",
+              "Individual"
+            ]
           },
-          generic_many:{},
-          generic_one:{}
+          "generic_one": {},
+          "generic_many": {}
         },
-        to_one:[
+        "to_one": [
           {
-            type:"to_one",
-            target:"individual",
-            targetKey:"individual_id",
-            keyIn:"transcript_count",
-            targetStorageType:"sql",
-            name:"individual",
-            name_lc:"individual",
-            name_cp:"Individual",
-            target_lc:"individual",
-            target_lc_pl:"individuals",
-            target_pl:"individuals",
-            target_cp:"Individual",
-            target_cp_pl:"Individuals",
-            keyIn_lc:"transcript_count",
-            holdsForeignKey:true
+            "type": "to_one",
+            "target": "individual",
+            "targetKey": "individual_id",
+            "keyIn": "transcript_count",
+            "targetStorageType": "sql",
+            "name": "individual",
+            "name_lc": "individual",
+            "name_cp": "Individual",
+            "target_lc": "individual",
+            "target_lc_pl": "individuals",
+            "target_pl": "individuals",
+            "target_cp": "Individual",
+            "target_cp_pl": "Individuals",
+            "keyIn_lc": "transcript_count",
+            "holdsForeignKey": true
           }
         ],
-        to_many:[],
-        to_many_through_sql_cross_table:[],
-        generic_to_one:[],
-        generic_to_many:[],
-        foreignKeyAssociations:{
-          individual:"individual_id"
+        "to_many": [],
+        "to_many_through_sql_cross_table": [],
+        "generic_to_one": [],
+        "generic_to_many": [],
+        "foreignKeyAssociations": {
+          "individual": "individual_id"
         },
-        associations:[
+        "associations": [
           {
-            type:"to_one",
-            target:"individual",
-            targetKey:"individual_id",
-            keyIn:"transcript_count",
-            targetStorageType:"sql",
-            name:"individual",
-            name_lc:"individual",
-            name_cp:"Individual",
-            target_lc:"individual",
-            target_lc_pl:"individuals",
-            target_pl:"individuals",
-            target_cp:"Individual",
-            target_cp_pl:"Individuals",
-            keyIn_lc:"transcript_count",
-            holdsForeignKey:true
+            "type": "to_one",
+            "target": "individual",
+            "targetKey": "individual_id",
+            "keyIn": "transcript_count",
+            "targetStorageType": "sql"
           }
         ],
-        genericAssociations:[],
-        mutations_attributes:""
+        "genericAssociations": [],
+        "mutations_attributes": ""
       });
   });
 
@@ -1369,61 +1363,55 @@ describe('Parse associations', function() {
     let associations = models.individual.associations;
     let res = funks.parseAssociations(associations, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{
-          transcript_counts:["transcript_count","Transcript_count","Transcript_counts"]
+      "schema_attributes": {
+        "many": {
+          "transcript_counts": [
+            "transcript_count",
+            "Transcript_count",
+            "Transcript_counts"
+          ]
         },
-        one:{},
-        generic_many:{},
-        generic_one:{}
+        "one": {},
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[],
-      to_many:[
+      "to_one": [],
+      "to_many": [
         {
-          type:"to_many",
-          target:"transcript_count",
-          keyIn:"transcript_count",
-          targetKey:"individual_id",
-          targetStorageType:"sql",
-          name:"transcript_counts",
-          name_lc:"transcript_counts",
-          name_cp:"Transcript_counts",
-          target_lc:"transcript_count",
-          target_lc_pl:"transcript_counts",
-          target_pl:"transcript_counts",
-          target_cp:"Transcript_count",
-          target_cp_pl:"Transcript_counts",
-          keyIn_lc:"transcript_count",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "transcript_count",
+          "keyIn": "transcript_count",
+          "targetKey": "individual_id",
+          "targetStorageType": "sql",
+          "name": "transcript_counts",
+          "name_lc": "transcript_counts",
+          "name_cp": "Transcript_counts",
+          "target_lc": "transcript_count",
+          "target_lc_pl": "transcript_counts",
+          "target_pl": "transcript_counts",
+          "target_cp": "Transcript_count",
+          "target_cp_pl": "Transcript_counts",
+          "keyIn_lc": "transcript_count",
+          "holdsForeignKey": false
         }
       ],
-      to_many_through_sql_cross_table:[],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        transcript_counts:"individual_id"
+      "to_many_through_sql_cross_table": [],
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "transcript_counts": "individual_id"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_many",
-          target:"transcript_count",
-          keyIn:"transcript_count",
-          targetKey:"individual_id",
-          targetStorageType:"sql",
-          name:"transcript_counts",
-          name_lc:"transcript_counts",
-          name_cp:"Transcript_counts",
-          target_lc:"transcript_count",
-          target_lc_pl:"transcript_counts",
-          target_pl:"transcript_counts",
-          target_cp:"Transcript_count",
-          target_cp_pl:"Transcript_counts",
-          keyIn_lc:"transcript_count",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "transcript_count",
+          "keyIn": "transcript_count",
+          "targetKey": "individual_id",
+          "targetStorageType": "sql"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   });
 
@@ -1433,63 +1421,63 @@ describe('Parse associations', function() {
     let associations = {assoc: association};
     let res = funks.parseAssociations(associations, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{
-          assoc:["Project","Project","Assoc"]
+      "schema_attributes": {
+        "many": {
+          "assoc": [
+            "Project",
+            "Project",
+            "Assoc"
+          ]
         },
-        one:{},
-        generic_many:{},
-        generic_one:{}
+        "one": {},
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[],
-      to_many:[],
-      to_many_through_sql_cross_table:[
+      "to_one": [],
+      "to_many": [],
+      "to_many_through_sql_cross_table": [
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Project",
-          targetKey:"projectId",
-          sourceKey:"researcherId",
-          keysIn:"project_to_researcher",
-          targetStorageType:"sql",
-          source:"researchers",
-          target_lc:"project",
-          target_lc_pl:"projects",
-          target_pl:"Projects",
-          target_cp:"Project",
-          target_cp_pl:"Projects",
-          name:"assoc",
-          name_lc:"assoc",
-          name_cp:"Assoc",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Project",
+          "targetKey": "projectId",
+          "sourceKey": "researcherId",
+          "keysIn": "project_to_researcher",
+          "targetStorageType": "sql",
+          "source": "researchers",
+          "target_lc": "project",
+          "target_lc_pl": "projects",
+          "target_pl": "Projects",
+          "target_cp": "Project",
+          "target_cp_pl": "Projects",
+          "name": "assoc",
+          "name_lc": "assoc",
+          "name_cp": "Assoc",
+          "holdsForeignKey": false
         }
       ],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        assoc:"projectId"
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "assoc": "projectId"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Project",
-          targetKey:"projectId",
-          sourceKey:"researcherId",
-          keysIn:"project_to_researcher",
-          targetStorageType:"sql",
-          source:"researchers",
-          target_lc:"project",
-          target_lc_pl:"projects",
-          target_pl:"Projects",
-          target_cp:"Project",
-          target_cp_pl:"Projects",
-          name:"assoc",
-          name_lc:"assoc",
-          name_cp:"Assoc",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Project",
+          "targetKey": "projectId",
+          "sourceKey": "researcherId",
+          "keysIn": "project_to_researcher",
+          "targetStorageType": "sql",
+          "source": "researchers",
+          "target_lc": "project",
+          "target_lc_pl": "projects",
+          "target_pl": "Projects",
+          "target_cp": "Project",
+          "target_cp_pl": "Projects"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   });
 
@@ -1498,98 +1486,87 @@ describe('Parse associations', function() {
     associations.books.type = "to_many_through_sql_cross_table"
     let res = funks.parseAssociations(associations, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{
-          dogs:["Dog","Dog","Dogs"],
-          books:["Book","Book","Books"]
+      "schema_attributes": {
+        "many": {
+          "dogs": [
+            "Dog",
+            "Dog",
+            "Dogs"
+          ],
+          "books": [
+            "Book",
+            "Book",
+            "Books"
+          ]
         },
-        one:{},
-        generic_many:{},
-        generic_one:{}
+        "one": {},
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[],
-      to_many:[
+      "to_one": [],
+      "to_many": [
         {
-          type:"to_many",
-          target:"Dog",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          name:"dogs",
-          name_lc:"dogs",
-          name_cp:"Dogs",
-          target_lc:"dog",
-          target_lc_pl:"dogs",
-          target_pl:"Dogs",
-          target_cp:"Dog",
-          target_cp_pl:"Dogs",
-          keyIn_lc:"dog",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "Dog",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "name": "dogs",
+          "name_lc": "dogs",
+          "name_cp": "Dogs",
+          "target_lc": "dog",
+          "target_lc_pl": "dogs",
+          "target_pl": "Dogs",
+          "target_cp": "Dog",
+          "target_cp_pl": "Dogs",
+          "keyIn_lc": "dog",
+          "holdsForeignKey": false
         }
       ],
-      to_many_through_sql_cross_table:[
+      "to_many_through_sql_cross_table": [
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Book",
-          targetKey:"bookId",
-          sourceKey:"personId",
-          keysIn:"books_to_people",
-          targetStorageType:"sql",
-          name:"books",
-          name_lc:"books",
-          name_cp:"Books",
-          target_lc:"book",
-          target_lc_pl:"books",
-          target_pl:"Books",
-          target_cp:"Book",
-          target_cp_pl:"Books",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Book",
+          "targetKey": "bookId",
+          "sourceKey": "personId",
+          "keysIn": "books_to_people",
+          "targetStorageType": "sql",
+          "name": "books",
+          "name_lc": "books",
+          "name_cp": "Books",
+          "target_lc": "book",
+          "target_lc_pl": "books",
+          "target_pl": "Books",
+          "target_cp": "Book",
+          "target_cp_pl": "Books",
+          "holdsForeignKey": false
         }
       ],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        dogs:"personId",
-        books:"bookId"
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "dogs": "personId",
+        "books": "bookId"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_many",
-          target:"Dog",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          name:"dogs",
-          name_lc:"dogs",
-          name_cp:"Dogs",
-          target_lc:"dog",
-          target_lc_pl:"dogs",
-          target_pl:"Dogs",
-          target_cp:"Dog",
-          target_cp_pl:"Dogs",
-          keyIn_lc:"dog",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "Dog",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql"
         },
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Book",
-          targetKey:"bookId",
-          sourceKey:"personId",
-          keysIn:"books_to_people",
-          targetStorageType:"sql",
-          name:"books",
-          name_lc:"books",
-          name_cp:"Books",
-          target_lc:"book",
-          target_lc_pl:"books",
-          target_pl:"Books",
-          target_cp:"Book",
-          target_cp_pl:"Books",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Book",
+          "targetKey": "bookId",
+          "sourceKey": "personId",
+          "keysIn": "books_to_people",
+          "targetStorageType": "sql"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   });
 
@@ -1597,103 +1574,91 @@ describe('Parse associations', function() {
     let associations = models.dog.associations;
     let res = funks.parseAssociations(associations, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{},
-        one:{
-          person:["Person","Person","Person"],
-          researcher:["Researcher","Researcher","Researcher"]
+      "schema_attributes": {
+        "many": {},
+        "one": {
+          "person": [
+            "Person",
+            "Person",
+            "Person"
+          ],
+          "researcher": [
+            "Researcher",
+            "Researcher",
+            "Researcher"
+          ]
         },
-        generic_many:{},
-        generic_one:{}
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[
+      "to_one": [
         {
-          type:"to_one",
-          target:"Person",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          sublabel:"lastName",
-          name:"person",
-          name_lc:"person",
-          name_cp:"Person",
-          target_lc:"person",
-          target_lc_pl:"people",
-          target_pl:"People",
-          target_cp:"Person",
-          target_cp_pl:"People",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Person",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName",
+          "sublabel": "lastName",
+          "name": "person",
+          "name_lc": "person",
+          "name_cp": "Person",
+          "target_lc": "person",
+          "target_lc_pl": "people",
+          "target_pl": "People",
+          "target_cp": "Person",
+          "target_cp_pl": "People",
+          "keyIn_lc": "dog",
+          "holdsForeignKey": true
         },
         {
-          type:"to_one",
-          target:"Researcher",
-          targetKey:"researcherId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          name:"researcher",
-          name_lc:"researcher",
-          name_cp:"Researcher",
-          target_lc:"researcher",
-          target_lc_pl:"researchers",
-          target_pl:"Researchers",
-          target_cp:"Researcher",
-          target_cp_pl:"Researchers",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Researcher",
+          "targetKey": "researcherId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName",
+          "name": "researcher",
+          "name_lc": "researcher",
+          "name_cp": "Researcher",
+          "target_lc": "researcher",
+          "target_lc_pl": "researchers",
+          "target_pl": "Researchers",
+          "target_cp": "Researcher",
+          "target_cp_pl": "Researchers",
+          "keyIn_lc": "dog",
+          "holdsForeignKey": true
         }
       ],
-      to_many:[],
-      to_many_through_sql_cross_table:[],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        person:"personId",
-        researcher:"researcherId"
+      "to_many": [],
+      "to_many_through_sql_cross_table": [],
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "person": "personId",
+        "researcher": "researcherId"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_one",
-          target:"Person",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          sublabel:"lastName",
-          name:"person",
-          name_lc:"person",
-          name_cp:"Person",
-          target_lc:"person",
-          target_lc_pl:"people",
-          target_pl:"People",
-          target_cp:"Person",
-          target_cp_pl:"People",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Person",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName",
+          "sublabel": "lastName"
         },
         {
-          type:"to_one",
-          target:"Researcher",
-          targetKey:"researcherId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          name:"researcher",
-          name_lc:"researcher",
-          name_cp:"Researcher",
-          target_lc:"researcher",
-          target_lc_pl:"researchers",
-          target_pl:"Researchers",
-          target_cp:"Researcher",
-          target_cp_pl:"Researchers",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Researcher",
+          "targetKey": "researcherId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   })
 

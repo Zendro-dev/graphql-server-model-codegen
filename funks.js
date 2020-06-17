@@ -485,9 +485,7 @@ convertToType = function(many, model_name){
  * @return {object}           Object with all extra info that will be needed to create files with templates.
  */
 module.exports.getOptions = function(dataModel){
-  //let dataModel = parseFile(json_file);
-  //console.log(dataModel.associations);
-
+  
   let opts = {
       name : dataModel.model,
       nameCp: capitalizeString(dataModel.model),
@@ -661,7 +659,7 @@ module.exports.parseAssociations = function(associations){
         console.error(colors.red("Association type "+ association.type + " not supported."));
       }
 
-      let assoc = association;
+      let assoc = JSON.parse(JSON.stringify(association));
       //push association
       if(isStandardAssociation) {
         //standard

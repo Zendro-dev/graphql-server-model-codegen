@@ -322,67 +322,28 @@ const definition = {
             targetKey: 'bookId',
             sourceKey: 'personId',
             keysIn: 'books_to_people',
-            targetStorageType: 'sql',
-            name: 'works',
-            name_lc: 'works',
-            name_cp: 'Works',
-            target_lc: 'book',
-            target_lc_pl: 'books',
-            target_pl: 'Books',
-            target_cp: 'Book',
-            target_cp_pl: 'Books',
-            holdsForeignKey: false
+            targetStorageType: 'sql'
         },
         company: {
             type: 'to_one',
             target: 'publi_sher',
             targetKey: 'companyId',
             keyIn: 'Person',
-            targetStorageType: 'cenz-server',
-            name: 'company',
-            name_lc: 'company',
-            name_cp: 'Company',
-            target_lc: 'publi_sher',
-            target_lc_pl: 'publi_shers',
-            target_pl: 'publi_shers',
-            target_cp: 'Publi_sher',
-            target_cp_pl: 'Publi_shers',
-            keyIn_lc: 'person',
-            holdsForeignKey: true
+            targetStorageType: 'cenz-server'
         },
         dogs: {
             type: 'to_many',
             target: 'Dog',
             targetKey: 'personId',
             keyIn: 'Dog',
-            targetStorageType: 'sql',
-            name: 'dogs',
-            name_lc: 'dogs',
-            name_cp: 'Dogs',
-            target_lc: 'dog',
-            target_lc_pl: 'dogs',
-            target_pl: 'Dogs',
-            target_cp: 'Dog',
-            target_cp_pl: 'Dogs',
-            keyIn_lc: 'dog',
-            holdsForeignKey: false
+            targetStorageType: 'sql'
         },
         parrot: {
             type: 'to_one',
             target: 'Parrot',
             targetKey: 'personId',
             keyIn: 'Parrot',
-            targetStorageType: 'sql',
-            name: 'parrot',
-            name_lc: 'parrot',
-            name_cp: 'Parrot',
-            target_lc: 'parrot',
-            target_lc_pl: 'parrots',
-            target_pl: 'Parrots',
-            target_cp: 'Parrot',
-            target_cp_pl: 'Parrots',
-            keyIn_lc: 'parrot',
-            holdsForeignKey: false
+            targetStorageType: 'sql'
         }
     },
     id: {
@@ -410,17 +371,7 @@ const definition = {
             target: 'Person',
             targetKey: 'personId',
             keyIn: 'Dog',
-            targetStorageType: 'sql',
-            name: 'owner',
-            name_lc: 'owner',
-            name_cp: 'Owner',
-            target_lc: 'person',
-            target_lc_pl: 'people',
-            target_pl: 'People',
-            target_cp: 'Person',
-            target_cp_pl: 'People',
-            keyIn_lc: 'dog',
-            holdsForeignKey: true
+            targetStorageType: 'sql'
         }
     },
     id: {
