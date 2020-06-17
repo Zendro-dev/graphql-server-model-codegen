@@ -1,6 +1,15 @@
---- individual.js.orig	2020-02-12 01:52:26.928491047 -0600
-+++ individual.js	2020-02-12 01:51:05.940643228 -0600
-@@ -10,7 +10,15 @@
+--- individual.js	2020-06-17 17:46:43.238164227 -0500
++++ individual_2.js	2020-06-17 17:47:43.032612750 -0500
+@@ -4,6 +4,8 @@
+ const ajv = validatorUtil.addDateTimeAjvKeywords(new Ajv({
+     allErrors: true
+ }))
++const path = require('path');
++const individual_model =  require(path.join(__dirname, '..', 'models', 'sql' ,'individual.js'));
+ 
+ // Dear user, edit the schema to adjust it to your model
+ module.exports.validator_patch = function(individual) {
+@@ -12,7 +14,15 @@
          "$async": true,
          "properties": {
              "name": {
@@ -17,17 +26,26 @@
              }
          }
      }
-@@ -29,11 +37,8 @@
+@@ -34,12 +44,9 @@
  
-     individual.prototype.validateForDelete = async function(record) {
+     individual.prototype.validateForDelete = async function(id) {
  
--        //TODO: on the input you have the record to be deleted, no generic
--        // validation checks are available.
+-        //TODO: on the input you have the id of the record to be deleted, no generic
+-        // validation checks are available. You might need to import the correspondant model
+-        // in order to read the whole record info and the do the validation.
 -
 -        return {
 -            error: null
-+        if (record.name === 'Undeletable') {
++      let record = await individual_model.readById(id);
++        if (record.name === "Undeletable") {
 +          throw new Ajv.ValidationError('Record with name "Undeletable" can\'t be deleted')
          }
      }
+ 
+@@ -54,4 +61,4 @@
+     }
+ 
      return individual
+-}
+\ No hay ningún carácter de nueva línea al final del archivo
++}

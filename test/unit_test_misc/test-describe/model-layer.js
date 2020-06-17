@@ -165,23 +165,18 @@ module.exports.add_one_resolver = `
 
 module.exports.delete_one_model = `
 static deleteOne(id){
-  return super.findByPk(id)
-      .then(item => {
 
-          if (item === null) return new Error(\`Record with ID = \${id} does not exist\`);
-
-          return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
-              .then((valSuccess) => {
-                  return item
-                      .destroy()
-                      .then(() => {
-                          return 'Item successfully deleted';
-                      });
-              }).catch((err) => {
-                  return err
-              })
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id)
+      .then(async (valSuccess) => {
+        let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+        if(destroyed !== 0){
+          return 'Item successfully deleted';
+        }else{
+          return new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+        }
+      }).catch((error) => {
+          throw error;
       });
-
 }
 `
 module.exports.delete_one_resolver = `

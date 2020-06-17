@@ -26,10 +26,11 @@ module.exports.validator_patch = function(<%- nameLc -%>){
         return await <%- nameLc -%>.prototype.asyncValidate(record)
     }
 
-    <%- nameLc -%>.prototype.validateForDelete = async function(record) {
+    <%- nameLc -%>.prototype.validateForDelete = async function(id) {
 
-        //TODO: on the input you have the record to be deleted, no generic
-        // validation checks are available.
+        //TODO: on the input you have the id of the record to be deleted, no generic
+        // validation checks are available. You might need to import the correspondant model
+        // in order to read the whole record info and the do the validation.
 
         return {error: null}
     }
