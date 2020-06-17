@@ -760,7 +760,7 @@ describe(
     trCounts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
     expect(trCounts).to.deep.equal([]);
 
-  });
+  }).timeout(5000);
   
   //one_to_one associations where foreignKey is in the target model
   it('22. one_to_one associations', function() {
@@ -2076,7 +2076,18 @@ describe(
   });
 
   describe('Cassandra', function() {
-    it('01. Add an incident', function() {
+    it('01. Incident table is empty', function() {
+      let res = itHelpers.request_graph_ql_post(`{countIncidents}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            countIncidents: 0
+        }
+      });
+    })
+
+    it('02. Add an incident', function() {
       let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db", incident_description: "An event" ) {incident_id incident_description}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -2090,7 +2101,7 @@ describe(
       });
     })
 
-    it('02. Read an incident', function() {
+    it('03. Read an incident', function() {
       let res = itHelpers.request_graph_ql_post('{readOneIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db") {incident_id incident_description}}');
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -2104,7 +2115,7 @@ describe(
       });
     })
 
-    it('03. Update an incident', function() {
+    it('04. Update an incident', function() {
       let res = itHelpers.request_graph_ql_post(`mutation { updateIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db", incident_description: "Another event" ) {incident_id incident_description}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -2122,7 +2133,7 @@ describe(
     // The server response can return an array of warnings in info.warnings - in this case it has one element
     // The warning itself should be taken seriously in large databases, but here there is only one element.
 
-    it('04. Count incidents', function() {
+    it('05. Count and search incidents', function() {
       let res = itHelpers.request_graph_ql_post(`{countIncidents}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -2131,9 +2142,31 @@ describe(
             countIncidents: 1
         }
       });
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {nodes{incident_id incident_description} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            incidentsConnection: {
+                nodes: [
+                    {
+                        incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+                        incident_description: "Another event"
+                    }
+                ],
+                pageInfo: {
+                    startCursor: null,
+                    previousCursors: [],
+                    hasPreviousPage: false,
+                    hasNextPage: false
+                }
+            }
+        }
     });
 
-    it('05. Delete an incident', function() {
+    });
+
+    it('06. Delete an incident', function() {
       let res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db")}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);

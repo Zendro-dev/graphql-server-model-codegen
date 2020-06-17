@@ -186,21 +186,22 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     });*/
   }
 
-  static readAllCursor(search, order, pagination){
+  static async readAllCursor(search, pagination){
     //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    let argsValid = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward) || (!pagination.forward && helper.isNonEmptyArray(stack));
     if (!argsValid) {
-      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+      throw new Error('Illegal cursor based pagination arguments. Use either "forward" and optionally "after", or "!forward" and a stack of previous cursors!');
     }
 
-    let isForwardPagination = !pagination || !(pagination.last != undefined);
-    let options = {};
-    options['where'] = {};
+    let isForwardPagination = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward);
+    let offsetCursor = pagination ? (isForwardPagination ? pagination.after : pagination.stack.pop()) : null;
 
-    /*
-     * Search conditions
-     */
-    if(search !== undefined){
+    let arg_cassandra = ';';
+    let stack = [];
+    if (pagination && pagination.stack) {
+      stack = pagination.stack;
+    }
+    if (search !== undefined) {
 
       //check
       if(typeof search !== 'object') {
@@ -208,133 +209,35 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       }
 
       let arg = new searchArg(search);
-      let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;
+      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>');
     }
 
-    /*
-     * Count
-     */
-    return super.count(options).then( countA =>{
-      options['offset'] = 0;
-      options['order'] = [];
-      options['limit'] = countA;
-      /*
-       * Order conditions
-       */
-      if(order !== undefined){
-        options['order'] = order.map( (orderItem)=>{
-          return [orderItem.field, orderItem.order];
-        });
-      }
-      if( !options['order'].map( orderItem=>{return orderItem[0] }).includes("<%- idAttribute -%>") ){
-        options['order'] = [ ...options['order'], ...[ ["<%- idAttribute -%>", "ASC"] ]];
-      }
+    const query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
 
-      /*
-       * Pagination conditions
-       */
-      if(pagination) {
-        //forward
-        if(isForwardPagination) {
-          if(pagination.after) {
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
-            options['where'] = {
-                ...options['where'],
-                ...helper.parseOrderCursor(options['order'], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor)
-            };
-          }
-        }else {//backward
-          if(pagination.before) {
-            let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
-            options['where'] = {
-                ...options['where'],
-                ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor)
-            };
-          }
-        }
-      }
-      //woptions: copy of {options} with only 'where' options
-      let woptions = {};
-      woptions['where'] = {...options['where']};
-      /*
-       *  Count (with only where-options)
-       */
-      return super.count(woptions).then( countB => {
-        /*
-         * Limit conditions
-         */
-        if(pagination) {
-          //forward
-          if(isForwardPagination) {
+    let options = {};
+    if (offsetCursor) {
+      options = {offsetCursor};
+    }
 
-            if(pagination.first) {
-              options['limit'] = pagination.first;
-            }
-          } else {//backward
-            if(pagination.last) {
-              options['limit'] = pagination.last;
-              options['offset'] = Math.max( (countB - pagination.last), 0 );
-            }
-          }
-        }
-        //check: limit
-        if(globals.LIMIT_RECORDS < options['limit']) {
-          throw new Error(`Request of total <%- namePl -%> exceeds max limit of ${globals.LIMIT_RECORDS}. Please use pagination.`);
-        }
+    if (pagination && pagination.limit) {
+      options.fetchSize = parseInt(pagination.limit);
+    }
 
-        /*
-         * Get records
-         */
-        return super.findAll(options).then( records =>{
-          let edges = [];
-          let pageInfo = {
-            hasPreviousPage: false,
-            hasNextPage: false,
-            startCursor: null,
-            endCursor: null
-          };
+    const result = await client.execute(query, [], options);
 
-          //edges
-          if(records.length > 0) {
-            edges = records.map(record => {
-              return {
-                  node: record,
-                  cursor: record.base64Enconde()
-              }
-            });
-          }
+    const rows = result.rows;
+    let pageState = result.pageState;
+    if (helper.isNotUndefinedAndNotNull(pageState)) {
+      stack.push(pageState);
+    }
 
-          //forward
-          if(isForwardPagination) {
-
-            pageInfo = {
-              hasPreviousPage: ( (countA - countB) > 0 ),
-              hasNextPage: ( pagination&&pagination.first ? (countB > pagination.first) : false ),
-              startCursor: (records.length > 0) ? edges[0].cursor : null,
-              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
-            }
-          } else {//backward
-
-            pageInfo = {
-              hasPreviousPage: ( pagination&&pagination.last ? (countB > pagination.last) : false ),
-              hasNextPage: ( (countA - countB) > 0 ),
-              startCursor: (records.length > 0) ? edges[0].cursor : null,
-              endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
-            }
-          }
-
-          return { edges, pageInfo };
-
-        }).catch(error =>{
-          throw error;
-        });
-      }).catch(error =>{
-        throw error;
-      });
-    }).catch(error =>{
-      throw error;
-    });
+    let pageInfo = {
+      startCursor: pageState,
+      previousCursors: stack,
+      hasPreviousPage: helper.isNonEmptyArray(stack),
+      hasNextPage: helper.isNotUndefinedAndNotNull(pageState)
+    }
+    return {nodes: rows, pageInfo: pageInfo};
   }
 
   <%# For a proper response at the end of the add-function, a SELECT query is performed to get the information from the database.

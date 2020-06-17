@@ -370,9 +370,23 @@ writeSchemaCommons = function(dir_write){
     includeCursor: Boolean
   }
 
+  input paginationCursorCassandraInput{
+    limit: Int     # first = last in the Cassandra case
+    after: String
+    forward: Boolean
+    stack: [String]
+  }
+
   type pageInfo{
     startCursor: String
     endCursor: String
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+  }
+
+  type pageCassandraInfo{
+    startCursor: String
+    previousCursors: [String]
     hasPreviousPage: Boolean!
     hasNextPage: Boolean!
   }
@@ -382,51 +396,6 @@ writeSchemaCommons = function(dir_write){
   scalar DateTime
 \`;`;
 
-/*let commonsCassandra = `module.exports = \`
-
-enum CassandraOperator{
-  eq
-  lt
-  gt
-  le
-  ge
-  _in
-  cont   # CONTAINS
-  ctk    # CONTAINS KEY
-  and
-}
-
-enum Order{
-  DESC
-  ASC
-}
-
-input typeValue{
-  type: String
-  value: String!
-}
-
-type paginationCursorInput{
-  first: Int
-  last: Int
-  after: String
-  before: String # Needs to be saved before, calling "before" a given cursor is not possible in Cassandra
-  includeCursor: Boolean
-}
-
-type pageInfo{
-  startCursor: String
-  endCursor: String
-  hasPreviousPage: Boolean!
-  hasNextPage: Boolean!
-}
-
-scalar Date
-scalar Time
-scalar DateTime
-
-\`;`;*/
-
   try {
     let file_name = dir_write + '/schemas/' +  'commons.js';
 
@@ -434,13 +403,6 @@ scalar DateTime
 
     //success
     console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
-
-    /*let file_name_cassandra = dir_write + '/schemas/commons-cassandra.js';
-
-    fs.writeFileSync(file_name_cassandra, commonsCassandra);
-
-    console.log('@@@ File:', colors.dim(file_name_cassandra), colors.green('written successfully!'));*/
-
   } catch(e) {
     //error
     console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
@@ -921,6 +883,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'resolvers':
       case 'resolvers-ddm':
       case 'resolvers-generic':
+      case 'resolvers-cassandra':
       //models
       case 'models':  
       case 'models-webservice':
@@ -1223,7 +1186,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'cassandra':
         sections = [
           {dir: 'schemas', template: 'schemas-cassandra', fileName: opts.nameLc},
-          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers-cassandra', fileName: opts.nameLc},
           {dir: 'models-cassandra', template: 'models-cassandra', fileName: opts.nameLc},
           {dir: 'migrations-cassandra', template: 'migrations-cassandra', fileName: opts.nameLc},
         ]

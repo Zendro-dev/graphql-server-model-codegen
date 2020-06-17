@@ -116,13 +116,8 @@ module.exports = `
  */
 -%>
 type <%- nameCp -%>Connection{
-  edges: [<%- nameCp -%>Edge]
-  pageInfo: pageInfo!
-}
-
-type <%- nameCp -%>Edge{
-  cursor: String!
-  node: <%- name -%>!
+  nodes: [<%- name -%>!]
+  pageInfo: pageCassandraInfo!
 }
 
   type VueTable<%- nameCp -%>{
@@ -177,7 +172,7 @@ type <%- nameCp -%>Edge{
     vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
     csvTableTemplate<%- nameCp -%>: [String]
 
-    <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput ): <%- nameCp -%>Connection
+    <%- namePl -%>Connection(search:search<%- nameCp -%>Input, pagination: paginationCursorCassandraInput ): <%- nameCp -%>Connection
   }
 <%# 
 /**
