@@ -248,18 +248,13 @@ static readAllCursor(search, order, pagination) {
 
 
 module.exports.deleteOne = `
-    static deleteOne(id) {
-        return super.findByPk(id)
-        .then(item => {
-
-        if (item === null) return new Error(\`Record with ID = \${id} not exist\`);
-          return item
-              .destroy()
-              .then(() => {
-                  return 'Item successfully deleted';
-              });
-
-        });
+    static async deleteOne(id) {
+      let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+      if(destroyed !== 0){
+        return 'Item successfully deleted';
+      }else{
+        throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+      }
     }`
 
 module.exports.updateOne = `

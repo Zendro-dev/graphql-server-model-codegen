@@ -172,7 +172,7 @@ static deleteOne(id){
         if(destroyed !== 0){
           return 'Item successfully deleted';
         }else{
-          return new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+          throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
         }
       }).catch((error) => {
           throw error;
