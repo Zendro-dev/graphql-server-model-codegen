@@ -2174,7 +2174,87 @@ describe(
         data: {
             deleteIncident: "Item successfully deleted"
         }
-    });
+      });
     })
+
+    it('07. Create 5 incidents and delete them in a loop', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1", incident_description: "One incident" ) {incident_id incident_description}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addIncident: {
+                incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1",
+                incident_description: "One incident"
+            }
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "0a853fac-1bb2-4adf-bbf9-9371f7db97b6", incident_description: "Second incident" ) {incident_id incident_description}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addIncident: {
+                incident_id: "0a853fac-1bb2-4adf-bbf9-9371f7db97b6",
+                incident_description: "Second incident"
+            }
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "8f455707-f7aa-4925-9efc-df18f2f9cd55", incident_description: "Third incident" ) {incident_id incident_description}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addIncident: {
+                incident_id: "8f455707-f7aa-4925-9efc-df18f2f9cd55",
+                incident_description: "Third incident"
+            }
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "a1e30fde-2bc0-466b-84f4-1d4fee68af44", incident_description: "Fourth incident" ) {incident_id incident_description}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addIncident: {
+                incident_id: "a1e30fde-2bc0-466b-84f4-1d4fee68af44",
+                incident_description: "Fourth incident"
+            }
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "1f458011-49a3-4833-90f0-d084e227c376", incident_description: "Fifth incident" ) {incident_id incident_description}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addIncident: {
+                incident_id: "1f458011-49a3-4833-90f0-d084e227c376",
+                incident_description: "Fifth incident"
+            }
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {nodes{incident_id}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      let nodes = resBody.data.incidentsConnection.nodes;
+      for (let node of nodes) {
+        let id = node.incident_id;
+        res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "${id}")}`);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            deleteIncident: "Item successfully deleted"
+          }
+        });
+      }
+      res = itHelpers.request_graph_ql_post(`{countIncidents}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            countIncidents: 0
+        }
+      });
+    });
     
   })

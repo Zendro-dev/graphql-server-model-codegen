@@ -190,7 +190,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward) || (!pagination.forward && helper.isNonEmptyArray(stack));
     if (!argsValid) {
-      throw new Error('Illegal cursor based pagination arguments. Use either "forward" and optionally "after", or "!forward" and a stack of previous cursors!');
+      throw new Error('Illegal cursor based pagination arguments. If you use "forward = false", you must also give a non-empty stack of previous cursors!');
     }
 
     let isForwardPagination = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward);
