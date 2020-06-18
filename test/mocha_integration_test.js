@@ -2256,5 +2256,118 @@ describe(
         }
       });
     });
+
+    it('08. Instant table is empty', function() {
+      let res = itHelpers.request_graph_ql_post(`{countInstants}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            countInstants: 0
+        }
+      });
+    })
+
+    it('09. Add an instant', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { addInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45", year: 2020, month: 6, day: 18, hour: 10, minute: 52 ) {instant_id year month day hour minute}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addInstant: {
+                instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                year: 2020,
+                month: 6,
+                day: 18,
+                hour: 10,
+                minute: 52
+            }
+        }
+      });
+    })
+
+    it('10. Read an instant', function() {
+      let res = itHelpers.request_graph_ql_post('{readOneInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45") {instant_id year month day hour minute}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            readOneInstant: {
+                instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                year: 2020,
+                month: 6,
+                day: 18,
+                hour: 10,
+                minute: 52
+            }
+        }
+      });
+    })
+
+    it('11. Update an instant', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { updateInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45", minute: 57 ) {instant_id year month day hour minute}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            updateInstant: {
+                instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                year: 2020,
+                month: 6,
+                day: 18,
+                hour: 10,
+                minute: 57
+            }
+        }
+      });
+    })
+
+    it('12. Count and search instants', function() {
+      let res = itHelpers.request_graph_ql_post(`{countInstants}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            countInstants: 1
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`{instantsConnection {nodes{instant_id year month day hour minute} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            instantsConnection: {
+                nodes: [
+                    {
+                      instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                      year: 2020,
+                      month: 6,
+                      day: 18,
+                      hour: 10,
+                      minute: 57
+                    }
+                ],
+                pageInfo: {
+                    startCursor: null,
+                    previousCursors: [],
+                    hasPreviousPage: false,
+                    hasNextPage: false
+                }
+            }
+        }
+      });
+
+    });
+
+    it('13. Delete an instant', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { deleteInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45")}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            deleteInstant: "Item successfully deleted"
+        }
+      });
+    })
     
   })
