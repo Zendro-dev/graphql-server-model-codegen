@@ -2142,16 +2142,20 @@ describe(
             countIncidents: 1
         }
       });
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection {nodes{incident_id incident_description} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id incident_description}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
+      let cursor = resBody.data.incidentsConnection.edges[0].cursor;
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
         data: {
             incidentsConnection: {
-                nodes: [
+                edges: [
                     {
+                      cursor: `${cursor}`,
+                      node: {
                         incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
                         incident_description: "Another event"
+                      }
                     }
                 ],
                 pageInfo: {
@@ -2233,11 +2237,11 @@ describe(
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection {nodes{incident_id}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {node{incident_id}}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
-      let nodes = resBody.data.incidentsConnection.nodes;
-      for (let node of nodes) {
-        let id = node.incident_id;
+      let edges = resBody.data.incidentsConnection.edges;
+      for (let edge of edges) {
+        let id = edge.node.incident_id;
         res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "${id}")}`);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2331,20 +2335,24 @@ describe(
             countInstants: 1
         }
       });
-      res = itHelpers.request_graph_ql_post(`{instantsConnection {nodes{instant_id year month day hour minute} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{instantsConnection {edges{cursor node{instant_id year month day hour minute}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
+      let cursor = resBody.data.instantsConnection.edges[0].cursor;
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
         data: {
             instantsConnection: {
-                nodes: [
+                edges: [
                     {
-                      instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
-                      year: 2020,
-                      month: 6,
-                      day: 18,
-                      hour: 10,
-                      minute: 57
+                      cursor: `${cursor}`,
+                      node: {
+                        instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                        year: 2020,
+                        month: 6,
+                        day: 18,
+                        hour: 10,
+                        minute: 57
+                      }
                     }
                 ],
                 pageInfo: {

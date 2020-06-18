@@ -116,8 +116,13 @@ module.exports = `
  */
 -%>
 type <%- nameCp -%>Connection{
-  nodes: [<%- name -%>!]
+  edges: [<%- nameCp -%>Edge]
   pageInfo: pageCassandraInfo!
+}
+
+type <%- nameCp -%>Edge{
+  cursor: String!
+  node: <%- name -%>!
 }
 
   type VueTable<%- nameCp -%>{

@@ -30,7 +30,9 @@ const definition = <%- definition -%>;
 
 module.exports = class <%- name -%> /* extends Sequelize.Model */ {
   constructor(input, initMessage) {
-    this.initMessage = initMessage;
+    if (initMessage) {
+      this.initMessage = initMessage;
+    }
     for (let key of Object.keys(input)) {
       this[key] = input[key];
     }
@@ -225,7 +227,12 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
 
     const result = await client.execute(query, [], options);
 
-    const rows = result.rows;
+    const rows = result.rows.map(row => {
+      let edge = {};
+      edge.node = row;
+      edge.cursor = (new <%- name -%>(row)).base64Enconde();
+      return edge;
+    });
     let pageState = result.pageState;
     if (helper.isNotUndefinedAndNotNull(pageState)) {
       stack.push(pageState);
@@ -237,7 +244,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       hasPreviousPage: helper.isNonEmptyArray(stack),
       hasNextPage: helper.isNotUndefinedAndNotNull(pageState)
     }
-    return {nodes: rows, pageInfo: pageInfo};
+    return {edges: rows, pageInfo: pageInfo};
   }
 
   <%# For a proper response at the end of the add-function, a SELECT query is performed to get the information from the database.
