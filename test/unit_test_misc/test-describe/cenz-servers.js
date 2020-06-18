@@ -5,7 +5,7 @@ module.exports.server_url = `
 module.exports.read_by_id = `
 static async readById( id, benignErrorReporter){
   let query = \`query readOneBook{ readOneBook(id: "\${id}"){id  title genre publisher_id} }\`
-  
+
   //use default BenignErrorReporter if no BenignErrorReporter defined
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
@@ -217,7 +217,7 @@ static async bulkAddCsv(context, benignErrorReporter){
 
   try {
     let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
-    let query = \`mutation {bulkAddBookCsv{id}}\`;
+    let query = \`mutation {bulkAddBookCsv}\`;
     let formData = new FormData();
     formData.append('csv_file', fs.createReadStream(tmpFile));
     formData.append('query', query);
@@ -337,7 +337,7 @@ static async add_personId(id, personId, benignErrorReporter) {
     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
     if(helper.isNonEmptyArray(response.data.errors)) {
       benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
-    } 
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
@@ -381,7 +381,7 @@ static async remove_personId(id, personId, benignErrorReporter) {
     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
     if(helper.isNonEmptyArray(response.data.errors)) {
       benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
-    } 
+    }
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send

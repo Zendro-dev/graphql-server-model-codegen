@@ -248,33 +248,26 @@ static readAllCursor(search, order, pagination) {
 
 
 module.exports.deleteOne = `
-    static deleteOne(id) {
-        return super.findByPk(id)
-        .then(item => {
-
-        if (item === null) return new Error(\`Record with ID = \${id} not exist\`);
-          return item
-              .destroy()
-              .then(() => {
-                  return 'Item successfully deleted';
-              });
-
-        });
+    static async deleteOne(id) {
+      let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+      if(destroyed !== 0){
+        return 'Item successfully deleted';
+      }else{
+        throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+      }
     }`
 
 module.exports.updateOne = `
     static async updateOne(input) {
       try {
-          let result = await sequelize.transaction(async (t) => {
-              let item = await super.findByPk(input[this.idAttribute()], {
-                  transaction: t
-              });
-              let updated = await item.update(input, {
-                  transaction: t
-              });
-              return updated;
+        let result = await sequelize.transaction( async (t) =>{
+          let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+          return updated;
           });
-          return result;
+          if(result[0] === 0){
+            throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+          }
+          return result[1][0];
       } catch (error) {
           throw error;
       }

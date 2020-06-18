@@ -165,23 +165,18 @@ module.exports.add_one_resolver = `
 
 module.exports.delete_one_model = `
 static deleteOne(id){
-  return super.findByPk(id)
-      .then(item => {
 
-          if (item === null) return new Error(\`Record with ID = \${id} does not exist\`);
-
-          return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
-              .then((valSuccess) => {
-                  return item
-                      .destroy()
-                      .then(() => {
-                          return 'Item successfully deleted';
-                      });
-              }).catch((err) => {
-                  return err
-              })
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id)
+      .then(async (valSuccess) => {
+        let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+        if(destroyed !== 0){
+          return 'Item successfully deleted';
+        }else{
+          throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+        }
+      }).catch((error) => {
+          throw error;
       });
-
 }
 `
 module.exports.delete_one_resolver = `
@@ -211,19 +206,15 @@ static updateOne(input) {
         .then(async (valSuccess) => {
             try {
                 let result = await sequelize.transaction(async (t) => {
-                    let promises_associations = [];
-                    let item = await super.findByPk(input[this.idAttribute()], {
-                        transaction: t
-                    });
-		    if (item === null) {
-                            throw new Error(\`Record with ID = \${id} does not exist\`);
-                        }
-                    let updated = await item.update(input, {
-                        transaction: t
-                    });
+                    let updated = await super.update(input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
                     return updated;
                 });
-                return result;
+
+                if(result[0] === 0){
+                  throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+                }
+
+                return result[1][0];
             } catch (error) {
                 throw error;
             }
@@ -309,6 +300,7 @@ static bulkAddCsv(context){
     }).catch((error) => {
         throw new Error(error);
     });
+    return \`Bulk import of Book records started. You will be send an email to \$\{helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
 }
 `
 

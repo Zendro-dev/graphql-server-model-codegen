@@ -1,9 +1,9 @@
 module.exports = `
-<%# 
+<%#
 /**
  * Section 1
  * Model type: <name>
- * 
+ *
  * <name> is equal to the given model's name. The fields of this type are the following:
  *
  *  Internal id attribute.
@@ -13,7 +13,7 @@ module.exports = `
 -%>
 type <%- name -%>
 {
-<%# 
+<%#
 /**
  * Section 1.1 - Internal id attribute.
  * Field: <idAttribute> : ID
@@ -24,7 +24,7 @@ type <%- name -%>
   """
   <%- idAttribute -%>: ID
 
-  <%# 
+  <%#
 /**
  * Section 1.2 - All other attributes (non-internal-id).
  * Fields: <nonIdAttribute> : scalar
@@ -38,7 +38,7 @@ type <%- name -%>
   <%= key %>: <%= attributes[key]%>
 <%}-%>
 
-<%# 
+<%#
 /**
  * Section 1.3 - Associations fields.
  *
@@ -102,7 +102,7 @@ type <%- name -%>
 <%}-%>
 }
 
-<%# 
+<%#
 /**
  * Section 2
  * Inner types
@@ -130,7 +130,7 @@ type VueTable<%- nameCp -%>{
   to: Int
 }
 
-<%# 
+<%#
 /**
  * Section 3
  * Enum
@@ -143,7 +143,7 @@ enum <%- name -%>Field {
 <%}-%>
 }
 
-<%# 
+<%#
 /**
  * Section 4
  * Input types
@@ -162,7 +162,7 @@ input order<%- nameCp -%>Input{
   order: Order
 }
 
-<%# 
+<%#
 /**
  * Section 5
  * Query type
@@ -177,7 +177,7 @@ type Query {
   <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput ): <%- nameCp -%>Connection
 }
 
-<%# 
+<%#
 /**
  * Section 6
  * Mutation type
@@ -187,6 +187,6 @@ type Query {
   add<%- nameCp -%>(<%if(!defaultId){-%><%- idAttribute -%>: ID!,<%}-%> <%- editableAttributesStr -%> <%for(var key in associationsArguments.schema_attributes.one){-%>, add<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.generic_one){-%>, add<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%>, add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%> <%for(var key in associationsArguments.schema_attributes.generic_many){-%>, add<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID]<%}-%>, skipAssociationsExistenceChecks:Boolean = false): <%- name %>!
   update<%- nameCp -%>(<%- idAttribute -%>: ID!, <%- editableAttributesStr -%> <%for(var key in associationsArguments.schema_attributes.one){-%>, add<%= associationsArguments.schema_attributes.one[key][2]%>:ID, remove<%= associationsArguments.schema_attributes.one[key][2]%>:ID <%}-%> <%for(var key in associationsArguments.schema_attributes.generic_one){-%>, add<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID, remove<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID <%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%>, add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID], remove<%= associationsArguments.schema_attributes.many[key][2]%>:[ID] <%}-%> <%for(var key in associationsArguments.schema_attributes.generic_many){-%>, add<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID], remove<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID] <%}-%>, skipAssociationsExistenceChecks:Boolean = false): <%- name %>!
 delete<%- nameCp -%>(<%- idAttribute -%>: ID!): String!
-bulkAdd<%- nameCp -%>Csv: [<%- name -%>] }
+bulkAdd<%- nameCp -%>Csv: String }
 
 `;
