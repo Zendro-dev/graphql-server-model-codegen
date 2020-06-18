@@ -135,6 +135,7 @@ static async deleteOne(id, benignErrorReporter){
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
   try {
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id);
     // Send an HTTP request to the remote server
     let response = await axios.post(remoteCenzontleURL, {query: query});
     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
