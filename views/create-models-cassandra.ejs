@@ -124,7 +124,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
         });
   }
 
-  static async countRecords(search){
+  static async countRecords(search, filtering){
     let options = {};
     let result = 0;
     let arg_cassandra = ';';
@@ -138,7 +138,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       let arg = new searchArg(search);
       /*let arg_sequelize = arg.toSequelize();
       options['where'] = arg_sequelize;*/
-      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>');
+      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>', filtering);
     }
     const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
     let queryResult = await client.execute(query);
@@ -188,7 +188,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     });*/
   }
 
-  static async readAllCursor(search, pagination){
+  static async readAllCursor(search, pagination, filteringAllowed){
     //check valid pagination arguments
     let offsetCursor = pagination ? pagination.after : null;
     let arg_cassandra = ';';
@@ -214,7 +214,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       if (searchTerms.value && searchTerms.value.value) {
         searchTerms = new searchArg(searchTerms);
       }
-      arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>');
+      arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>', filteringAllowed) + ';';
     }
 
     let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;

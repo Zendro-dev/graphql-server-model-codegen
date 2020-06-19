@@ -2180,18 +2180,18 @@ describe(
     })
 
     it('07. Create 5 incidents, test pagination and delete the incidents in a loop', function() {
-      let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1", incident_description: "One incident" ) {incident_id incident_description}}`);
+      let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1", incident_description: "First incident", incident_number: 1 ) {incident_id incident_description}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
         data: {
             addIncident: {
                 incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1",
-                incident_description: "One incident"
+                incident_description: "First incident"
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "0a853fac-1bb2-4adf-bbf9-9371f7db97b6", incident_description: "Second incident" ) {incident_id incident_description}}`);
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "0a853fac-1bb2-4adf-bbf9-9371f7db97b6", incident_description: "Second incident", incident_number: 2 ) {incident_id incident_description}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2202,7 +2202,7 @@ describe(
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "8f455707-f7aa-4925-9efc-df18f2f9cd55", incident_description: "Third incident" ) {incident_id incident_description}}`);
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "8f455707-f7aa-4925-9efc-df18f2f9cd55", incident_description: "Third incident", incident_number: 3 ) {incident_id incident_description}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2213,7 +2213,7 @@ describe(
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "a1e30fde-2bc0-466b-84f4-1d4fee68af44", incident_description: "Fourth incident" ) {incident_id incident_description}}`);
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "a1e30fde-2bc0-466b-84f4-1d4fee68af44", incident_description: "Fourth incident", incident_number: 4 ) {incident_id incident_description}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2224,7 +2224,7 @@ describe(
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "1f458011-49a3-4833-90f0-d084e227c376", incident_description: "Fifth incident" ) {incident_id incident_description}}`);
+      res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "1f458011-49a3-4833-90f0-d084e227c376", incident_description: "Fifth incident", incident_number: 5 ) {incident_id incident_description}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2235,11 +2235,12 @@ describe(
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id}}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id incident_description incident_number}}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       let edges = resBody.data.incidentsConnection.edges;
       let idArray = edges.map(edge => edge.node.incident_id);
       let cursorArray = edges.map(edge => edge.cursor);
+      let numberArray = edges.map(edge => edge.node.incident_number);
       res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -2315,6 +2316,24 @@ describe(
           }
         }
       })
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(search:{field: incident_number, value: {value: "3"}, operator: gt}, pagination:{limit: 1}) {edges{node{incident_id incident_number}}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      let idx = numberArray.indexOf(5);
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          incidentsConnection: {
+            edges: [
+              {
+                node: {
+                  incident_id: idArray[idx],
+                  incident_number: 5
+                }
+              }
+            ]
+          }
+        }
+      });
       for (let edge of edges) {
         let id = edge.node.incident_id;
         res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "${id}")}`);

@@ -3,7 +3,8 @@
     "storageType": "cassandra",
     "attributes": {
       "incident_id": "uuid",
-      "incident_description": "String"
+      "incident_description": "String",
+      "incident_number": "Int"
     },
   
     "associations": {

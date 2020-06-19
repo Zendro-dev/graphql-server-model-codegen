@@ -14,9 +14,10 @@ function errorMessageForRecordsLimit(query) {
 * @param {object} search  Search argument for filtering records
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 * @param {string} query The query that makes this check
+* @param {boolean} filtering Is filtering allowed (only for Cassandra)?
 */
-async function checkCountAndReduceRecordsLimit(search, context, query) {
-  let count = (await <%- nameLc -%>.countRecords(search)).sum;
+async function checkCountAndReduceRecordsLimit(search, context, query, filtering) {
+  let count = (await <%- nameLc -%>.countRecords(search, filtering)).sum;
   if (count > context.recordsLimit) {
       throw new Error(errorMessageForRecordsLimit(query));
   }

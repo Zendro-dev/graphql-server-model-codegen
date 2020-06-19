@@ -586,18 +586,20 @@ module.exports = {
    * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
-   <%- namePl -%>Connection: function({search, pagination}, context){
-     return checkAuthorization(context, '<%- name -%>', 'read').then(async authorization =>{
-         if (authorization === true) {
-           await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>Connection");
-           return <%- nameLc -%>.readAllCursor(search, pagination);
+   <%- namePl -%>Connection: async function({search, pagination}, context){
+     try {
+       let authorization = await checkAuthorization(context, '<%- name -%>', 'read');
+       if (authorization === true) {
+         let filtering = await checkAuthorization(context, '<%- name -%>', 'search')
+         await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>Connection", filtering);
+         return <%- nameLc -%>.readAllCursor(search, pagination, filtering);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }
-     }).catch( error =>{
-          console.error(error);
-           handleError( error);
-     })
+     } catch( error) {
+         console.error(error);
+         handleError( error);
+     }
    },
 
   /**
@@ -629,16 +631,18 @@ module.exports = {
    * @return {number}          Number of records that holds the conditions specified in the search argument
    */
   count<%-namePlCp-%>: async function({search}, context){
-    return await checkAuthorization(context, '<%- name -%>', 'read').then( async authorization =>{
+    try {
+      let authorization = await checkAuthorization(context, '<%- name -%>', 'read');
       if (authorization === true) {
-        return (await <%- nameLc -%>.countRecords(search)).sum;
+        let filtering = await checkAuthorization(context, '<%- name -%>', 'search')
+        return (await <%- nameLc -%>.countRecords(search, filtering)).sum;
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
-    }).catch( error =>{
+    } catch( error ) {
         console.error(error);
         handleError( error);
-    })
+    }
   },
 
   /**
