@@ -496,7 +496,7 @@ module.exports.getOptions = function(dataModel){
       namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
       attributes: getOnlyTypeAttributes(dataModel.attributes),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
-      associationsArguments: module.exports.parseAssociations(dataModel.associations),
+      associationsArguments: module.exports.parseAssociations(dataModel),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definitionObj : dataModel,
@@ -596,11 +596,11 @@ getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute
  * parseAssociations - Parse associations of a given data model.
  * Classification of associations will be accordingly to the type of association and storage type of target model.
  *
- * @param  {object} associations Description of each association
- * @return {object}              Object containing explicit information needed for generating files with templates.
+ * @param  {object} dataModel Data model definition
+ * @return {object}           Object containing explicit information needed for generating files with templates.
  */
-module.exports.parseAssociations = function(associations){
-
+module.exports.parseAssociations = function(dataModel){
+  let associations = dataModel.associations;
   associations_info = {
     "schema_attributes" : {
       "many" : {},
@@ -618,7 +618,6 @@ module.exports.parseAssociations = function(associations){
     associations: [],
     genericAssociations: []
   };
-
   if(associations!==undefined){
     Object.entries(associations).forEach(([name, association]) => {
       let type = association.type;
@@ -643,7 +642,7 @@ module.exports.parseAssociations = function(associations){
       //}else if(associations_type["one"].includes(association.type))
       } else if(association.type === 'to_one') {
         associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
-        if (association.keyIn !== association.target) {
+        if (association.keyIn === dataModel.model) {
           holdsTheForeignKey = true;
         }
       } else if(association.type === 'to_many_through_sql_cross_table') {
@@ -659,7 +658,7 @@ module.exports.parseAssociations = function(associations){
         console.error(colors.red("Association type "+ association.type + " not supported."));
       }
 
-      let assoc = JSON.parse(JSON.stringify(association));
+      let assoc = Object.assign({},association);
       //push association
       if(isStandardAssociation) {
         //standard

@@ -1304,8 +1304,7 @@ describe('SQL-adapter', function(){
 
 describe('Parse associations', function() {
   it('01. Single to_one association', function() {
-      let associations = models.transcript_count.associations;
-      let res = funks.parseAssociations(associations, 'sql');
+      let res = funks.parseAssociations(models.transcript_count, 'sql');
       expect(res).to.deep.equal({
         "schema_attributes": {
           "many": {},
@@ -1360,8 +1359,7 @@ describe('Parse associations', function() {
   });
 
   it('02. Single to_many association', function() {
-    let associations = models.individual.associations;
-    let res = funks.parseAssociations(associations, 'sql');
+    let res = funks.parseAssociations(models.individual, 'sql');
     expect(res).to.deep.equal({
       "schema_attributes": {
         "many": {
@@ -1418,8 +1416,8 @@ describe('Parse associations', function() {
   it('03. Single to_many_through_sql_cross_table', function() {
     let association = models.assoc_through_project_researcher;
     association.type = 'to_many_through_sql_cross_table';
-    let associations = {assoc: association};
-    let res = funks.parseAssociations(associations, 'sql');
+    let model = {model: "Person", associations: {assoc: association}};
+    let res = funks.parseAssociations(model, 'sql');
     expect(res).to.deep.equal({
       "schema_attributes": {
         "many": {
@@ -1482,9 +1480,9 @@ describe('Parse associations', function() {
   });
 
   it('04. Two associations: to_many and to_many_through_sql_cross_table', function() {
-    let associations = models.person.associations;
-    associations.books.type = "to_many_through_sql_cross_table"
-    let res = funks.parseAssociations(associations, 'sql');
+    let person = models.person;
+    person.associations.books.type = "to_many_through_sql_cross_table"
+    let res = funks.parseAssociations(person, 'sql');
     expect(res).to.deep.equal({
       "schema_attributes": {
         "many": {
@@ -1571,8 +1569,7 @@ describe('Parse associations', function() {
   });
 
   it('05. Two associations: Twice to_one', function() {
-    let associations = models.dog.associations;
-    let res = funks.parseAssociations(associations, 'sql');
+    let res = funks.parseAssociations(models.dog, 'sql');
     expect(res).to.deep.equal({
       "schema_attributes": {
         "many": {},
