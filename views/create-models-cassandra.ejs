@@ -190,24 +190,8 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
 
   static async readAllCursor(search, pagination){
     //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward) || (!pagination.forward && helper.isNonEmptyArray(stack));
-    if (!argsValid) {
-      throw new Error('Illegal cursor based pagination arguments. If you use "forward = false", you must also give a non-empty stack of previous cursors!');
-    }
-
-    let isForwardPagination = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward);
-
-    let offsetCursor = pagination ? (isForwardPagination ? pagination.after : pagination.stack.pop()) : null;
-
+    let offsetCursor = pagination ? pagination.after : null;
     let arg_cassandra = ';';
-    let stack = [];
-    if (pagination && pagination.stack) {
-      stack = pagination.stack;
-    }
-
-    if (pagination && pagination.after) {
-      stack.push(pagination.after);
-    }
 
     let searchTerms = search;
     if (helper.isNotUndefinedAndNotNull(search) && helper.isNotUndefinedAndNotNull(offsetCursor)) {
@@ -234,13 +218,6 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     }
 
     let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
-    /*if (helper.isNotUndefinedAndNotNull(pagination) && helper.isNotUndefinedAndNotNull(pagination.limit) && pagination.limit > 0) {
-      if (query.lastIndexOf(';') === query.length - 1) {
-        query = query.substring(0, query.length - 1);
-      }
-      query += ` LIMIT ${pagination.limit};`;
-    }*/
-
     let options = {};
 
     if (pagination && pagination.limit) {
@@ -265,8 +242,6 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
 
     let pageInfo = {
       startCursor: nextCursor,
-      previousCursors: stack,
-      hasPreviousPage: helper.isNonEmptyArray(stack),
       hasNextPage: hasNextCursor
     }
     return {edges: rows, pageInfo: pageInfo};

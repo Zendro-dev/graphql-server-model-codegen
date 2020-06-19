@@ -2142,7 +2142,7 @@ describe(
             countIncidents: 1
         }
       });
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id incident_description}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id incident_description}} pageInfo{startCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       let cursor = resBody.data.incidentsConnection.edges[0].cursor;
       expect(res.statusCode).to.equal(200);
@@ -2160,8 +2160,6 @@ describe(
                 ],
                 pageInfo: {
                     startCursor: null,
-                    previousCursors: [],
-                    hasPreviousPage: false,
                     hasNextPage: false
                 }
             }
@@ -2242,7 +2240,7 @@ describe(
       let edges = resBody.data.incidentsConnection.edges;
       let idArray = edges.map(edge => edge.node.incident_id);
       let cursorArray = edges.map(edge => edge.cursor);
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2}) {edges{cursor node{incident_id}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2264,14 +2262,12 @@ describe(
             ],
             pageInfo: {
               startCursor: cursorArray[1],
-              previousCursors: [],
-              hasPreviousPage: false,
               hasNextPage: true
             }
           }
         }
       })
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[1]}"}) {edges{cursor node{incident_id}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[1]}"}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2293,14 +2289,12 @@ describe(
             ],
             pageInfo: {
               startCursor: cursorArray[3],
-              previousCursors: [cursorArray[1]],
-              hasPreviousPage: true,
               hasNextPage: true
             }
           }
         }
       })
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[3]}", stack: ["${cursorArray[1]}"]}) {edges{cursor node{incident_id}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[3]}"}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2316,8 +2310,6 @@ describe(
             ],
             pageInfo: {
               startCursor: null,
-              previousCursors: [cursorArray[1], cursorArray[3]],
-              hasPreviousPage: true,
               hasNextPage: false
             }
           }
@@ -2418,7 +2410,7 @@ describe(
             countInstants: 1
         }
       });
-      res = itHelpers.request_graph_ql_post(`{instantsConnection {edges{cursor node{instant_id year month day hour minute}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{instantsConnection {edges{cursor node{instant_id year month day hour minute}} pageInfo{startCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       let cursor = resBody.data.instantsConnection.edges[0].cursor;
       expect(res.statusCode).to.equal(200);
@@ -2440,8 +2432,6 @@ describe(
                 ],
                 pageInfo: {
                     startCursor: null,
-                    previousCursors: [],
-                    hasPreviousPage: false,
                     hasNextPage: false
                 }
             }

@@ -375,8 +375,6 @@ writeSchemaCommons = function(dir_write){
   input paginationCursorCassandraInput{
     limit: Int     # first = last in the Cassandra case
     after: String
-    forward: Boolean
-    stack: [String]
   }
 
   type pageInfo{
@@ -388,8 +386,6 @@ writeSchemaCommons = function(dir_write){
 
   type pageCassandraInfo{
     startCursor: String
-    previousCursors: [String]
-    hasPreviousPage: Boolean!
     hasNextPage: Boolean!
   }
 
