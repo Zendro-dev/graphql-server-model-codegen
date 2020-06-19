@@ -158,7 +158,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         if (globals.LIMIT_RECORDS < options['limit']) {
             throw new Error(`Request of total <%- namePl -%> exceeds max limit of ${globals.LIMIT_RECORDS}. Please use pagination.`);
         }
-        return super.findAll(options);
+        let records = await super.findAll(options);
+        return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
     });
   }
 

@@ -82,7 +82,8 @@ static readAll(search, order, pagination) {
             if (globals.LIMIT_RECORDS < options['limit']) {
                 throw new Error(\`Request of total dogs exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
             }
-            return super.findAll(options);
+            let records = await super.findAll(options);
+            return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
         });
     }
 
