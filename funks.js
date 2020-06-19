@@ -7,16 +7,6 @@ const ejsRenderFile = promisify( ejs.renderFile );
 const stringify_obj = require('stringify-object');
 const colors = require('colors/safe');
 
-/**
- *  Allowed type of associations classified accordingly the number of possible records involved
- *  @constant
- *  @type {object}
- */
-associations_type = {
-  "many" : ['hasMany', 'belongsToMany'],
-  "one" : ['hasOne', 'belongsTo']
-};
-
 
 /**
  * parseFile - Parse a json file
@@ -557,18 +547,6 @@ validateJsonFile =  function(opts){
   })
 
   return check;
-}
-
-getSqlType = function(association, model_name){
-  if(association.type === 'to_one' && association.keyIn !== association.target){
-    return 'belongsTo';
-  }else if(association.type === 'to_one' && association.keyIn === association.target){
-    return 'hasOne';
-  }else if(association.type === 'to_many' && association.hasOwnProperty('sourceKey')){
-    return 'belongsToMany';
-  }else if(association.type === 'to_many' && association.keyIn === association.target){
-    return 'hasMany';
-  }
 }
 
 getEditableAssociations = function(associations) {
