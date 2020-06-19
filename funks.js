@@ -344,6 +344,8 @@ writeSchemaCommons = function(dir_write){
     _in
     cont   # CONTAINS
     ctk    # CONTAINS KEY
+    tlt    # Token < Token
+    tgt    # Token > Token
     and
   }
 

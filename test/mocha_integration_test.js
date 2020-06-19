@@ -2181,7 +2181,7 @@ describe(
       });
     })
 
-    it('07. Create 5 incidents and delete them in a loop', function() {
+    it('07. Create 5 incidents, test pagination and delete the incidents in a loop', function() {
       let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1", incident_description: "One incident" ) {incident_id incident_description}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -2237,9 +2237,92 @@ describe(
             }
         }
       });
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {node{incident_id}}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id}}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       let edges = resBody.data.incidentsConnection.edges;
+      let idArray = edges.map(edge => edge.node.incident_id);
+      let cursorArray = edges.map(edge => edge.cursor);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2}) {edges{cursor node{incident_id}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          incidentsConnection: {
+            edges: [
+              {
+                cursor: cursorArray[0],
+                node: {
+                  incident_id: idArray[0]
+                }
+              },
+              {
+                cursor: cursorArray[1],
+                node: {
+                  incident_id: idArray[1]
+                }
+              }
+            ],
+            pageInfo: {
+              startCursor: cursorArray[1],
+              previousCursors: [],
+              hasPreviousPage: false,
+              hasNextPage: true
+            }
+          }
+        }
+      })
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[1]}"}) {edges{cursor node{incident_id}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          incidentsConnection: {
+            edges: [
+              {
+                cursor: cursorArray[2],
+                node: {
+                  incident_id: idArray[2]
+                }
+              },
+              {
+                cursor: cursorArray[3],
+                node: {
+                  incident_id: idArray[3]
+                }
+              }
+            ],
+            pageInfo: {
+              startCursor: cursorArray[3],
+              previousCursors: [cursorArray[1]],
+              hasPreviousPage: true,
+              hasNextPage: true
+            }
+          }
+        }
+      })
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[3]}", stack: ["${cursorArray[1]}"]}) {edges{cursor node{incident_id}} pageInfo{startCursor previousCursors hasPreviousPage hasNextPage}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          incidentsConnection: {
+            edges: [
+              {
+                cursor: cursorArray[4],
+                node: {
+                  incident_id: idArray[4]
+                }
+              }
+            ],
+            pageInfo: {
+              startCursor: null,
+              previousCursors: [cursorArray[1], cursorArray[3]],
+              hasPreviousPage: true,
+              hasNextPage: false
+            }
+          }
+        }
+      })
       for (let edge of edges) {
         let id = edge.node.incident_id;
         res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "${id}")}`);

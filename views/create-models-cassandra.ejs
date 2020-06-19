@@ -196,6 +196,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     }
 
     let isForwardPagination = (pagination === undefined) || (pagination.forward === undefined) || (pagination.forward);
+
     let offsetCursor = pagination ? (isForwardPagination ? pagination.after : pagination.stack.pop()) : null;
 
     let arg_cassandra = ';';
@@ -203,23 +204,44 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     if (pagination && pagination.stack) {
       stack = pagination.stack;
     }
-    if (search !== undefined) {
+
+    if (pagination && pagination.after) {
+      stack.push(pagination.after);
+    }
+
+    let searchTerms = search;
+    if (helper.isNotUndefinedAndNotNull(search) && helper.isNotUndefinedAndNotNull(offsetCursor)) {
+      let decoded_cursor = JSON.parse(this.base64Decode(offsetCursor));
+      let cursorId = decoded_cursor['<%- idAttribute -%>'];
+      searchTerms = new searchArg({field: null, value: null, operator: 'and', search:[search, new searchArg({field: '<%- idAttribute -%>', value: {value: cursorId}, operator:'tgt', search:undefined})]});
+    } else if (helper.isNotUndefinedAndNotNull(offsetCursor)) {
+      let decoded_cursor = JSON.parse(this.base64Decode(offsetCursor));
+      let cursorId = decoded_cursor['<%- idAttribute -%>'];
+      searchTerms = new searchArg({field: '<%- idAttribute -%>', value: {value: cursorId}, operator:'tgt', search:undefined});
+    }
+
+    if (searchTerms !== undefined) {
 
       //check
-      if(typeof search !== 'object') {
+      if(typeof searchTerms !== 'object') {
         throw new Error('Illegal "search" argument type, it must be an object.');
       }
 
-      let arg = new searchArg(search);
-      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>');
+      if (searchTerms.value && searchTerms.value.value) {
+        searchTerms = new searchArg(searchTerms);
+      }
+      arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>');
     }
 
-    const query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
+    let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
+    /*if (helper.isNotUndefinedAndNotNull(pagination) && helper.isNotUndefinedAndNotNull(pagination.limit) && pagination.limit > 0) {
+      if (query.lastIndexOf(';') === query.length - 1) {
+        query = query.substring(0, query.length - 1);
+      }
+      query += ` LIMIT ${pagination.limit};`;
+    }*/
 
     let options = {};
-    if (offsetCursor) {
-      options = {offsetCursor};
-    }
 
     if (pagination && pagination.limit) {
       options.fetchSize = parseInt(pagination.limit);
@@ -233,16 +255,19 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       edge.cursor = (new <%- name -%>(row)).base64Enconde();
       return edge;
     });
-    let pageState = result.pageState;
-    if (helper.isNotUndefinedAndNotNull(pageState)) {
-      stack.push(pageState);
+    let nextCursor = null;
+    let hasNextCursor = false;
+    if (helper.isNotUndefinedAndNotNull(result.pageState)) {
+      let maxIndex = rows.length - 1;
+      nextCursor = rows[maxIndex].cursor;
+      hasNextCursor = true;
     }
 
     let pageInfo = {
-      startCursor: pageState,
+      startCursor: nextCursor,
       previousCursors: stack,
       hasPreviousPage: helper.isNonEmptyArray(stack),
-      hasNextPage: helper.isNotUndefinedAndNotNull(pageState)
+      hasNextPage: hasNextCursor
     }
     return {edges: rows, pageInfo: pageInfo};
   }
