@@ -17,6 +17,8 @@ const helper = require('../utils/helper');
 const models = require(path.join(__dirname, '..', 'models_index.js'));
 const moment = require('moment');
 const client = require('../utils/cassandra-client');
+const Uuid = require('cassandra-driver').types.Uuid;
+
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
 
@@ -109,8 +111,12 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
   }
 
   static async readById(id){
+    let theId = id;
+    if ('<%- idAttributeType %>'.toLowerCase() === 'uuid') {
+      theId = Uuid.fromString(id);
+    }
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
-    let queryResult = await client.execute(query, [ id ], { prepare: true });
+    let queryResult = await client.execute(query, [ theId ], { prepare: true });
     let firstResult = queryResult.first();
     let item = new <%- name -%>(firstResult, queryResult);
     if (item === null) {
@@ -262,6 +268,9 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
               delete inputCopy.skipAssociationsExistenceChecks;
             }
             for (let key of Object.keys(inputCopy)) {
+              if (!helper.isNotUndefinedAndNotNull(definition.attributes[key])) {
+                delete inputCopy[key];
+              }
               if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
                 inputCopy[key] = `'${inputCopy[key]}'`;
               }
@@ -301,18 +310,23 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
               delete inputCopy.skipAssociationsExistenceChecks;
             }
             for (let key of Object.keys(inputCopy)) {
+              if (!helper.isNotUndefinedAndNotNull(definition.attributes[key])) {
+                delete inputCopy[key];
+              }
               if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
                 inputCopy[key] = `'${inputCopy[key]}'`;
               }
             }
             let idValue = input[this.idAttribute()];
             delete inputCopy[this.idAttribute()];
-            const fields = Object.keys(inputCopy).join(', ');
-            const values = Object.values(inputCopy).join(', ');
-            let mutation = `UPDATE <%- namePl -%> SET `;
-            mutation += Object.keys(inputCopy).map(key => `${key} = ${inputCopy[key]}`).join(', ');
-            mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
-            let mutationResponse = await client.execute(mutation);
+            let inputKeys = Object.keys(inputCopy);
+            let mutationResponse = {};
+            if (inputKeys.length > 0) {
+              let mutation = `UPDATE <%- namePl -%> SET `;
+              mutation += inputKeys.map(key => `${key} = ${inputCopy[key]}`).join(', ');
+              mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
+              mutationResponse = await client.execute(mutation);
+            }
             let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
             let response = new <%- name -%>(checkQuery, mutationResponse);
             return response;
@@ -597,8 +611,8 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     }
   <%}-%>
 
-  <%- include('./includes/create-models-fieldMutations', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations', {op: "remove"}); %>
+  <%- include('./includes/create-models-fieldMutations-cassandra', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-cassandra', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
   

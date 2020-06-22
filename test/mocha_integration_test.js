@@ -2505,15 +2505,40 @@ describe(
 
     });
 
-    it('13. Delete an instant', function() {
-      let res = itHelpers.request_graph_ql_post(`mutation { deleteInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45")}`);
+    it('13. Generate an incident and associate it to the instant', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a", incident_description: "Associations test incident", addInstants: "c28ffcb7-6f55-4577-8359-9d8a46382a45") {incident_id incident_description}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
         data: {
-            deleteInstant: "Item successfully deleted"
+            addIncident: {
+                incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a",
+                incident_description: "Associations test incident"
+            }
         }
       });
+    })
+
+    it('14. Delete the associations', function() {
+      let res = itHelpers.request_graph_ql_post(`{instantsConnection(search:{field: incident_assoc_id, operator: eq, value:{value: "0d2569b6-c890-4e26-a081-9eff27f70b8a"}}) {edges {node{ instant_id}}}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      let edges = resBody.data.instantsConnection.edges;
+      expect(edges.length).to.equal(1); // ADAPT!
+      for (let edge of edges) {
+        let id = edge.node.instant_id;
+        res = itHelpers.request_graph_ql_post(`mutation{updateInstant(instant_id: "${id}", removeIncident: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {instant_id incident_assoc_id}}`);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            updateInstant: {
+              instant_id: `${id}`,
+              incident_assoc_id: null
+            }
+          }
+        });
+      }
     })
     
   })
