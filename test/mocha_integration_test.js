@@ -2076,6 +2076,52 @@ describe(
   });
 
   describe('Cassandra', function() {
+    after(async function() {
+      let res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {node {incident_id}}}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      let edges = resBody.data.incidentsConnection.edges;
+      for (let edge of edges) {
+        let id = edge.node.incident_id;
+        res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "${id}")}`);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            deleteIncident: "Item successfully deleted"
+          }
+        });
+      }
+      res = itHelpers.request_graph_ql_post(`{countIncidents}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            countIncidents: 0
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`{instantsConnection {edges {node {instant_id}}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+       edges = resBody.data.instantsConnection.edges;
+      for (let edge of edges) {
+        let id = edge.node.instant_id;
+        res = itHelpers.request_graph_ql_post(`mutation { deleteInstant(instant_id: "${id}")}`);
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          data: {
+            deleteInstant: "Item successfully deleted"
+          }
+        });
+      }
+      res = itHelpers.request_graph_ql_post(`{countInstants}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            countInstants: 0
+        }
+      });
+    })
     it('01. Incident table is empty', function() {
       let res = itHelpers.request_graph_ql_post(`{countIncidents}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
