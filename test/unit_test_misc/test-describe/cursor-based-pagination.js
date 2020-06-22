@@ -15,7 +15,7 @@ booksConnection(search: searchBookInput, order: [orderBookInput], pagination: pa
 `
 
 module.exports.model_read_all_connection = `
-static readAllCursor(search, order, pagination) {
+static readAllCursor(search, order, pagination, benignErrorReporter) {
         //check valid pagination arguments
         let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
         if (!argsValid) {
@@ -121,7 +121,7 @@ static readAllCursor(search, order, pagination) {
                 /*
                  * Get records
                  */
-                return super.findAll(options).then(records => {
+                return super.findAll(options).then(async records => {
                   //validate records
                   records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
 

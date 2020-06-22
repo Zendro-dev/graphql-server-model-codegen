@@ -46,7 +46,7 @@ module.exports.count_in_resolvers = `
     },
 `
 module.exports.read_all = `
-static readAll(search, order, pagination) {
+static readAll(search, order, pagination, benignErrorReporter) {
         let options = {};
         if (search !== undefined) {
 
@@ -60,7 +60,7 @@ static readAll(search, order, pagination) {
             options['where'] = arg_sequelize;
         }
 
-        return super.count(options).then(items => {
+        return super.count(options).then(async items => {
             if (order !== undefined) {
                 options['order'] = order.map((orderItem) => {
                     return [orderItem.field, orderItem.order];

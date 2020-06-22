@@ -122,7 +122,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return super.count(options);
   }
 
-  static readAll(search, order, pagination){
+  static readAll(search, order, pagination, benignErrorReporter){
     let options = {};
     if (search !== undefined) {
 
@@ -136,7 +136,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       options['where'] = arg_sequelize;
     }
 
-    return super.count(options).then(items => {
+    return super.count(options).then(async items => {
         if (order !== undefined) {
             options['order'] = order.map((orderItem) => {
                 return [orderItem.field, orderItem.order];
@@ -163,7 +163,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     });
   }
 
-  static readAllCursor(search, order, pagination){
+  static readAllCursor(search, order, pagination,benignErrorReporter){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -263,7 +263,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         /*
          * Get records
          */
-        return super.findAll(options).then( records =>{
+        return super.findAll(options).then(async records =>{
           //validate records
           records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
 
