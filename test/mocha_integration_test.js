@@ -2519,12 +2519,78 @@ describe(
       });
     })
 
-    it('14. Delete the associations', function() {
+    it('14. Read the instant and its connection to the incident', function() {
+      let res = itHelpers.request_graph_ql_post(`{instantsConnection(search:{field: instant_id, operator: eq, value:{value: "c28ffcb7-6f55-4577-8359-9d8a46382a45"}}) {edges {node {instant_id incident_assoc_id}}}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            instantsConnection: {
+                edges: [
+                    {
+                        node: {
+                            instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                            incident_assoc_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a"
+                        }
+                    }
+                ]
+            }
+        }
+      });
+    })
+
+    it('15. Generate a new instant and associate it to the incident', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation { addInstant(instant_id: "36c29673-0cc3-4d50-9172-b0cf885a481c", year: 2020, month: 6, day: 22, hour: 18, minute: 47, addIncident: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {instant_id year month day hour minute incident_assoc_id}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addInstant: {
+                instant_id: "36c29673-0cc3-4d50-9172-b0cf885a481c",
+                year: 2020,
+                month: 6,
+                day: 22,
+                hour: 18,
+                minute: 47,
+                incident_assoc_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a"
+            }
+        }
+      });
+    })
+
+    it('16. Read the incident and its connection to the instants', function() {
+      let res = itHelpers.request_graph_ql_post(`{readOneIncident(incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {incident_id instantsConnection {edges {node{ instant_id}}} }}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            readOneIncident: {
+                incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a",
+                instantsConnection: {
+                    edges: [
+                        {
+                            node: {
+                                instant_id: "36c29673-0cc3-4d50-9172-b0cf885a481c"
+                            }
+                        },
+                        {
+                            node: {
+                                instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+      });
+    })
+
+    it('17. Delete the associations', function() {
       let res = itHelpers.request_graph_ql_post(`{instantsConnection(search:{field: incident_assoc_id, operator: eq, value:{value: "0d2569b6-c890-4e26-a081-9eff27f70b8a"}}) {edges {node{ instant_id}}}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       let edges = resBody.data.instantsConnection.edges;
-      expect(edges.length).to.equal(1); // ADAPT!
+      expect(edges.length).to.equal(2);
       for (let edge of edges) {
         let id = edge.node.instant_id;
         res = itHelpers.request_graph_ql_post(`mutation{updateInstant(instant_id: "${id}", removeIncident: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {instant_id incident_assoc_id}}`);
