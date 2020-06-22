@@ -1,26 +1,16 @@
 <%# Helper functions for checking the Record Limits %> 
-/**
-* errorMessageForRecordsLimit(query) - returns error message in case the record limit is exceeded.
-*
-* @param {string} query The query that failed
-*/
-function errorMessageForRecordsLimit(query) {
-  return "Max record limit of " + globals.LIMIT_RECORDS + " exceeded in " + query;
-}
 
 /**
 * checkCountAndReduceRecordsLimit(search, context, query) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
 *
 * @param {object} search  Search argument for filtering records
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-* @param {string} query The query that makes this check
+* @param {string} resolverName The resolver that makes this check
+* @param {string} modelName The model to do the count
 */
-async function checkCountAndReduceRecordsLimit(search, context, query) {
-  let count = (await <%- nameLc -%>.countRecords(search));
-  if (count > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit(query));
-  }
-  context.recordsLimit -= count;
+async function checkCountAndReduceRecordsLimit(search, context, resolverName, modelName = '<%- nameLc -%>') {
+  let count = (await models[modelName].countRecords(search));
+  helper.checkCountAndReduceRecordLimitHelper(count, context, resolverName)
 }
 
 /**
@@ -29,8 +19,5 @@ async function checkCountAndReduceRecordsLimit(search, context, query) {
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 */
 function checkCountForOneAndReduceRecordsLimit(context) {
-  if (1 > context.recordsLimit) {
-      throw new Error(errorMessageForRecordsLimit("readOne<%- nameCp -%>"));
-  }
-  context.recordsLimit -= 1;
+  helper.checkCountAndReduceRecordLimitHelper(1, context, "readOne<%- nameCp -%>")
 }
