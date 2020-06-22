@@ -779,7 +779,7 @@ describe(
   });
 
   //one_to_one associations where foreignKey is in the target model
-  it('22. one_to_one associations', function() {
+  it('22. one_to_one associations setup', function() {
     //setup
     itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
     let res = itHelpers.request_graph_ql_post('{ countries {country_id} }');
@@ -844,7 +844,80 @@ describe(
     expect(res.statusCode).to.equal(200);
   });
 
-  it('26. Cursor based pagination', function() {
+  it('26. to_many_through_sql_cross_table setup', function() {
+    res = itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "NED", name: "Netherlands") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "AUT", name: "Austria") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addRiver(river_id: "river_1_rhine", name: "rhine", length:1230, addCountries:["GER","NED","AUT"]) {river_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addRiver(river_id: "river_2_donau", name: "donau", length:2850, addCountries:["GER","AUT"]) {river_id} }');
+    expect(res.statusCode).to.equal(200); 
+  });
+
+  it('27. to_many_through_sql_cross_table simple', function(){
+    //Filter
+    res = itHelpers.request_graph_ql_post('{countries{name riversFilter{name} countFilteredRivers} countCountries}')
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.countries.length).equal(3);
+    //Connection
+    res = itHelpers.request_graph_ql_post('{countries{name riversConnection{edges{node{name}}} countFilteredRivers} countCountries}')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.countries.length).equal(3);
+  });
+
+  it('28. to_many_through_sql_cross_table Filter', function(){
+    res = itHelpers.request_graph_ql_post('{ countries{ name riversFilter(search:{field:length,value:{value:"2000",type:"Int"}, operator:gt}){ name }}}')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+
+    expect(resBody).to.deep.equal(
+    {
+      "data": {
+        "countries": [
+          {
+            "name": "Germany",
+            "riversFilter": [
+              {
+                "name": "donau"
+              }
+            ]
+          },
+          {
+            "name": "Netherlands",
+            "riversFilter": []
+          },
+          {
+            "name": "Austria",
+            "riversFilter": [
+              {
+                "name": "donau"
+              }
+            ]
+          }
+        ]
+      }
+    })
+  });
+
+  it('29. to_many_through_sql_cross_table Cleanup', function(){
+    res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_1_rhine")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_2_donau")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteCountry(country_id:"GER")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteCountry(country_id:"NED")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteCountry(country_id:"AUT")}');
+    expect(res.statusCode).to.equal(200);
+  });
+
+  it('30. Cursor based pagination', function() {
     let res = itHelpers.request_graph_ql_post('{transcript_countsConnection{edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     let edges = resBody.data.transcript_countsConnection.edges;
@@ -893,7 +966,7 @@ describe(
   }});
   })
 
-  it('27. Error output for wrong parameter', function() {
+  it('31. Error output for wrong parameter', function() {
     let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(400);
@@ -1001,7 +1074,7 @@ describe(
     });
   });
 
-  it('28. Complementary search operators', async () => {
+  it('32. Complementary search operators', async () => {
     //items
     let ita = null;
     let itb = null;
