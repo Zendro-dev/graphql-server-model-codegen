@@ -38,20 +38,15 @@ dog.prototype.researcher = async function({
 
 module.exports.belongsTo_model = `
 static async add_researcherId(id, researcherId) {
-        let updated = await sequelize.transaction(async transaction => {
-            return Dog.update({
-                researcherId: researcherId
-            }, {
-                where: {
-                    id: id
-                }
-            }, {
-                transaction: transaction
-            })
-
-        });
-        return updated;
-    }
+  let updated = await Dog.update({
+      researcherId: researcherId
+  }, {
+      where: {
+          id: id
+      }
+  });
+  return updated;
+}
 `
 
 module.exports.hasOne_resolver = `

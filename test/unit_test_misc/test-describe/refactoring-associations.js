@@ -211,48 +211,28 @@ accession.prototype.remove_individuals = async function(input, benignErrorReport
 `
 
 module.exports._addAssoc_to_one_fieldMutation_sql_model = `
-/**
- * add_locationId - field Mutation (model-layer) for to_one associationsArguments to add
- *
- * @param {Id}   accession_id   IdAttribute of the root model to be updated
- * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
- */
 static async add_locationId(accession_id, locationId) {
-    let updated = await sequelize.transaction(async transaction => {
-            return Accession.update({
-                locationId: locationId
-            }, {
-                where: {
-                    accession_id: accession_id
-                }
-            }, {
-                transaction: transaction
-            })
-    });
-    return updated;
+  let updated = await Accession.update({
+      locationId: locationId
+  }, {
+      where: {
+          accession_id: accession_id
+      }
+  });
+  return updated;
 }
 `
 module.exports._removeAssoc_to_one_fieldMutation_sql_model = `
-/**
- * remove_locationId - field Mutation (model-layer) for to_one associationsArguments to remove
- *
- * @param {Id}   accession_id   IdAttribute of the root model to be updated
- * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
- */
 static async remove_locationId(accession_id, locationId) {
-    let updated = await sequelize.transaction(async transaction => {
-            return Accession.update({
-                locationId: null
-            }, {
-                where: {
-                    accession_id: accession_id,
-                    locationId: locationId
-                }
-            }, {
-                transaction: transaction
-            })
-    });
-    return updated;
+  let updated = await Accession.update({
+      locationId: null
+  }, {
+      where: {
+          accession_id: accession_id,
+          locationId: locationId
+      }
+  });
+  return updated;
 }
 `
 module.exports.to_one_add =`
@@ -344,34 +324,29 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter) {
 `
 
 module.exports.to_one_remove_sql_adapter =  `
-/**
- * remove_locationId - field Mutation (adapter-layer) for to_one associationsArguments to remove
- *
- * @param {Id}   accession_id   IdAttribute of the root model to be updated
- * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
- */
 static async remove_locationId(accession_id, locationId) {
-    let updated = await sequelize.transaction(async transaction => {
-          return super.update({locationId: null},{where: {accession_id: accession_id, locationId: locationId}}, {transaction: transaction})
-
-    });
-    return updated;
+  let updated = await super.update({
+      locationId: null
+  }, {
+      where: {
+          accession_id: accession_id,
+          locationId: locationId
+      }
+  });
+  return updated;
 }
 `
 
 module.exports.to_one_add_sql_adapter = `
-/**
-* add_locationId - field Mutation (adapter-layer) for to_one associationsArguments to add
-*
-* @param {Id}   accession_id   IdAttribute of the root model to be updated
-* @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
-*/
 static async add_locationId(accession_id, locationId) {
-   let updated = await sequelize.transaction(async transaction => {
-         return super.update({locationId: locationId},{where: {accession_id: accession_id}}, {transaction: transaction})
-
-   });
-   return updated;
+  let updated = await super.update({
+      locationId: locationId
+  }, {
+      where: {
+          accession_id: accession_id
+      }
+  });
+  return updated;
 }
 `
 
