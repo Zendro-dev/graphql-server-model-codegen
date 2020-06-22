@@ -264,6 +264,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
          * Get records
          */
         return super.findAll(options).then( records =>{
+          //validate records
+          records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+
           let edges = [];
           let pageInfo = {
             hasPreviousPage: false,

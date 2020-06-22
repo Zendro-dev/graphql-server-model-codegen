@@ -122,6 +122,9 @@ static readAllCursor(search, order, pagination) {
                  * Get records
                  */
                 return super.findAll(options).then(records => {
+                  //validate records
+                  records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+
                     let edges = [];
                     let pageInfo = {
                         hasPreviousPage: false,
@@ -421,7 +424,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
-      } 
+      }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
@@ -472,7 +475,7 @@ static async updateOne(input, benignErrorReporter){
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
-        } 
+        }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
