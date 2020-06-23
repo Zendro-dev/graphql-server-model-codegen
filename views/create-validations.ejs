@@ -16,17 +16,21 @@ module.exports.validator_patch = function(<%- nameLc -%>){
     )
 
     <%- nameLc -%>.prototype.validateForCreate = async function(record) {
-        return await <%- nameLc -%>.prototype.asyncValidate(record)
+        let ret = await <%- nameLc -%>.prototype.asyncValidate(record);
+        console.log("\n\nret: "+ ret + "\n\n")
+        console.log("\n\nret: "+ JSON.stringify(ret) + "\n\n")
+        return ret;
     }
 
     <%- nameLc -%>.prototype.validateForUpdate = async function(record) {
         return await <%- nameLc -%>.prototype.asyncValidate(record)
     }
 
-    <%- nameLc -%>.prototype.validateForDelete = async function(record) {
+    <%- nameLc -%>.prototype.validateForDelete = async function(id) {
 
-        //TODO: on the input you have the record to be deleted, no generic
-        // validation checks are available.
+        //TODO: on the input you have the id of the record to be deleted, no generic
+        // validation checks are available. You might need to import the correspondant model
+        // in order to read the whole record info and the do the validation.
 
         return {error: null}
     }

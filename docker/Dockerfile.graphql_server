@@ -1,11 +1,11 @@
-FROM node:12.18.0-stretch-slim
+FROM node:14.3.0-stretch-slim
 
 # Create app directory
 WORKDIR /usr/src/app
 
 # Clone the skeleton project and install dependencies
 RUN apt-get update && apt-get install -y git procps autoconf libtool make &&\
-  git clone --branch issue34-translate-to-cassandra https://github.com/ScienceDb/graphql-server.git . && \
+  git clone --branch issue34-cassandra-merge-master https://github.com/ScienceDb/graphql-server.git . && \
   chmod u+x ./migrateDbAndStartServer.sh && \
   npm install --save
 

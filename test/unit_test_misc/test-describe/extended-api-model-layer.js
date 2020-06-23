@@ -1,28 +1,14 @@
 module.exports.to_add_individual = `
-/**
-     * add_individual_id - field Mutation (model-layer) for to_one associationsArguments to add
-     *
-     * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   individual_id Foreign Key (stored in "Me") of the Association to be updated.
-     */
-    static async add_individual_id(id, individual_id) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return transcript_count.update({
-                    individual_id: individual_id
-                }, {
-                    where: {
-                        id: id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
+static async add_individual_id(id, individual_id) {
+  let updated = await transcript_count.update({
+      individual_id: individual_id
+  }, {
+      where: {
+          id: id
+      }
+  });
+  return updated;
+}
 `
 
 module.exports.set_individual_id = `
@@ -58,31 +44,17 @@ async _addAuthors(ids){
 `
 
 module.exports.remove_individual = `
-/**
-     * remove_individual_id - field Mutation (model-layer) for to_one associationsArguments to remove
-     *
-     * @param {Id}   id   IdAttribute of the root model to be updated
-     * @param {Id}   individual_id Foreign Key (stored in "Me") of the Association to be updated.
-     */
-    static async remove_individual_id(id, individual_id) {
-        let updated = await sequelize.transaction(async transaction => {
-            try {
-                return transcript_count.update({
-                    individual_id: null
-                }, {
-                    where: {
-                        id: id,
-                        individual_id: individual_id
-                    }
-                }, {
-                    transaction: transaction
-                })
-            } catch (error) {
-                throw error;
-            }
-        });
-        return updated;
-    }
+static async remove_individual_id(id, individual_id) {
+  let updated = await transcript_count.update({
+      individual_id: null
+  }, {
+      where: {
+          id: id,
+          individual_id: individual_id
+      }
+  });
+  return updated;
+}
 `
 
 module.exports.remove_transcript_counts = `

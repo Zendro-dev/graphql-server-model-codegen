@@ -31,27 +31,21 @@ individual.prototype.transcript_countsFilter = function({
     order,
     pagination
 }, context) {
-  try {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "individual_id",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
+    //build new search filter
+    let nsearch = helper.addSearchField({
+        "search": search,
+        "field": "individual_id",
+        "value": {
+            "value": this.getIdValue()
+        },
+        "operator": "eq"
+    });
 
-        return resolvers.transcript_counts({
-            search: nsearch,
-            order: order,
-            pagination: pagination
-        }, context);
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
-
+    return resolvers.transcript_counts({
+        search: nsearch,
+        order: order,
+        pagination: pagination
+    }, context);
 }
 `
 

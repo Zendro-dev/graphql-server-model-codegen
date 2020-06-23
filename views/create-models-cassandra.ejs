@@ -2,21 +2,21 @@
 
 const _ = require('lodash');
 const Sequelize = require('sequelize');
-const dict = require('../utils/graphql-sequelize-types');
-const searchArg = require('../utils/search-argument');
-const globals = require('../config/globals');
-const validatorUtil = require('../utils/validatorUtil');
-const fileTools = require('../utils/file-tools');
-const helpersAcl = require('../utils/helpers-acl');
-const email = require('../utils/email');
+const dict = require('../../utils/graphql-sequelize-types');
+const searchArg = require('../../utils/search-argument');
+const globals = require('../../config/globals');
+const validatorUtil = require('../../utils/validatorUtil');
+const fileTools = require('../../utils/file-tools');
+const helpersAcl = require('../../utils/helpers-acl');
+const email = require('../../utils/email');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const uuidv4 = require('uuidv4');
-const helper = require('../utils/helper');
-const models = require(path.join(__dirname, '..', 'models_index.js'));
+const helper = require('../../utils/helper');
+const models = require(path.join(__dirname, '..', 'index.js'));
 const moment = require('moment');
-const client = require('../utils/cassandra-client');
+const client = require('../../utils/cassandra-client');
 const Uuid = require('cassandra-driver').types.Uuid;
 
 // An exact copy of the the model definition that comes from the .json file
@@ -153,7 +153,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     let queryResult = await client.execute(query);
     let item = queryResult.first();
     result = parseInt(item['count']);
-    return {sum: result, errors:[]};
+    return result;
   }
 
   static readAll(search, order, pagination){

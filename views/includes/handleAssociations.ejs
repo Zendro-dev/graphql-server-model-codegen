@@ -3,27 +3,23 @@
 * handleAssociations - handles the given associations in the create and update case.
 *
 * @param {object} input   Info of each field to create the new record
-* @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+* @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
 */
-<%- nameLc -%>.prototype.handleAssociations = async function(input, context){
-  try {
+<%- nameLc -%>.prototype.handleAssociations = async function(input, benignErrorReporter){
     let promises = [];
     <% ['add','remove'].forEach(op => { -%>
       <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_many"])-%>
       <%for(let i=0; i < to_manyAssociations.length; i++){-%>
         if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>)) {
-          promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, context));
+          promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, benignErrorReporter));
         }<%}-%>
       
       <% to_oneAssociations = associationsArguments["to_one"].concat(associationsArguments["generic_to_one"])-%>
       <%for(let i=0; i < to_oneAssociations.length; i++){-%>
         if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=to_oneAssociations[i].name_cp-%>)) {
-          promises.push(this.<%-op%>_<%=to_oneAssociations[i].name_lc-%>(input, context));
+          promises.push(this.<%-op%>_<%=to_oneAssociations[i].name_lc-%>(input, benignErrorReporter));
         }
       <%}-%>
     <%}) -%>  
     await Promise.all(promises);
-  } catch (error) {
-      throw error
-  }
 }

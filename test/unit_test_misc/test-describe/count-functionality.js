@@ -13,16 +13,12 @@ module.exports.individual_resolvers = `
     countIndividuals: async function({
         search
     }, context) {
-        return await checkAuthorization(context, 'individual', 'read').then(async authorization => {
-            if (authorization === true) {
-                return (await individual.countRecords(search)).sum;
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'individual', 'read') === true) {
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await individual.countRecords(search, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `
 
@@ -37,15 +33,11 @@ module.exports.specie_resolvers = `
     countSpecies: async function({
         search
     }, context) {
-        return await checkAuthorization(context, 'Specie', 'read').then(async authorization => {
-            if (authorization === true) {
-                return (await specie.countRecords(search)).sum;
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'Specie', 'read') === true) {
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await specie.countRecords(search, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `

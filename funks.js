@@ -7,16 +7,6 @@ const ejsRenderFile = promisify( ejs.renderFile );
 const stringify_obj = require('stringify-object');
 const colors = require('colors/safe');
 
-/**
- *  Allowed type of associations classified accordingly the number of possible records involved
- *  @constant
- *  @type {object}
- */
-associations_type = {
-  "many" : ['hasMany', 'belongsToMany'],
-  "one" : ['hasOne', 'belongsTo']
-};
-
 
 /**
  * parseFile - Parse a json file
@@ -320,11 +310,14 @@ writeSchemaCommons = function(dir_write){
 
   enum Operator{
     like
+    notLike
     or
     and
     eq
     between
+    notBetween
     in
+    notIn
     gt
     gte
     lt
@@ -467,7 +460,7 @@ writeIndexAdapters = function(dir_write){
   const fs = require('fs');
   const path = require('path');
   const Sequelize = require('sequelize');
-  sequelize = require('../connection');
+  sequelize = require('../../connection');
 
   let adapters = {};
   module.exports = adapters;
@@ -480,23 +473,29 @@ writeIndexAdapters = function(dir_write){
     if( adapters[adapter.adapterName] ){
       throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
     }
-    
+
     switch(adapter.adapterType) {
       case 'ddm-adapter':
       case 'cenzontle-webservice-adapter':
       case 'generic-adapter':
-        adapters[adapter.adapterName] = adapter; 
+        adapters[adapter.adapterName] = adapter;
         break;
 
       case 'sql-adapter':
         adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
         break;
-      
+
       case 'default':
         throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
     }
+
+    let patches_patch = path.join(__dirname,'..','..','patches', file);
+    if(fs.existsSync(patches_patch)){
+        adapter = require(\`\${patches_patch}\`).logic_patch(adapter);
+    }
+
   });
-  
+
   `
   try {
     let file_name = dir_write + '/adapters/' +  'index.js';
@@ -570,9 +569,7 @@ convertToType = function(many, model_name){
  * @return {object}           Object with all extra info that will be needed to create files with templates.
  */
 module.exports.getOptions = function(dataModel){
-  //let dataModel = parseFile(json_file);
-  //console.log(dataModel.associations);
-
+  
   let opts = {
       name : dataModel.model,
       nameCp: capitalizeString(dataModel.model),
@@ -584,7 +581,7 @@ module.exports.getOptions = function(dataModel){
       attributes: getOnlyTypeAttributes(dataModel.attributes),
       cassandraAttributes: getOnlyCassandraTypeAttributes(dataModel.attributes, getIdAttribute(dataModel)),
       jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
-      associationsArguments: module.exports.parseAssociations(dataModel.associations),
+      associationsArguments: module.exports.parseAssociations(dataModel),
       arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
       indices: dataModel.indices,
       definitionObj : dataModel,
@@ -627,9 +624,9 @@ validateJsonFile =  function(opts){
 
   //check: validate external ids declare in attributes
   opts.externalIds.forEach( x => {
-    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String' 
+    if( !opts.attributes.hasOwnProperty(x) || !(opts.attributes[x] === 'String'
         || opts.attributes[x] === 'Float' || opts.attributes[x] === 'Int'  ) ) {
-      
+
           //error
           check.pass = false;
           check.errors.push(`ERROR: External id "${x}" has not been declared in the attributes of model ${opts.name} or is not of one of the allowed types: String, Int or Float`);
@@ -645,18 +642,6 @@ validateJsonFile =  function(opts){
   })
 
   return check;
-}
-
-getSqlType = function(association, model_name){
-  if(association.type === 'to_one' && association.keyIn !== association.target){
-    return 'belongsTo';
-  }else if(association.type === 'to_one' && association.keyIn === association.target){
-    return 'hasOne';
-  }else if(association.type === 'to_many' && association.hasOwnProperty('sourceKey')){
-    return 'belongsToMany';
-  }else if(association.type === 'to_many' && association.keyIn === association.target){
-    return 'hasMany';
-  }
 }
 
 getEditableAssociations = function(associations) {
@@ -684,11 +669,11 @@ getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute
  * parseAssociations - Parse associations of a given data model.
  * Classification of associations will be accordingly to the type of association and storage type of target model.
  *
- * @param  {object} associations Description of each association
- * @return {object}              Object containing explicit information needed for generating files with templates.
+ * @param  {object} dataModel Data model definition
+ * @return {object}           Object containing explicit information needed for generating files with templates.
  */
-module.exports.parseAssociations = function(associations){
-
+module.exports.parseAssociations = function(dataModel){
+  let associations = dataModel.associations;
   associations_info = {
     "schema_attributes" : {
       "many" : {},
@@ -706,13 +691,12 @@ module.exports.parseAssociations = function(associations){
     associations: [],
     genericAssociations: []
   };
-
   if(associations!==undefined){
     Object.entries(associations).forEach(([name, association]) => {
       let type = association.type;
       let holdsTheForeignKey = false;
       let isStandardAssociation = (association.type !== 'generic_to_many' && association.type !== 'generic_to_one');
-      
+
       //push association
       if(isStandardAssociation) {
         //standard
@@ -731,9 +715,9 @@ module.exports.parseAssociations = function(associations){
       //}else if(associations_type["one"].includes(association.type))
       } else if(association.type === 'to_one') {
         associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
-        if (association.keyIn !== association.target) {
+        if (association.keyIn === dataModel.model) {
           holdsTheForeignKey = true;
-        } 
+        }
       } else if(association.type === 'to_many_through_sql_cross_table') {
         if (association.sourceKey === undefined || association.keysIn === undefined || association.targetStorageType !== 'sql') {
           console.error(colors.red(`ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`));
@@ -742,12 +726,12 @@ module.exports.parseAssociations = function(associations){
       } else if(association.type === 'generic_to_one'){
         associations_info.schema_attributes["generic_one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
       } else if(association.type === 'generic_to_many'){
-        associations_info.schema_attributes["generic_many"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];        
-      } else { 
+        associations_info.schema_attributes["generic_many"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
+      } else {
         console.error(colors.red("Association type "+ association.type + " not supported."));
       }
 
-      let assoc = association;
+      let assoc = Object.assign({},association);
       //push association
       if(isStandardAssociation) {
         //standard
@@ -856,7 +840,7 @@ generateSection = async function(section, opts, dir_write ){
 };
 
 /**
-  * generateSections - Receives an array of sections, and for each one invokes generateSection() after handling 
+  * generateSections - Receives an array of sections, and for each one invokes generateSection() after handling
   * particular sections checks.
   *
   * @param  {array} sections     Array of sections that will be generated; each section is an object with 'dir' and 'template' keys.
@@ -883,8 +867,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'resolvers-generic':
       case 'resolvers-cassandra':
       //models
-      case 'models':  
-      case 'models-webservice':
+      case 'models':
       case 'models-cenz':
       case 'distributed-model':
       case 'models-generic':  
@@ -939,7 +922,8 @@ generateSections = async function(sections, opts, dir_write) {
  */
 writeCommons = async function(dir_write, models){
   writeSchemaCommons(dir_write);
-  writeIndexAdapters(dir_write);
+  console.log(path.join(dir_write,'models'))
+  writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
   await writeIndexMigrationsCassandra(dir_write, models);
   //deprecated due to static global index, to be removed
@@ -952,7 +936,7 @@ getIdAttribute = function(dataModel){
 
 getStorageType = function(dataModel) {
   let valid = true;
-  
+
   /**
    * Checks for 'storageType'.
    */
@@ -971,22 +955,21 @@ getStorageType = function(dataModel) {
         //models
         case 'sql':
         case 'distributed-data-model':
-        case 'webservice':
         case 'cenz-server':
         case 'generic':
         case 'cassandra':
         //adapters
         case 'sql-adapter':
-        case 'ddm-adapter': 
+        case 'ddm-adapter':
         case 'cenzontle-webservice-adapter':
         case 'generic-adapter':
           //ok
           break;
-        
+
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, webservice, cenz-server, generic, cassandra, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`)); 
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, cenz-server, generic, cassandra, sql-adapter, ddm-adapter, cenzontle-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`)); 
           break;
       }
     }
@@ -999,7 +982,7 @@ getStorageType = function(dataModel) {
   }
 }
 
-/** 
+/**
  * generateCode - Given a set of json files, describing each of them a data model, this
  * functions generate the code for a graphql server that will handle CRUD operations.
  * The generated code consists of four sections: sequelize models, migrations, resolvers and
@@ -1011,7 +994,7 @@ getStorageType = function(dataModel) {
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches', 'migrations-cassandra'];
-  let sectionsDirsB = ['models-webservice', 'models-cenz-server', 'adapters', 'models-distributed', 'models-generic', 'models-cassandra'];
+  let sectionsDirsB = ['models/sql','models/cenz-server', 'models/adapters', 'models/distributed', 'models/generic', 'models/cassandra'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
@@ -1038,7 +1021,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         //err
         console.log(colors.red("! mkdir.error: "), "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS");
         console.log(colors.red("!@ mkdir.error: "), e);
-        console.log(colors.red("\done"));
+        console.log(colors.red("done"));
         process.exit(1);
       }
     } else {
@@ -1115,7 +1098,6 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       });
       console.log('@@@ File:', colors.blue(json_file), colors.yellow('excluded'));
       continue;
-  
     } else { //valid model
       //check for Warnings
       if(check.warnings.length > 0) {
@@ -1142,18 +1124,10 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',    template: 'schemas',    fileName: opts.nameLc},
           {dir: 'resolvers',  template: 'resolvers',  fileName: opts.nameLc},
-          {dir: 'models',     template: 'models',     fileName: opts.nameLc},
+          {dir: 'models/sql',     template: 'models',     fileName: opts.nameLc},
           {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
-        ]
-        break;
-
-      case 'webservice':
-        sections = [
-          {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
-          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
-          {dir: 'models-webservice', template: 'models-webservice', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
         ]
         break;
 
@@ -1161,7 +1135,9 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
-          {dir: 'models-cenz-server', template: 'models-cenz', fileName: opts.nameLc},
+          {dir: 'models/cenz-server', template: 'models-cenz', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
         break;
 
@@ -1169,15 +1145,18 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',    template: 'schemas-ddm',   fileName: opts.nameLc},
           {dir: 'resolvers',  template: 'resolvers-ddm', fileName: opts.nameLc},
-          {dir: 'models-distributed', template: 'distributed-model', fileName: opts.nameLc},
+          {dir: 'models/distributed', template: 'distributed-model', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
         ]
         break;
 
       case 'generic':
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
-          {dir: 'resolvers', template: 'resolvers-generic', fileName: opts.nameLc},
-          {dir: 'models-generic', template: 'models-generic', fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
+          {dir: 'models/generic', template: 'models-generic', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
         ]
         break;
 
@@ -1185,35 +1164,37 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas', template: 'schemas-cassandra', fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers-cassandra', fileName: opts.nameLc},
-          {dir: 'models-cassandra', template: 'models-cassandra', fileName: opts.nameLc},
+          {dir: 'models/cassandra', template: 'models-cassandra', fileName: opts.nameLc},
           {dir: 'migrations-cassandra', template: 'migrations-cassandra', fileName: opts.nameLc},
         ]
         break;
 
       case 'cenzontle-webservice-adapter':
         sections = [
-          {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
       case 'ddm-adapter':
         sections = [
-          {dir: 'adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'cenz-adapters', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
       case 'sql-adapter':
         sections = [
-          {dir: 'adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
+          {dir: 'models/adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
           {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
-          {dir: 'validations',  template: 'validations',  fileName: opts.nameLc},
-          {dir: 'patches', template: 'patches', fileName: opts.nameLc},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
       case 'generic-adapter':
         sections = [
-          {dir: 'adapters', template: 'generic-adapter', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'generic-adapter', fileName: opts.adapterName},
+          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
@@ -1235,8 +1216,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
     //save data for writeCommons
     models.push([opts.name , opts.namePl]);
-  };
-
+    };
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
   //generate commons & index's
@@ -1264,7 +1244,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   if(verbose) console.log("@@ Total JSON files with errors: ", (totalWrongFiles>0) ? colors.red(totalWrongFiles) : colors.green(totalWrongFiles));
   //msg
   if(verbose) console.log("@@ Total models with errors: ", (totalWrongModels>0) ? colors.red(totalWrongModels) : colors.green(totalWrongModels));
-  
+
   //msg
   console.log(colors.white('@ Code generation...'), (totalWrongModels>0 || totalGenErrors>0) ? colors.red('done') : colors.green('done'));
 };

@@ -43,15 +43,14 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
-      - ./integration_test_run/instance1/adapters:/usr/src/app/adapters
+      - ./integration_test_run/instance1/models/adapters:/usr/src/app/models/adapters
       - ./integration_test_run/instance1/schemas:/usr/src/app/schemas
       - ./integration_test_run/instance1/resolvers:/usr/src/app/resolvers
-      - ./integration_test_run/instance1/models:/usr/src/app/models
-      - ./integration_test_run/instance1/models-distributed:/usr/src/app/models-distributed
-      - ./integration_test_run/instance1/models-webservice:/usr/src/app/models-webservice
-      - ./integration_test_run/instance1/models-cenz-server:/usr/src/app/models-cenz-server
-      - ./integration_test_run/instance1/models-generic:/usr/src/app/models-generic
-      - ./integration_test_run/instance1/models-cassandra:/usr/src/app/models-cassandra
+      - ./integration_test_run/instance1/models/sql:/usr/src/app/models/sql
+      - ./integration_test_run/instance1/models/distributed:/usr/src/app/models/distributed
+      - ./integration_test_run/instance1/models/cenz-server:/usr/src/app/models/cenz-server
+      - ./integration_test_run/instance1/models/generic:/usr/src/app/models/generic
+      - ./integration_test_run/instance1/models/cassandra:/usr/src/app/models/cassandra      
       - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance1/migrations-cassandra:/usr/src/app/migrations-cassandra
       - ./integration_test_run/instance1/validations:/usr/src/app/validations
@@ -151,15 +150,14 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
-      - ./integration_test_run/instance2/adapters:/usr/src/app/adapters
+      - ./integration_test_run/instance2/models/adapters:/usr/src/app/models/adapters
       - ./integration_test_run/instance2/schemas:/usr/src/app/schemas
       - ./integration_test_run/instance2/resolvers:/usr/src/app/resolvers
-      - ./integration_test_run/instance2/models:/usr/src/app/models
-      - ./integration_test_run/instance2/models-distributed:/usr/src/app/models-distributed
-      - ./integration_test_run/instance2/models-webservice:/usr/src/app/models-webservice
-      - ./integration_test_run/instance2/models-cenz-server:/usr/src/app/models-cenz-server
-      - ./integration_test_run/instance2/models-generic:/usr/src/app/models-generic
-      - ./integration_test_run/instance2/models-cassandra:/usr/src/app/models-cassandra
+      - ./integration_test_run/instance2/models/sql:/usr/src/app/models/sql
+      - ./integration_test_run/instance2/models/distributed:/usr/src/app/models/distributed
+      - ./integration_test_run/instance2/models/cenz-server:/usr/src/app/models/cenz-server
+      - ./integration_test_run/instance2/models/generic:/usr/src/app/models/generic
+      - ./integration_test_run/instance2/models/cassandra:/usr/src/app/models/cassandra      
       - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance2/migrations-cassandra:/usr/src/app/migrations-cassandra
       - ./integration_test_run/instance2/validations:/usr/src/app/validations

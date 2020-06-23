@@ -12,7 +12,7 @@ USAGE
     Run via npm:
         npm run test-integration [-- OPTIONS]
 
-    Cleaup:
+    Cleanup:
         npm run test-integration-clear
         or
         npm run test-integration -- -c
@@ -26,7 +26,7 @@ DESCRIPTION
     gql_science_db_graphql_server
     gql_ncbi_sim_srv
 
-    By default, after the test run, all corresponding Docker images will be completely removed from the docker, this cleanup step can be skiped with -k option as described below.
+    By default, after the test run, all corresponding Docker images will be completely removed from the docker, this cleanup step can be skipped with -k option as described below.
 
     Default behavior performs the following actions:
 

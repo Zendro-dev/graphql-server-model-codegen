@@ -46,11 +46,10 @@ type book{
 `
 module.exports.model_book = `
 /**
- * constructor - Creates an instance of the model stored in webservice
+ * constructor - Creates an instance of the generic model book.
  *
  * @param  {obejct} input    Data for the new instances. Input for each field of the model.
  */
-
 constructor({
     id,
     title,
@@ -78,33 +77,29 @@ book.prototype.publisher = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.publisher_id)) {
-        try {
-            if (search === undefined) {
-                return resolvers.readOnePubli_sher({
-                    [models.publi_sher.idAttribute()]: this.publisher_id
-                }, context)
-            } else {
-                //build new search filter
-                let nsearch = helper.addSearchField({
-                    "search": search,
-                    "field": models.publi_sher.idAttribute(),
-                    "value": {
-                        "value": this.publisher_id
-                    },
-                    "operator": "eq"
-                });
-                let found = await resolvers.publi_shers({
-                    search: nsearch
-                }, context);
-                if (found) {
-                    return found[0]
-                }
-                return found;
+        if (search === undefined) {
+            return resolvers.readOnePubli_sher({
+                [models.publi_sher.idAttribute()]: this.publisher_id
+            }, context)
+        } else {
+            //build new search filter
+            let nsearch = helper.addSearchField({
+                "search": search,
+                "field": models.publi_sher.idAttribute(),
+                "value": {
+                    "value": this.publisher_id
+                },
+                "operator": "eq"
+            });
+            let found = await resolvers.publi_shers({
+                search: nsearch
+            }, context);
+            if (found) {
+                return found[0]
             }
-        } catch (error) {
-            console.error(error);
-            handleError(error);
-        };
+            return found;
+        }
+
     }
 }
 `
@@ -125,15 +120,16 @@ type Query {
 
 
 deletePerson(id: ID!): String!
-bulkAddPersonCsv: [Person] }
+bulkAddPersonCsv: String! }
 
 `
 module.exports.model_person = `
-static readById( id ){
+static async readById(id, benignErrorReporter) {
+
   /*
   YOUR CODE GOES HERE
-  */
-  throw new Error('readOnePerson is not implemented');
+   */
+  throw new Error('readById() is not implemented for model Person');
 }
 `
 
@@ -154,7 +150,6 @@ person.prototype.worksFilter = function({
     order,
     pagination
 }, context) {
-    try {
         //build new search filter
         let nsearch = helper.addSearchField({
             "search": search,
@@ -170,10 +165,6 @@ person.prototype.worksFilter = function({
             order: order,
             pagination: pagination
         }, context);
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
 }
 
 `

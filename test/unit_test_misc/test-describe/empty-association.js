@@ -14,7 +14,7 @@ type Query {
 
 
 deleteTranscript_count(id: ID!): String!
-bulkAddTranscript_countCsv: [transcript_count] }
+bulkAddTranscript_countCsv: String! }
 `
 
 module.exports.individual_no_assoc_resolvers = `
@@ -28,22 +28,20 @@ module.exports.individual_no_assoc_resolvers = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
-    individuals: function({
+    individuals: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'individual', 'read').then(async authorization => {
-            if (authorization === true) {
-                await checkCountAndReduceRecordsLimit(search, context, "individuals");
-                return await individual.readAll(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+
+        if (await checkAuthorization(context, 'individual', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "individuals");
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await individual.readAll(search, order, pagination,benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+
     },`
 
 module.exports.transcript_count_no_assoc_model = `

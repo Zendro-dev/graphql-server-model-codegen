@@ -187,22 +187,19 @@ module.exports.resolver_read_all_connection = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
      */
-    booksConnection: function({
+    booksConnection: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'Book', 'read').then(async authorization => {
-            if (authorization === true) {
-                await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
-                return book.readAllCursor(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'Book', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await book.readAllCursor(search, order, pagination, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+
     },
 `
 
@@ -226,26 +223,21 @@ module.exports.resolver_to_many_association = `
  * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
  */
-person.prototype.booksConnection = function({                                                                                                                                                                   
-    search,                                                                                                                                                                                                     
-    order,                                                                                                                                                                                                      
-    pagination                                                                                                                                                                                                  
-}, context) {                                                                                                                                                                                                   
-    return checkAuthorization(context, 'Book', 'read').then(async authorization => {                                                                                                                            
-        if (authorization === true) {                                                                                                                                                                           
-            await checkCountAndReduceRecordsLimit(search, context, "peopleConnection");                                                                                                                         
-            return this.booksConnectionImpl({                                                                                                                                                                   
-                search,                                                                                                                                                                                         
+person.prototype.booksConnection = async function({
+    search,
+    order,
+    pagination
+}, context) {
+if (await checkAuthorization(context, 'Book', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, 'booksConnection', 'book');
+            return this.booksConnectionImpl({
+                search,
                 order,
                 pagination
             });
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
 }
 `
 
@@ -407,81 +399,91 @@ booksConnectionImpl({
 `
 
 module.exports.read_all_cenz_server = `
-static readAllCursor(search, order, pagination) {
-  //check valid pagination arguments
-  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-  if (!argsValid) {
-    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-  }
-    
-  let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
-booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
-  genre
-  publisher_id
- } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
+static async readAllCursor(search, order, pagination, benignErrorReporter){
+    //check valid pagination arguments
+    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+    if (!argsValid) {
+      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+    }
 
-  return axios.post(url, {
-      query: query,
-      variables: {
-          search: search,
-          order: order,
-          pagination: pagination
-      }
-  }).then(res => {
-      //check
-      if(res&&res.data&&res.data.data) {
-        let data_edges = res.data.data.booksConnection.edges;
-        let pageInfo = res.data.data.booksConnection.pageInfo;
+    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+        booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
+          genre
+          publisher_id
+         } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
-        let edges = data_edges.map(e => {
-            return {
-                node: new Book(e.node),
-                cursor: e.cursor
-            }
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      } 
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response&&response.data&&response.data.data) {
+        let data_edges = response.data.data.booksConnection.edges;
+        let pageInfo = response.data.data.booksConnection.pageInfo;
+
+        let edges = data_edges.map( e =>{
+          return {
+            node: new Book(e.node),
+            cursor: e.cursor
+          }
         })
 
-        return {
-            edges,
-            pageInfo
-        };
+        return { edges, pageInfo };
       } else {
-        throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
       }
-  }).catch(error => {
-      error['url'] = url;
-      handleError(error);
-  });
-}
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
+  }
 `
 
 module.exports.many_to_many_association_connection_cenz_server = `
-static updateOne(input) {
-        let query = \`mutation updatePerson($id:ID!        $firstName:String
-            $lastName:String
-            $email:String){
-       updatePerson(id:$id           firstName:$firstName
-                  lastName:$lastName
-                  email:$email){
-          id            firstName
-                    lastName
-                    email
-                    companyId
-         }
-     }\`
+static async updateOne(input, benignErrorReporter){
+    let query = \`mutation updatePerson($id:ID!        $firstName:String
+        $lastName:String
+        $email:String){
+    updatePerson(id:$id           firstName:$firstName
+                lastName:$lastName
+                email:$email){
+        id            firstName
+                lastName
+                email
+                companyId
+        }
+    }\`
 
-        return axios.post(url, {
-            query: query,
-            variables: input
-        }).then(res => {
-            //check
-            if (res && res.data && res.data.data) {
-                return new Person(res.data.data.updatePerson);
-            } else {
-              throw new Error(\`Invalid response from remote cenz-server: \${url}\`);
-            }
-        }).catch(error => {
-            error['url'] = url;
-            handleError(error);
-        });
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+        await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+        if(helper.isNonEmptyArray(response.data.errors)) {
+            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        } 
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if(response&&response.data&&response.data.data) {
+        return new Person(response.data.data.updatePerson);
+        } else {
+        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        }
+    } catch(error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
     }
+}
 `

@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 //const test = require('./unit_test_misc/data_test');
 const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
-const models_webservice = require('./unit_test_misc/data_models_webservice');
+const models_generic_webservice = require('./unit_test_misc/data_models_generic_webservice');
 const models_cenz = require('./unit_test_misc/data_models_cenz');
 const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
@@ -221,7 +221,7 @@ describe('Model naming cases ', function(){
 
   it('Model - aminoAcidSequence', async function(){
     let opts = funks.getOptions(models.aminoAcidSequence);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.model_webservice_aminoAcid.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
@@ -366,12 +366,12 @@ describe('Monkey patching templates', function(){
     });
 });
 
-describe('All webservice models', function(){
+describe('All webservice (generic) models', function(){
 
-  let data_test = require('./unit_test_misc/test-describe/all-webservice');
+  let data_test = require('./unit_test_misc/test-describe/all-generic-webservice');
 
   it('GraphQL Schema - book', async function(){
-    let opts = funks.getOptions(models_webservice.book);
+    let opts = funks.getOptions(models_generic_webservice.book);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     let test_schema = data_test.schema_book.replace(/\s/g, '');
@@ -379,7 +379,7 @@ describe('All webservice models', function(){
   });
 
   it('Resolvers - book', async function(){
-    let opts = funks.getOptions(models_webservice.book);
+    let opts = funks.getOptions(models_generic_webservice.book);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.resolvers_book.replace(/\s/g, '');
@@ -387,15 +387,15 @@ describe('All webservice models', function(){
   });
 
   it('Model - book', async function(){
-    let opts = funks.getOptions(models_webservice.book);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.book);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.model_book.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
   it('GraphQL Schema - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
+    let opts = funks.getOptions(models_generic_webservice.person);
     let generated_schema =await funks.generateJs('create-schemas', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     let test_schema = data_test.schema_person.replace(/\s/g, '');
@@ -403,7 +403,7 @@ describe('All webservice models', function(){
   });
 
   it('Resolvers - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
+    let opts = funks.getOptions(models_generic_webservice.person);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, '');
     let test_resolvers = data_test.resolvers_person.replace(/\s/g, '');
@@ -411,16 +411,16 @@ describe('All webservice models', function(){
   });
 
   it('Model - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.person);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.model_person.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
   it('Model name class - person', async function(){
-    let opts = funks.getOptions(models_webservice.person);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.person);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.class_name_model_person.replace(/\s/g, '');
     expect(g_model, 'Incorrect model').to.have.string(test_model);
@@ -448,8 +448,8 @@ describe('All webservice models', function(){
 //   });
 //
 //   it('Access web-service model definition property', async function(){
-//     let opts = funks.getOptions(models_webservice.publisher);
-//     let generated_model =await funks.generateJs('create-models-webservice', opts);
+//     let opts = funks.getOptions(models_generic_webservice.publisher);
+//     let generated_model =await funks.generateJs('create-models-generic', opts);
 //     let model = requireFromString(generated_model);
 //
 //     // check any existing property of the 'publisher' definition
@@ -539,8 +539,8 @@ describe('Model Layer', function(){
   });
 
   it('Model - publisher', async function(){
-    let opts = funks.getOptions(models_webservice.publisher);
-    let generated_model =await funks.generateJs('create-models-webservice', opts);
+    let opts = funks.getOptions(models_generic_webservice.publisher);
+    let generated_model =await funks.generateJs('create-models-generic', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.count_in_webservice_model.replace(/\s/g, '');
     expect(g_model, 'No count method found').to.have.string(test_model);
@@ -1304,396 +1304,358 @@ describe('SQL-adapter', function(){
 
 describe('Parse associations', function() {
   it('01. Single to_one association', function() {
-      let associations = models.transcript_count.associations;
-      let res = funks.parseAssociations(associations, 'sql');
+      let res = funks.parseAssociations(models.transcript_count, 'sql');
       expect(res).to.deep.equal({
-        schema_attributes: {
-          many:{},
-          one:{
-            individual:["individual", "Individual", "Individual"]
+        "schema_attributes": {
+          "many": {},
+          "one": {
+            "individual": [
+              "individual",
+              "Individual",
+              "Individual"
+            ]
           },
-          generic_many:{},
-          generic_one:{}
+          "generic_one": {},
+          "generic_many": {}
         },
-        to_one:[
+        "to_one": [
           {
-            type:"to_one",
-            target:"individual",
-            targetKey:"individual_id",
-            keyIn:"transcript_count",
-            targetStorageType:"sql",
-            name:"individual",
-            name_lc:"individual",
-            name_cp:"Individual",
-            target_lc:"individual",
-            target_lc_pl:"individuals",
-            target_pl:"individuals",
-            target_cp:"Individual",
-            target_cp_pl:"Individuals",
-            keyIn_lc:"transcript_count",
-            holdsForeignKey:true
+            "type": "to_one",
+            "target": "individual",
+            "targetKey": "individual_id",
+            "keyIn": "transcript_count",
+            "targetStorageType": "sql",
+            "name": "individual",
+            "name_lc": "individual",
+            "name_cp": "Individual",
+            "target_lc": "individual",
+            "target_lc_pl": "individuals",
+            "target_pl": "individuals",
+            "target_cp": "Individual",
+            "target_cp_pl": "Individuals",
+            "keyIn_lc": "transcript_count",
+            "holdsForeignKey": true
           }
         ],
-        to_many:[],
-        to_many_through_sql_cross_table:[],
-        generic_to_one:[],
-        generic_to_many:[],
-        foreignKeyAssociations:{
-          individual:"individual_id"
+        "to_many": [],
+        "to_many_through_sql_cross_table": [],
+        "generic_to_one": [],
+        "generic_to_many": [],
+        "foreignKeyAssociations": {
+          "individual": "individual_id"
         },
-        associations:[
+        "associations": [
           {
-            type:"to_one",
-            target:"individual",
-            targetKey:"individual_id",
-            keyIn:"transcript_count",
-            targetStorageType:"sql",
-            name:"individual",
-            name_lc:"individual",
-            name_cp:"Individual",
-            target_lc:"individual",
-            target_lc_pl:"individuals",
-            target_pl:"individuals",
-            target_cp:"Individual",
-            target_cp_pl:"Individuals",
-            keyIn_lc:"transcript_count",
-            holdsForeignKey:true
+            "type": "to_one",
+            "target": "individual",
+            "targetKey": "individual_id",
+            "keyIn": "transcript_count",
+            "targetStorageType": "sql"
           }
         ],
-        genericAssociations:[],
-        mutations_attributes:""
+        "genericAssociations": [],
+        "mutations_attributes": ""
       });
   });
 
   it('02. Single to_many association', function() {
-    let associations = models.individual.associations;
-    let res = funks.parseAssociations(associations, 'sql');
+    let res = funks.parseAssociations(models.individual, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{
-          transcript_counts:["transcript_count","Transcript_count","Transcript_counts"]
+      "schema_attributes": {
+        "many": {
+          "transcript_counts": [
+            "transcript_count",
+            "Transcript_count",
+            "Transcript_counts"
+          ]
         },
-        one:{},
-        generic_many:{},
-        generic_one:{}
+        "one": {},
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[],
-      to_many:[
+      "to_one": [],
+      "to_many": [
         {
-          type:"to_many",
-          target:"transcript_count",
-          keyIn:"transcript_count",
-          targetKey:"individual_id",
-          targetStorageType:"sql",
-          name:"transcript_counts",
-          name_lc:"transcript_counts",
-          name_cp:"Transcript_counts",
-          target_lc:"transcript_count",
-          target_lc_pl:"transcript_counts",
-          target_pl:"transcript_counts",
-          target_cp:"Transcript_count",
-          target_cp_pl:"Transcript_counts",
-          keyIn_lc:"transcript_count",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "transcript_count",
+          "keyIn": "transcript_count",
+          "targetKey": "individual_id",
+          "targetStorageType": "sql",
+          "name": "transcript_counts",
+          "name_lc": "transcript_counts",
+          "name_cp": "Transcript_counts",
+          "target_lc": "transcript_count",
+          "target_lc_pl": "transcript_counts",
+          "target_pl": "transcript_counts",
+          "target_cp": "Transcript_count",
+          "target_cp_pl": "Transcript_counts",
+          "keyIn_lc": "transcript_count",
+          "holdsForeignKey": false
         }
       ],
-      to_many_through_sql_cross_table:[],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        transcript_counts:"individual_id"
+      "to_many_through_sql_cross_table": [],
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "transcript_counts": "individual_id"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_many",
-          target:"transcript_count",
-          keyIn:"transcript_count",
-          targetKey:"individual_id",
-          targetStorageType:"sql",
-          name:"transcript_counts",
-          name_lc:"transcript_counts",
-          name_cp:"Transcript_counts",
-          target_lc:"transcript_count",
-          target_lc_pl:"transcript_counts",
-          target_pl:"transcript_counts",
-          target_cp:"Transcript_count",
-          target_cp_pl:"Transcript_counts",
-          keyIn_lc:"transcript_count",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "transcript_count",
+          "keyIn": "transcript_count",
+          "targetKey": "individual_id",
+          "targetStorageType": "sql"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   });
 
   it('03. Single to_many_through_sql_cross_table', function() {
     let association = models.assoc_through_project_researcher;
     association.type = 'to_many_through_sql_cross_table';
-    let associations = {assoc: association};
-    let res = funks.parseAssociations(associations, 'sql');
+    let model = {model: "Person", associations: {assoc: association}};
+    let res = funks.parseAssociations(model, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{
-          assoc:["Project","Project","Assoc"]
+      "schema_attributes": {
+        "many": {
+          "assoc": [
+            "Project",
+            "Project",
+            "Assoc"
+          ]
         },
-        one:{},
-        generic_many:{},
-        generic_one:{}
+        "one": {},
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[],
-      to_many:[],
-      to_many_through_sql_cross_table:[
+      "to_one": [],
+      "to_many": [],
+      "to_many_through_sql_cross_table": [
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Project",
-          targetKey:"projectId",
-          sourceKey:"researcherId",
-          keysIn:"project_to_researcher",
-          targetStorageType:"sql",
-          source:"researchers",
-          target_lc:"project",
-          target_lc_pl:"projects",
-          target_pl:"Projects",
-          target_cp:"Project",
-          target_cp_pl:"Projects",
-          name:"assoc",
-          name_lc:"assoc",
-          name_cp:"Assoc",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Project",
+          "targetKey": "projectId",
+          "sourceKey": "researcherId",
+          "keysIn": "project_to_researcher",
+          "targetStorageType": "sql",
+          "source": "researchers",
+          "target_lc": "project",
+          "target_lc_pl": "projects",
+          "target_pl": "Projects",
+          "target_cp": "Project",
+          "target_cp_pl": "Projects",
+          "name": "assoc",
+          "name_lc": "assoc",
+          "name_cp": "Assoc",
+          "holdsForeignKey": false
         }
       ],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        assoc:"projectId"
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "assoc": "projectId"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Project",
-          targetKey:"projectId",
-          sourceKey:"researcherId",
-          keysIn:"project_to_researcher",
-          targetStorageType:"sql",
-          source:"researchers",
-          target_lc:"project",
-          target_lc_pl:"projects",
-          target_pl:"Projects",
-          target_cp:"Project",
-          target_cp_pl:"Projects",
-          name:"assoc",
-          name_lc:"assoc",
-          name_cp:"Assoc",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Project",
+          "targetKey": "projectId",
+          "sourceKey": "researcherId",
+          "keysIn": "project_to_researcher",
+          "targetStorageType": "sql",
+          "source": "researchers",
+          "target_lc": "project",
+          "target_lc_pl": "projects",
+          "target_pl": "Projects",
+          "target_cp": "Project",
+          "target_cp_pl": "Projects"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   });
 
   it('04. Two associations: to_many and to_many_through_sql_cross_table', function() {
-    let associations = models.person.associations;
-    associations.books.type = "to_many_through_sql_cross_table"
-    let res = funks.parseAssociations(associations, 'sql');
+    let person = models.person;
+    person.associations.books.type = "to_many_through_sql_cross_table"
+    let res = funks.parseAssociations(person, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{
-          dogs:["Dog","Dog","Dogs"],
-          books:["Book","Book","Books"]
+      "schema_attributes": {
+        "many": {
+          "dogs": [
+            "Dog",
+            "Dog",
+            "Dogs"
+          ],
+          "books": [
+            "Book",
+            "Book",
+            "Books"
+          ]
         },
-        one:{},
-        generic_many:{},
-        generic_one:{}
+        "one": {},
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[],
-      to_many:[
+      "to_one": [],
+      "to_many": [
         {
-          type:"to_many",
-          target:"Dog",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          name:"dogs",
-          name_lc:"dogs",
-          name_cp:"Dogs",
-          target_lc:"dog",
-          target_lc_pl:"dogs",
-          target_pl:"Dogs",
-          target_cp:"Dog",
-          target_cp_pl:"Dogs",
-          keyIn_lc:"dog",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "Dog",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "name": "dogs",
+          "name_lc": "dogs",
+          "name_cp": "Dogs",
+          "target_lc": "dog",
+          "target_lc_pl": "dogs",
+          "target_pl": "Dogs",
+          "target_cp": "Dog",
+          "target_cp_pl": "Dogs",
+          "keyIn_lc": "dog",
+          "holdsForeignKey": false
         }
       ],
-      to_many_through_sql_cross_table:[
+      "to_many_through_sql_cross_table": [
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Book",
-          targetKey:"bookId",
-          sourceKey:"personId",
-          keysIn:"books_to_people",
-          targetStorageType:"sql",
-          name:"books",
-          name_lc:"books",
-          name_cp:"Books",
-          target_lc:"book",
-          target_lc_pl:"books",
-          target_pl:"Books",
-          target_cp:"Book",
-          target_cp_pl:"Books",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Book",
+          "targetKey": "bookId",
+          "sourceKey": "personId",
+          "keysIn": "books_to_people",
+          "targetStorageType": "sql",
+          "name": "books",
+          "name_lc": "books",
+          "name_cp": "Books",
+          "target_lc": "book",
+          "target_lc_pl": "books",
+          "target_pl": "Books",
+          "target_cp": "Book",
+          "target_cp_pl": "Books",
+          "holdsForeignKey": false
         }
       ],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        dogs:"personId",
-        books:"bookId"
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "dogs": "personId",
+        "books": "bookId"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_many",
-          target:"Dog",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          name:"dogs",
-          name_lc:"dogs",
-          name_cp:"Dogs",
-          target_lc:"dog",
-          target_lc_pl:"dogs",
-          target_pl:"Dogs",
-          target_cp:"Dog",
-          target_cp_pl:"Dogs",
-          keyIn_lc:"dog",
-          holdsForeignKey:false
+          "type": "to_many",
+          "target": "Dog",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql"
         },
         {
-          type:"to_many_through_sql_cross_table",
-          target:"Book",
-          targetKey:"bookId",
-          sourceKey:"personId",
-          keysIn:"books_to_people",
-          targetStorageType:"sql",
-          name:"books",
-          name_lc:"books",
-          name_cp:"Books",
-          target_lc:"book",
-          target_lc_pl:"books",
-          target_pl:"Books",
-          target_cp:"Book",
-          target_cp_pl:"Books",
-          holdsForeignKey:false
+          "type": "to_many_through_sql_cross_table",
+          "target": "Book",
+          "targetKey": "bookId",
+          "sourceKey": "personId",
+          "keysIn": "books_to_people",
+          "targetStorageType": "sql"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   });
 
   it('05. Two associations: Twice to_one', function() {
-    let associations = models.dog.associations;
-    let res = funks.parseAssociations(associations, 'sql');
+    let res = funks.parseAssociations(models.dog, 'sql');
     expect(res).to.deep.equal({
-      schema_attributes:{
-        many:{},
-        one:{
-          person:["Person","Person","Person"],
-          researcher:["Researcher","Researcher","Researcher"]
+      "schema_attributes": {
+        "many": {},
+        "one": {
+          "person": [
+            "Person",
+            "Person",
+            "Person"
+          ],
+          "researcher": [
+            "Researcher",
+            "Researcher",
+            "Researcher"
+          ]
         },
-        generic_many:{},
-        generic_one:{}
+        "generic_one": {},
+        "generic_many": {}
       },
-      to_one:[
+      "to_one": [
         {
-          type:"to_one",
-          target:"Person",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          sublabel:"lastName",
-          name:"person",
-          name_lc:"person",
-          name_cp:"Person",
-          target_lc:"person",
-          target_lc_pl:"people",
-          target_pl:"People",
-          target_cp:"Person",
-          target_cp_pl:"People",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Person",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName",
+          "sublabel": "lastName",
+          "name": "person",
+          "name_lc": "person",
+          "name_cp": "Person",
+          "target_lc": "person",
+          "target_lc_pl": "people",
+          "target_pl": "People",
+          "target_cp": "Person",
+          "target_cp_pl": "People",
+          "keyIn_lc": "dog",
+          "holdsForeignKey": true
         },
         {
-          type:"to_one",
-          target:"Researcher",
-          targetKey:"researcherId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          name:"researcher",
-          name_lc:"researcher",
-          name_cp:"Researcher",
-          target_lc:"researcher",
-          target_lc_pl:"researchers",
-          target_pl:"Researchers",
-          target_cp:"Researcher",
-          target_cp_pl:"Researchers",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Researcher",
+          "targetKey": "researcherId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName",
+          "name": "researcher",
+          "name_lc": "researcher",
+          "name_cp": "Researcher",
+          "target_lc": "researcher",
+          "target_lc_pl": "researchers",
+          "target_pl": "Researchers",
+          "target_cp": "Researcher",
+          "target_cp_pl": "Researchers",
+          "keyIn_lc": "dog",
+          "holdsForeignKey": true
         }
       ],
-      to_many:[],
-      to_many_through_sql_cross_table:[],
-      generic_to_one:[],
-      generic_to_many:[],
-      foreignKeyAssociations:{
-        person:"personId",
-        researcher:"researcherId"
+      "to_many": [],
+      "to_many_through_sql_cross_table": [],
+      "generic_to_one": [],
+      "generic_to_many": [],
+      "foreignKeyAssociations": {
+        "person": "personId",
+        "researcher": "researcherId"
       },
-      associations:[
+      "associations": [
         {
-          type:"to_one",
-          target:"Person",
-          targetKey:"personId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          sublabel:"lastName",
-          name:"person",
-          name_lc:"person",
-          name_cp:"Person",
-          target_lc:"person",
-          target_lc_pl:"people",
-          target_pl:"People",
-          target_cp:"Person",
-          target_cp_pl:"People",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Person",
+          "targetKey": "personId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName",
+          "sublabel": "lastName"
         },
         {
-          type:"to_one",
-          target:"Researcher",
-          targetKey:"researcherId",
-          keyIn:"Dog",
-          targetStorageType:"sql",
-          label:"firstName",
-          name:"researcher",
-          name_lc:"researcher",
-          name_cp:"Researcher",
-          target_lc:"researcher",
-          target_lc_pl:"researchers",
-          target_pl:"Researchers",
-          target_cp:"Researcher",
-          target_cp_pl:"Researchers",
-          keyIn_lc:"dog",
-          holdsForeignKey:true
+          "type": "to_one",
+          "target": "Researcher",
+          "targetKey": "researcherId",
+          "keyIn": "Dog",
+          "targetStorageType": "sql",
+          "label": "firstName"
         }
       ],
-      genericAssociations:[],
-      mutations_attributes:""
+      "genericAssociations": [],
+      "mutations_attributes": ""
     });
   })
 
@@ -1939,7 +1901,7 @@ describe('Refactor associations in distributed data case - add - remove', functi
 
 });
 
-/** 
+/**
  * Generic Models - GraphQL Schema Layer
  */
 describe('Generic Models - GraphQL Schema Layer', function(){
@@ -2011,7 +1973,7 @@ describe('Generic Models - GraphQL Schema Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Models - Resolvers Layer
  */
 describe('Generic Models - Resolvers Layer', function(){
@@ -2019,7 +1981,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.1. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.match(data_test.test6_1);
@@ -2027,7 +1989,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.2. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_2);
@@ -2035,7 +1997,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.3. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_3);
@@ -2043,7 +2005,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.4. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_4);
@@ -2051,7 +2013,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('6.5. generic with no associations - person', async function(){
     let opts = funks.getOptions(models_generic.personGeneric_noAssociations);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.not.match(data_test.test6_5);
@@ -2074,7 +2036,7 @@ describe('Generic Models - Resolvers Layer', function(){
 
   it('8. generic <to_one> sql - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_toOne_personSql);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.match(data_test.test8_1).and
@@ -2084,7 +2046,7 @@ describe('Generic Models - Resolvers Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Models - Model Layer
  */
 describe('Generic Models - Model Layer', function(){
@@ -2168,7 +2130,7 @@ describe('Generic Models - Model Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Associations - GraphQL Schema Layer
  */
 describe('Generic Associations - GraphQL Schema Layer', function(){
@@ -2223,7 +2185,7 @@ describe('Generic Associations - GraphQL Schema Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Associations - Resolvers Layer
  */
 describe('Generic Associations - Resolvers Layer', function(){
@@ -2251,7 +2213,7 @@ describe('Generic Associations - Resolvers Layer', function(){
 
   it('17. generic <generic_to_one> - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
-    let generated_schema =await funks.generateJs('create-resolvers-generic', opts);
+    let generated_schema =await funks.generateJs('create-resolvers', opts);
     let g_schema = generated_schema.replace(/\s/g, '');
     expect(g_schema,'Incorrect schema')
       .to.match(data_test.test17_1).and
@@ -2306,7 +2268,7 @@ describe('Generic Associations - Resolvers Layer', function(){
   });
 });
 
-/** 
+/**
  * Generic Associations - Model Layer
  */
 describe('Generic Associations - Model Layer', function(){
@@ -2323,7 +2285,7 @@ describe('Generic Associations - Model Layer', function(){
       .to.match(data_test.test18_4).and
       .to.match(data_test.test18_5);
   });
-  
+
   it('19. generic <generic_to_one> - dog', async function(){
     let opts = funks.getOptions(models_generic.dogGeneric_genericToOne_person);
     let generated_schema =await funks.generateJs('create-models-generic', opts);
@@ -2345,7 +2307,7 @@ describe('Generic Associations - Model Layer', function(){
       .to.match(data_test.test18_4).and
       .to.match(data_test.test18_5);
   });
-  
+
   it('19_b. generic <generic_to_one> - dog', async function(){
     let opts = funks.getOptions(models_generic.dogDdm_genericToOne_person);
     let generated_schema =await funks.generateJs('create-distributed-model', opts);
@@ -2358,7 +2320,7 @@ describe('Generic Associations - Model Layer', function(){
 
 });
 
-/** 
+/**
  * Generic Adapter
  */
 describe('Generic Adapter', function(){
@@ -2384,4 +2346,51 @@ describe('Generic Adapter', function(){
       .to.match(data_test.test20_13).and
       .to.match(data_test.test20_14);
   });
+});
+
+
+
+describe('Handle Errors in DDM', function(){
+  let data_test = require('./unit_test_misc/test-describe/handle-error-ddm');
+
+  it('Count in model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_model =await funks.generateJs('create-distributed-model', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.count_dogs_model_ddm.replace(/\s/g, '');
+    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+  });
+
+  it('readAllCursor in model- dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_model =await funks.generateJs('create-distributed-model', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.readAllCursor_dogs_model_ddm.replace(/\s/g, '');
+    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+  });
+
+  it('count in resolver - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.count_dogs_resolver_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('connection in resolver - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.connections_dogs_resolver_ddm.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+
+  it('readAllCursor in cenzontle-webservice-adapter - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_cenz_adapter_integration_test);
+    let generated_adapter =await funks.generateJs('create-cenz-adapters', opts);
+    let g_adapter = generated_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.readAllCursor_dogs_adapter_ddm.replace(/\s/g, '');
+    expect(g_adapter).to.have.string(test_adapter);
+  });
+
 });

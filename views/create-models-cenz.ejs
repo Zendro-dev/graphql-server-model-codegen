@@ -1,17 +1,20 @@
 const _ = require('lodash');
 const path = require('path');
-const models = require(path.join(__dirname, '..', 'models_index.js'));
+const models = require(path.join(__dirname, '..', 'index.js'));
 const axios_general = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const os = require('os');
-const uuidv4 = require('uuidv4');
-const globals = require('../config/globals');
+const uuidv4 = require('uuidv4').uuid;
+const globals = require('../../config/globals');
+const validatorUtil = require('../../utils/validatorUtil');
+const helper = require('../../utils/helper');
+const errorHelper = require('../../utils/errors');
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
 
-const url = "<%- url -%>";
+const remoteCenzontleURL = "<%- url -%>";
 let axios = axios_general.create();
 axios.defaults.timeout = globals.MAX_TIME_OUT;
 
@@ -34,59 +37,98 @@ module.exports = class <%- name -%>{
     return "<%- nameLc -%>";
   }
 
-  static readById( id ){
+  static async readById( id, benignErrorReporter){
     let query = `query readOne<%- nameCp -%>{ readOne<%- nameCp -%>(<%- idAttribute -%>: "${id}"){<%- idAttribute -%> <%for(var key in attributes){-%>
-       <%=key %>
-     <%}-%> } }`
+      <%=key %>
+    <%}-%> } }`
 
-     return axios.post(url, {query:query}).then(res => {
-        //check
-        if(res&&res.data&&res.data.data) {
-          return new <%- name -%>(res.data.data.readOne<%- nameCp -%>);
-        } else {
-          throw new Error(`Invalid response from remote cenz-server: ${url}`);
-        }
-     }).catch(error => {
-       error['url'] = url;
-       handleError(error);
-     });
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if (response && response.data && response.data.data) {
+        let item = new <%- name -%>(response.data.data.readOne<%- nameCp -%>);
+        await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+        return item;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static countRecords(search){
+  static async countRecords(search, benignErrorReporter){
     let query = `query count<%- namePlCp -%>($search: search<%- nameCp -%>Input){
       count<%- namePlCp -%>(search: $search)
     }`
 
-    return axios.post(url, {query:query, variables:{search: search}}).then(res=>{
-      return {sum: res.data.data.count<%- namePlCp -%>, errors: []};
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables:{search: search}});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        return response.data.data.count<%- namePlCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    } catch(error){
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static readAll(search, order, pagination){
+  static async readAll(search, order, pagination, benignErrorReporter){
     let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>(search:$search pagination:$pagination order:$order){<%- idAttribute -%> <%for(var key in attributes){-%>
          <%=key %>
        <%}-%> } }`
 
-       return axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
-        //check
-        if(res&&res.data&&res.data.data) {
-          let data = res.data.data.<%- namePl -%> ;
-          return data.map(item => {return new <%- name -%>(item) });
-        } else {
-          throw new Error(`Invalid response from remote cenz-server: ${url}`);
-        }
-       }).catch(error=>{
-         error['url'] = url;
-         handleError(error);
-       });
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        let data = response.data.data.<%- namePl -%> ;
+        return data.map(item => {return new <%- name -%>(item) });
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    } catch(error){
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static readAllCursor(search, order, pagination){
+  static async readAllCursor(search, order, pagination, benignErrorReporter){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
@@ -94,174 +136,304 @@ module.exports = class <%- name -%>{
     }
 
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
-
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
        <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
 
-      return axios.post(url, {query:query, variables: {search: search, order:order, pagination: pagination}}).then(res =>{
-        //check
-        if(res&&res.data&&res.data.data) {
-          let data_edges = res.data.data.<%- namePl -%>Connection.edges ;
-          let pageInfo = res.data.data.<%- namePl -%>Connection.pageInfo ;
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
-          let edges = data_edges.map( e =>{
-            return {
-              node: new <%- name -%>(e.node),
-              cursor: e.cursor
-            }
-          })
+    try {
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        let data_edges = response.data.data.<%- namePl -%>Connection.edges;
+        let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo;
 
-          return { edges, pageInfo };
-        } else {
-          throw new Error(`Invalid response from remote cenz-server: ${url}`);
-        }
-      }).catch(error=>{
-        error['url'] = url;
-        handleError(error);
-      });
-  }
-
-  static addOne(input){
-    let query = `
-        mutation add<%- nameCp _%>(
-<%if(!defaultId){-%>
-          $<%=idAttribute%>:ID! <%}-%> <%for(var key in editableAttributes){%>
-          $<%=key %>:<%= editableAttributes[key]%><%}-%>
-        ){
-          add<%- nameCp -%>(<%if(!defaultId){-%>
-          <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){%>
-          <%=key %>:$<%= key%><%}-%>){
-            <%- idAttribute -%>
-<%for(var key in attributes){-%>
-            <%=key %>
-<%}-%>
+        let edges = data_edges.map( e =>{
+          return {
+            node: new <%- name -%>(e.node),
+            cursor: e.cursor
           }
-        }`;
+        })
 
-    return axios.post(url, {query:query, variables:input}).then(res =>{
-      //check
-      if(res&&res.data&&res.data.data) {
-        return new <%- name -%>(res.data.data.add<%- nameCp -%>);
+        return { edges, pageInfo };
       } else {
-        throw new Error(`Invalid response from remote cenz-server: ${url}`);
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
       }
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static deleteOne(id){
+  static async addOne(input, benignErrorReporter){
     let query = `
-          mutation
-            delete<%- nameCp -%>{
-              delete<%- nameCp -%>(
-                <%- idAttribute -%>: "${id}" )}`;
-
-    return axios.post(url, {query: query}).then(res =>{
-      //check
-      if(res&&res.data&&res.data.data) {
-        return res.data.data.delete<%- nameCp -%>;
-      } else {
-        throw new Error(`Invalid response from remote cenz-server: ${url}`);
-      }
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
-  }
-
-  static updateOne(input){
-    let query = `
-          mutation
-            update<%- nameCp-%>(
-              $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
-              $<%=key %>:<%= editableAttributes[key]%> <%}-%>
+            mutation add<%- nameCp _%>(
+    <%if(!defaultId){-%>
+              $<%=idAttribute%>:ID! <%}-%> <%for(var key in editableAttributes){%>
+              $<%=key %>:<%= editableAttributes[key]%><%}-%>
             ){
-              update<%- nameCp-%>(
-                <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
-                <%=key %>:$<%= key%> <%}-%>
-              ){
-                <%- idAttribute -%> <%for(var key in attributes){%>
-                <%=key %> <%}%>
+              add<%- nameCp -%>(<%if(!defaultId){-%>
+              <%=idAttribute %>:$<%= idAttribute%> <%}-%> <%for(var key in editableAttributes){%>
+              <%=key %>:$<%= key%><%}-%>){
+                <%- idAttribute -%>
+    <%for(var key in attributes){-%>
+                <%=key %>
+    <%}-%>
               }
-            }`
+            }`;
 
-    return axios.post(url, {query:query, variables:input}).then(res => {
-      //check
-      if(res&&res.data&&res.data.data) {
-        return new <%- name -%>(res.data.data.update<%- nameCp -%>);
-      } else {
-        throw new Error(`Invalid response from remote cenz-server: ${url}`);
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
       }
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        return new <%- name -%>(response.data.data.add<%- nameCp -%>);
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static bulkAddCsv(context){
+  static async deleteOne(id, benignErrorReporter){
+    let query = `
+              mutation
+                delete<%- nameCp -%>{
+                  delete<%- nameCp -%>(
+                    <%- idAttribute -%>: "${id}" )}`;
+
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id);
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query: query});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        return response.data.data.delete<%- nameCp -%>;
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
+  }
+
+  static async updateOne(input, benignErrorReporter){
+    let query = `
+            mutation
+              update<%- nameCp-%>(
+                $<%- idAttribute -%>:ID! <%for(var key in editableAttributes){%>
+                $<%=key %>:<%= editableAttributes[key]%> <%}-%>
+              ){
+                update<%- nameCp-%>(
+                  <%- idAttribute -%>:$<%- idAttribute -%> <%for(var key in editableAttributes){%>
+                  <%=key %>:$<%= key%> <%}-%>
+                ){
+                  <%- idAttribute -%> <%for(var key in attributes){%>
+                  <%=key %> <%}%>
+                }
+              }`
+
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+      // Send an HTTP request to the remote server
+      let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      // STATUS-CODE is 200
+      // NO ERROR as such has been detected by the server (Express)
+      // check if data was send
+      if(response && response.data && response.data.data) {
+        return new <%- name -%>(response.data.data.update<%- nameCp -%>);
+      } else {
+        throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+      }
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
+  }
+
+  static async bulkAddCsv(context, benignErrorReporter){
     let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
 
-    return context.request.files.csv_file.mv(tmpFile).then(() =>{
-      let query = `mutation {bulkAdd<%- nameCp -%>Csv{<%- idAttribute -%>}}`;
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
+      let query = `mutation {bulkAdd<%- nameCp -%>Csv}`;
       let formData = new FormData();
       formData.append('csv_file', fs.createReadStream(tmpFile));
       formData.append('query', query);
 
-      return axios.post(url, formData,  {
+      let response = await axios.post(remoteCenzontleURL, formData,  {
         headers: formData.getHeaders()
-      }).then(res =>{
-          return res.data.data.bulkAdd<%- nameCp -%>Csv;
-        });
+      });
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      return response.data.data.bulkAdd<%- nameCp -%>Csv;
 
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
-  static  csvTableTemplate(){
+  /**
+   * csvTableTemplate - Allows the user to download a template in CSV format with the
+   * properties and types of this model.
+   *
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the
+   * GraphQL response will have a non empty errors property.
+   */
+  static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
-    return axios.post(url, {query:query}).then(res =>{
-      return res.data.data.csvTableTemplate<%- nameCp-%>;
-    }).catch(error =>{
-      error['url'] = url;
-      handleError(error);
-    });
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+    try {
+      let response = await axios.post(remoteCenzontleURL, {query:query});
+      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+      if(helper.isNonEmptyArray(response.data.errors)) {
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+      }
+      return response.data.data.csvTableTemplate<%- nameCp-%>;
+    } catch(error) {
+      //handle caught errors
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+    }
   }
 
 <%# generic_to_one -%>
   <% associations_temp = associationsArguments["generic_to_one"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
-    
-    async <%=associations_temp[i].name%>Impl({search}, context){
+
+    /**
+     * <%=associations_temp[i].name%>Impl - Return associated record.
+     *
+     * @param  {object} search      Search argument to match the associated record.
+     * @param  {object} context     Provided to every resolver holds contextual information like the
+     * resquest query and user info.
+     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+     * is invoked, the server will include any so reported errors in the final response, i.e. the
+     * GraphQL response will have a non empty errors property.
+     * @return {type}   Associated record.
+     */
+    async <%=associations_temp[i].name%>Impl({search}, context, benignErrorReporter){
       /*
       YOUR CODE GOES HERE
       */
       throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
     }
   <%}-%>
-  
 <%# generic_to_many -%>
   <% associations_temp = associationsArguments["generic_to_many"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
 
-    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context){
+    /**
+     * <%=associations_temp[i].name%>FilterImpl - Return certain number, specified in pagination argument,
+     * of records associated with the current instance, this records should also holds the condition of search
+     * argument, all of them sorted as specified by the order argument.
+     *
+     * @param  {object} search      Search argument for filtering associated records.
+     * @param  {array} order        Type of sorting (ASC, DESC) for each field.
+     * @param  {object} pagination  Offset and limit to get the records from and to respectively.
+     * @param  {object} context     Provided to every resolver holds contextual information like the
+     * resquest query and user info.
+     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+     * is invoked, the server will include any so reported errors in the final response, i.e. the
+     * GraphQL response will have a non empty errors property.
+     * @return {array}    Array of associated records holding conditions specified by search, order and
+     * pagination argument.
+     */
+    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context, benignErrorReporter){
       /*
       YOUR CODE GOES HERE
       */
       throw new Error('<%=associations_temp[i].name%>FilterImpl() is not implemented');
     }
 
-    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context){
+    /**
+     * <%=associations_temp[i].name%>ConnectionImpl - Return certain number, specified in pagination argument,
+     * of records associated with the current instance, this records should also holds the condition of search
+     * argument, all of them sorted as specified by the order argument.
+     *
+     * @param  {object} search      Search argument for filtering associated records.
+     * @param  {array} order        Type of sorting (ASC, DESC) for each field.
+     * @param  {object} pagination  Cursor and first (indicatig the number of records to retrieve)
+     * arguments to apply cursor-based pagination.
+     * @param  {object} context     Provided to every resolver holds contextual information like the
+     * resquest query and user info.
+     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+     * is invoked, the server will include any so reported errors in the final response, i.e. the
+     * GraphQL response will have a non empty errors property.
+     * @return {array}    Array of records as grapqhql connections holding conditions specified by search,
+     * order and pagination argument.
+     */
+    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context, benignErrorReporter){
       /*
       YOUR CODE GOES HERE
       */
       throw new Error('<%=associations_temp[i].name%>ConnectionImpl() is not implemented');
     }
 
-    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context){
+    /**
+     * countFiltered<%=associations_temp[i].name_cp%>Impl - Count number of associated records that
+     * holds the conditions specified in the search argument.
+     *
+     * @param  {object} {search}    Search argument for filtering associated records.
+     * @param  {object} context     Provided to every resolver holds contextual information like the
+     * resquest query and user info.
+     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+     * is invoked, the server will include any so reported errors in the final response, i.e. the
+     * GraphQL response will have a non empty errors property.
+     * @return {type}   Number of associated records that holds the conditions specified in the search
+     * argument.
+     */
+    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context, benignErrorReporter){
       /*
       YOUR CODE GOES HERE
       */
@@ -269,7 +441,7 @@ module.exports = class <%- name -%>{
     }
   <%}-%>
 
-   <%#
+  <%#
   /**
    * Add and remove methods for to-one association where the foreign key
    * is stored in this model and therefore this adapter is the responsible to update the foreign key.
@@ -278,7 +450,7 @@ module.exports = class <%- name -%>{
   -%>
   <%- include('./includes/create-models-cenz-fieldMutations', {op: "add"}); %>
   <%- include('./includes/create-models-cenz-fieldMutations', {op: "remove"}); %>
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
 
 

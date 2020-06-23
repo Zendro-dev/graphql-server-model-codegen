@@ -9,22 +9,18 @@ module.exports.resolvers_webservice_aminoAcid = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
-    aminoAcidSequences: function({
+    aminoAcidSequences: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'aminoAcidSequence', 'read').then(async authorization => {
-            if (authorization === true) {
-                await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
-                return await aminoAcidSequence.readAll(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await aminoAcidSequence.readAll(search, order, pagination, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `
 
@@ -59,26 +55,21 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
     order,
     pagination
 }, context) {
-    try {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "individual_id",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
+      //build new search filter
+      let nsearch = helper.addSearchField({
+          "search": search,
+          "field": "individual_id",
+          "value": {
+              "value": this.getIdValue()
+          },
+          "operator": "eq"
+      });
 
-        return resolvers.transcriptCounts({
-            search: nsearch,
-            order: order,
-            pagination: pagination
-        }, context);
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
+      return resolvers.transcriptCounts({
+          search: nsearch,
+          order: order,
+          pagination: pagination
+      }, context);
 }
 `
 
@@ -89,7 +80,7 @@ updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscr
 
 
 deleteInDiVIdual(id: ID!): String!
-bulkAddInDiVIdualCsv: [inDiVIdual] }
+bulkAddInDiVIdualCsv: String! }
 `
 
 module.exports.individual_model_camelcase = `
@@ -140,19 +131,15 @@ module.exports.transcriptCount_resolvers_camelcase=`
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {object}         Record with id requested
      */
-    readOneTranscriptCount: function({
+    readOneTranscriptCount: async function({
         id
     }, context) {
-        return checkAuthorization(context, 'transcriptCount', 'read').then(authorization => {
-            if (authorization === true) {
-                checkCountForOneAndReduceRecordsLimit(context);
-                return transcriptCount.readById(id);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
+            checkCountForOneAndReduceRecordsLimit(context);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await transcriptCount.readById(id, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `

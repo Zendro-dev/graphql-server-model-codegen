@@ -12,20 +12,17 @@ static async countRecords(search) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
-        return {
-            sum: await super.count(options),
-            errors: []
-        };
+        return super.count(options);
     }
 `
 
 module.exports.count_in_webservice_model = `
-static countRecords(search){
+static async countRecords(search, benignErrorReporter) {
 
   /*
   YOUR CODE GOES HERE
   */
-  throw new Error('countPubli_shers is not implemented');
+  throw new Error('countRecords() is not implemented for model publi_sher');
 }
 `
 
@@ -40,16 +37,12 @@ module.exports.count_in_resolvers = `
     countDogs: async function({
         search
     }, context) {
-        return await checkAuthorization(context, 'Dog', 'read').then(async authorization => {
-            if (authorization === true) {
-                return (await dog.countRecords(search)).sum;
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'Dog', 'read') === true) {
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await dog.countRecords(search, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `
 module.exports.read_all = `
@@ -106,22 +99,19 @@ module.exports.read_all_resolver = `
      * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
-    dogs: function({
+    dogs: async function({
         search,
         order,
         pagination
     }, context) {
-        return checkAuthorization(context, 'Dog', 'read').then(async authorization => {
-            if (authorization === true) {
-                await checkCountAndReduceRecordsLimit(search, context, "dogs");
-                return await dog.readAll(search, order, pagination);
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        if (await checkAuthorization(context, 'Dog', 'read') === true) {
+            await checkCountAndReduceRecordsLimit(search, context, "dogs");
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return await dog.readAll(search, order, pagination, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+
     },
 `
 
@@ -129,17 +119,17 @@ module.exports.add_one_model = `
 static addOne(input) {
     return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
         .then(async (valSuccess) => {
-            try {
-                const result = await sequelize.transaction(async (t) => {
-                    let item = await super.create(input, {
-                        transaction: t
-                    });
-                    return item;
+          try{
+            const result = await sequelize.transaction(async (t) => {
+                let item = await super.create(input, {
+                    transaction: t
                 });
-                return result;
-            } catch (error) {
-                throw error;
-            }
+                return item;
+            });
+            return result;
+          }catch(error){
+            throw error;
+          }
         });
 }
 `
@@ -155,47 +145,38 @@ module.exports.add_one_resolver = `
      * @return {object}         New record created
      */
     addBook: async function(input, context) {
-        try {
-            let authorization = await checkAuthorization(context, 'Book', 'create');
-            if (authorization === true) {
-                let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-                await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
-                await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-                if(!input.skipAssociationsExistenceChecks) {
-                    await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
-                }
-                let createdBook = await book.addOne(inputSanitized);
-                await createdBook.handleAssociations(inputSanitized, context);
-                return createdBook;
-            } else {
-                throw new Error("You don't have authorization to perform this action");
+        let authorization = await checkAuthorization(context, 'Book', 'create');
+        if (authorization === true) {
+            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            if(!input.skipAssociationsExistenceChecks) {
+                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-        } catch (error) {
-            console.error(error);
-            handleError(error);
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
+            await createdBook.handleAssociations(inputSanitized, context);
+            return createdBook;
+        } else {
+            throw new Error("You don't have authorization to perform this action");
         }
     },
 `
 
 module.exports.delete_one_model = `
 static deleteOne(id){
-  return super.findByPk(id)
-      .then(item => {
 
-          if (item === null) return new Error(\`Record with ID = \${id} does not exist\`);
-
-          return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
-              .then((valSuccess) => {
-                  return item
-                      .destroy()
-                      .then(() => {
-                          return 'Item successfully deleted';
-                      });
-              }).catch((err) => {
-                  return err
-              })
+  return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id)
+      .then(async (valSuccess) => {
+        let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+        if(destroyed !== 0){
+          return 'Item successfully deleted';
+        }else{
+          throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+        }
+      }).catch((error) => {
+          throw error;
       });
-
 }
 `
 module.exports.delete_one_resolver = `
@@ -206,21 +187,17 @@ module.exports.delete_one_resolver = `
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {string}         Message indicating if deletion was successfull.
      */
-    deleteBook: function({
+    deleteBook: async function({
         id
     }, context) {
-        return checkAuthorization(context, 'Book', 'delete').then(async authorization => {
-            if (authorization === true) {
-                if (await validForDeletion(id, context)) {
-                    return book.deleteOne(id);
-                }
-            } else {
-                throw new Error("You don't have authorization to perform this action");
+        if (await checkAuthorization(context, 'Book', 'delete') === true) {
+            if (await validForDeletion(id, context)) {
+                let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+                return book.deleteOne(id, benignErrorReporter);
             }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `
 module.exports.update_one_model = `
@@ -229,19 +206,15 @@ static updateOne(input) {
         .then(async (valSuccess) => {
             try {
                 let result = await sequelize.transaction(async (t) => {
-                    let promises_associations = [];
-                    let item = await super.findByPk(input[this.idAttribute()], {
-                        transaction: t
-                    });
-		    if (item === null) {
-                            throw new Error(\`Record with ID = \${id} does not exist\`);
-                        }
-                    let updated = await item.update(input, {
-                        transaction: t
-                    });
+                    let updated = await super.update(input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
                     return updated;
                 });
-                return result;
+
+                if(result[0] === 0){
+                  throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+                }
+
+                return result[1][0];
             } catch (error) {
                 throw error;
             }
@@ -250,36 +223,32 @@ static updateOne(input) {
 `
 
 module.exports.update_one_resolver = `
-/**                                                                                                                                                                                                            
- * updateBook - Check user authorization and update the record specified in the input argument                                                                                                                 
- * This function only handles attributes, not associations.                                                                                                                                                    
- * @see handleAssociations for further information.                                                                                                                                                            
- *                                                                                                                                                                                                             
- * @param  {object} input   record to update and new info to update                                                                                                                                            
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.                                                                                     
- * @return {object}         Updated record                                                                                                                                                                     
- */                                                                                                                                                                                                            
-updateBook: async function(input, context) {                                                                                                                                                                   
-    try {                                                                                                                                                                                                      
-        let authorization = await checkAuthorization(context, 'Book', 'update');                                                                                                                               
-        if (authorization === true) {                                                                                                                                                                          
-            let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);                                                                                                
-            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);                                                                               
-            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);                                                                                                
-            if(!input.skipAssociationsExistenceChecks) {
-                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
-            }                                                                                                      
-            let updatedBook = await book.updateOne(inputSanitized);                                                                                                                                            
-            await updatedBook.handleAssociations(inputSanitized, context);                                                                                                                                     
-            return updatedBook;                                                                                                                                                                                
-        } else {                                                                                                                                                                                               
-            throw new Error("You don't have authorization to perform this action");                                                                                                                            
-        }                                                                                                                                                                                                      
-    } catch (error) {                                                                                                                                                                                          
-        console.error(error);                                                                                                                                                                                  
-        handleError(error);                                                                                                                                                                                    
-    }                                                                                                                                                                                                          
-}, 
+/**
+ * updateBook - Check user authorization and update the record specified in the input argument
+ * This function only handles attributes, not associations.
+ * @see handleAssociations for further information.
+ *
+ * @param  {object} input   record to update and new info to update
+ * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+ * @return {object}         Updated record
+ */
+updateBook: async function(input, context) {
+    let authorization = await checkAuthorization(context, 'Book', 'update');
+    if (authorization === true) {
+        let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+        await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef, ['read', 'create'], models);
+        await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+        if(!input.skipAssociationsExistenceChecks) {
+            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+        }
+        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+        let updatedBook = await book.updateOne(inputSanitized, benignErrorReporter);
+        await updatedBook.handleAssociations(inputSanitized, context);
+        return updatedBook;
+    } else {
+        throw new Error("You don't have authorization to perform this action");
+    }
+},
 `
 
 module.exports.bulk_add_model = `
@@ -331,6 +300,7 @@ static bulkAddCsv(context){
     }).catch((error) => {
         throw new Error(error);
     });
+    return \`Bulk import of Book records started. You will be send an email to \$\{helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
 }
 `
 
@@ -342,46 +312,37 @@ module.exports.bulk_add_resolver = `
      * @param  {string} _       First parameter is not used
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      */
-    bulkAddBookCsv: function(_, context) {
-        return checkAuthorization(context, 'Book', 'create').then(authorization => {
-            if (authorization === true) {
-              return book.bulkAddCsv(context);
-
-            } else {
-                throw new Error("You don't have authorization to perform this action");
-            }
-        }).catch(error => {
-            console.error(error);
-            handleError(error);
-        })
-    }
+    bulkAddBookCsv: async function(_, context) {
+        if (await checkAuthorization(context, 'Book', 'create') === true) {
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return book.bulkAddCsv(context, benignErrorReporter);
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
+    },
 `
 module.exports.table_template_model = `
-static csvTableTemplate(){
-  return helper.csvTableTemplate(individual);
+static async csvTableTemplate(benignErrorReporter){
+  return helper.csvTableTemplate(definition);
 }
 `
 
 module.exports.table_template_resolver = `
 /**
- * csvTableTemplateIndividual - Returns table's template
- *
- * @param  {string} _       First parameter is not used
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {Array}         Strings, one for header and one columns types
- */
-csvTableTemplateIndividual: function(_, context) {
-    return checkAuthorization(context, 'individual', 'read').then(authorization => {
-        if (authorization === true) {
-            return individual.csvTableTemplate();
+     * csvTableTemplateIndividual - Returns table's template
+     *
+     * @param  {string} _       First parameter is not used
+     * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+     * @return {Array}         Strings, one for header and one columns types
+     */
+    csvTableTemplateIndividual: async function(_, context) {
+        if (await checkAuthorization(context, 'individual', 'read') === true) {
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+            return individual.csvTableTemplate(benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-    }).catch(error => {
-        console.error(error);
-        handleError(error);
-    })
-}
+    }
 
 }
 `

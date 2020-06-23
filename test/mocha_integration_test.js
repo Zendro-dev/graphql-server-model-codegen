@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const should = require('chai').should();
 const path = require('path');
 const delay = require('delay');
 const itHelpers = require('./integration_test_misc/integration_test_helpers');
@@ -613,8 +614,13 @@ describe(
       expect(resBody).to.deep.equal({
           errors:[
               {
-                  message:`Error: transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
-                  details:"",
+                  message:`transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
+                  locations: [
+                            {
+                              column: 12,
+                              line: 1
+                            }
+                          ],
                   path:["deleteTranscript_count"]
                 }
             ],
@@ -675,8 +681,13 @@ describe(
 
     const errorObject_TranscriptCount = {
         errors:[{
-            message:"Error: Max record limit of 25 exceeded in transcript_counts",
-            details:"",
+            message:"Max record limit of 25 exceeded in transcript_counts",
+            locations: [
+                      {
+                        column: 95,
+                        line: 1
+                      }
+                    ],
             path:["transcript_counts"]
         }],
         data:{
@@ -702,8 +713,13 @@ describe(
 
     const errorObject_Individual = {
         errors:[{
-            message:"Error: Max record limit of 25 exceeded in individuals",
-            details:"",
+            message:"Max record limit of 25 exceeded in individuals",
+            locations: [
+              {
+                column: 3,
+                line: 1
+              }
+            ],
             path:["individuals"]
         }],
         data:{
@@ -763,7 +779,7 @@ describe(
   }).timeout(5000);
   
   //one_to_one associations where foreignKey is in the target model
-  it('22. one_to_one associations', function() {
+  it('22. one_to_one associations setup', function() {
     //setup
     itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
     let res = itHelpers.request_graph_ql_post('{ countries {country_id} }');
@@ -794,7 +810,24 @@ describe(
     res = itHelpers.request_graph_ql_post('{ countries {country_id unique_capital{ capital_id}} }');
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
-    expect(resBody).to.deep.equal({"errors":[{"message":"Not unique \"to_one\" association Error: Found 2 capitals matching country with country_id GER. Consider making this association a \"to_many\", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]","details":""}],"data":{"countries":[{"country_id":"GER","unique_capital":{"capital_id":"GER_B"}}]}});
+    expect(resBody).to.deep.equal({
+      errors:[
+        {
+          message:'Not unique "to_one" association Error: Found 2 capitals matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
+          locations: ""
+        }
+      ],
+      data:{
+        countries:[
+          {
+            country_id:"GER",
+            unique_capital:{
+              capital_id:"GER_B"
+            }
+          }
+        ]
+      }
+    });
   });
 
   it('25. one_to_one associations deletion cleanup', function() {
@@ -811,6 +844,346 @@ describe(
     expect(res.statusCode).to.equal(200);
   });
 
+  it('26. to_many_through_sql_cross_table setup', function() {
+    res = itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "NED", name: "Netherlands") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "AUT", name: "Austria") {country_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addRiver(river_id: "river_1_rhine", name: "rhine", length:1230, addCountries:["GER","NED","AUT"]) {river_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation { addRiver(river_id: "river_2_donau", name: "donau", length:2850, addCountries:["GER","AUT"]) {river_id} }');
+    expect(res.statusCode).to.equal(200); 
+  });
+
+  it('27. to_many_through_sql_cross_table simple', function(){
+    //Filter
+    res = itHelpers.request_graph_ql_post('{countries{name riversFilter{name} countFilteredRivers} countCountries}')
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.countries.length).equal(3);
+    //Connection
+    res = itHelpers.request_graph_ql_post('{countries{name riversConnection{edges{node{name}}} countFilteredRivers} countCountries}')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.countries.length).equal(3);
+  });
+
+  it('28. to_many_through_sql_cross_table Filter', function(){
+    res = itHelpers.request_graph_ql_post('{ countries{ name riversFilter(search:{field:length,value:{value:"2000",type:"Int"}, operator:gt}){ name }}}')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+
+    expect(resBody).to.deep.equal(
+    {
+      "data": {
+        "countries": [
+          {
+            "name": "Germany",
+            "riversFilter": [
+              {
+                "name": "donau"
+              }
+            ]
+          },
+          {
+            "name": "Netherlands",
+            "riversFilter": []
+          },
+          {
+            "name": "Austria",
+            "riversFilter": [
+              {
+                "name": "donau"
+              }
+            ]
+          }
+        ]
+      }
+    })
+  });
+
+  it('29. to_many_through_sql_cross_table Cleanup', function(){
+    res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_1_rhine")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_2_donau")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteCountry(country_id:"GER")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteCountry(country_id:"NED")}');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{deleteCountry(country_id:"AUT")}');
+    expect(res.statusCode).to.equal(200);
+  });
+
+  it('30. Cursor based pagination', function() {
+    let res = itHelpers.request_graph_ql_post('{transcript_countsConnection{edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    let edges = resBody.data.transcript_countsConnection.edges;
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        transcript_countsConnection: {
+          edges: [
+              {
+                  cursor: `${edges[0].cursor}`,
+                  node: {
+                      id: `${edges[0].node.id}`,
+                      gene: "Gene B"
+                  }
+              },
+              {
+                  cursor: `${edges[1].cursor}`,
+                  node: {
+                      id: `${edges[1].node.id}`,
+                      gene: "Gene C"
+                  }
+              },
+              {
+                  cursor: `${edges[2].cursor}`,
+                  node: {
+                      id: `${edges[2].node.id}`,
+                      gene: "Gene D"
+                  }
+              },
+              {
+                  cursor: `${edges[3].cursor}`,
+                  node: {
+                      id: `${edges[3].node.id}`,
+                      gene: "Gene D"
+                  }
+              }
+          ],
+          pageInfo: {
+              startCursor: `${resBody.data.transcript_countsConnection.pageInfo.startCursor}`,
+              endCursor: `${resBody.data.transcript_countsConnection.pageInfo.endCursor}`,
+              hasPreviousPage: false,
+              hasNextPage: false
+          }
+      }
+  }});
+  })
+
+  it('31. Error output for wrong parameter', function() {
+    let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(400);
+    expect(resBody).to.deep.equal({
+      errors: [
+          {
+              message: 'Field "hello" is not defined by type paginationCursorInput.',
+              locations: [
+                  {
+                      line: 1,
+                      column: 36
+                  }
+              ]
+          }
+      ]
+    });
+    res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{first:1, last:1}) {edges {node {id}}}}');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+          {
+              message: 'Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!',
+              locations: [
+                  {
+                      line: 1,
+                      column: 2
+                  }
+              ],
+              path: [
+                  "individualsConnection"
+              ]
+          }
+      ],
+      data: {
+          individualsConnection: null
+      }
+  });
+
+  res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"acc1" sampling_date:"today") {accession_id sampling_date}}');
+  resBody = JSON.parse(res.body.toString('utf8'));
+  expect(res.statusCode).to.equal(400);
+  expect(resBody).to.deep.equal({
+    errors: [
+        {
+            message: 'Expected type Date, found "today"; Date cannot represent an invalid date-string today.',
+            locations: [
+                {
+                    line: 1,
+                    column: 57
+                }
+            ],
+        }
+    ]
+  });
+
+  res = itHelpers.request_graph_ql_post('mutation { addIndividual(name: "@#$%^&") { name } }');
+  resBody = JSON.parse(res.body.toString('utf8'));
+  expect(res.statusCode).to.equal(500);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "validation failed",
+          locations: [
+            {
+              line: 1,
+              column: 12
+            }
+          ],
+          extensions: {
+            "validationErrors": [
+              {
+                keyword: "type",
+                dataPath: ".name",
+                schemaPath: "#/properties/name/anyOf/0/type",
+                params: {
+                  type: "null"
+                },
+                message: "should be null"
+              },
+              {
+                keyword: "pattern",
+                dataPath: ".name",
+                schemaPath: "#/properties/name/anyOf/1/pattern",
+                params: {
+                  pattern: "^[a-zA-Z0-9]+$"
+                },
+                message: "should match pattern \"^[a-zA-Z0-9]+$\""
+              },
+              {
+                keyword: "anyOf",
+                dataPath: ".name",
+                schemaPath: "#/properties/name/anyOf",
+                params: {},
+                message: "should match some schema in anyOf"
+              }
+            ]
+          },
+          path: [
+            "addIndividual"
+          ]
+        }
+      ],
+      data: null
+    });
+  });
+
+  it('32. Complementary search operators', async () => {
+    //items
+    let ita = null;
+    let itb = null;
+    let itc = null;
+
+    //item a
+    res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-a") { id, gene } }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.addTranscript_count);
+    should.exist(resBody.data.addTranscript_count.id);
+    should.exist(resBody.data.addTranscript_count.gene);
+    ita =  resBody.data.addTranscript_count;
+
+    //item b
+    res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-b") { id, gene } }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.addTranscript_count);
+    should.exist(resBody.data.addTranscript_count.id);
+    should.exist(resBody.data.addTranscript_count.gene);
+    itb =  resBody.data.addTranscript_count;
+
+    //item c
+    res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene-28-c") { id, gene } }');
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.addTranscript_count);
+    should.exist(resBody.data.addTranscript_count.id);
+    should.exist(resBody.data.addTranscript_count.gene);
+    itc =  resBody.data.addTranscript_count;
+
+    /**
+     * op: in ['ita.id', 'itb.id']
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(ita);
+    expect(resBody.data.transcript_counts).to.deep.include(itb);
+    expect(resBody.data.transcript_counts.length).to.equal(2);
+
+    /**
+     * op: notIn ('ita.id', 'itb.id')
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(itc);
+    expect(resBody.data.transcript_counts).to.not.include(ita);
+    expect(resBody.data.transcript_counts).to.not.include(itb);
+
+    /**
+     * op: like '%ene-28%'
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: {value: "%ene-28%"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(ita);
+    expect(resBody.data.transcript_counts).to.deep.include(itb);
+    expect(resBody.data.transcript_counts).to.deep.include(itc);
+    expect(resBody.data.transcript_counts.length).to.equal(3);
+
+    /**
+     * op: notLike '%ene-28%'
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: {value: "%ene-28%"}}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.not.include(ita);
+    expect(resBody.data.transcript_counts).to.not.include(itb);
+    expect(resBody.data.transcript_counts).to.not.include(itc);
+
+    /**
+     * op: between ['ita.id', 'itc.id']
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.deep.include(ita);
+    expect(resBody.data.transcript_counts).to.deep.include(itb);
+    expect(resBody.data.transcript_counts).to.deep.include(itc);
+    expect(resBody.data.transcript_counts.length).to.equal(3);
+
+    /**
+     * op: notBetween ['ita.id', 'itc.id']
+     */
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+    expect(res.statusCode).to.equal(200);
+    should.exist(resBody.data.transcript_counts);
+    expect(resBody.data.transcript_counts).to.not.include(ita);
+    expect(resBody.data.transcript_counts).to.not.include(itb);
+    expect(resBody.data.transcript_counts).to.not.include(itc);
+  });
 });
 
 
@@ -944,7 +1317,7 @@ describe( 'Batch Upload', function() {
         // batch_upload_csv start new background, there is no way to test the actual result
         // without explicit delay. The test may fail if delay is too small, just check the
         // resulting DB table to be sure that all records from file individual_valid.csv were added.
-        let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{id}}');
+        let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv}');
         expect(success).equal(true);
         await delay(500);
 
@@ -1037,7 +1410,7 @@ describe(
             // batch_upload_csv start new background, it returns a response without
             // an error independently if there are validation errors during batch add or not.
             // These errors will be sent to the user's e-mail.
-            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv{ id}}');
+            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIndividualCsv}');
             expect(success).equal(true);
             await delay(500);
 
@@ -1055,7 +1428,7 @@ describe(
             // batch_upload_csv start new background, it returns a response without
             // an error independently if there are validation errors during batch add or not.
             // These errors will be sent to the user's e-mail.
-            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation { bulkAddTranscript_countCsv {id}}');
+            let success = await itHelpers.batch_upload_csv(csvPath, 'mutation { bulkAddTranscript_countCsv }');
             expect(success).equal(true);
             await delay(500);
 
@@ -1149,7 +1522,31 @@ describe(
                 name: "Hector"
               }
             }
-          });
+        });
+
+        res = itHelpers.request_graph_ql_post('{dogsConnection(pagination:{first:-1}) {edges{node{dog_id}}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "errors": [
+              {
+                  "message": "LIMIT must not be negative",
+                  "locations": "",
+                  "extensions": {
+                      "receivedFrom": ["http://server2:3030/graphql"]
+                  }
+              },
+              {
+                "message": "LIMIT must not be negative",
+                "locations": ""
+              }
+          ],
+          "data": {
+              "dogsConnection": {
+                  "edges": []
+              }
+          }
+      });
 
     });
 
@@ -1476,6 +1873,7 @@ describe(
               }
             }
           });
+
         // 'Free' dog Benji so that the entries can be erased next
         res = itHelpers.request_graph_ql_post('mutation{updateDog(dog_id:"instance2-01" removePerson:"instance1-03") {dog_id name person_id}}');
         resBody = JSON.parse(res.body.toString('utf8'));
@@ -1489,6 +1887,124 @@ describe(
               }
             }
           });
+
+        //illegal cursor based pagination Arguments
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}\
+           pagination:{last:2, after:"eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9"})\
+             {edges{node{person_id name countFilteredDogs}cursor}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+          {
+            "errors": [
+              {
+                "message": "Illegal cursor based pagination arguments. Use either \"first\" and optionally \"after\", or \"last\" and optionally \"before\"!",
+                "locations": [
+                  {
+                    "line": 1,
+                    "column": 2
+                  }
+                ],
+                "path": [
+                  "peopleConnection"
+                ]
+              }
+            ],
+            "data": {
+              "peopleConnection": null
+            }
+          }
+        )
+
+        //parseOrderCursor Tests (after)
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
+          first:2, after:"eyJuYW1lIjoiQmVydGhhIiwicGVyc29uX2lkIjoiaW5zdGFuY2UyLTAxIn0="}) \
+          {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+          {
+            "data": {
+              "peopleConnection": {
+                "edges": [
+                  {
+                    "node": {
+                      "person_id": "instance1-02",
+                      "name": "Charlie",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9"
+                  },
+                  {
+                    "node": {
+                      "person_id": "instance2-02",
+                      "name": "Dora",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9"
+                  }
+                ],
+                "pageInfo": {
+                  "startCursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9",
+                  "endCursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9",
+                  "hasNextPage": true,
+                  "hasPreviousPage": true
+                }
+              }
+            }
+          }
+        )
+        //parseOrderCursor Tests (before + includeCursor)
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
+          last:2, before:"eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9", includeCursor:true})\
+          {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor}\
+          pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
+        resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal(
+          {
+            "data": {
+              "peopleConnection": {
+                "edges": [
+                  {
+                    "node": {
+                      "person_id": "instance1-02",
+                      "name": "Charlie",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9"
+                  },
+                  {
+                    "node": {
+                      "person_id": "instance2-02",
+                      "name": "Dora",
+                      "countFilteredDogs": 0,
+                      "dogsConnection": {
+                        "edges": []
+                      }
+                    },
+                    "cursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9"
+                  }
+                ],
+                "pageInfo": {
+                  "startCursor": "eyJuYW1lIjoiQ2hhcmxpZSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMS0wMiJ9",
+                  "endCursor": "eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9",
+                  "hasPreviousPage": true,
+                  "hasNextPage": true
+                }
+              }
+            }
+          }
+        )
     });
     it('08. Delete people and dogs', function() {
         // Delete dog Hector
@@ -1630,7 +2146,28 @@ describe(
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal(
-        {"errors":[{"message":"Not unique \"to_one\" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a \"to_many\", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]","details":""}],"data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-person01","unique_parrot":{"parrot_id":"instance2-parrot01"}}}]}}}
+        {
+          errors:[
+            {
+              message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
+              locations: ""
+            }
+          ],
+          data:{
+            peopleConnection:{
+              edges:[
+                {
+                  node:{
+                    person_id:"instance1-person01",
+                    unique_parrot:{
+                      parrot_id:"instance2-parrot01"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
       )
     });
 
@@ -1870,7 +2407,35 @@ describe(
         });
     });
 
-    it('11. Remove association(to-one) accession-location', function() {
+    it('11. Create record on remote server with failed Validation', function(){
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"faulty-accesion-instance1" collectors_name:"@#$%^&") {accession_id sampling_date}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(500);
+      expect(resBody).to.deep.equal({
+        "errors":[{
+          "message":"Web-service http://server1:3000/graphql returned attached (see below) error(s).",
+          "locations":[{"line":1,"column":10}],
+          "path":["addAccession"]},
+          {
+            "message":"validation failed",
+            "locations":[{"line":7,"column":15}],
+            "extensions":{
+              "validationErrors":[{
+                "keyword":"pattern",
+                "dataPath":".collectors_name",
+                "schemaPath":"#/properties/collectors_name/pattern",
+                "params":{"pattern":"^[a-zA-Z0-9_]+$"},
+                "message":"should match pattern \"^[a-zA-Z0-9_]+$\""
+              }],
+              "receivedFrom":["http://server1:3000/graphql"
+            ]},
+            "path":["addAccession"]
+          }],
+        "data":null
+      });
+    });
+
+    it('12. Remove association(to-one) accession-location', function() {
       /**
        * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
@@ -1888,7 +2453,7 @@ describe(
         });
     });
 
-    it('12. Update association(to-one) accession-location', function() {
+    it('13. Update association(to-one) accession-location', function() {
       /**
        * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
@@ -1911,7 +2476,7 @@ describe(
     });
 
 
-    it('13.Create with association(to-many) accession-measurement', function() {
+    it('14.Create with association(to-many) accession-measurement', function() {
       /**
        * Create measurements that will be associated to accession
        * */
@@ -1942,7 +2507,7 @@ describe(
         });
     });
 
-    it('14.Remove association(to-many) accession-measurement', function() {
+    it('15.Remove association(to-many) accession-measurement', function() {
       /**
        * This test assumes that association from previous test (13.Create with association(to-many) accession-measurement) still is stored in the DB.
        * */
@@ -1964,7 +2529,7 @@ describe(
         });
     });
 
-    it('15.Update add association(to-many) accession-measurement', function() {
+    it('16.Update add association(to-many) accession-measurement', function() {
       /**
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
@@ -1993,7 +2558,7 @@ describe(
 
     });
 
-    it('16. Read connection association(to-many) accession-measurement', function() {
+    it('17. Read connection association(to-many) accession-measurement', function() {
       /**
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
@@ -2033,7 +2598,23 @@ describe(
     });
 
 
-    it('17. Delete all remaining accessions', async function() {
+    it('18 CSV Export - Accessions', async function() {
+      /**
+       * This test assumes that accessions from previous test are still in the DB
+       * */
+
+        let res = await itHelpers.request_export('Accession');
+
+        expect(res.data).to.equal('accession_id,collectors_name,collectors_initials,sampling_date,locationId\n' +
+         'a-instance1,aa,NULL,NULL,NULL\n'+
+         'b-instance1,bb,NULL,NULL,NULL\n' +
+         'c-instance1,cc,NULL,NULL,NULL\n' +
+         'cenz-2-accession,NULL,NULL,NULL,NULL\n' +
+         'cenz-3-accession,NULL,NULL,NULL,NULL\n' +
+         'd-instance1,dd,NULL,NULL,NULL\n');
+    });
+
+    it('19. Delete all remaining accessions', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{accessions{accession_id}}');
         let accessions = JSON.parse(res.body.toString('utf8')).data.accessions;
 
@@ -2047,7 +2628,7 @@ describe(
     });
 
 
-    it('18. Delete all remaining measurements', async function() {
+    it('20. Delete all remaining measurements', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{measurements{measurement_id}}');
         let measurements = JSON.parse(res.body.toString('utf8')).data.measurements;
 
@@ -2060,7 +2641,7 @@ describe(
         expect(cnt).to.equal(0);
     });
 
-    it('19. Delete all remaining locations', async function() {
+    it('21. Delete all remaining locations', async function() {
         let res = itHelpers.request_graph_ql_post_instance2('{locations{locationId}}');
         let locations = JSON.parse(res.body.toString('utf8')).data.locations;
 

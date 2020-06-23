@@ -5,8 +5,12 @@
    *
    * @param {Object}  <%-nameLc-%>_input Object with all the current attributes of the <%-name-%> model record to be updated,
    *                  including info of input ids to <%- op %> as association.
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the 
+   * GraphQL response will have a non empty errors property.
    */
-  static async <%-op%>_<%-generic_to_one_association.name_lc-%>Impl(<%-nameLc-%>_input) {
+  static async <%-op%>_<%-generic_to_one_association.name_lc-%>Impl(<%-nameLc-%>_input, benignErrorReporter) {
       /*
       YOUR CODE GOES HERE
       */
@@ -20,9 +24,13 @@
    * <%- op %>_<%-generic_to_many_association.name_lc-%>Impl - field Mutation (model-layer) for <%- op %> new <%-generic_to_many_association.name-%> associations (generic_to_many). 
    *
    * @param {Object}  <%-nameLc-%>_input Object with all the current attributes of the <%-name-%> model record to be updated,
-   *                  including info of input ids to <%- op %> as association. 
+   *                  including info of input ids to <%- op %> as association.
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the 
+   * GraphQL response will have a non empty errors property.
    */
-  static async <%-op%>_<%-generic_to_many_association.name_lc-%>Impl(<%-nameLc-%>_input) {
+  static async <%-op%>_<%-generic_to_many_association.name_lc-%>Impl(<%-nameLc-%>_input, benignErrorReporter) {
       /*
       YOUR CODE GOES HERE
       */

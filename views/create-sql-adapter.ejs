@@ -1,21 +1,18 @@
 const _ = require('lodash');
-const globals = require('../config/globals');
-const {
-    handleError
-} = require('../utils/errors');
+const globals = require('../../config/globals');
 const Sequelize = require('sequelize');
-const dict = require('../utils/graphql-sequelize-types');
-const validatorUtil = require('../utils/validatorUtil');
-const helper = require('../utils/helper');
-const searchArg = require('../utils/search-argument');
+const dict = require('../../utils/graphql-sequelize-types');
+const validatorUtil = require('../../utils/validatorUtil');
+const helper = require('../../utils/helper');
+const searchArg = require('../../utils/search-argument');
 const path = require('path');
-const fileTools = require('../utils/file-tools');
-const helpersAcl = require('../utils/helpers-acl');
-const email = require('../utils/email');
+const fileTools = require('../../utils/file-tools');
+const helpersAcl = require('../../utils/helpers-acl');
+const email = require('../../utils/email');
 const fs = require('fs');
 const os = require('os');
-const uuidv4 = require('uuidv4');
-const models = require(path.join(__dirname, '..', 'models_index.js'));
+const uuidv4 = require('uuidv4').uuid;
+const models = require(path.join(__dirname, '..', 'index.js'));
 
 const remoteCenzontleURL = "<%- url -%>";
 const iriRegex = new RegExp('<%- regex -%>');
@@ -87,12 +84,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-        .then((valSuccess) => {
-            return item
-        }).catch((err) => {
-            return err
-        });
+    return item;
   }
 
   static countRecords(search){
@@ -266,55 +258,42 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     });
   }
 
-  static addOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            const result = await sequelize.transaction( async(t) =>{
-              let item = await super.create(input, {transaction:t});
-              return item;
-            });
-            return result;
-          }catch(error){
-            throw error;
-          }
-        });
-  }
+  static async addOne(input){
 
-  static deleteOne(id){
-    return super.findByPk(id)
-        .then(item => {
-
-            if (item === null) return new Error(`Record with ID = ${id} not exist`);
-
-            return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, item)
-                .then((valSuccess) => {
-                    return item
-                        .destroy()
-                        .then(() => {
-                            return 'Item successfully deleted';
-                        });
-                }).catch((err) => {
-                    return err
-                })
-        });
+    try{
+      const result = await sequelize.transaction( async(t) =>{
+        let item = await super.create(input, {transaction:t});
+        return item;
+      });
+      return result;
+    }catch(error){
+      throw error;
+    }
 
   }
 
-  static updateOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            let result = await sequelize.transaction( async (t) =>{
-              let item = await super.findByPk(input[this.idAttribute()], {transaction:t});
-              let updated = await item.update(input, {transaction: t});
-              return updated;
-            });
-            return result;
-          }catch(error){
-            throw error;
-          }
-        });
+  static async deleteOne(id){
+    let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+    if(destroyed !== 0){
+      return 'Item successfully deleted';
+    }else{
+      throw new Error(`Record with ID = ${id} does not exist or could not been deleted`);
+    }
+  }
+
+  static async updateOne(input){
+    try{
+      let result = await sequelize.transaction( async (t) =>{
+        let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+        return updated;
+      });
+      if(result[0] === 0){
+        throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
+      }
+      return result[1][0];
+    }catch(error){
+      throw error;
+    }
   }
 
 
@@ -377,6 +356,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       }).catch((error) => {
           throw new Error(error);
       });
+      return `Bulk import of <%- adapterName -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
   }
 
   static csvTableTemplate(){

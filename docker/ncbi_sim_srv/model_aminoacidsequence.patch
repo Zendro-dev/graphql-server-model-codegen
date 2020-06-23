@@ -1,59 +1,54 @@
---- aminoacidsequence.js	2019-07-18 14:28:34.382745541 -0500
-+++ aminoacidsequence_updated.js	2019-07-18 15:04:44.440273569 -0500
-@@ -1,6 +1,8 @@
+--- aminoacidsequence.js	2020-06-09 19:10:05.446587902 -0500
++++ aminoacidsequence_update.js	2020-06-09 19:16:53.527756704 -0500
+@@ -1,6 +1,9 @@
  const _ = require('lodash');
- const path = require('path');
- const models = require(path.join(__dirname, '..', 'models_index.js'));
+ const globals = require('../../config/globals');
+ const helper = require('../../utils/helper');
 +const request = require('sync-request');
 +const baseUrl = 'http://gql_ncbi_sim_srv:3344/aminoAcidSequence/';
-
++
+ 
  // An exact copy of the the model definition that comes from the .json file
  const definition = {
-@@ -47,10 +49,9 @@
+@@ -85,10 +88,10 @@
+      */
+     static async readById(id, benignErrorReporter) {
+ 
+-        /*
+-        YOUR CODE GOES HERE
+-         */
+-        throw new Error('readById() is not implemented for model aminoacidsequence');
++      let res = request('get', baseUrl + id);
++      if(res.statusCode !== 200) throw new Error(`Remote service response status code for ${id}: ${res.statusCode}`);
++      return new aminoacidsequence(JSON.parse(res.body.toString('utf8')));
++
      }
-
-     static readById(id) {
+ 
+     /**
+@@ -147,10 +150,22 @@
+      */
+     static async readAll(search, order, pagination, benignErrorReporter) {
+ 
 -        /*
 -        YOUR CODE GOES HERE
 -        */
--        throw new Error('readOneAminoacidsequence is not implemented');
-+        let res = request('get', baseUrl + id);
-+        if(res.statusCode !== 200) throw new Error(`Remote service response status code for ${id}: ${res.statusCode}`);
-+        return new aminoacidsequence(JSON.parse(res.body.toString('utf8')));
-     }
-
-     static countRecords(search) {
-@@ -62,11 +63,22 @@
-     }
-
-     static readAll(search, order, pagination) {
--        /*
--        YOUR CODE GOES HERE
--        */
--        throw new Error('Read all aminoacidsequences is not implemented');
-+       let ids = [69905, 10644, 63165];
-+       let unfiltered = [];
-+       let cnt = 0;
-+       for(let idx in ids){
-+            if(idx >= pagination.offset) {
-+              console.log(ids[idx]);
-+              let res = request('get', baseUrl + ids[idx]);
-+              if (res.statusCode !== 200) throw new Error(`Remote service response status code for ${ids[idx]}: ${res.statusCode}`);
-+              unfiltered.push(new aminoacidsequence(JSON.parse(res.body.toString('utf8'))));
-+              cnt++;
-+              if(cnt === pagination.limit)
-+                break;
-+          }
+-        throw new Error('readAll() is not implemented for model aminoacidsequence');
++      let ids = [69905, 10644, 63165];
++      let unfiltered = [];
++      let cnt = 0;
++      for(let idx in ids){
++        if(idx >= pagination.offset) {
++          console.log(ids[idx]);
++          let res = request('get', baseUrl + ids[idx]);
++          if (res.statusCode !== 200) throw new Error(`Remote service response status code for ${ids[idx]}: ${res.statusCode}`);
++          unfiltered.push(new aminoacidsequence(JSON.parse(res.body.toString('utf8'))));
++          cnt++;
++          if(cnt === pagination.limit)
++          break;
++        }
 +      }
-
-+       return unfiltered;
++
++      return unfiltered;
      }
-
-     static addOne(input) {
-@@ -125,4 +137,4 @@
-     }
-
-
--};
-\ No hay ningún carácter de nueva línea al final del archivo
-+};
+ 
+     /**

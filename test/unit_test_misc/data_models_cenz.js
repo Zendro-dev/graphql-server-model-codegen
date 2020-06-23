@@ -24,7 +24,7 @@ module.exports.book = {
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "webservice",
+        "targetStorageType" : "generic",
         "label" : "name"
         }
   }
@@ -56,7 +56,7 @@ module.exports.person = {
       "target": "publi_sher",
       "targetKey": "companyId",
       "keyIn": "Person",
-      "targetStorageType": "webservice"
+      "targetStorageType": "generic"
     }
   }
 }

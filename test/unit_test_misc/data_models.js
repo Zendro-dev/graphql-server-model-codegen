@@ -106,7 +106,7 @@ module.exports.book = {
         "target" : "Publisher",
         "targetKey" : "publisherId",
         "keyIn": "Book",
-        "targetStorageType" : "webservice"
+        "targetStorageType" : "generic"
         }
   }
 }
@@ -140,7 +140,7 @@ module.exports.researcher = {
 
 module.exports.specie = {
   "model" : "Specie",
-  "storageType" : "webservice",
+  "storageType" : "generic",
   "attributes" : {
     "nombre" : "String",
     "e_nombre_comun_principal" : "String",
@@ -220,7 +220,7 @@ module.exports.assoc_dogs_researcher = {
 
 module.exports.aminoAcidSequence = {
   "model": "aminoAcidSequence",
-  "storageType": "webservice",
+  "storageType": "generic",
   "attributes": {
     "accession": "String",
     "sequence": "String"
@@ -476,7 +476,7 @@ module.exports.book_authors = {
         "target" : "Publisher",
         "targetKey" : "publisherId",
         "keyIn" : "Book",
-        "targetStorageType" : "webservice",
+        "targetStorageType" : "generic",
         "label" : "name"
         }
   }

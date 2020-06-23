@@ -10,7 +10,6 @@ dog.prototype.owner = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.owner_id_test)) {
-        try {
             if (search === undefined) {
                 return resolvers.readOnePerson({
                     [models.person.idAttribute()]: this.owner_id_test
@@ -33,10 +32,6 @@ dog.prototype.owner = async function({
                 }
                 return found;
             }
-        } catch (error) {
-            console.error(error);
-            handleError(error);
-        };
     }
 }
 `
@@ -69,26 +64,21 @@ academicTeam.prototype.membersFilter = function({
     order,
     pagination
 }, context) {
-    try {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "academicTeamId",
-            "value": {
-                "value": this.getIdValue()
-            },
-            "operator": "eq"
-        });
+    //build new search filter
+    let nsearch = helper.addSearchField({
+        "search": search,
+        "field": "academicTeamId",
+        "value": {
+            "value": this.getIdValue()
+        },
+        "operator": "eq"
+    });
 
-        return resolvers.researchers({
-            search: nsearch,
-            order: order,
-            pagination: pagination
-        }, context);
-    } catch (error) {
-        console.error(error);
-        handleError(error);
-    };
+    return resolvers.researchers({
+        search: nsearch,
+        order: order,
+        pagination: pagination
+    }, context);
 }
 `
 
