@@ -33,15 +33,13 @@ module.exports.individual_no_assoc_resolvers = `
         order,
         pagination
     }, context) {
-
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "individuals");
+            await checkCountAndReduceRecordsLimit(search, context, "individuals", false);
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await individual.readAll(search, order, pagination,benignErrorReporter);
+            return await individual.readAll(search, order, pagination, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-
     },`
 
 module.exports.transcript_count_no_assoc_model = `

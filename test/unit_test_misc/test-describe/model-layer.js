@@ -105,13 +105,12 @@ module.exports.read_all_resolver = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "dogs");
+            await checkCountAndReduceRecordsLimit(search, context, "dogs", false);
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await dog.readAll(search, order, pagination, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-
     },
 `
 

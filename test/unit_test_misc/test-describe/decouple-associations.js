@@ -259,17 +259,16 @@ book.prototype.AuthorsFilter = async function({
     order,
     pagination
 }, context) {
-      if (await checkAuthorization(context, 'Person', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, 'AuthorsFilter', 'person');
-            return this.AuthorsFilterImpl({
-                search,
-                order,
-                pagination
-            });
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
-
+    if (await checkAuthorization(context, 'Person', 'read') === true) {
+        await checkCountAndReduceRecordsLimit(search, context, 'AuthorsFilter', false, 'person');
+        return this.AuthorsFilterImpl({
+            search,
+            order,
+            pagination
+        });
+    } else {
+        throw new Error("You don't have authorization to perform this action");
+    }
 }
 `
 

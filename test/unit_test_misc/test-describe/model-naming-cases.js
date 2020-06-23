@@ -15,7 +15,7 @@ module.exports.resolvers_webservice_aminoAcid = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences");
+            await checkCountAndReduceRecordsLimit(search, context, "aminoAcidSequences", false);
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await aminoAcidSequence.readAll(search, order, pagination, benignErrorReporter);
         } else {

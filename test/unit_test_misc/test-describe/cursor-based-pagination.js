@@ -193,13 +193,12 @@ module.exports.resolver_read_all_connection = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            await checkCountAndReduceRecordsLimit(search, context, "booksConnection", false);
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await book.readAllCursor(search, order, pagination, benignErrorReporter);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
-
     },
 `
 
@@ -228,16 +227,16 @@ person.prototype.booksConnection = async function({
     order,
     pagination
 }, context) {
-if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, 'booksConnection', 'book');
-            return this.booksConnectionImpl({
-                search,
-                order,
-                pagination
-            });
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
+    if (await checkAuthorization(context, 'Book', 'read') === true) {
+        await checkCountAndReduceRecordsLimit(search, context, 'booksConnection', false, 'book');
+        return this.booksConnectionImpl({
+            search,
+            order,
+            pagination
+        });
+    } else {
+        throw new Error("You don't have authorization to perform this action");
+    }
 }
 `
 
