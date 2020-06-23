@@ -187,9 +187,9 @@ const associationArgsDef = {
    * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {array}              Array of associated records holding conditions specified by search, order and pagination argument.
    */
-  <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
+  <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter", '<%- associations_generic_many[i].target -%>');
+      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter", '<%- associations_generic_many[i].target_lc -%>');
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -205,7 +205,7 @@ const associationArgsDef = {
    * @param  {object} context   Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {type}             Number of associated records that holds the conditions specified in the search argument.
    */
-  <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = function({search}, context){
+  <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context, benignErrorReporter);
@@ -225,9 +225,9 @@ const associationArgsDef = {
    * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
    * @return {array}              Array of records as grapqhql connections holding conditions specified by search, order and pagination argument.
    */
-  <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
+  <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection", '<%- associations_generic_many[i].target -%>' );
+      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection", '<%- associations_generic_many[i].target_lc -%>' );
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
     } else {

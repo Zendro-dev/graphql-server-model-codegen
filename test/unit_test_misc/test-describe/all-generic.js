@@ -206,9 +206,9 @@ module.exports.test15_6 = /typeMutation{.+updatePerson\(.+removeDogs:\[ID\]/;
  */
 //to_many firms (particular firms)
 module.exports.test16_1 = /.+constassociationArgsDef={'addDogs':'dog'}/;
-module.exports.test16_2 = /person\.prototype\.dogsFilter=function\({.+this\.dogsFilterImpl\({/;
-module.exports.test16_3 = /person\.prototype\.countFilteredDogs=function\({.+this\.countFilteredDogsImpl\({/;
-module.exports.test16_4 = /person\.prototype\.dogsConnection=function\({.+this\.dogsConnectionImpl\({/;
+module.exports.test16_2 = /person\.prototype\.dogsFilter=asyncfunction\({.+this\.dogsFilterImpl\({/;
+module.exports.test16_3 = /person\.prototype\.countFilteredDogs=asyncfunction\({.+this\.countFilteredDogsImpl\({/;
+module.exports.test16_4 = /person\.prototype\.dogsConnection=asyncfunction\({.+this\.dogsConnectionImpl\({/;
 module.exports.test16_5 = /promises\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
 module.exports.test16_6 = /promises\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
 module.exports.test16_7 = /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.add_dogsImpl\(input,benignErrorReporter\);/;

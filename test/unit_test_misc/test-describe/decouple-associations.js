@@ -260,7 +260,7 @@ book.prototype.AuthorsFilter = async function({
     pagination
 }, context) {
       if (await checkAuthorization(context, 'Person', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, 'AuthorsFilter', 'Person');
+            await checkCountAndReduceRecordsLimit(search, context, 'AuthorsFilter', 'person');
             return this.AuthorsFilterImpl({
                 search,
                 order,

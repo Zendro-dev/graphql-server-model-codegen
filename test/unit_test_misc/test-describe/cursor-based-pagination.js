@@ -229,7 +229,7 @@ person.prototype.booksConnection = async function({
     pagination
 }, context) {
 if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, 'booksConnection', 'Book');
+            await checkCountAndReduceRecordsLimit(search, context, 'booksConnection', 'book');
             return this.booksConnectionImpl({
                 search,
                 order,
