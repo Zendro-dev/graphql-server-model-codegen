@@ -2520,7 +2520,7 @@ describe(
     })
 
     it('14. Read the instant and its connection to the incident', function() {
-      let res = itHelpers.request_graph_ql_post(`{instantsConnection(search:{field: instant_id, operator: eq, value:{value: "c28ffcb7-6f55-4577-8359-9d8a46382a45"}}) {edges {node {instant_id incident_assoc_id}}}}`);
+      let res = itHelpers.request_graph_ql_post(`{instantsConnection(search:{field: instant_id, operator: eq, value:{value: "c28ffcb7-6f55-4577-8359-9d8a46382a45"}}) {edges {node {instant_id incident_assoc_id incident {incident_id}}}}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2530,13 +2530,16 @@ describe(
                     {
                         node: {
                             instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
-                            incident_assoc_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a"
+                            incident_assoc_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a",
+                            incident: {
+                                incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a"
+                            }
                         }
                     }
                 ]
             }
         }
-      });
+    });
     })
 
     it('15. Generate a new instant and associate it to the incident', function() {

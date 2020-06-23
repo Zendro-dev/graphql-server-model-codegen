@@ -33,6 +33,9 @@ const definition = <%- definition -%>;
 module.exports = class <%- name -%> /* extends Sequelize.Model */ {
   constructor(input, initMessage) {
     if (initMessage) {
+      if (initMessage.rows) {
+        delete initMessage.rows;
+      }
       this.initMessage = initMessage;
     }
     for (let key of Object.keys(input)) {
@@ -234,8 +237,9 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
 
     const rows = result.rows.map(row => {
       let edge = {};
-      edge.node = row;
-      edge.cursor = (new <%- name -%>(row)).base64Enconde();
+      let rowAs<%- name -%> = new <%- name -%>(row);
+      edge.node = rowAs<%- name -%>;
+      edge.cursor = rowAs<%- name -%>.base64Enconde();
       return edge;
     });
     let nextCursor = null;

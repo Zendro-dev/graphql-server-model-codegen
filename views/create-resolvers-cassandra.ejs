@@ -73,7 +73,7 @@ const associationArgsDef = {
    * @param  {object} search     Search argument for filtering associated records
    * @param  {array} order       Type of sorting (ASC, DESC) for each field
    * @param  {object} pagination Offset and limit to get the records from and to respectively
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
@@ -98,7 +98,7 @@ const associationArgsDef = {
    * @param  {object} search     Search argument for filtering associated records
    * @param  {array} order       Type of sorting (ASC, DESC) for each field
    * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({
@@ -123,7 +123,7 @@ const associationArgsDef = {
    * <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> - Count number of associated records that holds the conditions specified in the search argument
    *
    * @param  {object} {search} description
-   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context  Provided to every resolver holds contextual information like the request query and user info.
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
@@ -159,7 +159,7 @@ const associationArgsDef = {
    * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
    *
    * @param  {object} search       Search argument to match the associated record
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
@@ -167,7 +167,7 @@ const associationArgsDef = {
     if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
       try{
         if (search === undefined) {
-          return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+          return await resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
         } else {
           //build new search filter
           let nsearch = helper.addSearchField({
@@ -176,9 +176,9 @@ const associationArgsDef = {
             "value": {"value": this.<%= associations_one[i].targetKey -%> },
             "operator": "eq"
           });
-          let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+          let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context);
           if (found) {
-            return found[0]
+            return found.edges[0].node;
           }
           return found;
         }
@@ -241,7 +241,7 @@ const associationArgsDef = {
    * @param  {object} search     Search argument for filtering associated records
    * @param  {array} order       Type of sorting (ASC, DESC) for each field
    * @param  {object} pagination Offset and limit to get the records from and to respectively
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
@@ -265,7 +265,7 @@ const associationArgsDef = {
    * <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> - Count number of associated records that holds the conditions specified in the search argument
    *
    * @param  {object} {search} description
-   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context  Provided to every resolver holds contextual information like the request query and user info.
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
@@ -294,7 +294,7 @@ const associationArgsDef = {
    * @param  {object} search     Search argument for filtering associated records
    * @param  {array} order       Type of sorting (ASC, DESC) for each field
    * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
@@ -334,7 +334,7 @@ const associationArgsDef = {
    * <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> - Return associated record
    *
    * @param  {object} search    Search argument to match the associated record.
-   * @param  {object} context   Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context   Provided to every resolver holds contextual information like the request query and user info.
    * @return {type}             Associated record.
    */
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
@@ -376,7 +376,7 @@ const associationArgsDef = {
    * @param  {object} search      Search argument for filtering associated records.
    * @param  {array}  order       Type of sorting (ASC, DESC) for each field.
    * @param  {object} pagination  Offset and limit to get the records from and to respectively.
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
    * @return {array}              Array of associated records holding conditions specified by search, order and pagination argument.
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = function({search,order,pagination}, context){
@@ -398,7 +398,7 @@ const associationArgsDef = {
    * holds the conditions specified in the search argument.
    *
    * @param  {object} {search}  Search argument for filtering associated records.
-   * @param  {object} context   Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context   Provided to every resolver holds contextual information like the request query and user info.
    * @return {type}             Number of associated records that holds the conditions specified in the search argument.
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = function({search}, context){
@@ -423,7 +423,7 @@ const associationArgsDef = {
    * @param  {object} search      Search argument for filtering associated records.
    * @param  {array}  order       Type of sorting (ASC, DESC) for each field.
    * @param  {object} pagination  Cursor and first (indicating the number of records to retrieve) arguments to apply cursor-based pagination.
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
    * @return {array}              Array of records as grapqhql connections holding conditions specified by search, order and pagination argument.
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = function({search,order,pagination}, context){
@@ -579,12 +579,12 @@ module.exports = {
 
   /**
    * <%- namePl -%>Connection - Check user authorization and return certain number, specified in pagination argument, of records that
-   * holds the condition of search argument, all of them sorted as specified by the order argument.
+   * holds the condition of search argument.
    *
    * @param  {object} search     Search argument for filtering records
    * @param  {object} pagination Cursor and first(indicatig the number of records to retrieve) arguments to apply cursor-based pagination.
-   * @param  {object} context     Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
+   * @param  {object} context     Provided to every resolver holds contextual information like the request query and user info.
+   * @return {array}             Array of records as grapqhql connections holding conditions specified by search and pagination argument
    */
    <%- namePl -%>Connection: async function({search, pagination}, context){
      try {
@@ -606,7 +606,7 @@ module.exports = {
    * readOne<%- nameCp -%> - Check user authorization and return one record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
    *
    * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to retrieve
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {object}         Record with <%- idAttribute -%> requested
    */
   readOne<%- nameCp -%>: function({<%- idAttribute -%> }, context){
@@ -627,7 +627,7 @@ module.exports = {
    * count<%-namePlCp-%> - Counts number of records that holds the conditions specified in the search argument
    *
    * @param  {object} {search} Search argument for filtering records
-   * @param  {object} context  Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context  Provided to every resolver holds contextual information like the request query and user info.
    * @return {number}          Number of records that holds the conditions specified in the search argument
    */
   count<%-namePlCp-%>: async function({search}, context){
@@ -649,7 +649,7 @@ module.exports = {
    * vueTable<%- nameCp-%> - Return table of records as needed for displaying a vuejs table
    *
    * @param  {string} _       First parameter is not used
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {object}         Records with format as needed for displaying a vuejs table
    */
   vueTable<%- nameCp-%>: function(_,context){
@@ -685,7 +685,7 @@ module.exports = {
    * @see handleAssociations for further information.
    *
    * @param  {object} input   Info of each field to create the new record
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {object}         New record created
    */
   add<%- nameCp -%>: async function(input, context) {
@@ -714,7 +714,7 @@ module.exports = {
    * bulkAdd<%- nameCp -%>Csv - Load csv file of records
    *
    * @param  {string} _       First parameter is not used
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    */
   bulkAdd<%- nameCp -%>Csv: function(_, context) {
     return checkAuthorization(context, '<%- name -%>', 'create').then(authorization => {
@@ -733,7 +733,7 @@ module.exports = {
    * delete<%- nameCp -%> - Check user authorization and delete a record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
    *
    * @param  {number} {<%- idAttribute -%>}    <%- idAttribute -%> of the record to delete
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {string}         Message indicating if deletion was successfull.
    */
   delete<%- nameCp -%>: function({<%- idAttribute -%>}, context){
@@ -757,7 +757,7 @@ module.exports = {
    * @see handleAssociations for further information.
    *
    * @param  {object} input   record to update and new info to update
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {object}         Updated record
    */
    update<%- nameCp -%>: async function(input, context) {
@@ -786,7 +786,7 @@ module.exports = {
    * csvTableTemplate<%- nameCp-%> - Returns table's template
    *
    * @param  {string} _       First parameter is not used
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    * @return {Array}         Strings, one for header and one columns types
    */
   csvTableTemplate<%- nameCp-%>: function(_, context){
