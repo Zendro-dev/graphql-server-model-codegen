@@ -21,7 +21,7 @@ static async readById( id, benignErrorReporter){
     // check if data was send
     if (response && response.data && response.data.data) {
       let item = new Book(response.data.data.readOneBook);
-      await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+      await validatorUtil.validateData('validateAfterRead', this, item);
       return item;
     } else {
       throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);

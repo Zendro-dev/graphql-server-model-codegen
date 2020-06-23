@@ -117,10 +117,7 @@ static readById(id, benignErrorReporter) {
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
   return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
     let item  = new Book(result);
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-        .then((valSuccess) => {
-            return item;
-        });
+    return validatorUtil.validateData('validateAfterRead', this, item);
 
    });
   }
