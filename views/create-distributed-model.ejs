@@ -210,9 +210,9 @@ module.exports = class <%- name -%>{
         return total;
       }, []);
     })
-    //phase 2: order & paginate
-    .then( nodes => {
-
+    //phase 2: validate & order & paginate
+    .then( async nodes => {
+      nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 

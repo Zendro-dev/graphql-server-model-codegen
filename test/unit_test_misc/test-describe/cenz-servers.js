@@ -55,6 +55,7 @@ static async readAll(search, order, pagination, benignErrorReporter){
     // check if data was send
     if(response&&response.data&&response.data.data) {
       let data = response.data.data.books;
+      data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
       return data.map(item => {return new Book(item)});
     } else {
       throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);

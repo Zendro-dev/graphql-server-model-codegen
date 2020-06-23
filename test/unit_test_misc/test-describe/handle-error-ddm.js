@@ -139,8 +139,9 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
             return total;
         },[]);
     })
-    //phase 2: order & paginate
-    .then(nodes => {
+    //phase 2: validate & order & paginate
+    .then(async nodes => {
+        nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
         if (order === undefined) {
             order = [{
                 field: "dog_id",
