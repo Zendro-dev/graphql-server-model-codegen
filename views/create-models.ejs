@@ -314,52 +314,48 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     });
   }
 
-  static addOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            const result = await sequelize.transaction( async(t) =>{
-              let item = await super.create(input, {transaction:t});
-              return item;
-            });
-            return result;
-          }catch(error){
-            throw error;
-          }
-        });
+  static async addOne(input){
+    //validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+    try{
+      const result = await sequelize.transaction( async(t) =>{
+        let item = await super.create(input, {transaction:t});
+        return item;
+      });
+      return result;
+    }catch(error){
+      throw error;
+    }
+
   }
 
-  static deleteOne(id){
-
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id)
-        .then(async (valSuccess) => {
-          let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
-          if(destroyed !== 0){
-            return 'Item successfully deleted';
-          }else{
-            throw new Error(`Record with ID = ${id} does not exist or could not been deleted`);
-          }
-        }).catch((error) => {
-            throw error;
-        });
+  static  async deleteOne(id){
+    //validate id
+    await validatorUtil.validateData('validateForDelete', this, id);
+    let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+    if(destroyed !== 0){
+      return 'Item successfully deleted';
+    }else{
+      throw new Error(`Record with ID = ${id} does not exist or could not been deleted`);
+    }
   }
 
-  static updateOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            let result = await sequelize.transaction( async (t) =>{
-              let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
-              return updated;
-            });
-            if(result[0] === 0){
-              throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
-            }
-            return result[1][0];
-          }catch(error){
-            throw error;
-          }
-        });
+  static async updateOne(input){
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
+    try{
+      let result = await sequelize.transaction( async (t) =>{
+        let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+        return updated;
+      });
+      if(result[0] === 0){
+        throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
+      }
+      return result[1][0];
+    }catch(error){
+      throw error;
+    }
+
   }
 
   static bulkAddCsv(context){

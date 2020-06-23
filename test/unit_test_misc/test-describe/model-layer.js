@@ -117,21 +117,21 @@ module.exports.read_all_resolver = `
 `
 
 module.exports.add_one_model = `
-static addOne(input) {
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            const result = await sequelize.transaction(async (t) => {
-                let item = await super.create(input, {
-                    transaction: t
-                });
-                return item;
-            });
-            return result;
-          }catch(error){
-            throw error;
-          }
-        });
+static async addOne(input) {
+    //validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+    try{
+      const result = await sequelize.transaction(async (t) => {
+          let item = await super.create(input, {
+              transaction: t
+          });
+          return item;
+      });
+      return result;
+    }catch(error){
+      throw error;
+    }
+
 }
 `
 
@@ -165,19 +165,16 @@ module.exports.add_one_resolver = `
 `
 
 module.exports.delete_one_model = `
-static deleteOne(id){
+static async deleteOne(id){
+  //validate id
+  await validatorUtil.validateData('validateForDelete', this, id);
+  let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+  if(destroyed !== 0){
+    return 'Item successfully deleted';
+  }else{
+    throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+  }
 
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id)
-      .then(async (valSuccess) => {
-        let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
-        if(destroyed !== 0){
-          return 'Item successfully deleted';
-        }else{
-          throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
-        }
-      }).catch((error) => {
-          throw error;
-      });
 }
 `
 module.exports.delete_one_resolver = `
@@ -202,9 +199,9 @@ module.exports.delete_one_resolver = `
     },
 `
 module.exports.update_one_model = `
-static updateOne(input) {
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
+static async updateOne(input) {
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
             try {
                 let result = await sequelize.transaction(async (t) => {
                     let updated = await super.update(input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
@@ -219,7 +216,7 @@ static updateOne(input) {
             } catch (error) {
                 throw error;
             }
-        });
+
 }
 `
 

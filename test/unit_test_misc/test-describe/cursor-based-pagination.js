@@ -452,6 +452,8 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
 module.exports.many_to_many_association_connection_cenz_server = `
 static async updateOne(input, benignErrorReporter){
+  //validate input
+  await validatorUtil.validateData('validateForUpdate', this, input);
     let query = \`mutation updatePerson($id:ID!        $firstName:String
         $lastName:String
         $email:String){
@@ -469,7 +471,7 @@ static async updateOne(input, benignErrorReporter){
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     try {
-        await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+
         // Send an HTTP request to the remote server
         let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
