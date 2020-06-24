@@ -114,23 +114,19 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
   }
 
   static async readById(id){
-    let theId = id;
-    if ('<%- idAttributeType %>'.toLowerCase() === 'uuid') {
-      theId = Uuid.fromString(id);
-    }
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
-    let queryResult = await client.execute(query, [ theId ], { prepare: true });
+    let queryResult = await client.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
     let firstResult = queryResult.first();
     let item = new <%- name -%>(firstResult, queryResult);
     if (item === null) {
-        throw new Error(`Record with ID = "${id}" does not exist`);
+      throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-        .then((valSuccess) => {
-            return item
-        }).catch((err) => {
-            return err
-        });
+    try {
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+      return item;
+    } catch (err) {
+      return err
+    };
   }
 
   static async countRecords(search, filtering){
@@ -158,43 +154,6 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
 
   static readAll(search, order, pagination){
     throw new Error('Limit-offset based pagination is not supported by Cassandra');
-    /*let options = {};
-    if (search !== undefined) {
-
-      //check
-      if(typeof search !== 'object') {
-        throw new Error('Illegal "search" argument type, it must be an object.');
-      }
-
-      let arg = new searchArg(search);
-      let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;
-    }
-
-    return super.count(options).then(items => {
-        if (order !== undefined) {
-            options['order'] = order.map((orderItem) => {
-                return [orderItem.field, orderItem.order];
-            });
-        } else if (pagination !== undefined) {
-            options['order'] = [
-                ["<%- idAttribute -%>", "ASC"]
-            ];
-        }
-
-        if (pagination !== undefined) {
-            options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
-            options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
-        } else {
-            options['offset'] = 0;
-            options['limit'] = items;
-        }
-
-        if (globals.LIMIT_RECORDS < options['limit']) {
-            throw new Error(`Request of total <%- namePl -%> exceeds max limit of ${globals.LIMIT_RECORDS}. Please use pagination.`);
-        }
-        return super.findAll(options);
-    });*/
   }
 
   static async readAllCursor(search, pagination, filteringAllowed){
@@ -263,39 +222,37 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       but we are using only one node here (no DDM).
       Furthermore, we query for a single ID, so even in a distributed case, we wouldn't query over more than one partition. %>
 
-  static addOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            let inputCopy = JSON.parse(JSON.stringify(input));
-            if (inputCopy.skipAssociationsExistenceChecks) {
-              delete inputCopy.skipAssociationsExistenceChecks;
-            }
-            for (let key of Object.keys(inputCopy)) {
-              if (!helper.isNotUndefinedAndNotNull(definition.attributes[key])) {
-                delete inputCopy[key];
-              }
-              if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
-                inputCopy[key] = `'${inputCopy[key]}'`;
-              }
-            }
-            const fields = Object.keys(inputCopy).join(', ');
-            const values = Object.values(inputCopy).join(', ');
-            const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
-            let mutationResponse = await client.execute(query);
-            let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
-            let response = new <%- name -%>(checkQuery, mutationResponse);
-            return response;
-          }catch(error){
-            throw error;
-          }
-        });
+  static async addOne(input){
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
+    try{
+      let inputCopy = JSON.parse(JSON.stringify(input));
+      if (inputCopy.skipAssociationsExistenceChecks) {
+        delete inputCopy.skipAssociationsExistenceChecks;
+      }
+      for (let key of Object.keys(inputCopy)) {
+        if (!helper.isNotUndefinedAndNotNull(definition.attributes[key])) {
+          delete inputCopy[key];
+        }
+        if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
+          inputCopy[key] = `'${inputCopy[key]}'`;
+        }
+      }
+      const fields = Object.keys(inputCopy).join(', ');
+      const values = Object.values(inputCopy).join(', ');
+      const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
+      let mutationResponse = await client.execute(query);
+      let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
+      let response = new <%- name -%>(checkQuery, mutationResponse);
+      return response;
+    }catch(error){
+      throw error;
+    }  
   }
 
   static async deleteOne(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
     let queryResponse = await client.execute(query);
-    let validationSuccess = await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, queryResponse.rows[0]);
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, queryResponse.rows[0]);
     const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
     await client.execute(mutation);
     queryResponse = await client.execute(query);
@@ -305,50 +262,49 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     throw new Error('Record was not deleted!');
   }
 
-  static updateOne(input){
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            let inputCopy = JSON.parse(JSON.stringify(input));
-            if (inputCopy.skipAssociationsExistenceChecks) {
-              delete inputCopy.skipAssociationsExistenceChecks;
-            }
-            for (let key of Object.keys(inputCopy)) {
-              if (!helper.isNotUndefinedAndNotNull(definition.attributes[key])) {
-                delete inputCopy[key];
-              }
-              if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
-                inputCopy[key] = `'${inputCopy[key]}'`;
-              }
-            }
-            let idValue = input[this.idAttribute()];
-            delete inputCopy[this.idAttribute()];
-            let inputKeys = Object.keys(inputCopy);
-            let mutationResponse = {};
-            if (inputKeys.length > 0) {
-              let mutation = `UPDATE <%- namePl -%> SET `;
-              mutation += inputKeys.map(key => `${key} = ${inputCopy[key]}`).join(', ');
-              mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
-              mutationResponse = await client.execute(mutation);
-            }
-            let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
-            let response = new <%- name -%>(checkQuery, mutationResponse);
-            return response;
-          }catch(error){
-            throw error;
+  static async updateOne(input){
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+      try{
+        let inputCopy = JSON.parse(JSON.stringify(input));
+        if (inputCopy.skipAssociationsExistenceChecks) {
+          delete inputCopy.skipAssociationsExistenceChecks;
+        }
+        for (let key of Object.keys(inputCopy)) {
+          if (!helper.isNotUndefinedAndNotNull(definition.attributes[key])) {
+            delete inputCopy[key];
           }
-        });
+          if (definition.attributes[key] === 'String' && inputCopy[key].indexOf("'") !== 0) {
+            inputCopy[key] = `'${inputCopy[key]}'`;
+          }
+        }
+        let idValue = input[this.idAttribute()];
+        delete inputCopy[this.idAttribute()];
+        let inputKeys = Object.keys(inputCopy);
+        let mutationResponse = {};
+        if (inputKeys.length > 0) {
+          let mutation = `UPDATE <%- namePl -%> SET `;
+          mutation += inputKeys.map(key => `${key} = ${inputCopy[key]}`).join(', ');
+          mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
+          mutationResponse = await client.execute(mutation);
+        }
+        let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
+        let response = new <%- name -%>(checkQuery, mutationResponse);
+        return response;
+      }catch(error){
+        throw error;
+      }
   }
 
-  static bulkAddCsv(context){
+  static async bulkAddCsv(context){
 
       let delim = context.request.body.delim;
       let cols = context.request.body.cols;
       let tmpFile = path.join(os.tmpdir(), uuidv4() + '.csv');
 
-      context.request.files.csv_file.mv(tmpFile).then(() => {
+      await context.request.files.csv_file.mv(tmpFile);
 
-          fileTools.parseCsvStream(tmpFile, this, delim, cols).then((addedZipFilePath) => {
+        try {
+          let addedZipFilePath = await fileTools.parseCsvStream(tmpFile, this, delim, cols);
               try {
                   console.log(`Sending ${addedZipFilePath} to the user.`);
 
@@ -358,36 +314,35 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
                       path: addedZipFilePath
                   });
 
-                  email.sendEmail(helpersAcl.getTokenFromContext(context).email,
-                      'ScienceDB batch add',
-                      'Your data has been successfully added to the database.',
-                      attach).then(function(info) {
+                  try {
+                      let info = await email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                        'ScienceDB batch add',
+                        'Your data has been successfully added to the database.',
+                        attach);
                       fileTools.deleteIfExists(addedZipFilePath);
                       console.log(info);
-                  }).catch(function(err) {
+                  } catch(err) {
                       fileTools.deleteIfExists(addedZipFilePath);
                       console.error(err);
-                  });
+                  }
 
               } catch (error) {
                   console.error(error.message);
               }
 
               fs.unlinkSync(tmpFile);
-          }).catch((error) => {
-              email.sendEmail(helpersAcl.getTokenFromContext(context).email,
-                  'ScienceDB batch add', `${error.message}`).then(function(info) {
+          } catch(error) {
+            try {
+              let info = await email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                  'ScienceDB batch add', `${error.message}`);
                   console.error(info);
-              }).catch(function(err) {
+              } catch(err) {
                   console.error(err);
-              });
+              }
 
               fs.unlinkSync(tmpFile);
-          });
+          }
 
-      }).catch((error) => {
-          throw new Error(error);
-      });
   }
 
   static csvTableTemplate(){
