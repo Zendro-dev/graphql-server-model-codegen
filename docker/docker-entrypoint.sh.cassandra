@@ -87,8 +87,6 @@ if [ "$1" = 'cassandra' ]; then
 	done
 fi
 
-cp a.cqlshrc home/cassandra/.cassandra/cqlshrc
-
 for f in docker-entrypoint-initdb.d/*; do
     case "$f" in
         *.sh)     echo "$0: running $f"; . "$f" ;;
