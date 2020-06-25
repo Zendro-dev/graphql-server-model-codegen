@@ -157,20 +157,36 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
   }
 
   static async readAllCursor(search, pagination, filteringAllowed){
-    //check valid pagination arguments
+    // === Set variables ===
+
     let offsetCursor = pagination ? pagination.after : null;
     let arg_cassandra = ';';
-
     let searchTerms = search;
-    if (helper.isNotUndefinedAndNotNull(search) && helper.isNotUndefinedAndNotNull(offsetCursor)) {
+
+    // === Set pagination offset if needed ===
+
+    /*
+    * In this section, a special operator is used: "tgt", meaning "TOKEN > TOKEN".
+    * This operator is implemented in utils/search-argument.js, toCassandra(idAttribute, allowFiltering)
+    *
+    * The Cassandra database is ordered by the TOKEN of the ID value, so if we want to cut away entries above the cursor,
+    * we need to enforce the condition TOKEN(id) > TOKEN(cursor_id), which is realized here by: id TGT cursor_id
+    */
+
+    if (helper.isNotUndefinedAndNotNull(offsetCursor)) {
       let decoded_cursor = JSON.parse(this.base64Decode(offsetCursor));
       let cursorId = decoded_cursor['<%- idAttribute -%>'];
-      searchTerms = new searchArg({field: null, value: null, operator: 'and', search:[search, new searchArg({field: '<%- idAttribute -%>', value: {value: cursorId}, operator:'tgt', search:undefined})]});
-    } else if (helper.isNotUndefinedAndNotNull(offsetCursor)) {
-      let decoded_cursor = JSON.parse(this.base64Decode(offsetCursor));
-      let cursorId = decoded_cursor['<%- idAttribute -%>'];
-      searchTerms = new searchArg({field: '<%- idAttribute -%>', value: {value: cursorId}, operator:'tgt', search:undefined});
+      let cursorSearchCondition = new searchArg({field: '<%- idAttribute -%>', value: {value: cursorId}, operator:'tgt', search:undefined});
+      if (helper.isNotUndefinedAndNotNull(search)) {
+        // -- Use *both* the given search condition and the cursor --
+        searchTerms = new searchArg({field: null, value: null, operator: 'and', search:[search, cursorSearchCondition]});
+      } else {
+        // -- Use only the cursor --
+        searchTerms = cursorSearchCondition;
+      }
     }
+
+    // === Construct CQL statement ===
 
     if (searchTerms !== undefined) {
 
@@ -186,13 +202,19 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     }
 
     let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
-    let options = {};
+    
+    // === Set page size if needed ===
 
+    let options = {};
     if (pagination && pagination.limit) {
       options.fetchSize = parseInt(pagination.limit);
     }
 
+    // === Call to database ===
+
     const result = await client.execute(query, [], options);
+
+    // === Construct return object ===
 
     const rows = result.rows.map(row => {
       let edge = {};
@@ -203,6 +225,11 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     });
     let nextCursor = null;
     let hasNextCursor = false;
+    /*
+    * The pageState attribute is where Cassandra stores its own version of a cursor.
+    * We cannot use it directly, because Cassandra uses different conventions. 
+    * But its presence shows that there is a following page.
+    */
     if (helper.isNotUndefinedAndNotNull(result.pageState)) {
       let maxIndex = rows.length - 1;
       nextCursor = rows[maxIndex].cursor;
