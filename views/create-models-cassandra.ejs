@@ -99,10 +99,24 @@ module.exports = class <%- name -%> {
     <% } -%>
   }*/
 
+  /**
+  * name - Getter for the name attribute
+  *
+  * This attribute is needed by the models' index
+  * @return {string} The name of the model
+  */
   static get name(){
     return "<%- nameLc -%>";
   }
 
+  /**
+  * readById - The model implementation for reading a single record given by its ID
+  *
+  * This method is the implementation for reading a single record for the Cassandra storage type, based on CQL.
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- name -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
   static async readById(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
     let queryResult = await client.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
@@ -119,6 +133,16 @@ module.exports = class <%- name -%> {
     };
   }
 
+  /**
+  * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
+  * for the Cassandra storage type, based on CQL.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {boolean} filtering - If the user has the 'search' right, the term 'ALLOW FILTERING' will be appended to the CQL string, possibly
+  * allowing for searches that would otherwise be forbidden. This comes at an efficiency cost.
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
   static async countRecords(search, filtering){
     let options = {};
     let result = 0;
@@ -140,10 +164,24 @@ module.exports = class <%- name -%> {
     return result;
   }
 
+  /**
+  * readAll - Limit-offset based pagination is not offered by Cassandra, and this method is left here only as information
+  * to the user / developer. Use *readAllCursor* instead, which relies on cursor based pagination.
+  * @throw {Error} If this method is used at all, an Error is thrown
+  */
   static readAll(search, order, pagination){
     throw new Error('Limit-offset based pagination is not supported by Cassandra');
   }
 
+  /**
+  * readAllCursor - The model implementation for searching for records in Cassandra. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {boolean} filteringAllowed - If the user has the right 'search', the term "ALLOW FILTERING" will be added to the
+  * CQL statement, allowing for more search queries at a efficiency cost.
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
   static async readAllCursor(search, pagination, filteringAllowed){
     // === Set variables ===
 
@@ -252,6 +290,14 @@ module.exports = class <%- name -%> {
       but we are using only one node here (no DDM).
       Furthermore, we query for a single ID, so even in a distributed case, we wouldn't query over more than one partition. %>
 
+  /**
+  * addOne - The model implementation method for adding a record in Cassandra, based on CQL.
+  *
+  * @param {object} input_object - The input object with informations about the record to be added, destructured into
+  * the attribute components, but whithout associations or other information like *skipAssociationsExistenceChecks*.
+  * @return {object} The created record as <%- indefiniteArticle -%> <%- name -%> object
+  * @throw {Error} If the process fails, an error is thrown
+  */
   static async addOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
     let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
     await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
@@ -269,6 +315,13 @@ module.exports = class <%- name -%> {
     }  
   }
 
+  /**
+  * deleteOne - The model implementation for deleting a single record, given by its ID, in Cassandra, based on CQL.
+  *
+  * @param {string} id - The ID of the record to be deleted
+  * @returns {string} A success message is returned
+  * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+  */
   static async deleteOne(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
     let queryResponse = await client.execute(query);
@@ -282,6 +335,14 @@ module.exports = class <%- name -%> {
     throw new Error('Record was not deleted!');
   }
 
+  /**
+  * updateOne - The model implementation for updating a single record in Cassandra, based on CQL.
+  *
+  * @param {object} input_object - The input object with informations about the record to be updated, destructured into
+  * the attribute components, but whithout associations or other information like *skipAssociationsExistenceChecks*.
+  * @returns {object} A new object of the type <%- name -%>, which represents the updated record
+  * @throw {Error} If this method fails, an error is thrown
+  */
   static async updateOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
       let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
       await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
@@ -353,10 +414,21 @@ module.exports = class <%- name -%> {
               fs.unlinkSync(tmpFile);
           }
 
+      return `Bulk import of <%- name -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
+
   }
 
-  static csvTableTemplate(){
-    return helper.csvTableTemplate(<%- name -%>);
+  /**
+   * csvTableTemplate - Allows the user to download a template in CSV format with the
+   * properties and types of this model.
+   *
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the
+   * GraphQL response will have a non empty errors property.
+   */
+  static async csvTableTemplate(benignErrorReporter){
+      return helper.csvTableTemplate(definition);
   }
 
   <% associations_temp = associationsArguments["to_many_through_sql_cross_table"]-%>
@@ -615,18 +687,37 @@ module.exports = class <%- name -%> {
     return this[<%- name -%>.idAttribute()]
   }
 
+  /**
+  * definition - Getter for the attribute 'definition'
+  * @return {string} the definition string
+  */
   static get definition(){
     return definition;
   }
 
+  /**
+  * base64Decode - Decode a base 64 String to UTF-8.
+  * @param {string} cursor - The cursor to be decoded into the record, given in base 64
+  * @return {string} The stringified object in UTF-8 format
+  */
   static base64Decode(cursor){
     return Buffer.from(cursor, 'base64').toString('utf-8');
   }
 
+  /**
+  * base64Enconde - Encode <%- indefiniteArticle -%> <%- name -%> to a base 64 String
+  *
+  * @return {string} The <%- name -%> object, encoded in a base 64 String
+  */
     base64Enconde(){
     return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
   }
 
+  /**
+  * stripAssociations - Instant method for getting all attributes of <%- indefiniteArticle -%> <%- name -%>.
+  *
+  * @return {object} The attributes of <%- indefiniteArticle -%> <%- name -%> in object form
+  */
   stripAssociations(){
     let attributes = Object.keys(<%- name -%>.definition.attributes);
   <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
@@ -634,6 +725,11 @@ module.exports = class <%- name -%> {
     return data_values;
   }
 
+  /**
+  * externalIdsArray - Get all attributes of <%- indefiniteArticle -%> <%- name -%> that are marked as external IDs.
+  *
+  * @return {Array<String>} An array of all attributes of <%- indefiniteArticle -%> <%- name -%> that are marked as external IDs
+  */
   static externalIdsArray(){
     let externalIds = [];
     if(definition.externalIds){
@@ -643,6 +739,11 @@ module.exports = class <%- name -%> {
     return externalIds;
   }
 
+  /**
+  * externalIdsObject - Get all external IDs of <%- indefiniteArticle -%> <%- name -%>.
+  *
+  * @return {object} An object that has the names of the external IDs as keys and their types as values
+  */
   static externalIdsObject(){
     return {
       <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>

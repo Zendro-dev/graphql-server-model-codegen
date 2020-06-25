@@ -563,6 +563,21 @@ convertToType = function(many, model_name){
 };
 
 /**
+ * getIndefiniteArticle - Generate the (uncapitalized) indefinite article that belongs to a given name.
+ * 
+ * @param {string} name - The name that this article is to be used with
+ * @return {string} The indefinite article
+ */
+getIndefiniteArticle = function(name) {
+  let vowelRegex = '^[aeiouAEIOU].*';
+  if (name.match(vowelRegex)) {
+    return 'an';
+  } else {
+    return 'a';
+  }
+}
+
+/**
  * getOptions - Creates object with all extra info and with all data model info.
  *
  * @param  {object} dataModel object created from a json file containing data model info.
@@ -591,7 +606,8 @@ module.exports.getOptions = function(dataModel){
       regex: dataModel.regex || "",
       adapterName: dataModel.adapterName || "",
       registry: dataModel.registry || [],
-      idAttribute: getIdAttribute(dataModel)
+      idAttribute: getIdAttribute(dataModel),
+      indefiniteArticle: getIndefiniteArticle(dataModel.model)
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
