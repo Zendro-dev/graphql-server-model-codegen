@@ -23,14 +23,10 @@ const Uuid = require('cassandra-driver').types.Uuid;
 const definition = <%- definition -%>;
 
 /**
- * module - Creates a sequelize model
- *
- * @param  {object} sequelize Sequelize instance.
- * @param  {object} DataTypes Allowed sequelize data types.
- * @return {object}           Sequelize model with associations defined
+ * module - Creates a class to administer Cassandra model types
  */
 
-module.exports = class <%- name -%> /* extends Sequelize.Model */ {
+module.exports = class <%- name -%> {
   constructor(input) {
     for (let key of Object.keys(input)) {
       this[key] = input[key];
@@ -135,8 +131,6 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       }
 
       let arg = new searchArg(search);
-      /*let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;*/
       arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>', filtering);
     }
     const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
