@@ -31,13 +31,7 @@ const definition = <%- definition -%>;
  */
 
 module.exports = class <%- name -%> /* extends Sequelize.Model */ {
-  constructor(input, initMessage) {
-    if (initMessage) {
-      if (initMessage.rows) {
-        delete initMessage.rows;
-      }
-      this.initMessage = initMessage;
-    }
+  constructor(input) {
     for (let key of Object.keys(input)) {
       this[key] = input[key];
     }
@@ -117,7 +111,7 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
     let queryResult = await client.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
     let firstResult = queryResult.first();
-    let item = new <%- name -%>(firstResult, queryResult);
+    let item = new <%- name -%>(firstResult);
     if (item === null) {
       throw new Error(`Record with ID = "${id}" does not exist`);
     }
@@ -267,9 +261,9 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
       const fields = Object.keys(inputCopy).join(', ');
       const values = Object.values(inputCopy).join(', ');
       const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
-      let mutationResponse = await client.execute(query);
+      await client.execute(query);
       let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
-      let response = new <%- name -%>(checkQuery, mutationResponse);
+      let response = new <%- name -%>(checkQuery);
       return response;
     }catch(error){
       throw error;
@@ -307,15 +301,14 @@ module.exports = class <%- name -%> /* extends Sequelize.Model */ {
         let idValue = input[this.idAttribute()];
         delete inputCopy[this.idAttribute()];
         let inputKeys = Object.keys(inputCopy);
-        let mutationResponse = {};
         if (inputKeys.length > 0) {
           let mutation = `UPDATE <%- namePl -%> SET `;
           mutation += inputKeys.map(key => `${key} = ${inputCopy[key]}`).join(', ');
           mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
-          mutationResponse = await client.execute(mutation);
+          await client.execute(mutation);
         }
         let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
-        let response = new <%- name -%>(checkQuery, mutationResponse);
+        let response = new <%- name -%>(checkQuery);
         return response;
       }catch(error){
         throw error;
