@@ -12,7 +12,7 @@ const email = require('../../utils/email');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const uuidv4 = require('uuidv4');
+const uuidv4 = require('uuidv4').uuid;
 const helper = require('../../utils/helper');
 const models = require(path.join(__dirname, '..', 'index.js'));
 const moment = require('moment');
@@ -367,15 +367,32 @@ module.exports = class <%- name -%> {
   }
 
   static async bulkAddCsv(context){
-
-      let delim = context.request.body.delim;
+      throw new Error('Bulk Adding from a CSV file is currently not implemented!');
+      /*
+      let delim = context.request.body.delim || ',';
+      let csvFile = context.request.files.csv_file;
       let cols = context.request.body.cols;
       let tmpFile = path.join(os.tmpdir(), uuidv4() + '.csv');
 
       await context.request.files.csv_file.mv(tmpFile);
 
         try {
-          let addedZipFilePath = await fileTools.parseCsvStream(tmpFile, this, delim, cols);
+
+          // The following command will only work for up to 2 million rows. For large datasets, use https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/tools/toolsBulkloader.html
+
+          // The COPY statement can *only* be applied in the CQLSH, not by the driver!
+          let copyQuery = `COPY <%- namePl -%> FROM '${tmpFile}' WITH HEADER = TRUE AND DELIMITER = '${delim}';`;
+          await client.execute(copyQuery);
+          let idArray = await fileTools.getIdArrayFromCSV(tmpFile, this, delim, cols);
+          let idString = idArray.join(', ');
+          let resultQuery = `SELECT * FROM <%- namePl -%> WHERE ID IN (${idString});`
+          let insertionResult = await client.execute(resultQuery);
+
+          let rowsJson = insertionResult.rows.map(record => JSON.stringify(record));
+          let addedZipFilePath = await fileTools.JSONArrayToZIP(rowsJson, tmpFile);
+
+          // let addedZipFilePath = await fileTools.parseCsvStream(tmpFile, this, delim, cols);
+
               try {
                   console.log(`Sending ${addedZipFilePath} to the user.`);
 
@@ -415,7 +432,7 @@ module.exports = class <%- name -%> {
           }
 
       return `Bulk import of <%- name -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
-
+      */
   }
 
   /**

@@ -717,7 +717,7 @@ module.exports = {
    * @param  {string} _       First parameter is not used
    * @param  {object} context Provided to every resolver holds contextual information like the request query and user info.
    */
-  bulkAdd<%- nameCp -%>Csv: async function(_, context) {
+  /* bulkAdd<%- nameCp -%>Csv: async function(_, context) {
     try {
         if (await checkAuthorization(context, '<%- name -%>', 'create') === true) {
           return <%- nameLc -%>.bulkAddCsv(context);
@@ -728,7 +728,7 @@ module.exports = {
       console.error(error);
       handleError( error);
     }
-  },
+  }, */
 
   /**
    * delete<%- nameCp -%> - Check user authorization and delete a record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.

@@ -3204,5 +3204,24 @@ describe(
         }
       });
     })
+
+    /*it('19. CSV incident batch upload', async function () {
+
+      let csvPath = path.join(__dirname, 'integration_test_misc', 'incident.csv');
+
+      // count records before upload
+      let cnt1 = await itHelpers.count_all_records('countIncidents');
+
+      // batch_upload_csv start new background, there is no way to test the actual result
+      // without explicit delay. The test may fail if delay is too small, just check the
+      // resulting DB table to be sure that all records from file incident.csv were added.
+      let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIncidentCsv}');
+      expect(success).equal(true);
+      await delay(1500);
+
+      // count records before upload
+      let cnt2 = await itHelpers.count_all_records('countIncidents');
+      expect(cnt2 - cnt1).to.equal(2);
+    });*/
     
   })
