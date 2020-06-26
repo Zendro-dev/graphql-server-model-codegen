@@ -3190,5 +3190,19 @@ describe(
         });
       }
     })
+
+    it('18. Get the table template', function() {
+      let res = itHelpers.request_graph_ql_post(`{csvTableTemplateIncident}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            csvTableTemplateIncident: [
+                "incident_id,incident_description,incident_number",
+                "uuid,String,Int"
+            ]
+        }
+      });
+    })
     
   })
