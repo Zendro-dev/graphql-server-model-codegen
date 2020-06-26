@@ -16,7 +16,7 @@ const uuidv4 = require('uuidv4').uuid;
 const helper = require('../../utils/helper');
 const models = require(path.join(__dirname, '..', 'index.js'));
 const moment = require('moment');
-const client = require('../../utils/cassandra-client');
+// const client = require('../../utils/cassandra-client');
 const Uuid = require('cassandra-driver').types.Uuid;
 
 // An exact copy of the the model definition that comes from the .json file
@@ -26,11 +26,16 @@ const definition = <%- definition -%>;
  * module - Creates a class to administer Cassandra model types
  */
 
-module.exports = class <%- name -%> {
+class <%- name -%> {
   constructor(input) {
     for (let key of Object.keys(input)) {
       this[key] = input[key];
     }
+  }
+
+  get storageHandler() {
+    // defined below by `Object.defineProperty`
+    return <%- name -%>.storageHandler
   }
 
   /*static init(sequelize, DataTypes){
@@ -119,7 +124,7 @@ module.exports = class <%- name -%> {
   */
   static async readById(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
-    let queryResult = await client.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
+    let queryResult = await this.storageHandler.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
     let firstResult = queryResult.first();
     let item = new <%- name -%>(firstResult);
     if (item === null) {
@@ -158,7 +163,7 @@ module.exports = class <%- name -%> {
       arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>', filtering);
     }
     const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
-    let queryResult = await client.execute(query);
+    let queryResult = await this.storageHandler.execute(query);
     let item = queryResult.first();
     result = parseInt(item['count']);
     return result;
@@ -238,7 +243,7 @@ module.exports = class <%- name -%> {
 
     // === Call to database ===
 
-    const result = await client.execute(query, [], options);
+    const result = await this.storageHandler.execute(query, [], options);
 
     // === Construct return object ===
 
@@ -306,8 +311,8 @@ module.exports = class <%- name -%> {
       const fields = Object.keys(input).join(', ');
       const values = Object.values(input).join(', ');
       const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
-      await client.execute(query);
-      let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
+      await this.storageHandler.execute(query);
+      let checkQuery = (await this.storageHandler.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
       let response = new <%- name -%>(checkQuery);
       return response;
     }catch(error){
@@ -324,11 +329,11 @@ module.exports = class <%- name -%> {
   */
   static async deleteOne(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
-    let queryResponse = await client.execute(query);
+    let queryResponse = await this.storageHandler.execute(query);
     await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, queryResponse.rows[0]);
     const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
-    await client.execute(mutation);
-    queryResponse = await client.execute(query);
+    await this.storageHandler.execute(mutation);
+    queryResponse = await this.storageHandler.execute(query);
     if (helper.isEmptyArray(queryResponse.rows)) {
       return 'Item successfully deleted';
     }
@@ -356,9 +361,9 @@ module.exports = class <%- name -%> {
           let mutation = `UPDATE <%- namePl -%> SET `;
           mutation += inputKeys.map(key => `${key} = ${input[key]}`).join(', ');
           mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
-          await client.execute(mutation);
+          await this.storageHandler.execute(mutation);
         }
-        let checkQuery = (await client.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
+        let checkQuery = (await this.storageHandler.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
         let response = new <%- name -%>(checkQuery);
         return response;
       }catch(error){
@@ -382,11 +387,11 @@ module.exports = class <%- name -%> {
 
           // The COPY statement can *only* be applied in the CQLSH, not by the driver!
           let copyQuery = `COPY <%- namePl -%> FROM '${tmpFile}' WITH HEADER = TRUE AND DELIMITER = '${delim}';`;
-          await client.execute(copyQuery);
+          await this.storageHandler.execute(copyQuery);
           let idArray = await fileTools.getIdArrayFromCSV(tmpFile, this, delim, cols);
           let idString = idArray.join(', ');
           let resultQuery = `SELECT * FROM <%- namePl -%> WHERE ID IN (${idString});`
-          let insertionResult = await client.execute(resultQuery);
+          let insertionResult = await this.storageHandler.execute(resultQuery);
 
           let rowsJson = insertionResult.rows.map(record => JSON.stringify(record));
           let addedZipFilePath = await fileTools.JSONArrayToZIP(rowsJson, tmpFile);
@@ -767,4 +772,13 @@ module.exports = class <%- name -%> {
     };
   }
 
+}
+
+module.exports.getAndConnectDataModelClass = function ( cassandraDriver ) {
+  return Object.defineProperty(<%- name -%>, 'storageHandler', {
+    value: cassandraDriver,
+    writable: false, // cannot be changed in the future
+    enumerable: true,
+    configurable: false
+  })
 }

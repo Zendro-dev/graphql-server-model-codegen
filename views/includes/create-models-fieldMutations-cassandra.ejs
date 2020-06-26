@@ -8,18 +8,10 @@
     */
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
       const mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ${<%- idAttribute -%>}`;
-      await client.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %>`${<%-associationsArguments["to_one"][i].targetKey-%>}`<%}-%>], {prepare: true});
+      await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %>`${<%-associationsArguments["to_one"][i].targetKey-%>}`<%}-%>], {prepare: true});
       const checkCql = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute-%> = ${<%- idAttribute-%>}`;
-      let result = await client.execute(checkCql);
+      let result = await this.storageHandler.execute(checkCql);
       return new <%- name -%>(result.first());
-      /*let updated = await sequelize.transaction(async transaction => {
-        try {
-          return <%- name -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}}, {transaction: transaction})
-        } catch (error) {
-            throw error;
-        }
-      });
-      return updated;*/
     }
   <%} -%>
 <%}-%>
