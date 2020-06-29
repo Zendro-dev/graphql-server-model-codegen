@@ -431,11 +431,15 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       if(response&&response.data&&response.data.data) {
         let data_edges = response.data.data.booksConnection.edges;
         let pageInfo = response.data.data.booksConnection.pageInfo;
+        //validate after read
+        let nodes = data_edges.map(e => e.node);
+        let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
 
-        let edges = data_edges.map( e =>{
+        let edges = valid_nodes.map( e =>{
+          let temp_node = new Book(e);
           return {
-            node: new Book(e.node),
-            cursor: e.cursor
+            node: temp_node,
+            cursor: temp_node.base64Enconde()
           }
         })
 

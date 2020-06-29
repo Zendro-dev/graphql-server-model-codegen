@@ -287,7 +287,7 @@ module.exports = class <%- name -%>{
     return true;
   }
 
-  static addOne(input, benignErrorReporter) {
+  static async addOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
@@ -306,7 +306,7 @@ module.exports = class <%- name -%>{
     return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter);
   }
 
-  static updateOne(input, benignErrorReporter) {
+  static async updateOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);

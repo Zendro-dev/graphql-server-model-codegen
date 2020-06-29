@@ -157,10 +157,15 @@ module.exports = class <%- name -%>{
         let data_edges = response.data.data.<%- namePl -%>Connection.edges;
         let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo;
 
-        let edges = data_edges.map( e =>{
+        //validate after read
+        let nodes = data_edges.map(e => e.node);
+        let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
+
+        let edges = valid_nodes.map( e =>{
+          let temp_node = new <%- name -%>(e);
           return {
-            node: new <%- name -%>(e.node),
-            cursor: e.cursor
+            node: temp_node,
+            cursor: temp_node.base64Enconde()
           }
         })
 
