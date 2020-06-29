@@ -1,0 +1,30 @@
+{
+    "model": "Dist_instant",
+    "storageType" : "ddm-adapter",
+    "adapterName": "instant_instance2",
+    "regex": "instance2",
+    "url": "http://server2:3030/graphql",
+    "attributes": {
+      "instant_id": "String",
+      "incident_assoc_id": "String",
+      "year": "Int",
+      "month": "Int",
+      "day": "Int",
+      "hour": "Int",
+      "minute": "Int"
+    },
+  
+    "associations": {
+  
+      "dist_incident": {
+        "type": "to_one",
+        "target": "Dist_incident",
+        "targetKey": "incident_assoc_id",
+        "keyIn" : "Dist_instant",
+        "targetStorageType": "distributed-data-model"
+      }
+  
+    },
+  
+    "internalId" : "instant_id"
+  }

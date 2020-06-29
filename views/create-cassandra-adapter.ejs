@@ -1,0 +1,405 @@
+const _ = require('lodash');
+const globals = require('../../config/globals');
+const Sequelize = require('sequelize');
+const dict = require('../../utils/graphql-sequelize-types');
+const validatorUtil = require('../../utils/validatorUtil');
+const helper = require('../../utils/helper');
+const searchArg = require('../../utils/search-argument');
+const path = require('path');
+const fileTools = require('../../utils/file-tools');
+const helpersAcl = require('../../utils/helpers-acl');
+const email = require('../../utils/email');
+const fs = require('fs');
+const os = require('os');
+const uuidv4 = require('uuidv4').uuid;
+const models = require(path.join(__dirname, '..', 'index.js'));
+
+const remoteCenzontleURL = "<%- url -%>";
+const iriRegex = new RegExp('<%- regex -%>');
+
+// An exact copy of the the model definition that comes from the .json file
+const definition = <%- definition -%>;
+
+/**
+ * module - Creates a sequelize model
+ *
+ * @param  {object} sequelize Sequelize instance.
+ * @param  {object} DataTypes Allowed sequelize data types.
+ * @return {object}           Sequelize model with associations defined
+ */
+
+class <%- adapterName -%> {
+
+  constructor(input) {
+    for (let key of Object.keys(input)) {
+      this[key] = input[key];
+    }
+  }
+
+  /* static init(sequelize, DataTypes){
+    return super.init({
+
+        <%if(!defaultId){-%>
+        <%- idAttribute -%> : {
+          type : Sequelize[ dict['<%- idAttributeType %>'] ],
+          primaryKey: true
+        },
+        <%}-%>
+      <% let keys = Object.keys(attributes) -%>
+      <%for (let i=0; i< keys.length; i++) {-%>
+        <% let type_seq =  attributes[ keys[i] ] -%>
+        <%=  keys[i] %>: {
+            type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
+            get(){
+              let <%=  keys[i] %> = this.getDataValue('<%=  keys[i] %>');
+              if(<%=  keys[i] %> !== null ){
+                let m = moment(<%=  keys[i] %>, "HH:mm:ss.SSS[Z]");
+                if(m.isValid()){
+                  return m.format("HH:mm:ss.SSS[Z]");
+                }
+              }
+            }
+            <%}-%>
+        }
+        <%if(i !== (keys.length -1) ){ -%>,<%}-%>
+      <%}-%>
+
+
+    },{ <%if(indices !== undefined){let string_indices = indices.map(x => { return "'" + x + "'" }) -%>
+      indexes: [<%- string_indices.join() -%> ], <%}-%>
+      modelName: "<%- nameLc -%>",
+      tableName: "<%-namePl-%>",
+      sequelize
+     } );
+  }*/
+
+  get storageHandler() {
+    // defined below by `Object.defineProperty`
+    return <%- adapterName -%>.storageHandler
+  }
+
+  static get adapterName(){
+    return '<%- adapterName -%>';
+  }
+
+  static get adapterType(){
+    return '<%- storageType -%>';
+  }
+
+  static recognizeId(iri){
+    return iriRegex.test(iri);
+  }
+
+  static async readById(id){
+    const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
+    let queryResult = await this.storageHandler.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
+    let firstResult = queryResult.first();
+    let item = new <%- adapterName -%>(firstResult);
+    if (item === null) {
+        throw new Error(`Record with ID = "${id}" does not exist`);
+    }
+    return item;
+  }
+
+  static async countRecords(search){
+    let options = {};
+    let result = 0;
+    let arg_cassandra = ';';
+    if (search !== undefined) {
+
+      //check
+      if(typeof search !== 'object') {
+        throw new Error('Illegal "search" argument type, it must be an object.');
+      }
+
+      let arg = new searchArg(search);
+      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>', filtering);
+    }
+    const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
+    let queryResult = await this.storageHandler.execute(query);
+    let item = queryResult.first();
+    result = parseInt(item['count']);
+    return result;
+  }
+
+  static async readAllCursor(search, order, pagination, filteringAllowed){
+    // === Set variables ===
+
+    let offsetCursor = pagination ? pagination.after : null;
+    let arg_cassandra = ';';
+    let searchTerms = search;
+
+    // === Set pagination offset if needed ===
+
+    /*
+    * In this section, a special operator is used: "tgt", meaning "TOKEN > TOKEN".
+    * This operator is implemented in utils/search-argument.js, toCassandra(idAttribute, allowFiltering)
+    *
+    * The Cassandra database is ordered by the TOKEN of the ID value, so if we want to cut away entries above the cursor,
+    * we need to enforce the condition TOKEN(id) > TOKEN(cursor_id), which is realized here by: id TGT cursor_id
+    */
+
+    if (helper.isNotUndefinedAndNotNull(offsetCursor)) {
+      let decoded_cursor = JSON.parse(this.base64Decode(offsetCursor));
+      let cursorId = decoded_cursor['<%- idAttribute -%>'];
+      let cursorSearchCondition = new searchArg({field: '<%- idAttribute -%>', value: {value: cursorId}, operator:'tgt', search:undefined});
+      if (helper.isNotUndefinedAndNotNull(search)) {
+        // -- Use *both* the given search condition and the cursor --
+        searchTerms = new searchArg({field: null, value: null, operator: 'and', search:[search, cursorSearchCondition]});
+      } else {
+        // -- Use only the cursor --
+        searchTerms = cursorSearchCondition;
+      }
+    }
+
+    // === Construct CQL statement ===
+
+    if (searchTerms !== undefined) {
+
+      //check
+      if(typeof searchTerms !== 'object') {
+        throw new Error('Illegal "search" argument type, it must be an object.');
+      }
+
+      if (searchTerms.value && searchTerms.value.value) {
+        searchTerms = new searchArg(searchTerms);
+      }
+      arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>', filteringAllowed) + ';';
+    }
+
+    let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
+    
+    // === Set page size if needed ===
+
+    let options = {};
+    if (pagination && pagination.limit) {
+      options.fetchSize = parseInt(pagination.limit);
+    }
+
+    // === Call to database ===
+
+    const result = await this.storageHandler.execute(query, [], options);
+
+    // === Construct return object ===
+
+    const rows = result.rows.map(row => {
+      let edge = {};
+      let rowAs<%- name -%> = new <%- adapterName -%>(row);
+      edge.node = rowAs<%- name -%>;
+      edge.cursor = rowAs<%- name -%>.base64Enconde();
+      return edge;
+    });
+    let nextCursor = null;
+    let hasNextCursor = false;
+    /*
+    * The pageState attribute is where Cassandra stores its own version of a cursor.
+    * We cannot use it directly, because Cassandra uses different conventions. 
+    * But its presence shows that there is a following page.
+    */
+    if (helper.isNotUndefinedAndNotNull(result.pageState)) {
+      let maxIndex = rows.length - 1;
+      nextCursor = rows[maxIndex].cursor;
+      hasNextCursor = true;
+    }
+
+    let pageInfo = {
+      startCursor: nextCursor,
+      hasNextPage: hasNextCursor
+    }
+    return {edges: rows, pageInfo: pageInfo};
+  }
+
+  static async addOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
+    let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
+    try{
+      this.encloseStringAttributesInApostrophes(input);
+      const fields = Object.keys(input).join(', ');
+      const values = Object.values(input).join(', ');
+      const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
+      await this.storageHandler.execute(query);
+      let checkQuery = (await this.storageHandler.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
+      let response = new <%- adapterName -%>(checkQuery);
+      return response;
+    }catch(error){
+      throw error;
+    }  
+  }
+
+  static async deleteOne(id){
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id);
+    const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${id}`;
+    await this.storageHandler.execute(mutation);
+    queryResponse = await this.storageHandler.execute(query);
+    if (helper.isEmptyArray(queryResponse.rows)) {
+      return 'Item successfully deleted';
+    }
+    throw new Error('Record was not deleted!');
+  }
+
+  static async updateOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
+      let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
+      await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+      try{
+        this.encloseStringAttributesInApostrophes(input);
+        let idValue = input[this.idAttribute()];
+        delete input[this.idAttribute()];
+        let inputKeys = Object.keys(input);
+        // An update that does not change the attributes must not execute the following CQL statement
+        if (inputKeys.length > 0) {
+          let mutation = `UPDATE <%- namePl -%> SET `;
+          mutation += inputKeys.map(key => `${key} = ${input[key]}`).join(', ');
+          mutation += ` WHERE <%- idAttribute -%> = ${idValue};`;
+          await this.storageHandler.execute(mutation);
+        }
+        let checkQuery = (await this.storageHandler.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${idValue}`)).rows[0];
+        let response = new <%- adapterName -%>(checkQuery);
+        return response;
+      }catch(error){
+        throw error;
+      }
+  }
+
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   */
+  -%>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+
+
+
+  static bulkAddCsv(context){
+      throw new Error('Bulk Adding from a CSV file is currently not implemented!');
+      /*
+      let delim = context.request.body.delim;
+      let cols = context.request.body.cols;
+      let tmpFile = path.join(os.tmpdir(), uuidv4() + '.csv');
+
+      context.request.files.csv_file.mv(tmpFile).then(() => {
+
+          fileTools.parseCsvStream(tmpFile, this, delim, cols).then((addedZipFilePath) => {
+              try {
+                  console.log(`Sending ${addedZipFilePath} to the user.`);
+
+                  let attach = [];
+                  attach.push({
+                      filename: path.basename("added_data.zip"),
+                      path: addedZipFilePath
+                  });
+
+                  email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                      'ScienceDB batch add',
+                      'Your data has been successfully added to the database.',
+                      attach).then(function(info) {
+                      fileTools.deleteIfExists(addedZipFilePath);
+                      console.log(info);
+                  }).catch(function(err) {
+                      fileTools.deleteIfExists(addedZipFilePath);
+                      console.error(err);
+                  });
+
+              } catch (error) {
+                  console.error(error.message);
+              }
+
+              fs.unlinkSync(tmpFile);
+          }).catch((error) => {
+              email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                  'ScienceDB batch add', `${error.message}`).then(function(info) {
+                  console.error(info);
+              }).catch(function(err) {
+                  console.error(err);
+              });
+
+              fs.unlinkSync(tmpFile);
+          });
+
+      }).catch((error) => {
+          throw new Error(error);
+      });
+      return `Bulk import of <%- adapterName -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
+      */
+  }
+
+  static csvTableTemplate(){
+    return helper.csvTableTemplate(<%- name -%>);
+  }
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
+  static idAttribute() {
+    return <%- adapterName -%>.definition.id.name;
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model
+   */
+
+  static idAttributeType() {
+    return <%- adapterName -%>.definition.id.type;
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   *
+   * @return {type} id value
+   */
+
+  getIdValue() {
+    return this[<%- adapterName -%>.idAttribute()]
+  }
+
+  static get definition(){
+    return definition;
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+    base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- adapterName -%>.definition.attributes);
+  <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
+  }
+
+}
+
+module.exports.getAndConnectDataModelClass = function ( cassandraDriver ) {
+  return Object.defineProperty(<%- adapterName -%>, 'storageHandler', {
+    value: cassandraDriver,
+    writable: false, // cannot be changed in the future
+    enumerable: true,
+    configurable: false
+  })
+}

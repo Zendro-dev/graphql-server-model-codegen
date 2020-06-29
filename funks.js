@@ -459,6 +459,7 @@ writeIndexAdapters = function(dir_write){
   let index = `
   const fs = require('fs');
   const path = require('path');
+  const cassandraDriver = require('../index.js').cassandraDriver;
   const Sequelize = require('sequelize');
   sequelize = require('../../connection');
 
@@ -483,6 +484,10 @@ writeIndexAdapters = function(dir_write){
 
       case 'sql-adapter':
         adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
+        break;
+
+      case 'cassandra-adapter':
+        adapters[adapter.adapterName] = require('./' + adapterName).getAndConnectDataModelClass(cassandraDriver);
         break;
 
       case 'default':
@@ -607,7 +612,8 @@ module.exports.getOptions = function(dataModel){
       adapterName: dataModel.adapterName || "",
       registry: dataModel.registry || [],
       idAttribute: getIdAttribute(dataModel),
-      indefiniteArticle: getIndefiniteArticle(dataModel.model)
+      indefiniteArticle: getIndefiniteArticle(dataModel.model),
+      indefiniteArticleCp: capitalizeString(getIndefiniteArticle(dataModel.model))
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
@@ -892,6 +898,7 @@ generateSections = async function(sections, opts, dir_write) {
       case 'sql-adapter':
       case 'cenz-adapters':
       case 'generic-adapter':
+      case 'cassandra-adapter':
         file_name = dir_write + '/'+ section.dir +'/' + section.fileName + '.js';
         break;
       //migrations
@@ -979,6 +986,7 @@ getStorageType = function(dataModel) {
         case 'ddm-adapter':
         case 'cenzontle-webservice-adapter':
         case 'generic-adapter':
+        case 'cassandra-adapter':
           //ok
           break;
 
@@ -1211,6 +1219,13 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'models/adapters', template: 'generic-adapter', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
+        ]
+        break;
+
+      case 'cassandra-adapter':
+        sections = [
+          {dir: 'models/adapters', template: 'cassandra-adapter', fileName: opts.adapterName},
+          {dir: 'migrations-cassandra', template: 'migrations-cassandra', fileName: opts.adapterName}
         ]
         break;
 

@@ -1,0 +1,24 @@
+{
+    "model": "Dist_incident",
+    "storageType" : "distributed-data-model",
+    "registry": ["dist_incident_instance1", "dist_incident_instance2"],
+    "attributes": {
+      "incident_id": "String",
+      "incident_description": "String",
+      "incident_number": "Int"
+    },
+  
+    "associations": {
+  
+      "dist_instants": {
+        "type": "to_many",
+        "target": "Dist_instant",
+        "targetKey": "incident_assoc_id",
+        "keyIn" : "Dist_instant",
+        "targetStorageType": "distributed-data-model"
+      }
+  
+    },
+  
+    "internalId" : "incident_id"
+  }

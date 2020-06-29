@@ -1,0 +1,26 @@
+{
+    "model": "Dist_incident",
+    "storageType" : "ddm-adapter",
+    "adapterName": "incident_instance2",
+    "regex": "instance2",
+    "url": "http://server2:3030/graphql",
+    "attributes": {
+      "incident_id": "String",
+      "incident_description": "String",
+      "incident_number": "Int"
+    },
+  
+    "associations": {
+  
+      "dist_instants": {
+        "type": "to_many",
+        "target": "Dist_instant",
+        "targetKey": "incident_assoc_id",
+        "keyIn" : "Dist_instant",
+        "targetStorageType": "distributed-data-model"
+      }
+  
+    },
+  
+    "internalId" : "incident_id"
+  }
