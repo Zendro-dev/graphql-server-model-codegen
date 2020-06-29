@@ -87,11 +87,13 @@ module.exports = class <%- adapterName -%>{
   }
 
   static async readAllCursor(search, <% if (!cassandraRestrictions) { %> order, <% } %> pagination, benignErrorReporter){
+    <% if (!cassandraRestrictions) { %>
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
+    <% } %>
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: <% if (cassandraRestrictions) { %> paginationCursorCassandraInput <% } else { %> paginationCursorInput  $order: [order<%- nameCp -%>Input] <% } %> ){
       <%- namePl -%>Connection(search:$search pagination:$pagination <% if (!cassandraRestrictions) { %> order:$order <% } %>){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor <% if (!cassandraRestrictions) { %> endCursor hasPreviousPage <% } %> hasNextPage } } }`
