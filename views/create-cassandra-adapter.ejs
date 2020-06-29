@@ -209,6 +209,21 @@ class <%- adapterName -%> {
     return {edges: rows, pageInfo: pageInfo};
   }
 
+  /**
+  * encloseStringAttributesInApostrophes - Cassandra expects String values to be 
+  * enclosed in apostrophes (see https://docs.datastax.com/en/cql-oss/3.x/cql/cql_reference/valid_literal_r.html). This method checks
+  * all string attributes of <%- adapterName -%>, and if the value does not start with an apostrophe (index 0), the value is enclosed
+  * in apostrophes.
+  * @param {Object} obj - The object to be examined
+  */
+  static encloseStringAttributesInApostrophes(obj) {
+    for (let key of Object.keys(obj)) {
+      if (definition.attributes[key] === 'String' && obj[key].indexOf("'") !== 0) {
+        obj[key] = `'${obj[key]}'`;
+      }
+    }
+  }
+
   static async addOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
     let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
     await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
@@ -217,7 +232,7 @@ class <%- adapterName -%> {
       const fields = Object.keys(input).join(', ');
       const values = Object.values(input).join(', ');
       const query = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + values + ')';
-      await this.storageHandler.execute(query);
+      await <%- adapterName -%>.storageHandler.execute(query);
       let checkQuery = (await this.storageHandler.execute(`SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ${input[definition.internalId]}`)).rows[0];
       let response = new <%- adapterName -%>(checkQuery);
       return response;

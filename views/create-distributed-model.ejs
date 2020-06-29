@@ -113,6 +113,7 @@ module.exports = class <%- name -%>{
 
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
+        case 'cassandra-adapter':
           return adapter.countRecords(search, benignErrorReporter);
 
         case 'default':
@@ -183,6 +184,7 @@ module.exports = class <%- name -%>{
         case 'generic-adapter':
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
+        case 'cassandra-adapter':
           return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
 
         default:
@@ -213,7 +215,7 @@ module.exports = class <%- name -%>{
     //phase 2: order & paginate
     .then( nodes => {
 
-      if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
+      <%if (!cassandraRestrictions) { %>if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }<% } %>
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
       let ordered_records = helper.orderRecords(nodes, order);

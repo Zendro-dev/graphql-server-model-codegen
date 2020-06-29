@@ -1,7 +1,7 @@
 {
     "model": "Dist_incident",
     "storageType" : "ddm-adapter",
-    "adapterName": "incident_instance1",
+    "adapterName": "dist_incident_instance1",
     "regex": "instance1",
     "url": "http://server1:3000/graphql",
     "cassandraRestrictions": true,

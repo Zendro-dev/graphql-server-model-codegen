@@ -459,7 +459,7 @@ writeIndexAdapters = function(dir_write){
   let index = `
   const fs = require('fs');
   const path = require('path');
-  const cassandraDriver = require('../index.js').cassandraDriver;
+  const cassandraDriver = require('..').cassandraDriver;
   const Sequelize = require('sequelize');
   sequelize = require('../../connection');
 
@@ -471,23 +471,24 @@ writeIndexAdapters = function(dir_write){
   }).forEach( file =>{
 
     let adapter = require(path.join(__dirname, file));
+    if (adapter.adapterName === undefined) {
+      adapter = require(path.join(__dirname, file)).getAndConnectDataModelClass(cassandraDriver);
+    }
     if( adapters[adapter.adapterName] ){
       throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
     }
+
 
     switch(adapter.adapterType) {
       case 'ddm-adapter':
       case 'cenzontle-webservice-adapter':
       case 'generic-adapter':
+      case 'cassandra-adapter':
         adapters[adapter.adapterName] = adapter;
         break;
 
       case 'sql-adapter':
         adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
-        break;
-
-      case 'cassandra-adapter':
-        adapters[adapter.adapterName] = require('./' + adapterName).getAndConnectDataModelClass(cassandraDriver);
         break;
 
       case 'default':
@@ -1226,7 +1227,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'cassandra-adapter':
         sections = [
           {dir: 'models/adapters', template: 'cassandra-adapter', fileName: opts.adapterName},
-          {dir: 'migrations-cassandra', template: 'migrations-cassandra', fileName: opts.adapterName}
+          {dir: 'migrations-cassandra', template: 'migrations-cassandra', fileName: opts.nameLc}
         ]
         break;
 

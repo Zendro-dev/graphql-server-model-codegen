@@ -1,7 +1,7 @@
 {
     "model": "Dist_instant",
     "storageType" : "cassandra-adapter",
-    "adapterName": "instant_instance1",
+    "adapterName": "dist_instant_instance1",
     "regex": "instance1",
     "attributes": {
       "instant_id": "String",

@@ -1,7 +1,7 @@
 {
     "model": "Dist_incident",
     "storageType" : "cassandra-adapter",
-    "adapterName": "incident_instance2",
+    "adapterName": "dist_incident_instance2",
     "regex": "instance2",
     "attributes": {
       "incident_id": "String",

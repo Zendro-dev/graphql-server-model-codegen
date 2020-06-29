@@ -1,7 +1,7 @@
 {
     "model": "Dist_instant",
     "storageType" : "ddm-adapter",
-    "adapterName": "instant_instance2",
+    "adapterName": "dist_instant_instance2",
     "regex": "instance2",
     "url": "http://server2:3030/graphql",
     "cassandraRestrictions": true,
