@@ -2,6 +2,7 @@
     "model": "Dist_incident",
     "storageType" : "distributed-data-model",
     "registry": ["dist_incident_instance1", "dist_incident_instance2"],
+    "cassandraRestrictions": true,
     "attributes": {
       "incident_id": "String",
       "incident_description": "String",

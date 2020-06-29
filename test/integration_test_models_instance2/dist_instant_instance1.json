@@ -4,6 +4,7 @@
     "adapterName": "instant_instance1",
     "regex": "instance1",
     "url": "http://server1:3000/graphql",
+    "cassandraRestrictions": true,
     "attributes": {
       "instant_id": "String",
       "incident_assoc_id": "String",

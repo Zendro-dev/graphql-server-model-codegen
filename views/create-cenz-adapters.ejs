@@ -86,19 +86,19 @@ module.exports = class <%- adapterName -%>{
 
   }
 
-  static async readAllCursor(search, order, pagination, benignErrorReporter){
+  static async readAllCursor(search, <% if (!cassandraRestrictions) { %> order, <% } %> pagination, benignErrorReporter){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
-    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
-      <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
-        <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
+    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: <% if (cassandraRestrictions) { %> paginationCursorCassandraInput <% } else { %> paginationCursorInput  $order: [order<%- nameCp -%>Input] <% } %> ){
+      <%- namePl -%>Connection(search:$search pagination:$pagination <% if (!cassandraRestrictions) { %> order:$order <% } %>){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
+        <%}-%>} } pageInfo{ startCursor <% if (!cassandraRestrictions) { %> endCursor hasPreviousPage <% } %> hasNextPage } } }`
 
         try {
           // Send an HTTP request to the remote server
-          let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+          let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, <% if (!cassandraRestrictions) { %>order:order, <% } %>pagination: pagination}});
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));

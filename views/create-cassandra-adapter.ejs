@@ -122,7 +122,7 @@ class <%- adapterName -%> {
     return result;
   }
 
-  static async readAllCursor(search, order, pagination, filteringAllowed){
+  static async readAllCursor(search, pagination, filteringAllowed){
     // === Set variables ===
 
     let offsetCursor = pagination ? pagination.after : null;

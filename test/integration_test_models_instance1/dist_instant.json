@@ -2,6 +2,7 @@
     "model": "Dist_instant",
     "storageType" : "distributed-data-model",
     "registry": ["dist_instant_instance1", "dist_instant_instance2"],
+    "cassandraRestrictions": true,
     "attributes": {
       "instant_id": "String",
       "incident_assoc_id": "String",

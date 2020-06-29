@@ -613,7 +613,8 @@ module.exports.getOptions = function(dataModel){
       registry: dataModel.registry || [],
       idAttribute: getIdAttribute(dataModel),
       indefiniteArticle: getIndefiniteArticle(dataModel.model),
-      indefiniteArticleCp: capitalizeString(getIndefiniteArticle(dataModel.model))
+      indefiniteArticleCp: capitalizeString(getIndefiniteArticle(dataModel.model)),
+      cassandraRestrictions: dataModel.cassandraRestrictions
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
