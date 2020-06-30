@@ -438,7 +438,7 @@ module.exports = {
          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
 
           let createdRecord = await <%- nameLc _%>.addOne(inputSanitized, benignErrorReporter);
-          await createdRecord.handleAssociations(inputSanitized, context);
+          await createdRecord.handleAssociations(inputSanitized, benignErrorReporter);
           return createdRecord;
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
@@ -508,7 +508,7 @@ module.exports = {
          //construct benignErrors reporter with context
          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
          let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized, benignErrorReporter);
-         await updatedRecord.handleAssociations(inputSanitized, context);
+         await updatedRecord.handleAssociations(inputSanitized, benignErrorReporter);
          return updatedRecord;
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
