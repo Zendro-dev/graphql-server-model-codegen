@@ -2769,7 +2769,7 @@ describe(
             countIncidents: 1
         }
       });
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id incident_description}} pageInfo{startCursor hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection {edges {cursor node{incident_id incident_description}} pageInfo{endCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       let cursor = resBody.data.incidentsConnection.edges[0].cursor;
       expect(res.statusCode).to.equal(200);
@@ -2786,7 +2786,7 @@ describe(
                     }
                 ],
                 pageInfo: {
-                    startCursor: null,
+                    endCursor: null,
                     hasNextPage: false
                 }
             }
@@ -2868,7 +2868,7 @@ describe(
       let idArray = edges.map(edge => edge.node.incident_id);
       let cursorArray = edges.map(edge => edge.cursor);
       let numberArray = edges.map(edge => edge.node.incident_number);
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2}) {edges{cursor node{incident_id}} pageInfo{endCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2889,13 +2889,13 @@ describe(
               }
             ],
             pageInfo: {
-              startCursor: cursorArray[1],
+              endCursor: cursorArray[1],
               hasNextPage: true
             }
           }
         }
       })
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[1]}"}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[1]}"}) {edges{cursor node{incident_id}} pageInfo{endCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2916,13 +2916,13 @@ describe(
               }
             ],
             pageInfo: {
-              startCursor: cursorArray[3],
+              endCursor: cursorArray[3],
               hasNextPage: true
             }
           }
         }
       })
-      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[3]}"}) {edges{cursor node{incident_id}} pageInfo{startCursor hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{limit: 2, after: "${cursorArray[3]}"}) {edges{cursor node{incident_id}} pageInfo{endCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -2937,7 +2937,7 @@ describe(
               }
             ],
             pageInfo: {
-              startCursor: null,
+              endCursor: null,
               hasNextPage: false
             }
           }
@@ -3056,7 +3056,7 @@ describe(
             countInstants: 1
         }
       });
-      res = itHelpers.request_graph_ql_post(`{instantsConnection {edges{cursor node{instant_id year month day hour minute}} pageInfo{startCursor hasNextPage}}}`);
+      res = itHelpers.request_graph_ql_post(`{instantsConnection {edges{cursor node{instant_id year month day hour minute}} pageInfo{endCursor hasNextPage}}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       let cursor = resBody.data.instantsConnection.edges[0].cursor;
       expect(res.statusCode).to.equal(200);
@@ -3077,7 +3077,7 @@ describe(
                     }
                 ],
                 pageInfo: {
-                    startCursor: null,
+                    endCursor: null,
                     hasNextPage: false
                 }
             }
@@ -3269,5 +3269,12 @@ describe(
           }
         }
       })
+    })
+
+    it('02. Update the incident to associate with an instant', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation {updateDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", addDist_instants: "instance2-1b85fddc-67a5-46f3-81a0-20aea167d791") {incident_id countFilteredDist_instants dist_instantsConnection {edges {node {instant_id}}}}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      console.log(res.statusCode);
+      console.log(JSON.stringify(resBody, null, 4));
     })
   })

@@ -378,7 +378,7 @@ writeSchemaCommons = function(dir_write){
   }
 
   type pageCassandraInfo{
-    startCursor: String
+    endCursor: String
     hasNextPage: Boolean!
   }
 
@@ -584,6 +584,21 @@ getIndefiniteArticle = function(name) {
 }
 
 /**
+ * getStringAttributesInCassandraSchema - Get all String attributes in a model regardless of capitalization.
+ * @param {object} attributes - The attributes of the schema
+ * @return {Array<string>} The string attributes in an array
+ */
+getStringAttributesInCassandraSchema = function(attributes) {
+  let res = [];
+  for (key in attributes) {
+    if (attributes[key].toUpperCase() === 'STRING') {
+      res.push(`'${key}'`);
+    }
+  }
+  return res;
+}
+
+/**
  * getOptions - Creates object with all extra info and with all data model info.
  *
  * @param  {object} dataModel object created from a json file containing data model info.
@@ -615,7 +630,8 @@ module.exports.getOptions = function(dataModel){
       idAttribute: getIdAttribute(dataModel),
       indefiniteArticle: getIndefiniteArticle(dataModel.model),
       indefiniteArticleCp: capitalizeString(getIndefiniteArticle(dataModel.model)),
-      cassandraRestrictions: dataModel.cassandraRestrictions
+      cassandraRestrictions: dataModel.cassandraRestrictions,
+      cassandraStringAttributes: getStringAttributesInCassandraSchema(dataModel.attributes)
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));

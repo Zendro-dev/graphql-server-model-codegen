@@ -268,7 +268,7 @@ class <%- name -%> {
     }
 
     let pageInfo = {
-      startCursor: nextCursor,
+      endCursor: nextCursor,
       hasNextPage: hasNextCursor
     }
     return {edges: rows, pageInfo: pageInfo};

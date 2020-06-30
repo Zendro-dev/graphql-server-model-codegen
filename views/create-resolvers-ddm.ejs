@@ -380,7 +380,8 @@ module.exports = {
         if (authorizationCheck.authorizationErrors.length > 0) {
           context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
         }
-        return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
+        let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
+        return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter, searchAuthorizationCheck.authorizedAdapters);
       } else { //adapters not auth || errors
           // else new Error
           if (authorizationCheck.authorizationErrors.length > 0) {
@@ -546,8 +547,9 @@ module.exports = {
         if (authorizationCheck.authorizationErrors.length > 0) {
           context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
         }
+        let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
 
-        return await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter);
+        return await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter, searchAuthorizationCheck);
       } else { //adapters not auth || errors
           // else new Error
           if (authorizationCheck.authorizationErrors.length > 0) {

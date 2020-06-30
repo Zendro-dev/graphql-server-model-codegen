@@ -20,6 +20,8 @@ const iriRegex = new RegExp('<%- regex -%>');
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
 
+const stringAttributeArray = [ <%- cassandraStringAttributes -%> ];
+
 /**
  * module - Creates a sequelize model
  *
@@ -90,6 +92,21 @@ class <%- adapterName -%> {
     return iriRegex.test(iri);
   }
 
+  /**
+  * encloseStringAttributesInApostrophes - Cassandra expects String values to be 
+  * enclosed in apostrophes (see https://docs.datastax.com/en/cql-oss/3.x/cql/cql_reference/valid_literal_r.html). This method checks
+  * all string attributes of <%- adapterName -%>, and if the value does not start with an apostrophe (index 0), the value is enclosed
+  * in apostrophes.
+  * @param {Object} obj - The object to be examined
+  */
+  static encloseStringAttributesInApostrophes(obj) {
+    for (let key of Object.keys(obj)) {
+      if (definition.attributes[key] === 'String' && obj[key].indexOf("'") !== 0) {
+        obj[key] = `'${obj[key]}'`;
+      }
+    }
+  }
+
   static async readById(id){
     const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
     let queryResult = await this.storageHandler.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
@@ -101,7 +118,7 @@ class <%- adapterName -%> {
     return item;
   }
 
-  static async countRecords(search){
+  static async countRecords(search, filtering){
     let options = {};
     let result = 0;
     let arg_cassandra = ';';
@@ -113,7 +130,7 @@ class <%- adapterName -%> {
       }
 
       let arg = new searchArg(search);
-      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>', filtering);
+      arg_cassandra = ' ' + arg.toCassandra('<%- idAttribute -%>', filtering, stringAttributeArray);
     }
     const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
     let queryResult = await this.storageHandler.execute(query);
@@ -164,7 +181,7 @@ class <%- adapterName -%> {
       if (searchTerms.value && searchTerms.value.value) {
         searchTerms = new searchArg(searchTerms);
       }
-      arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>', filteringAllowed) + ';';
+      arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>', filteringAllowed, stringAttributeArray) + ';';
     }
 
     let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
@@ -203,25 +220,10 @@ class <%- adapterName -%> {
     }
 
     let pageInfo = {
-      startCursor: nextCursor,
+      endCursor: nextCursor,
       hasNextPage: hasNextCursor
     }
     return {edges: rows, pageInfo: pageInfo};
-  }
-
-  /**
-  * encloseStringAttributesInApostrophes - Cassandra expects String values to be 
-  * enclosed in apostrophes (see https://docs.datastax.com/en/cql-oss/3.x/cql/cql_reference/valid_literal_r.html). This method checks
-  * all string attributes of <%- adapterName -%>, and if the value does not start with an apostrophe (index 0), the value is enclosed
-  * in apostrophes.
-  * @param {Object} obj - The object to be examined
-  */
-  static encloseStringAttributesInApostrophes(obj) {
-    for (let key of Object.keys(obj)) {
-      if (definition.attributes[key] === 'String' && obj[key].indexOf("'") !== 0) {
-        obj[key] = `'${obj[key]}'`;
-      }
-    }
   }
 
   static async addOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){

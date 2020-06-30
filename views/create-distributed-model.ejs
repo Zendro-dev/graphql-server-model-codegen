@@ -73,7 +73,7 @@ module.exports = class <%- name -%>{
     }
   }
 
-  static countRecords(search, authorizedAdapters, benignErrorReporter){
+  static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters){
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -89,6 +89,12 @@ module.exports = class <%- name -%>{
       authAdapters = Object.values(this.registeredAdapters);
     } else {
       authAdapters = Array.from(authorizedAdapters)
+    }
+
+    let searchAuthAdapters = [];
+
+    if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+      searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
@@ -114,7 +120,7 @@ module.exports = class <%- name -%>{
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
         case 'cassandra-adapter':
-          return adapter.countRecords(search, benignErrorReporter);
+          return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
         case 'default':
           throw new Error(`Adapter type: '${adapter.adapterType}' is not supported`);
@@ -136,7 +142,7 @@ module.exports = class <%- name -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
+  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -154,11 +160,19 @@ module.exports = class <%- name -%>{
       authAdapters = Array.from(authorizedAdapters)
     }
 
+    let searchAuthAdapters = [];
+
+    if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+      searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+    }
+
+    <% if (!cassandraRestrictions) { %>
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
     if (!argsValid) {
       throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
     }
+    <% } %>
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
@@ -179,20 +193,22 @@ module.exports = class <%- name -%>{
       switch(adapter.adapterType) {
         case 'ddm-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
+          return adapter.readAllCursor(nsearch, <%if (!cassandraRestrictions) { %>order, <% } %>pagination, benignErrorReporter);
 
         case 'generic-adapter':
         case 'sql-adapter':
         case 'cenzontle-webservice-adapter':
-        case 'cassandra-adapter':
           return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+
+        case 'cassandra-adapter':
+          return adapter.readAllCursor(search, pagination, searchAuthAdapters.includes(adapter.adapterName));
 
         default:
           throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
       }
     });
     let someHasNextPage = false;
-    let someHasPreviousPage = false;
+    <% if (!cassandraRestrictions) { %>let someHasPreviousPage = false;<% } %>
     return Promise.allSettled(promises)
     //phase 1: reduce
     .then( results => {
@@ -205,7 +221,7 @@ module.exports = class <%- name -%>{
         else if (current.status === 'fulfilled') {
           if (current.value && current.value.pageInfo && current.value.edges) {
               someHasNextPage |= current.value.pageInfo.hasNextPage;
-              someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+              <% if (!cassandraRestrictions) { %>someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;<% } %>
               total = total.concat(current.value.edges.map(e => e.node));
           }
         }
@@ -216,8 +232,14 @@ module.exports = class <%- name -%>{
     .then( nodes => {
 
       <%if (!cassandraRestrictions) { %>if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }<% } %>
-      if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
+      if(pagination === undefined ){ pagination = { <% if (cassandraRestrictions) { %>limit<% } else { %>first<% } %> : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
+      <% if (cassandraRestrictions) { %>
+      let paginated_records = helper.paginateRecordsCursor(nodes, pagination.limit);
+      let hasNextPage = nodes.length > pagination.limit || someHasNextPage;
+      let graphQLConnection = helper.toGraphQLCassandraConnectionObject(paginated_records, this, hasNextPage);
+      return graphQLConnection;
+      <% } else { %>
       let ordered_records = helper.orderRecords(nodes, order);
       let paginated_records = [];
 
@@ -232,6 +254,7 @@ module.exports = class <%- name -%>{
 
       let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
       return graphQLConnection;
+      <% } %>
     });
   }
 

@@ -18,6 +18,7 @@ const os = require('os');
 const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models', 'index.js'));
 const globals = require('../config/globals');
+const errorHelper = require('../utils/errors');
 
 <%# 
 /**
@@ -699,8 +700,9 @@ module.exports = {
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized);
-            await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            await created<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
             return created<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -770,8 +772,9 @@ module.exports = {
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
+            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized);
-            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            await updated<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
             return updated<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
