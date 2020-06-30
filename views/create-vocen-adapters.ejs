@@ -7,7 +7,7 @@ const helper = require('../../utils/helper');
 let axios = axios_general.create();
 axios.defaults.timeout = globals.MAX_TIME_OUT;
 
-const remoteCenzontleURL = "<%- url -%>";
+const remoteVocenURL = "<%- url -%>";
 const iriRegex = new RegExp('<%- regex -%>');
 
 module.exports = class <%- adapterName -%>{
@@ -38,10 +38,10 @@ module.exports = class <%- adapterName -%>{
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL, {query:query});
+        let response = await axios.post(remoteVocenURL, {query:query});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
         }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
@@ -49,11 +49,11 @@ module.exports = class <%- adapterName -%>{
         if (response && response.data && response.data.data) {
           return response.data.data.readOne<%- nameCp -%>;
         } else {
-          throw new Error(`Invalid response from remote vocen-server: ${remoteCenzontleURL}`);
+          throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
         }
       } catch(error) {
         //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
       }
   }
 
@@ -65,11 +65,11 @@ module.exports = class <%- adapterName -%>{
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL, {query:query,variables: {search: search}});
+        let response = await axios.post(remoteVocenURL, {query:query,variables: {search: search}});
 
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
         }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
@@ -77,11 +77,11 @@ module.exports = class <%- adapterName -%>{
         if (response && response.data && response.data.data) {
           return response.data.data.count<%- namePlCp -%>;
         } else {
-          throw new Error(`Invalid response from remote vocen-server: ${remoteCenzontleURL}`);
+          throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
         }
       } catch(error) {
         //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
       }
 
   }
@@ -98,10 +98,10 @@ module.exports = class <%- adapterName -%>{
 
         try {
           // Send an HTTP request to the remote server
-          let response = await axios.post(remoteCenzontleURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+          let response = await axios.post(remoteVocenURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
           }
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
@@ -109,11 +109,11 @@ module.exports = class <%- adapterName -%>{
           if(response && response.data && response.data.data) {
             return response.data.data.<%- namePl -%>Connection;
           } else {
-            throw new Error(`Invalid response from remote vocen-server: ${remoteCenzontleURL}`);
+            throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
           }
         } catch(error) {
           //handle caught errors
-          errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+          errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
         }
   }
 
@@ -136,19 +136,19 @@ module.exports = class <%- adapterName -%>{
 
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteCenzontleURL, {query:query,variables: input});
+        let response = await axios.post(remoteVocenURL, {query:query,variables: input});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
         }
         if (response && response.data && response.data.data) {
           return response.data.data.add<%- nameCp -%>;
         } else {
-          throw new Error(`Invalid response from remote vocen-server: ${remoteCenzontleURL}`);
+          throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
         }
       } catch(error) {
         //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
       }
   }
 
@@ -162,19 +162,19 @@ module.exports = class <%- adapterName -%>{
    
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL, {query:query});
+      let response = await axios.post(remoteVocenURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteCenzontleURL}`);
+        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
   }
 
@@ -197,19 +197,19 @@ module.exports = class <%- adapterName -%>{
    
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+      let response = await axios.post(remoteVocenURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.update<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteCenzontleURL}`);
+        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
   }
 
@@ -232,15 +232,15 @@ module.exports = class <%- adapterName -%>{
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
 
     try {
-      let response = await axios.post(remoteCenzontleURL, {query:query});
+      let response = await axios.post(remoteVocenURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       }
       return response.data.data.csvTableTemplate<%- nameCp-%>;
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
   }
   

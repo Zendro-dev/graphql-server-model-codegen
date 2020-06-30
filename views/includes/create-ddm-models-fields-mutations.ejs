@@ -5,7 +5,7 @@
   *
   * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
   * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
-  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
   */
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
     let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);

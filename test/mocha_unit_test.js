@@ -3,7 +3,7 @@ const expect = require('chai').expect;
 const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
 const models_generic_webservice = require('./unit_test_misc/data_models_generic_webservice');
-const models_cenz = require('./unit_test_misc/data_models_cenz');
+const models_vocen = require('./unit_test_misc/data_models_vocen');
 const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const models_generic = require('./unit_test_misc/data_models_generic');
@@ -790,12 +790,12 @@ describe('Description for attributes', function(){
 });
 
 
-describe('Cenz servers', function(){
+describe('Vocen servers', function(){
 
   let data_test = require('./unit_test_misc/test-describe/vocen-servers');
 
   it('Set url  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.server_url.replace(/\s/g, '');
@@ -803,7 +803,7 @@ describe('Cenz servers', function(){
   })
 
   it('Read by id  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.read_by_id.replace(/\s/g, '');
@@ -811,7 +811,7 @@ describe('Cenz servers', function(){
   })
 
   it('Read all  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.read_all.replace(/\s/g, '');
@@ -819,7 +819,7 @@ describe('Cenz servers', function(){
   })
 
   it('Count Records  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.count_records.replace(/\s/g, '');
@@ -827,7 +827,7 @@ describe('Cenz servers', function(){
   })
 
   it('AddOne  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.add_one.replace(/\s/g, '');
@@ -835,7 +835,7 @@ describe('Cenz servers', function(){
   })
 
   it('Delete by id  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.delete_by_id.replace(/\s/g, '');
@@ -843,7 +843,7 @@ describe('Cenz servers', function(){
   })
 
   it('UpdateOne  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.update_one.replace(/\s/g, '');
@@ -851,7 +851,7 @@ describe('Cenz servers', function(){
   })
 
   it('csvTemplate  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.csv_template.replace(/\s/g, '');
@@ -859,7 +859,7 @@ describe('Cenz servers', function(){
   })
 
   it('bulkAddCsv  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.bulk_add_csv.replace(/\s/g, '');
@@ -868,7 +868,7 @@ describe('Cenz servers', function(){
 
   // Check for changes!
   it('Many to many association  - person', async function(){
-    let opts = funks.getOptions(models_cenz.person);
+    let opts = funks.getOptions(models_vocen.person);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.many_to_many_association.replace(/\s/g, '');
@@ -877,7 +877,7 @@ describe('Cenz servers', function(){
 
   // Check for changes!
   it('Many to many count association  - person', async function(){
-    let opts = funks.getOptions(models_cenz.person);
+    let opts = funks.getOptions(models_vocen.person);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.many_to_many_association_count.replace(/\s/g, '');
@@ -885,7 +885,7 @@ describe('Cenz servers', function(){
   })
 
   it('add_personId - Dog', async function(){
-    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let opts = funks.getOptions(models_vocen.dog_one_assoc);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.add_personId.replace(/\s/g, '');
@@ -893,7 +893,7 @@ describe('Cenz servers', function(){
   })
 
   it('remove_personId - Dog', async function(){
-    let opts = funks.getOptions(models_cenz.dog_one_assoc);
+    let opts = funks.getOptions(models_vocen.dog_one_assoc);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.remove_personId.replace(/\s/g, '');
@@ -960,20 +960,20 @@ describe('Cursor based pagination', function(){
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
-  it('Read all connection in cenz server  - book', async function(){
-    let opts = funks.getOptions(models_cenz.book);
+  it('Read all connection in vocen server  - book', async function(){
+    let opts = funks.getOptions(models_vocen.book);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.read_all_cenz_server.replace(/\s/g, '');
+    let test_model = data_test.read_all_vocen_server.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
   // Check for changes!
-  it('Many to many association connection in cenz server  - person-book', async function(){
-    let opts = funks.getOptions(models_cenz.person);
+  it('Many to many association connection in vocen server  - person-book', async function(){
+    let opts = funks.getOptions(models_vocen.person);
     let generated_model =await funks.generateJs('create-models-vocen', opts);
     let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.many_to_many_association_connection_cenz_server.replace(/\s/g, '');
+    let test_model = data_test.many_to_many_association_connection_vocen_server.replace(/\s/g, '');
     expect(g_model, 'No method found').to.have.string(test_model);
   })
 
@@ -1835,18 +1835,18 @@ describe('Refactor associations in distributed data case - add - remove', functi
   });
 
   it('add association in vocen-webservice-adapter  - accession', async function(){
-    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-vocen-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.to_one_add_cenz_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.to_one_add_vocen_adapter.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
 
   it('remove association in vocen-webservice-adapter - accession', async function(){
-    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-vocen-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.to_one_remove_cenz_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.to_one_remove_vocen_adapter.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
 
@@ -1884,18 +1884,18 @@ describe('Refactor associations in distributed data case - add - remove', functi
   });
 
   it('add one in vocen-webservice-adapter - accession', async function(){
-    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-vocen-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.add_one_cenz_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.add_one_vocen_adapter.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
 
   it('update one in vocen-webservice-adapter - accession', async function(){
-    let opts = funks.getOptions(models_refactoring.accession_cenz_adapter);
+    let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-vocen-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.update_one_cenz_adapter.replace(/\s/g, '');
+    let test_adapter = data_test.update_one_vocen_adapter.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
   });
 
@@ -2386,7 +2386,7 @@ describe('Handle Errors in DDM', function(){
   });
 
   it('readAllCursor in vocen-webservice-adapter - dog', async function(){
-    let opts = funks.getOptions(models_distributed.dog_cenz_adapter_integration_test);
+    let opts = funks.getOptions(models_distributed.dog_vocen_adapter_integration_test);
     let generated_adapter =await funks.generateJs('create-vocen-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
     let test_adapter = data_test.readAllCursor_dogs_adapter_ddm.replace(/\s/g, '');

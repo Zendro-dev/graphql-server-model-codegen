@@ -98,7 +98,7 @@ module.exports.handleAssociations = `
  * handleAssociations - handles the given associations in the create and update case.
  *
  * @param {object} input   Info of each field to create the new record
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.handleAssociations = async function(input, benignErrorReporter) {
       let promises = [];
@@ -130,7 +130,7 @@ module.exports.add_assoc_to_one_fieldMutation_resolver = `
  * add_location - field Mutation for to_one associations to add
  *
  * @param {object} input   Info of input Ids to add  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.add_location = async function(input, benignErrorReporter) {
     await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter);
@@ -143,7 +143,7 @@ module.exports.remove_assoc_to_one_fieldMutation_resolver = `
  * remove_location - field Mutation for to_one associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.remove_location = async function(input, benignErrorReporter) {
     if (input.removeLocation == this.locationId) {
@@ -157,7 +157,7 @@ module.exports.add_assoc_to_one_fieldMutation_resolver_fK_in_target = `
  * add_dog - field Mutation for to_one associations to add
  *
  * @param {object} input   Info of input Ids to add  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 researcher.prototype.add_dog = async function(input, benignErrorReporter) {
     await models.dog.add_researcherId(input.addDog, this.getIdValue(), benignErrorReporter);
@@ -170,7 +170,7 @@ module.exports.remove_assoc_to_one_fieldMutation_resolver_fK_in_target = `
  * remove_dog - field Mutation for to_one associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 researcher.prototype.remove_dog = async function(input, benignErrorReporter) {
     await models.dog.remove_researcherId(input.removeDog, this.getIdValue(), benignErrorReporter);
@@ -183,7 +183,7 @@ module.exports.add_assoc_to_many_fieldMutation_resolver = `
  * add_individuals - field Mutation for to_many associations to add
  *
  * @param {object} input   Info of input Ids to add  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.add_individuals = async function(input, benignErrorReporter) {
     let results = [];
@@ -199,7 +199,7 @@ module.exports.remove_assoc_to_many_fieldMutation_resolver = `
  * remove_individuals - field Mutation for to_many associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.remove_individuals = async function(input, benignErrorReporter) {
     let results = [];
@@ -240,7 +240,7 @@ module.exports.to_one_add =`
  * add_location - field Mutation for to_one associations to add
  *
  * @param {object} input   Info of input Ids to add  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.add_location = async function(input, benignErrorReporter) {
     await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter);
@@ -253,7 +253,7 @@ module.exports.to_one_remove = `
  * remove_location - field Mutation for to_one associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.remove_location = async function(input, benignErrorReporter) {
    if (input.removeLocation == this.locationId) {
@@ -268,7 +268,7 @@ module.exports.to_many_add = `
  * add_individuals - field Mutation for to_many associations to add
  *
  * @param {object} input   Info of input Ids to add  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.add_individuals = async function(input, benignErrorReporter) {
     let results = [];
@@ -284,7 +284,7 @@ module.exports.to_many_remove = `
  * remove_individuals - field Mutation for to_many associations to remove
  *
  * @param {object} input   Info of input Ids to remove  the association
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 accession.prototype.remove_individuals = async function(input, benignErrorReporter) {
     let results = [];
@@ -301,7 +301,7 @@ module.exports.add_assoc_ddm_model = `
 *
 * @param {Id}   accession_id   IdAttribute of the root model to be updated
 * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
-* @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+* @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
 */
 static async add_locationId(accession_id, locationId, benignErrorReporter) {
 let responsibleAdapter = this.adapterForIri(accession_id);
@@ -315,7 +315,7 @@ module.exports.remove_assoc_ddm_model = `
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 static async remove_locationId(accession_id, locationId, benignErrorReporter) {
   let responsibleAdapter = this.adapterForIri(accession_id);
@@ -350,13 +350,13 @@ static async add_locationId(accession_id, locationId) {
 }
 `
 
-module.exports.to_one_add_cenz_adapter = `
+module.exports.to_one_add_vocen_adapter = `
 /**
 * add_locationId - field Mutation (adapter-layer) for to_one associationsArguments to add
 *
 * @param {Id}   accession_id   IdAttribute of the root model to be updated
 * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
-* @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+* @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
 */
 static async add_locationId(accession_id, locationId, benignErrorReporter){
 let query = \`
@@ -374,10 +374,10 @@ let query = \`
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL, {query:query});
+      let response = await axios.post(remoteVocenURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       } 
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -385,22 +385,22 @@ let query = \`
       if(response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
+        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
 }
 `
 
-module.exports.to_one_remove_cenz_adapter = `
+module.exports.to_one_remove_vocen_adapter = `
 /**
  * remove_locationId - field Mutation (adapter-layer) for to_one associationsArguments to remove
  *
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
- * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote cenzontle services
+ * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services
  */
 static async remove_locationId(accession_id, locationId, benignErrorReporter){
   let query = \`
@@ -418,10 +418,10 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL, {query:query});
+      let response = await axios.post(remoteVocenURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       } 
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -429,11 +429,11 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       if(response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
+        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
 }
 `
@@ -503,7 +503,7 @@ module.exports.update_one_resolver = `
    }
 `
 
-module.exports.add_one_cenz_adapter = `
+module.exports.add_one_vocen_adapter = `
 static async addOne(input, benignErrorReporter) {
     let query = \`
     mutation addAccession(
@@ -526,25 +526,25 @@ static async addOne(input, benignErrorReporter) {
     }\`;
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL, {query:query,variables: input});
+      let response = await axios.post(remoteVocenURL, {query:query,variables: input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.addAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
+        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
 
 }
 `
 
-module.exports.update_one_cenz_adapter = `
+module.exports.update_one_vocen_adapter = `
 static async updateOne(input, benignErrorReporter) {
     let query = \`
       mutation
@@ -568,19 +568,19 @@ static async updateOne(input, benignErrorReporter) {
         }\`
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteCenzontleURL, {query:query, variables:input});
+      let response = await axios.post(remoteVocenURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
+        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
     }
 }
 `

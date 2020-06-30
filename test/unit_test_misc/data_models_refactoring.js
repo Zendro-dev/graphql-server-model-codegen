@@ -138,7 +138,7 @@ module.exports.accession_sql_adapter = {
   "internalId" : "accession_id"
 }
 
-module.exports.accession_cenz_adapter = {
+module.exports.accession_vocen_adapter = {
   "model": "Accession",
   "storageType": "vocen-webservice-adapter",
   "adapterName": "ACCESSION_PGMN",
