@@ -3227,7 +3227,7 @@ describe(
   })
 
   describe('Cassandra DDM', function() {
-    xit('01. Create an incident and 2 instants', function() {
+    it('01. Create an incident and 2 instants', function() {
       let res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", incident_description: "First incident on server 1") {incident_id incident_description}}`);
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
@@ -3240,7 +3240,7 @@ describe(
         }
       })
       res = itHelpers.request_graph_ql_post(`mutation {addDist_instant(instant_id: "instance2-1b85fddc-67a5-46f3-81a0-20aea167d791", year: 2020, month: 6, day: 29, hour: 15, minute: 27) {instant_id year month day hour minute}}`);
-      esBody = JSON.parse(res.body.toString('utf8'));
+      resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
         data: {
@@ -3255,7 +3255,7 @@ describe(
         }
       })
       res = itHelpers.request_graph_ql_post(`mutation {addDist_instant(instant_id: "instance2-592a5d9f-ee5f-4392-9e2e-6965e8250c89", year: 2020, month: 6, day: 29, hour: 15, minute: 32) {instant_id year month day hour minute}}`);
-      esBody = JSON.parse(res.body.toString('utf8'));
+      resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
         data: {

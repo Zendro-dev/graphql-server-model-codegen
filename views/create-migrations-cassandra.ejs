@@ -15,7 +15,7 @@ module.exports = {
    * @return {promise}                Resolved if the table was created successfully, rejected otherwise.
    */
   up: async function(){
-    let createString = "CREATE TABLE <%-namePl-%>(<%- idAttribute -%> <%= idAttributeType %> PRIMARY KEY";
+    let createString = "CREATE TABLE <%-namePl-%>(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY";
     let indexCreationStrings = [];
 
     <% let keys = Object.keys(cassandraAttributes) -%>
