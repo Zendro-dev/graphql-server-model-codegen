@@ -1,6 +1,6 @@
 {
   "model": "Location",
-  "storageType": "cenz-server",
+  "storageType": "vocen-server",
   "url": "http://server1:3000/graphql",
   "attributes" : {
     "locationId": "String",

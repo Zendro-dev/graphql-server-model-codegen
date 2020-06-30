@@ -438,7 +438,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
         return { edges, pageInfo };
       } else {
-        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
       }
     } catch(error) {
       //handle caught errors
@@ -479,7 +479,7 @@ static async updateOne(input, benignErrorReporter){
         if(response&&response.data&&response.data.data) {
         return new Person(response.data.data.updatePerson);
         } else {
-        throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+        throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
         }
     } catch(error) {
         //handle caught errors

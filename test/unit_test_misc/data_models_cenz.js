@@ -1,6 +1,6 @@
 module.exports.book = {
   "model" : "Book",
-  "storageType" : "cenz-server",
+  "storageType" : "vocen-server",
   "url": "http://something.other:7000/graphql",
   "attributes" : {
     "title" : "String",
@@ -15,7 +15,7 @@ module.exports.book = {
           "targetKey" : "personId",
           "sourceKey" : "bookId",
           "keysIn" : "books_to_people",
-          "targetStorageType" : "cenz-server",
+          "targetStorageType" : "vocen-server",
           "label" : "firstName",
           "sublabel" : "email"
         },
@@ -32,7 +32,7 @@ module.exports.book = {
 
 module.exports.person = {
   "model" : "Person",
-  "storageType" : "cenz-server",
+  "storageType" : "vocen-server",
   "url": "http://something.other:7000/graphql",
   "attributes" : {
     "firstName" : "String",
@@ -47,7 +47,7 @@ module.exports.person = {
       "targetKey" : "bookId",
       "sourceKey" : "personId",
       "keysIn" : "books_to_people",
-      "targetStorageType" : "cenz-server",
+      "targetStorageType" : "vocen-server",
       "label" : "title"
     },
 
@@ -63,7 +63,7 @@ module.exports.person = {
 
 module.exports.dog_one_assoc = {
   "model" : "Dog",
-  "storageType" : "cenz-server",
+  "storageType" : "vocen-server",
   "url": "http://something.other:7000/graphql",
   "attributes" : {
     "name" : "String",
@@ -93,7 +93,7 @@ module.exports.dog_one_assoc = {
 
 module.exports.person_one_assoc = {
   "model": "Person",
-  "storageType": "cenz-server",
+  "storageType": "vocen-server",
   "url": "http://something.other:7000/graphql",
   "attributes" :{
     "firstName": "String",

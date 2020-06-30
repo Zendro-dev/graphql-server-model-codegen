@@ -140,7 +140,7 @@ module.exports.accession_sql_adapter = {
 
 module.exports.accession_cenz_adapter = {
   "model": "Accession",
-  "storageType": "cenzontle-webservice-adapter",
+  "storageType": "vocen-webservice-adapter",
   "adapterName": "ACCESSION_PGMN",
   "regex": "pgmn",
   "url": "http://instance_1_pgmn_sdb_science_db_graphql_server_1:3001/graphql",

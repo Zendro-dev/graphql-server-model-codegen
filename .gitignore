@@ -12,7 +12,7 @@ generic
 sql
 distributed
 adapters
-cenz-server
+vocen-server
 resolvers
 schemas
 validations

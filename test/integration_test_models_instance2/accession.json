@@ -1,6 +1,6 @@
 {
   "model": "Accession",
-  "storageType": "cenz-server",
+  "storageType": "vocen-server",
   "url": "http://server1:3000/graphql",
   "attributes": {
     "accession_id": "String",

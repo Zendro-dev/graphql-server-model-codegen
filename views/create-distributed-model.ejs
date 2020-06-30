@@ -101,7 +101,7 @@ module.exports = class <%- name -%>{
        *      resolve with current parameters.
        *
        *   ddm-adapter:
-       *   cenzontle-webservice-adapter:
+       *   vocen-webservice-adapter:
        *   generic-adapter:
        *      add exclusions to search.excludeAdapterNames parameter.
        */
@@ -112,7 +112,7 @@ module.exports = class <%- name -%>{
           return adapter.countRecords(nsearch, benignErrorReporter);
 
         case 'sql-adapter':
-        case 'cenzontle-webservice-adapter':
+        case 'vocen-webservice-adapter':
           return adapter.countRecords(search, benignErrorReporter);
 
         case 'default':
@@ -171,7 +171,7 @@ module.exports = class <%- name -%>{
        *      resolve with current parameters.
        *
        *   ddm-adapter:
-       *   cenzontle-webservice-adapter:
+       *   vocen-webservice-adapter:
        *   generic-adapter:
        *      add exclusions to search.excludeAdapterNames parameter.
        */
@@ -182,7 +182,7 @@ module.exports = class <%- name -%>{
 
         case 'generic-adapter':
         case 'sql-adapter':
-        case 'cenzontle-webservice-adapter':
+        case 'vocen-webservice-adapter':
           return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
 
         default:

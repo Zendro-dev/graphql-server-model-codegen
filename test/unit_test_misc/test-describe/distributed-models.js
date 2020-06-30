@@ -26,7 +26,7 @@ static async readById(iri, benignErrorReporter) {
               if (response && response.data && response.data.data) {
                 return response.data.data.readOneBook;
               } else {
-                throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+                throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
               }
             } catch(error) {
               //handle caught errors
@@ -56,7 +56,7 @@ static async countRecords(search, benignErrorReporter) {
         if (response && response.data && response.data.data) {
           return response.data.data.countBooks;
         } else {
-          throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+          throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
         }
       } catch(error) {
         //handle caught errors
@@ -90,7 +90,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
           if(response && response.data && response.data.data) {
             return response.data.data.booksConnection;
           } else {
-            throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+            throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
           }
         } catch(error) {
           //handle caught errors
@@ -156,7 +156,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
              *      resolve with current parameters.
              *
              *   ddm-adapter:
-             *   cenzontle-webservice-adapter:
+             *   vocen-webservice-adapter:
              *   generic-adapter:
              *      add exclusions to search.excludeAdapterNames parameter.
              */
@@ -167,7 +167,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
                     return adapter.countRecords(nsearch, benignErrorReporter);
 
                 case 'sql-adapter':
-                case 'cenzontle-webservice-adapter':
+                case 'vocen-webservice-adapter':
                     return adapter.countRecords(search, benignErrorReporter);
 
                 case 'default':
@@ -229,7 +229,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
              *      resolve with current parameters.
              *
              *   ddm-adapter:
-             *   cenzontle-webservice-adapter:
+             *   vocen-webservice-adapter:
              *   generic-adapter:
              *      add exclusions to search.excludeAdapterNames parameter.
              */
@@ -240,7 +240,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 
                 case 'generic-adapter':
                 case 'sql-adapter':
-                case 'cenzontle-webservice-adapter':
+                case 'vocen-webservice-adapter':
                     return adapter.readAllCursor(search, order, pagination,benignErrorReporter );
 
                 default:
@@ -329,7 +329,7 @@ const definition = {
             target: 'publi_sher',
             targetKey: 'companyId',
             keyIn: 'Person',
-            targetStorageType: 'cenz-server'
+            targetStorageType: 'vocen-server'
         },
         dogs: {
             type: 'to_many',

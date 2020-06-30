@@ -1,6 +1,6 @@
 module.exports.book_adapter = {
     "model": "Book",
-    "storageType": "cenzontle-webservice-adapter",
+    "storageType": "vocen-webservice-adapter",
     "adapterName": "booksRemote_one",
     "regex": "one",
     "url": "http://localhost:3030/graphql",
@@ -42,7 +42,7 @@ module.exports.book_ddm = {
             "target": "Person",
             "targetKey": "internalPersonId",
             "keyIn": "Book",
-            "targetStorageType": "cenz-server",
+            "targetStorageType": "vocen-server",
             "label": "email"
         }
     },
@@ -51,7 +51,7 @@ module.exports.book_ddm = {
 
 module.exports.person_adapter = {
     "model": "Person",
-    "storageType": "cenzontle-webservice-adapter",
+    "storageType": "vocen-webservice-adapter",
     "adapterName": "peopleRemote_one",
     "regex": "one",
     "url": "http://localhost:3030/graphql",
@@ -95,7 +95,7 @@ module.exports.person_ddm = {
             "target": "Book",
             "targetKey": "internalPersonId",
             "keyIn": "Book",
-            "targetStorageType": "cenz-server",
+            "targetStorageType": "vocen-server",
             "label": "title"
         }
     },

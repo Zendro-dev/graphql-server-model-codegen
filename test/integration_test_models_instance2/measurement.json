@@ -1,6 +1,6 @@
 {
   "model": "Measurement",
-  "storageType": "cenz-server",
+  "storageType": "vocen-server",
   "url": "http://server1:3000/graphql",
   "attributes": {
     "measurement_id": "String",

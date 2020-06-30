@@ -24,7 +24,7 @@ static async readById( id, benignErrorReporter){
       await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
       return item;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
@@ -57,7 +57,7 @@ static async readAll(search, order, pagination, benignErrorReporter){
       let data = response.data.data.books;
       return data.map(item => {return new Book(item)});
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
@@ -88,7 +88,7 @@ static async countRecords(search, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return response.data.data.countBooks;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
@@ -119,7 +119,7 @@ static async addOne(input, benignErrorReporter) {
     if(response&&response.data&&response.data.data) {
       return new Book(response.data.data.addBook);
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
@@ -148,7 +148,7 @@ static async deleteOne(id, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return response.data.data.deleteBook;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
@@ -180,7 +180,7 @@ static async updateOne(input, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return new Book(response.data.data.updateBook);
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error) {
     //handle caught errors
@@ -242,7 +242,7 @@ static async bulkAddCsv(context, benignErrorReporter){
 module.exports.many_to_many_association=`
 const definition = {
     model: 'Person',
-    storageType: 'cenz-server',
+    storageType: 'vocen-server',
     url: 'http://something.other:7000/graphql',
     attributes: {
         firstName: 'String',
@@ -257,7 +257,7 @@ const definition = {
             targetKey: 'bookId',
             sourceKey: 'personId',
             keysIn: 'books_to_people',
-            targetStorageType: 'cenz-server',
+            targetStorageType: 'vocen-server',
             label: 'title'
         },
         company: {
@@ -301,7 +301,7 @@ static async countRecords(search, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return response.data.data.countPeople;
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
@@ -345,7 +345,7 @@ static async add_personId(id, personId, benignErrorReporter) {
     if(response && response.data && response.data.data) {
       return new Dog(response.data.data.updateDog);
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
@@ -389,7 +389,7 @@ static async remove_personId(id, personId, benignErrorReporter) {
     if(response && response.data && response.data.data) {
       return new Dog(response.data.data.updateDog);
     } else {
-      throw new Error(\`Invalid response from remote cenz-server: \${remoteCenzontleURL}\`);
+      throw new Error(\`Invalid response from remote vocen-server: \${remoteCenzontleURL}\`);
     }
   } catch(error){
     //handle caught errors
