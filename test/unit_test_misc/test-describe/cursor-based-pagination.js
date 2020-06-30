@@ -41,6 +41,9 @@ static readAllCursor(search, order, pagination, benignErrorReporter) {
             options['where'] = arg_sequelize;
         }
 
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
         /*
          * Count
          */

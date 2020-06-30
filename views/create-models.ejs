@@ -133,6 +133,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       options['where'] = arg_sequelize;
     }
 
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
     return super.count(options).then(async items => {
         if (order !== undefined) {
             options['order'] = order.map((orderItem) => {
@@ -185,6 +188,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       let arg_sequelize = arg.toSequelize();
       options['where'] = arg_sequelize;
     }
+
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     /*
      * Count

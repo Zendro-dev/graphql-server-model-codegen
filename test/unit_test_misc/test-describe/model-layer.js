@@ -60,6 +60,8 @@ static readAll(search, order, pagination, benignErrorReporter) {
             options['where'] = arg_sequelize;
         }
 
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
         return super.count(options).then(async items => {
             if (order !== undefined) {
                 options['order'] = order.map((orderItem) => {
