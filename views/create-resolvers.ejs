@@ -640,7 +640,7 @@ module.exports = {
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized, benignErrorReporter);
-            await created<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            await created<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
             return created<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -700,7 +700,7 @@ module.exports = {
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized, benignErrorReporter);
-            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context);
+            await updated<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
             return updated<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");

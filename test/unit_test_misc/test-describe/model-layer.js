@@ -158,7 +158,7 @@ module.exports.add_one_resolver = `
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
-            await createdBook.handleAssociations(inputSanitized, context);
+            await createdBook.handleAssociations(inputSanitized, benignErrorReporter);
             return createdBook;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -243,7 +243,7 @@ updateBook: async function(input, context) {
         }
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         let updatedBook = await book.updateOne(inputSanitized, benignErrorReporter);
-        await updatedBook.handleAssociations(inputSanitized, context);
+        await updatedBook.handleAssociations(inputSanitized, benignErrorReporter);
         return updatedBook;
     } else {
         throw new Error("You don't have authorization to perform this action");
