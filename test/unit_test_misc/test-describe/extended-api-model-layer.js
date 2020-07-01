@@ -91,7 +91,7 @@ async _removeAuthors(ids){
 
 `
 
-module.exports.vocen_set_personId = `
+module.exports.zendro_set_personId = `
 
   set_personId(value ){
     super.updateOne({id: this.id, addOwner: value});
@@ -99,14 +99,14 @@ module.exports.vocen_set_personId = `
 
 `
 
-module.exports.vocen_add_owner = `
+module.exports.zendro_add_owner = `
 _addOwner( id ){
   super.updateOne({id: this.id, addOwner: id});
 }
 
 `
 
-module.exports.vocen_add_unique_pet = `
+module.exports.zendro_add_unique_pet = `
 
 _addUnique_pet(id){
   super.updateOne({id: this.id, addUnique_pet: id});
@@ -114,7 +114,7 @@ _addUnique_pet(id){
 
 `
 
-module.exports.vocen_add_works = `
+module.exports.zendro_add_works = `
  _addPatients(ids){
    super.updateOne({id: this.id, addPatients: ids});
  }

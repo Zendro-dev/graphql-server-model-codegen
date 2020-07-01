@@ -213,7 +213,7 @@ module.exports.dog_ddm_integration_test = {
   }
 
 
-module.exports.dog_vocen_adapter_integration_test =
+module.exports.dog_zendro_adapter_integration_test =
 {
     "model" : "dog",
     "storageType" : "ddm-adapter",

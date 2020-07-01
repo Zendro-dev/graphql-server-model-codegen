@@ -138,7 +138,7 @@ module.exports.accession_sql_adapter = {
   "internalId" : "accession_id"
 }
 
-module.exports.accession_vocen_adapter = {
+module.exports.accession_zendro_adapter = {
   "model": "Accession",
   "storageType": "zendro-webservice-adapter",
   "adapterName": "ACCESSION_PGMN",

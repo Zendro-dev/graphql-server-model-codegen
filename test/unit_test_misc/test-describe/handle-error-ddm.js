@@ -281,10 +281,10 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteVocenURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -292,11 +292,11 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
       if(response && response.data && response.data.data) {
         return response.data.data.dogsConnection;
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
 `

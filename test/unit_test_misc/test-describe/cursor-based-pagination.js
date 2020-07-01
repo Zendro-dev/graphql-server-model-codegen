@@ -404,7 +404,7 @@ booksConnectionImpl({
 }
 `
 
-module.exports.read_all_vocen_server = `
+module.exports.read_all_zendro_server = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
     //check valid pagination arguments
     let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
@@ -423,10 +423,10 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteVocenURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
+        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -448,16 +448,16 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
         return { edges, pageInfo };
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
       }
     } catch(error) {
       //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
+      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
   }
 `
 
-module.exports.many_to_many_association_connection_vocen_server = `
+module.exports.many_to_many_association_connection_zendro_server = `
 static async updateOne(input, benignErrorReporter){
   //validate input
   await validatorUtil.validateData('validateForUpdate', this, input);
@@ -480,10 +480,10 @@ static async updateOne(input, benignErrorReporter){
     try {
 
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteVocenURL, {query:query, variables:input});
+        let response = await axios.post(remoteZendroURL, {query:query, variables:input});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
+            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
 
         // STATUS-CODE is 200
@@ -492,11 +492,11 @@ static async updateOne(input, benignErrorReporter){
         if(response&&response.data&&response.data.data) {
         return new Person(response.data.data.updatePerson);
         } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
         }
     } catch(error) {
         //handle caught errors
-        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteVocenURL);
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
 `

@@ -2186,16 +2186,16 @@ describe(
     });
   });
 
-  describe('Vocen Webservice Data Models', function() {
+  describe('Zendro Webservice Data Models', function() {
     it('01. Create one accession', function() {
-        let res = itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "vocen_1-to-instance1" collectors_name:"me"){ accession_id collectors_name}}');
+        let res = itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "zendro_1-to-instance1" collectors_name:"me"){ accession_id collectors_name}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
           data: {
             addAccession: {
-              accession_id: "vocen_1-to-instance1",
+              accession_id: "zendro_1-to-instance1",
               collectors_name: "me"
             }
           }
@@ -2203,14 +2203,14 @@ describe(
     });
 
     it('02. Read one accession', function() {
-        let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id: "vocen_1-to-instance1"){ accession_id collectors_name}}');
+        let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id: "zendro_1-to-instance1"){ accession_id collectors_name}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
           data: {
             readOneAccession: {
-              accession_id: "vocen_1-to-instance1",
+              accession_id: "zendro_1-to-instance1",
               collectors_name: "me"
             }
           }
@@ -2218,14 +2218,14 @@ describe(
     });
 
     it('03. Update one accession', function() {
-        let res = itHelpers.request_graph_ql_post_instance2('mutation {updateAccession(accession_id: "vocen_1-to-instance1" collectors_name:"someone_else"){ accession_id collectors_name}}');
+        let res = itHelpers.request_graph_ql_post_instance2('mutation {updateAccession(accession_id: "zendro_1-to-instance1" collectors_name:"someone_else"){ accession_id collectors_name}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
           data: {
             updateAccession: {
-              accession_id: "vocen_1-to-instance1",
+              accession_id: "zendro_1-to-instance1",
               collectors_name: "someone_else"
             }
           }
@@ -2233,7 +2233,7 @@ describe(
     });
 
     it('04. Delete one accession', function() {
-        let res = itHelpers.request_graph_ql_post_instance2('mutation {deleteAccession(accession_id: "vocen_1-to-instance1")}');
+        let res = itHelpers.request_graph_ql_post_instance2('mutation {deleteAccession(accession_id: "zendro_1-to-instance1")}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2389,10 +2389,10 @@ describe(
 
     it('10. Create record with association(to-one) accession-location', function() {
       //add location first
-      itHelpers.request_graph_ql_post_instance2('mutation{addLocation(locationId: "location-vocen-1"){locationId}}');
+      itHelpers.request_graph_ql_post_instance2('mutation{addLocation(locationId: "location-zendro-1"){locationId}}');
 
       //create accession with the location created in the line above
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"vocen-2-accession" addLocation:"location-vocen-1" ){location{locationId}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"zendro-2-accession" addLocation:"location-zendro-1" ){location{locationId}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2400,7 +2400,7 @@ describe(
           "data": {
             "addAccession": {
               "location": {
-                "locationId": "location-vocen-1"
+                "locationId": "location-zendro-1"
               }
             }
           }
@@ -2439,7 +2439,7 @@ describe(
       /**
        * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"vocen-2-accession" removeLocation:"location-vocen-1"){locationId location{locationId}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-2-accession" removeLocation:"location-zendro-1"){locationId location{locationId}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2457,7 +2457,7 @@ describe(
       /**
        * This test assumes that the accession and location created in the previous test(10. Create record with association accession-location) are still in the DB
        * */
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"vocen-2-accession" addLocation:"location-vocen-1"){location{locationId}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-2-accession" addLocation:"location-zendro-1"){location{locationId}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2465,14 +2465,14 @@ describe(
           "data": {
             "updateAccession": {
               "location": {
-                "locationId": "location-vocen-1"
+                "locationId": "location-zendro-1"
               }
             }
           }
         });
 
         //remove association for cleaning
-        itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"vocen-2-accession" removeLocation:"location-vocen-1"){location{locationId}}}');
+        itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-2-accession" removeLocation:"location-zendro-1"){location{locationId}}}');
     });
 
 
@@ -2484,7 +2484,7 @@ describe(
        itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_2" ){measurement_id}}');
        itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_3" ){measurement_id}}');
 
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"vocen-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"zendro-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2512,7 +2512,7 @@ describe(
        * This test assumes that association from previous test (13.Create with association(to-many) accession-measurement) still is stored in the DB.
        * */
 
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"vocen-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2534,7 +2534,7 @@ describe(
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
 
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"vocen-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2563,7 +2563,7 @@ describe(
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
 
-      let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id:"vocen-3-accession"){ measurementsConnection(order:{field: measurement_id order: ASC}){ edges{node{measurement_id}}}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id:"zendro-3-accession"){ measurementsConnection(order:{field: measurement_id order: ASC}){ edges{node{measurement_id}}}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2594,7 +2594,7 @@ describe(
         });
 
         //remove associations for cleaning
-         itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"vocen-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
+         itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
     });
 
 
@@ -2610,8 +2610,8 @@ describe(
          'b-instance1,bb,NULL,NULL,NULL\n' +
          'c-instance1,cc,NULL,NULL,NULL\n' +
          'd-instance1,dd,NULL,NULL,NULL\n' +
-         'vocen-2-accession,NULL,NULL,NULL,NULL\n' +
-         'vocen-3-accession,NULL,NULL,NULL,NULL\n');
+         'zendro-2-accession,NULL,NULL,NULL,NULL\n' +
+         'zendro-3-accession,NULL,NULL,NULL,NULL\n');
     });
 
     it('19. Delete all remaining accessions', async function() {
