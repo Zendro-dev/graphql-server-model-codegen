@@ -3337,4 +3337,23 @@ describe(
         }
       });
     })
+
+    it('05. Update the first instant to remove the incident', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation {updateDist_instant(instant_id: "instance2-1b85fddc-67a5-46f3-81a0-20aea167d791", removeDist_incident: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136") {instant_id year month day hour minute dist_incident {incident_id}}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            updateDist_instant: {
+                instant_id: "instance2-1b85fddc-67a5-46f3-81a0-20aea167d791",
+                year: 2020,
+                month: 6,
+                day: 29,
+                hour: 15,
+                minute: 27,
+                dist_incident: null
+            }
+        }
+      });
+    })
   })
