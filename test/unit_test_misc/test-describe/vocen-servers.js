@@ -21,7 +21,7 @@ static async readById( id, benignErrorReporter){
     // check if data was send
     if (response && response.data && response.data.data) {
       let item = new Book(response.data.data.readOneBook);
-      await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+      await validatorUtil.validateData('validateAfterRead', this, item);
       return item;
     } else {
       throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
@@ -55,6 +55,7 @@ static async readAll(search, order, pagination, benignErrorReporter){
     // check if data was send
     if(response&&response.data&&response.data.data) {
       let data = response.data.data.books;
+      data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
       return data.map(item => {return new Book(item)});
     } else {
       throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
@@ -99,6 +100,8 @@ static async countRecords(search, benignErrorReporter){
 
 module.exports.add_one = `
 static async addOne(input, benignErrorReporter) {
+  //validate input
+  await validatorUtil.validateData('validateForCreate', this, input);
   let query = \`mutation addBook($title:String $genre:String){
     addBook(title:$title genre:$genre){id  title genre publisher_id   }
   }\`;
@@ -106,7 +109,7 @@ static async addOne(input, benignErrorReporter) {
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
   try {
-    await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
+
     // Send an HTTP request to the remote server
     let response = await axios.post(remoteVocenURL, {query:query, variables:input});
     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
@@ -129,13 +132,15 @@ static async addOne(input, benignErrorReporter) {
 `
 module.exports.delete_by_id = `
 static async deleteOne(id, benignErrorReporter){
+  //validate id
+  await validatorUtil.validateData('validateForDelete', this, id);
   let query = \`mutation deleteBook{ deleteBook(id: "\${id}" )}\`;
 
   //use default BenignErrorReporter if no BenignErrorReporter defined
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
   try {
-    await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id);
+
     // Send an HTTP request to the remote server
     let response = await axios.post(remoteVocenURL, {query: query});
     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
@@ -160,6 +165,8 @@ static async deleteOne(id, benignErrorReporter){
 
 module.exports.update_one = `
 static async updateOne(input, benignErrorReporter){
+  //validate input
+  await validatorUtil.validateData('validateForUpdate', this, input);
   let query = \`mutation updateBook($id:ID! $title:String $genre:String){
     updateBook(id:$id title:$title genre:$genre){id  title genre publisher_id  }
   }\`
@@ -167,7 +174,7 @@ static async updateOne(input, benignErrorReporter){
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
   try {
-    await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+
     // Send an HTTP request to the remote server
     let response = await axios.post(remoteVocenURL, {query:query, variables:input});
     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter

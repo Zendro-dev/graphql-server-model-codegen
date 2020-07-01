@@ -46,7 +46,7 @@ module.exports.count_in_resolvers = `
     },
 `
 module.exports.read_all = `
-static readAll(search, order, pagination) {
+static readAll(search, order, pagination, benignErrorReporter) {
         let options = {};
         if (search !== undefined) {
 
@@ -60,7 +60,9 @@ static readAll(search, order, pagination) {
             options['where'] = arg_sequelize;
         }
 
-        return super.count(options).then(items => {
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+        return super.count(options).then(async items => {
             if (order !== undefined) {
                 options['order'] = order.map((orderItem) => {
                     return [orderItem.field, orderItem.order];
@@ -82,7 +84,8 @@ static readAll(search, order, pagination) {
             if (globals.LIMIT_RECORDS < options['limit']) {
                 throw new Error(\`Request of total dogs exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
             }
-            return super.findAll(options);
+            let records = await super.findAll(options);
+            return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
         });
     }
 
@@ -116,21 +119,21 @@ module.exports.read_all_resolver = `
 `
 
 module.exports.add_one_model = `
-static addOne(input) {
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
-          try{
-            const result = await sequelize.transaction(async (t) => {
-                let item = await super.create(input, {
-                    transaction: t
-                });
-                return item;
-            });
-            return result;
-          }catch(error){
-            throw error;
-          }
-        });
+static async addOne(input) {
+    //validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+    try{
+      const result = await sequelize.transaction(async (t) => {
+          let item = await super.create(input, {
+              transaction: t
+          });
+          return item;
+      });
+      return result;
+    }catch(error){
+      throw error;
+    }
+
 }
 `
 
@@ -155,7 +158,7 @@ module.exports.add_one_resolver = `
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
-            await createdBook.handleAssociations(inputSanitized, context);
+            await createdBook.handleAssociations(inputSanitized, benignErrorReporter);
             return createdBook;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -164,19 +167,16 @@ module.exports.add_one_resolver = `
 `
 
 module.exports.delete_one_model = `
-static deleteOne(id){
+static async deleteOne(id){
+  //validate id
+  await validatorUtil.validateData('validateForDelete', this, id);
+  let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
+  if(destroyed !== 0){
+    return 'Item successfully deleted';
+  }else{
+    throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
+  }
 
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id)
-      .then(async (valSuccess) => {
-        let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
-        if(destroyed !== 0){
-          return 'Item successfully deleted';
-        }else{
-          throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
-        }
-      }).catch((error) => {
-          throw error;
-      });
 }
 `
 module.exports.delete_one_resolver = `
@@ -201,9 +201,9 @@ module.exports.delete_one_resolver = `
     },
 `
 module.exports.update_one_model = `
-static updateOne(input) {
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
+static async updateOne(input) {
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
             try {
                 let result = await sequelize.transaction(async (t) => {
                     let updated = await super.update(input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
@@ -218,7 +218,7 @@ static updateOne(input) {
             } catch (error) {
                 throw error;
             }
-        });
+
 }
 `
 
@@ -243,7 +243,7 @@ updateBook: async function(input, context) {
         }
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         let updatedBook = await book.updateOne(inputSanitized, benignErrorReporter);
-        await updatedBook.handleAssociations(inputSanitized, context);
+        await updatedBook.handleAssociations(inputSanitized, benignErrorReporter);
         return updatedBook;
     } else {
         throw new Error("You don't have authorization to perform this action");

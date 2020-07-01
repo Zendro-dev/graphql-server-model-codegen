@@ -57,7 +57,7 @@ module.exports = class <%- name -%>{
       // check if data was send
       if (response && response.data && response.data.data) {
         let item = new <%- name -%>(response.data.data.readOne<%- nameCp -%>);
-        await validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item);
+        await validatorUtil.validateData('validateAfterRead', this, item);
         return item;
       } else {
         throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
@@ -118,6 +118,7 @@ module.exports = class <%- name -%>{
       // check if data was send
       if(response && response.data && response.data.data) {
         let data = response.data.data.<%- namePl -%> ;
+        data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
         return data.map(item => {return new <%- name -%>(item) });
       } else {
         throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
@@ -156,10 +157,15 @@ module.exports = class <%- name -%>{
         let data_edges = response.data.data.<%- namePl -%>Connection.edges;
         let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo;
 
-        let edges = data_edges.map( e =>{
+        //validate after read
+        let nodes = data_edges.map(e => e.node);
+        let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
+
+        let edges = valid_nodes.map( e =>{
+          let temp_node = new <%- name -%>(e);
           return {
-            node: new <%- name -%>(e.node),
-            cursor: e.cursor
+            node: temp_node,
+            cursor: temp_node.base64Enconde()
           }
         })
 
@@ -174,6 +180,9 @@ module.exports = class <%- name -%>{
   }
 
   static async addOne(input, benignErrorReporter){
+    //validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+
     let query = `
             mutation add<%- nameCp _%>(
     <%if(!defaultId){-%>
@@ -194,7 +203,6 @@ module.exports = class <%- name -%>{
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     try {
-      await validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input);
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteVocenURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
@@ -216,6 +224,9 @@ module.exports = class <%- name -%>{
   }
 
   static async deleteOne(id, benignErrorReporter){
+    //validate id
+    await validatorUtil.validateData('validateForDelete', this, id);
+
     let query = `
               mutation
                 delete<%- nameCp -%>{
@@ -226,7 +237,6 @@ module.exports = class <%- name -%>{
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     try {
-      await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id);
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteVocenURL, {query: query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
@@ -248,6 +258,8 @@ module.exports = class <%- name -%>{
   }
 
   static async updateOne(input, benignErrorReporter){
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
     let query = `
             mutation
               update<%- nameCp-%>(
@@ -267,7 +279,6 @@ module.exports = class <%- name -%>{
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     try {
-      await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteVocenURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter

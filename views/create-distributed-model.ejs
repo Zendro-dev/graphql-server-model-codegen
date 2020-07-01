@@ -65,10 +65,7 @@ module.exports = class <%- name -%>{
       benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
       return adapters[responsibleAdapter[0]].readById(id, benignErrorReporter).then(result => {
         let item = new <%- name -%>(result);
-        return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-            .then((valSuccess) => {
-              return item;
-            });
+        return validatorUtil.validateData('validateAfterRead', this, item);
       });
     }
   }
@@ -210,9 +207,9 @@ module.exports = class <%- name -%>{
         return total;
       }, []);
     })
-    //phase 2: order & paginate
-    .then( nodes => {
-
+    //phase 2: validate & order & paginate
+    .then( async nodes => {
+      nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
       if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
@@ -290,34 +287,34 @@ module.exports = class <%- name -%>{
     return true;
   }
 
-  static addOne(input, benignErrorReporter) {
+  static async addOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForCreate', this, input)
-        .then(async (valSuccess) => {
-        let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-        //use default BenignErrorReporter if no BenignErrorReporter defined
-        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-        return adapters[responsibleAdapter].addOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
-      });
+    //validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+    let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    return adapters[responsibleAdapter].addOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
   }
 
   static async deleteOne(id, benignErrorReporter) {
-    await validatorUtil.ifHasValidatorFunctionInvoke('validateForDelete', this, id);
+    //validate input
+    await validatorUtil.validateData('validateForDelete', this, id);
     let responsibleAdapter = this.adapterForIri(id);
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
     return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter);
   }
 
-  static updateOne(input, benignErrorReporter) {
+  static async updateOne(input, benignErrorReporter) {
     this.assertInputHasId(input);
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input)
-        .then(async (valSuccess) => {
-        let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-        //use default BenignErrorReporter if no BenignErrorReporter defined
-        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-        return adapters[responsibleAdapter].updateOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
-    });
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
+    let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    return adapters[responsibleAdapter].updateOne(input, benignErrorReporter).then(result => new <%- name -%>(result));
+
   }
 
   static bulkAddCsv(context) {

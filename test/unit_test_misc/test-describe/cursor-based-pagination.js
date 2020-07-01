@@ -15,7 +15,7 @@ booksConnection(search: searchBookInput, order: [orderBookInput], pagination: pa
 `
 
 module.exports.model_read_all_connection = `
-static readAllCursor(search, order, pagination) {
+static readAllCursor(search, order, pagination, benignErrorReporter) {
         //check valid pagination arguments
         let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
         if (!argsValid) {
@@ -40,6 +40,9 @@ static readAllCursor(search, order, pagination) {
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
         }
+
+        //use default BenignErrorReporter if no BenignErrorReporter defined
+        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
         /*
          * Count
@@ -121,7 +124,10 @@ static readAllCursor(search, order, pagination) {
                 /*
                  * Get records
                  */
-                return super.findAll(options).then(records => {
+                return super.findAll(options).then(async records => {
+                  //validate records
+                  records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+
                     let edges = [];
                     let pageInfo = {
                         hasPreviousPage: false,
@@ -421,18 +427,22 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
-      } 
+      }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
       if(response&&response.data&&response.data.data) {
         let data_edges = response.data.data.booksConnection.edges;
         let pageInfo = response.data.data.booksConnection.pageInfo;
+        //validate after read
+        let nodes = data_edges.map(e => e.node);
+        let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
 
-        let edges = data_edges.map( e =>{
+        let edges = valid_nodes.map( e =>{
+          let temp_node = new Book(e);
           return {
-            node: new Book(e.node),
-            cursor: e.cursor
+            node: temp_node,
+            cursor: temp_node.base64Enconde()
           }
         })
 
@@ -449,6 +459,8 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
 module.exports.many_to_many_association_connection_vocen_server = `
 static async updateOne(input, benignErrorReporter){
+  //validate input
+  await validatorUtil.validateData('validateForUpdate', this, input);
     let query = \`mutation updatePerson($id:ID!        $firstName:String
         $lastName:String
         $email:String){
@@ -466,13 +478,14 @@ static async updateOne(input, benignErrorReporter){
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     try {
-        await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+
         // Send an HTTP request to the remote server
         let response = await axios.post(remoteVocenURL, {query:query, variables:input});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
-        } 
+        }
+
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send

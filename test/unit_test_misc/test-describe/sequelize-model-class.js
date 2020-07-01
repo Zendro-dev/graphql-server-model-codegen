@@ -38,9 +38,6 @@ static async readById(id) {
   if (item === null) {
       throw new Error(\`Record with ID = "\${id}" does not exist\`);
   }
-  return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-      .then((valSuccess) => {
-          return item
-      });
+return validatorUtil.validateData('validateAfterRead', this, item);
 }
 `

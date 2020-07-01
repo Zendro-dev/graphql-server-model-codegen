@@ -378,7 +378,8 @@ let query = \`
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
-      } 
+      }
+
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
@@ -422,7 +423,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteVocenURL));
-      } 
+      }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
@@ -462,7 +463,7 @@ module.exports.add_one_resolver = `
             //construct benignErrors reporter with context
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
            let createdRecord = await accession.addOne(inputSanitized, benignErrorReporter);
-           await createdRecord.handleAssociations(inputSanitized, context);
+           await createdRecord.handleAssociations(inputSanitized, benignErrorReporter);
            return createdRecord;
          } else { //adapter not auth
              throw new Error("You don't have authorization to perform this action on adapter");
@@ -495,7 +496,7 @@ module.exports.update_one_resolver = `
               //construct benignErrors reporter with context
               let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
                let updatedRecord = await accession.updateOne(inputSanitized, benignErrorReporter);
-               await updatedRecord.handleAssociations(inputSanitized, context);
+               await updatedRecord.handleAssociations(inputSanitized, benignErrorReporter);
                return updatedRecord;
            } else {//adapter not auth
                throw new Error("You don't have authorization to perform this action on adapter");

@@ -117,10 +117,7 @@ static readById(id, benignErrorReporter) {
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
   return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
     let item  = new Book(result);
-    return validatorUtil.ifHasValidatorFunctionInvoke('validateAfterRead', this, item)
-        .then((valSuccess) => {
-            return item;
-        });
+    return validatorUtil.validateData('validateAfterRead', this, item);
 
    });
   }
@@ -268,9 +265,9 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
               return total;
             }, []);
           })
-          //phase 2: order & paginate
-          .then(nodes => {
-
+          //phase 2: validate & order & paginate
+          .then(async nodes => {
+              nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
               if (order === undefined) {
                   order = [{
                       field: "id",
