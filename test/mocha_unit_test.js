@@ -1834,7 +1834,7 @@ describe('Refactor associations in distributed data case - add - remove', functi
     expect(g_resolver).to.have.string(test_resolver);
   });
 
-  it('add association in vocen-webservice-adapter  - accession', async function(){
+  it('add association in zendro-webservice-adapter  - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-zendro-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1842,7 +1842,7 @@ describe('Refactor associations in distributed data case - add - remove', functi
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('remove association in vocen-webservice-adapter - accession', async function(){
+  it('remove association in zendro-webservice-adapter - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-zendro-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1883,7 +1883,7 @@ describe('Refactor associations in distributed data case - add - remove', functi
     expect(g_resolver).to.have.string(test_resolver);
   });
 
-  it('add one in vocen-webservice-adapter - accession', async function(){
+  it('add one in zendro-webservice-adapter - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-zendro-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -1891,7 +1891,7 @@ describe('Refactor associations in distributed data case - add - remove', functi
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('update one in vocen-webservice-adapter - accession', async function(){
+  it('update one in zendro-webservice-adapter - accession', async function(){
     let opts = funks.getOptions(models_refactoring.accession_vocen_adapter);
     let generated_adapter =await funks.generateJs('create-zendro-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
@@ -2385,7 +2385,7 @@ describe('Handle Errors in DDM', function(){
     expect(g_resolver).to.have.string(test_resolver);
   });
 
-  it('readAllCursor in vocen-webservice-adapter - dog', async function(){
+  it('readAllCursor in zendro-webservice-adapter - dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_vocen_adapter_integration_test);
     let generated_adapter =await funks.generateJs('create-zendro-adapters', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');

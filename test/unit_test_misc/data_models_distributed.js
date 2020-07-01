@@ -1,6 +1,6 @@
 module.exports.book = {
   "model" : "Book",
-  "storageType" : "vocen-webservice-adapter",
+  "storageType" : "zendro-webservice-adapter",
   "adapterName": "BooksOne",
   "regex": "one",
   "url": "http://localhost:3000/graphql",

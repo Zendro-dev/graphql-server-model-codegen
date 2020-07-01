@@ -1,6 +1,6 @@
 module.exports.book_adapter = {
     "model": "Book",
-    "storageType": "vocen-webservice-adapter",
+    "storageType": "zendro-webservice-adapter",
     "adapterName": "booksRemote_one",
     "regex": "one",
     "url": "http://localhost:3030/graphql",
@@ -51,7 +51,7 @@ module.exports.book_ddm = {
 
 module.exports.person_adapter = {
     "model": "Person",
-    "storageType": "vocen-webservice-adapter",
+    "storageType": "zendro-webservice-adapter",
     "adapterName": "peopleRemote_one",
     "regex": "one",
     "url": "http://localhost:3030/graphql",

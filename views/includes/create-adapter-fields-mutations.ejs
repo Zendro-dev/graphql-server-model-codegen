@@ -5,17 +5,17 @@
   *
   * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
   * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
-  <% if(storageType === 'vocen-webservice-adapter' || storageType === 'ddm-adapter'){-%>
+  <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote vocen services   
   <% } _%>
   */
 
     <%#
     /**
-      *check the type of adapter and handle vocen-webservice-adapter and ddm-adapter
+      *check the type of adapter and handle zendro-webservice-adapter and ddm-adapter
       */
     -%>
-    <% if(storageType === 'vocen-webservice-adapter' || storageType === 'ddm-adapter'){-%>
+    <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
       static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
         let query = `
               mutation
@@ -51,7 +51,7 @@
         }
       }
   <%}-%>
-  <%#  /** End of the vocen-webservice-adapter case and the ddm-adapter case */ -%>
+  <%#  /** End of the zendro-webservice-adapter case and the ddm-adapter case */ -%>
 
 
   <%#

@@ -399,7 +399,7 @@ writeIndexAdapters = function(dir_write){
 
     switch(adapter.adapterType) {
       case 'ddm-adapter':
-      case 'vocen-webservice-adapter':
+      case 'zendro-webservice-adapter':
       case 'generic-adapter':
         adapters[adapter.adapterName] = adapter;
         break;
@@ -860,7 +860,7 @@ getStorageType = function(dataModel) {
         //adapters
         case 'sql-adapter':
         case 'ddm-adapter':
-        case 'vocen-webservice-adapter':
+        case 'zendro-webservice-adapter':
         case 'generic-adapter':
           //ok
           break;
@@ -868,7 +868,7 @@ getStorageType = function(dataModel) {
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, zendro-server, generic, sql-adapter, ddm-adapter, vocen-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, zendro-server, generic, sql-adapter, ddm-adapter, zendro-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
           break;
       }
     }
@@ -1059,7 +1059,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         ]
         break;
 
-      case 'vocen-webservice-adapter':
+      case 'zendro-webservice-adapter':
         sections = [
           {dir: 'models/adapters', template: 'zendro-adapters', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},

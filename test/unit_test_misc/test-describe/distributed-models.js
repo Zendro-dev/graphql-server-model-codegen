@@ -153,7 +153,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
              *      resolve with current parameters.
              *
              *   ddm-adapter:
-             *   vocen-webservice-adapter:
+             *   zendro-webservice-adapter:
              *   generic-adapter:
              *      add exclusions to search.excludeAdapterNames parameter.
              */
@@ -164,7 +164,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
                     return adapter.countRecords(nsearch, benignErrorReporter);
 
                 case 'sql-adapter':
-                case 'vocen-webservice-adapter':
+                case 'zendro-webservice-adapter':
                     return adapter.countRecords(search, benignErrorReporter);
 
                 case 'default':
@@ -226,7 +226,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
              *      resolve with current parameters.
              *
              *   ddm-adapter:
-             *   vocen-webservice-adapter:
+             *   zendro-webservice-adapter:
              *   generic-adapter:
              *      add exclusions to search.excludeAdapterNames parameter.
              */
@@ -237,7 +237,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 
                 case 'generic-adapter':
                 case 'sql-adapter':
-                case 'vocen-webservice-adapter':
+                case 'zendro-webservice-adapter':
                     return adapter.readAllCursor(search, order, pagination,benignErrorReporter );
 
                 default:
