@@ -3356,4 +3356,47 @@ describe(
         }
       });
     })
+
+    it('06. Add another incident and read all', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35", incident_description: "First incident on server 2") {incident_id incident_description}}`)
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            addDist_incident: {
+                incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+                incident_description: "First incident on server 2"
+            }
+        }
+      });
+      res = itHelpers.request_graph_ql_post(`{dist_incidentsConnection {edges {node {incident_id incident_description dist_instantsConnection {edges {node {instant_id}}}}}}}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            dist_incidentsConnection: {
+                edges: [
+                    {
+                        node: {
+                            incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+                            incident_description: "First incident on server 1",
+                            dist_instantsConnection: {
+                                edges: []
+                            }
+                        }
+                    },
+                    {
+                        node: {
+                            incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+                            incident_description: "First incident on server 2",
+                            dist_instantsConnection: {
+                                edges: []
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+      });
+    })
   })

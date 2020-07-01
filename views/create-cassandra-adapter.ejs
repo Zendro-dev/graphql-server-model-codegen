@@ -171,16 +171,8 @@ class <%- adapterName -%> {
 
     // === Construct CQL statement ===
 
-    if (searchTerms !== undefined) {
-
-      //check
-      if(typeof searchTerms !== 'object') {
-        throw new Error('Illegal "search" argument type, it must be an object.');
-      }
-
-      if (searchTerms.value && searchTerms.value.value) {
-        searchTerms = new searchArg(searchTerms);
-      }
+    if (searchTerms && searchTerms.value && searchTerms.value.value) {
+      searchTerms = new searchArg(searchTerms);
       arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>', filteringAllowed, stringAttributeArray) + ';';
     }
 
