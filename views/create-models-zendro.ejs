@@ -60,7 +60,7 @@ module.exports = class <%- name -%>{
         await validatorUtil.validateData('validateAfterRead', this, item);
         return item;
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
@@ -89,7 +89,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return response.data.data.count<%- namePlCp -%>;
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error){
       //handle caught errors
@@ -121,7 +121,7 @@ module.exports = class <%- name -%>{
         data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
         return data.map(item => {return new <%- name -%>(item) });
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error){
       //handle caught errors
@@ -171,7 +171,7 @@ module.exports = class <%- name -%>{
 
         return { edges, pageInfo };
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
@@ -215,7 +215,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.add<%- nameCp -%>);
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
@@ -249,7 +249,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
@@ -291,7 +291,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.update<%- nameCp -%>);
       } else {
-        throw new Error(`Invalid response from remote vocen-server: ${remoteVocenURL}`);
+        throw new Error(`Invalid response from remote zendro-server: ${remoteVocenURL}`);
       }
     } catch(error) {
       //handle caught errors
@@ -459,8 +459,8 @@ module.exports = class <%- name -%>{
    * Also add and remove methods for generic-to-one and generic-to-many associations.
    */
   -%>
-  <%- include('./includes/create-models-vocen-fieldMutations', {op: "add"}); %>
-  <%- include('./includes/create-models-vocen-fieldMutations', {op: "remove"}); %>
+  <%- include('./includes/create-models-zendro-fieldMutations', {op: "add"}); %>
+  <%- include('./includes/create-models-zendro-fieldMutations', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
 

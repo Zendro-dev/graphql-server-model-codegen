@@ -12,7 +12,7 @@ generic
 sql
 distributed
 adapters
-vocen-server
+zendro-server
 resolvers
 schemas
 validations

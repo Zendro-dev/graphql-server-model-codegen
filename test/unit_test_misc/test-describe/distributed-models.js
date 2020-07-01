@@ -26,7 +26,7 @@ static async readById(iri, benignErrorReporter) {
               if (response && response.data && response.data.data) {
                 return response.data.data.readOneBook;
               } else {
-                throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+                throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
               }
             } catch(error) {
               //handle caught errors
@@ -56,7 +56,7 @@ static async countRecords(search, benignErrorReporter) {
         if (response && response.data && response.data.data) {
           return response.data.data.countBooks;
         } else {
-          throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+          throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
         }
       } catch(error) {
         //handle caught errors
@@ -90,7 +90,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
           if(response && response.data && response.data.data) {
             return response.data.data.booksConnection;
           } else {
-            throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+            throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
           }
         } catch(error) {
           //handle caught errors
@@ -326,7 +326,7 @@ const definition = {
             target: 'publi_sher',
             targetKey: 'companyId',
             keyIn: 'Person',
-            targetStorageType: 'vocen-server'
+            targetStorageType: 'zendro-server'
         },
         dogs: {
             type: 'to_many',

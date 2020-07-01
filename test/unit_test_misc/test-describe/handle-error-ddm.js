@@ -292,7 +292,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
       if(response && response.data && response.data.data) {
         return response.data.data.dogsConnection;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors

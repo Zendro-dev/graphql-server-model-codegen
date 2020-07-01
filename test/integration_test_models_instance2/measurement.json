@@ -1,6 +1,6 @@
 {
   "model": "Measurement",
-  "storageType": "vocen-server",
+  "storageType": "zendro-server",
   "url": "http://server1:3000/graphql",
   "attributes": {
     "measurement_id": "String",

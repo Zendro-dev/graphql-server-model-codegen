@@ -386,7 +386,7 @@ let query = \`
       if(response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
@@ -430,7 +430,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       if(response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
@@ -535,7 +535,7 @@ static async addOne(input, benignErrorReporter) {
       if (response && response.data && response.data.data) {
         return response.data.data.addAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors
@@ -577,7 +577,7 @@ static async updateOne(input, benignErrorReporter) {
       if (response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote vocen-server: \${remoteVocenURL}\`);
+        throw new Error(\`Invalid response from remote zendro-server: \${remoteVocenURL}\`);
       }
     } catch(error) {
       //handle caught errors

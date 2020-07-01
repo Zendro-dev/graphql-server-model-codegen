@@ -42,7 +42,7 @@ module.exports.book_ddm = {
             "target": "Person",
             "targetKey": "internalPersonId",
             "keyIn": "Book",
-            "targetStorageType": "vocen-server",
+            "targetStorageType": "zendro-server",
             "label": "email"
         }
     },
@@ -95,7 +95,7 @@ module.exports.person_ddm = {
             "target": "Book",
             "targetKey": "internalPersonId",
             "keyIn": "Book",
-            "targetStorageType": "vocen-server",
+            "targetStorageType": "zendro-server",
             "label": "title"
         }
     },

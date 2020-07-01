@@ -149,7 +149,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/models/adapters" \
               $TARGET_DIR_INSTANCE1"/models/sql" \
               $TARGET_DIR_INSTANCE1"/models/distributed" \
               $TARGET_DIR_INSTANCE1"/models/generic" \
-              $TARGET_DIR_INSTANCE1"/models/vocen-server"
+              $TARGET_DIR_INSTANCE1"/models/zendro-server"
               $TARGET_DIR_INSTANCE1"/migrations" \
               $TARGET_DIR_INSTANCE1"/schemas" \
               $TARGET_DIR_INSTANCE1"/resolvers" \
@@ -159,7 +159,7 @@ CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/models/adapters" \
               $TARGET_DIR_INSTANCE2"/models/sql" \
               $TARGET_DIR_INSTANCE2"/models/distributed" \
               $TARGET_DIR_INSTANCE2"/models/generic" \
-              $TARGET_DIR_INSTANCE2"/models/vocen-server"
+              $TARGET_DIR_INSTANCE2"/models/zendro-server"
               $TARGET_DIR_INSTANCE2"/migrations" \
               $TARGET_DIR_INSTANCE2"/schemas" \
               $TARGET_DIR_INSTANCE2"/resolvers" \

@@ -24,7 +24,7 @@ services:
       - ./integration_test_run/instance1/resolvers:/usr/src/app/resolvers
       - ./integration_test_run/instance1/models/sql:/usr/src/app/models/sql
       - ./integration_test_run/instance1/models/distributed:/usr/src/app/models/distributed
-      - ./integration_test_run/instance1/models/vocen-server:/usr/src/app/models/vocen-server
+      - ./integration_test_run/instance1/models/zendro-server:/usr/src/app/models/zendro-server
       - ./integration_test_run/instance1/models/generic:/usr/src/app/models/generic
       - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance1/validations:/usr/src/app/validations
@@ -101,7 +101,7 @@ services:
       - ./integration_test_run/instance2/resolvers:/usr/src/app/resolvers
       - ./integration_test_run/instance2/models/sql:/usr/src/app/models/sql
       - ./integration_test_run/instance2/models/distributed:/usr/src/app/models/distributed
-      - ./integration_test_run/instance2/models/vocen-server:/usr/src/app/models/vocen-server
+      - ./integration_test_run/instance2/models/zendro-server:/usr/src/app/models/zendro-server
       - ./integration_test_run/instance2/models/generic:/usr/src/app/models/generic
       - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
       - ./integration_test_run/instance2/validations:/usr/src/app/validations

@@ -771,12 +771,12 @@ generateSections = async function(sections, opts, dir_write) {
       case 'resolvers-generic':
       //models
       case 'models':
-      case 'models-vocen':
+      case 'models-zendro':
       case 'distributed-model':
       case 'models-generic':
       //adapters
       case 'sql-adapter':
-      case 'vocen-adapters':
+      case 'zendro-adapters':
       case 'generic-adapter':
         file_name = dir_write + '/'+ section.dir +'/' + section.fileName + '.js';
         break;
@@ -855,7 +855,7 @@ getStorageType = function(dataModel) {
         //models
         case 'sql':
         case 'distributed-data-model':
-        case 'vocen-server':
+        case 'zendro-server':
         case 'generic':
         //adapters
         case 'sql-adapter':
@@ -868,7 +868,7 @@ getStorageType = function(dataModel) {
         default:
           //not ok
           valid = false;
-          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, vocen-server, generic, sql-adapter, ddm-adapter, vocen-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
+          console.error(colors.red(`ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, zendro-server, generic, sql-adapter, ddm-adapter, vocen-webservice-adapter, generic-adapter]. But '${dataModel.storageType}' was obtained on ${(dataModel.adapterName !== undefined)?'adapter':'model'} '${(dataModel.adapterName !== undefined)?dataModel.adapterName:dataModel.model}'.`));
           break;
       }
     }
@@ -893,7 +893,7 @@ getStorageType = function(dataModel) {
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
-  let sectionsDirsB = ['models/sql','models/vocen-server', 'models/adapters', 'models/distributed', 'models/generic'];
+  let sectionsDirsB = ['models/sql','models/zendro-server', 'models/adapters', 'models/distributed', 'models/generic'];
   let models = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
@@ -1030,11 +1030,11 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         ]
         break;
 
-      case 'vocen-server':
+      case 'zendro-server':
         sections = [
           {dir: 'schemas',   template: 'schemas',   fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
-          {dir: 'models/vocen-server', template: 'models-vocen', fileName: opts.nameLc},
+          {dir: 'models/zendro-server', template: 'models-zendro', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',    template: 'patches',    fileName: opts.nameLc},
         ]
@@ -1061,14 +1061,14 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
       case 'vocen-webservice-adapter':
         sections = [
-          {dir: 'models/adapters', template: 'vocen-adapters', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'zendro-adapters', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;
 
       case 'ddm-adapter':
         sections = [
-          {dir: 'models/adapters', template: 'vocen-adapters', fileName: opts.adapterName},
+          {dir: 'models/adapters', template: 'zendro-adapters', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
         ]
         break;

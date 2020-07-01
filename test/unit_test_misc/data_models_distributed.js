@@ -26,7 +26,7 @@ module.exports.book = {
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "vocen-server",
+        "targetStorageType" : "zendro-server",
         "label" : "name"
         }
   }
@@ -60,7 +60,7 @@ module.exports.book_ddm =
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
-        "targetStorageType" : "vocen-server",
+        "targetStorageType" : "zendro-server",
         "label" : "name"
         }
   }
@@ -93,7 +93,7 @@ module.exports.person_ddm =  {
         "target": "publi_sher",
         "targetKey": "companyId",
         "keyIn": "Person",
-        "targetStorageType": "vocen-server"
+        "targetStorageType": "zendro-server"
       },
 
       "dogs" :{
@@ -184,7 +184,7 @@ module.exports.dog_ddm =  {
         "target": "Person",
         "targetKey": "internalPersonId",
         "keyIn": "Book",
-        "targetStorageType": "vocen-server",
+        "targetStorageType": "zendro-server",
         "label": "email"
       }
     },
