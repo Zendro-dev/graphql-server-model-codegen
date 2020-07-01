@@ -3314,4 +3314,27 @@ describe(
         }
       });
     })
+
+    it('04. Update the incident to remove the second instant', function() {
+      let res = itHelpers.request_graph_ql_post(`mutation {updateDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", removeDist_instants: "instance2-592a5d9f-ee5f-4392-9e2e-6965e8250c89") {incident_id countFilteredDist_instants dist_instantsConnection {edges {node {instant_id}}}}}`);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+            updateDist_incident: {
+                incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+                countFilteredDist_instants: 1,
+                dist_instantsConnection: {
+                    edges: [
+                        {
+                            node: {
+                                instant_id: "instance2-1b85fddc-67a5-46f3-81a0-20aea167d791"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+      });
+    })
   })
