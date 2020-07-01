@@ -9,13 +9,10 @@
   */
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
     let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-    <% if (cassandraRestrictions) { %>
-    <% if (cassandraIdAttributeType === 'text') { %>
-    <%- idAttribute -%> = `'${<%- idAttribute -%>}'`;
-    <% } %>
-    <% if (cassandraAttributes[associationsArguments["to_one"][i].targetKey] === 'text') { %>
-    <%- associationsArguments["to_one"][i].targetKey -%> = `'${<%- associationsArguments["to_one"][i].targetKey -%>}'`;
-    <% } %>
+    <% if (cassandraRestrictions && cassandraIdAttributeType === 'text') { %>
+    if (<%- idAttribute -%>.indexOf("'") !== 0) {
+      <%- idAttribute -%> = `'${<%- idAttribute -%>}'`;
+    }
     <% } %>
     return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
   }
