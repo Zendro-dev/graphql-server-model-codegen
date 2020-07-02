@@ -38,6 +38,17 @@ type <%- name -%>
   <%= key %>: <%= attributes[key]%>
 <%}-%>
 
+<% if (cassandraRestrictions) { %>
+<%#
+  /**
+  * The token - needed to sort data from different servers
+  */
+  -%>
+  """
+  @original-field
+  """
+  toke: String<% } %>
+
 <%#
 /**
  * Section 1.3 - Associations fields.
@@ -141,6 +152,8 @@ enum <%- name -%>Field {
 <%for (var key in attributes) {-%>
   <%= key %>
 <%}-%>
+<% if (cassandraRestrictions) { -%>
+  toke <%}%>
 }
 
 <%#

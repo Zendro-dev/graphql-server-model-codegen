@@ -3378,8 +3378,8 @@ describe(
                 edges: [
                     {
                         node: {
-                            incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
-                            incident_description: "First incident on server 1",
+                            incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+                            incident_description: "First incident on server 2",
                             dist_instantsConnection: {
                                 edges: []
                             }
@@ -3387,8 +3387,8 @@ describe(
                     },
                     {
                         node: {
-                            incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
-                            incident_description: "First incident on server 2",
+                            incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+                            incident_description: "First incident on server 1",
                             dist_instantsConnection: {
                                 edges: []
                             }
@@ -3544,8 +3544,8 @@ describe(
                     },
                     {
                         node: {
-                            incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
-                            incident_description: "First incident on server 1",
+                            incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+                            incident_description: "First incident on server 2",
                             countFilteredDist_instants: 0,
                             dist_instantsConnection: {
                                 edges: []
@@ -3554,8 +3554,8 @@ describe(
                     },
                     {
                         node: {
-                            incident_id: "instance2-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
-                            incident_description: "First incident on server 2",
+                            incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+                            incident_description: "First incident on server 1",
                             countFilteredDist_instants: 0,
                             dist_instantsConnection: {
                                 edges: []
