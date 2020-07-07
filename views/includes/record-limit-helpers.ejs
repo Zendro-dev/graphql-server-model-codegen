@@ -21,7 +21,7 @@ async function checkCountAndReduceRecordsLimit({search, pagination}, context, re
   /*
    * Search check
    */
-  if(search !== undefined && search !== null && typeof search !== 'object'){
+  if(search !== undefined && search !== null){
     //check
     if(typeof search !== 'object') throw new Error('Illegal "search" argument type, it must be an object.');
     else nsearch = {...search};
