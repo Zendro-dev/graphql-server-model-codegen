@@ -42,7 +42,7 @@ async function checkCountAndReduceRecordsLimit({search, pagination}, context, re
          * Case: cursor-based pagination
          */
         //check valid pagination arguments
-        let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+        let argsValid = (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
         if (!argsValid) {
             throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
         }
@@ -52,16 +52,16 @@ async function checkCountAndReduceRecordsLimit({search, pagination}, context, re
           if(pagination.after) {
             let decoded_cursor = JSON.parse(models[modelName].base64Decode(pagination.after));
             nsearch = helper.parseOrderCursorGeneric(search, [ ["<%- idAttribute -%>", "ASC"] ], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor);
-            limit = pagination.first ? pagination.first : undefined;
-            offset = 0;
           }
+          limit = pagination.first ? pagination.first : undefined;
+          offset = 0;
         }else {//backward
           if(pagination.before) {
             let decoded_cursor = JSON.parse(models[modelName].base64Decode(pagination.before));
             nsearch = helper.parseOrderCursorBeforeGeneric(search, [ ["<%- idAttribute -%>", "ASC"] ], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor);
-            limit = pagination.last ? pagination.last : undefined;
-            offset = 0;
           }
+          limit = pagination.last ? pagination.last : undefined;
+          offset = 0;
         }
       }
     }

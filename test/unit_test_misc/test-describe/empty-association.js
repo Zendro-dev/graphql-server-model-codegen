@@ -35,7 +35,7 @@ module.exports.individual_no_assoc_resolvers = `
     }, context) {
 
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "individuals");
+            await checkCountAndReduceRecordsLimit({search, pagination}, context, "individuals");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await individual.readAll(search, order, pagination,benignErrorReporter);
         } else {

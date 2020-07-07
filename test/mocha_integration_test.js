@@ -776,7 +776,221 @@ describe(
     trCounts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
     expect(trCounts).to.deep.equal([]);
 
-  });
+    /**
+     * Check: 
+     * max_limit records validation
+     */
+    //Add another 30 individuals:
+    individualName = "individualB";
+    individualAdding = `mutation { addIndividual (name: "${individualName}") { id, name }}`;
+    let ids = [];
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    res = itHelpers.request_graph_ql_post(individualAdding);
+    expect(res.statusCode).to.equal(200);
+    ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
+    
+    //test 1: count = 30
+    res = itHelpers.request_graph_ql_post(`{ countIndividuals(search:{field:name operator:eq value:{value:"${individualName}"}}) }`);
+    resBody = JSON.parse(res.body.toString('utf8'));    
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.countIndividuals).equal(30);
+
+    //test 2: error limit_record
+    let err1_msg = "Max record limit of 25 exceeded in individuals";
+    let err1_path = ["individuals"];
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody.errors[0].message).to.deep.equal(err1_msg);
+    expect(resBody.errors[0].path).to.deep.equal(err1_path);
+
+    //test 3: pagination (limit-offset): with limit: 24
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:24}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(ids).to.include.members(resBody.data.individuals.map((item) => item.id));
+    expect(resBody.data.individuals.map((item) => item.id)).to.not.include(ids[ids.length-1]);
+
+    //test 4: pagination (limit-offset): with limit: 5 & offset: 25  (last 5)
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:5, offset:25}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(ids).to.include.members(resBody.data.individuals.map((item) => item.id));
+    expect(resBody.data.individuals.map((item) => item.id)).to.have.deep.members(ids.slice(-5));
+
+    //test 5: pagination (limit-offset): with limit: 50 & offset: 25 (last 5)
+    let err2_msg = "Request of total individuals exceeds max limit of 25. Please use pagination.";
+    let err2_path = ["individuals"];
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:50, offset:25}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody.errors[0].message).to.deep.equal(err2_msg);
+    expect(resBody.errors[0].path).to.deep.equal(err2_path);
+
+    //test 6: pagination (cursor-based): error limit_record - without pagination
+    let err3_msg = "Max record limit of 25 exceeded in individualsConnection";
+    let err3_path = ["individualsConnection"];
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{node{id}}}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody.errors[0].message).to.deep.equal(err3_msg);
+    expect(resBody.errors[0].path).to.deep.equal(err3_path);
+
+    //test 7: pagination (cursor-based): error limit_record - with pagination.first: 30
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:30}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{node{id}}}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody.errors[0].message).to.deep.equal(err3_msg);
+    expect(resBody.errors[0].path).to.deep.equal(err3_path);
+
+    //test 8: pagination (cursor-based): with first: 24
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:24}, search:{field:name operator:eq value:{value:"${individualName}"}}) 
+    {
+      pageInfo {
+        startCursor
+        endCursor
+        hasPreviousPage
+        hasNextPage
+      } 
+      edges{
+        cursor 
+        node{id}
+    }}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
+    expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.not.include(ids[ids.length-1]);
+
+    //test 9: pagination (cursor-based): with : first:5, after: cursor20
+    let cursor20 = resBody.data.individualsConnection.edges.map((item) => item.cursor)[19];
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:5, after:"${cursor20}"}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    
+    expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
+    expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-10, 25));
+
+    //test 10: pagination (cursor-based): with : last:5
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:5}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));      
+    expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
+    expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-5));
+
+    //test 11: pagination (cursor-based): with : last:10, before: cursor30, includeCursor: true
+    let cursor30 = resBody.data.individualsConnection.edges.map((item) => item.cursor)[4];
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:10, before:"${cursor30}", includeCursor: true}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
+    expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-10));
+
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit: 15}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    let individuals_a = JSON.parse(res.body.toString('utf8')).data.individuals;
+
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{offset:15, limit: 15}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    let individuals_b = JSON.parse(res.body.toString('utf8')).data.individuals;
+
+    individuals = individuals_a.concat(individuals_b);
+    for(let i = 0; i < individuals.length; i++){
+        res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individuals[i].id}) }`);
+        expect(res.statusCode).to.equal(200);
+    }
+
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    expect(res.statusCode).to.equal(200);
+    individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
+    expect(individuals).to.deep.equal([]);
+
+  }).timeout(5000);
 
   //one_to_one associations where foreignKey is in the target model
   it('22. one_to_one associations setup', function() {

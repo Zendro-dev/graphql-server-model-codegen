@@ -1,7 +1,7 @@
 module.exports.count_in_sequelize_model = `
 static async countRecords(search) {
         let options = {};
-        if (search !== undefined) {
+        if (search !== undefined && search !== null) {
 
             //check
             if (typeof search !== 'object') {
@@ -48,7 +48,7 @@ module.exports.count_in_resolvers = `
 module.exports.read_all = `
 static readAll(search, order, pagination) {
         let options = {};
-        if (search !== undefined) {
+        if (search !== undefined && search !== null) {
 
             //check
             if (typeof search !== 'object') {
@@ -105,7 +105,7 @@ module.exports.read_all_resolver = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "dogs");
+            await checkCountAndReduceRecordsLimit({search, pagination}, context, "dogs");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await dog.readAll(search, order, pagination, benignErrorReporter);
         } else {
