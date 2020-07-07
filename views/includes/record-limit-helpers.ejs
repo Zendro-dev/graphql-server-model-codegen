@@ -1,16 +1,81 @@
 <%# Helper functions for checking the Record Limits %> 
 
 /**
-* checkCountAndReduceRecordsLimit(search, context, query) - Make sure that the current set of requested records does not exceed the record limit set in globals.js.
+* checkCountAndReduceRecordsLimit({search, pagination}, context, resolverName, modelName) - Make sure that the current
+* set of requested records does not exceed the record limit set in globals.js.
 *
-* @param {object} search  Search argument for filtering records
+* @param {object} {search}  Search argument for filtering records
+* @param {object} {pagination}  If limit-offset pagination, this object will include 'offset' and 'limit' properties
+* to get the records from and to respectively. If cursor-based pagination, this object will include 'first' or 'last'
+* properties to indicate the number of records to fetch, and 'after' or 'before' cursors to indicate from which record
+* to start fetching.
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 * @param {string} resolverName The resolver that makes this check
 * @param {string} modelName The model to do the count
 */
-async function checkCountAndReduceRecordsLimit(search, context, resolverName, modelName = '<%- nameLc -%>') {
-  let count = (await models[modelName].countRecords(search));
-  helper.checkCountAndReduceRecordLimitHelper(count, context, resolverName)
+async function checkCountAndReduceRecordsLimit({search, pagination}, context, resolverName, modelName = '<%- nameLc -%>') {
+  let limit = undefined;
+  let offset = 0;
+  let nsearch = undefined;
+
+  /*
+   * Search check
+   */
+  if(search !== undefined && search !== null && typeof search !== 'object'){
+    //check
+    if(typeof search !== 'object') throw new Error('Illegal "search" argument type, it must be an object.');
+    else nsearch = {...search};
+  }
+ 
+  /**
+   * Pagination options
+   */
+    if(pagination) {
+      /**
+       * Case: limit-offset pagination
+       */
+      if(pagination.limit !== undefined || pagination.offset !== undefined) {
+        limit = pagination.limit ? pagination.limit : undefined;
+        offset = pagination.offset ? pagination.offset : 0;
+      } else {
+        /**
+         * Case: cursor-based pagination
+         */
+        //check valid pagination arguments
+        let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
+        if (!argsValid) {
+            throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
+        }
+        let isForwardPagination = !(pagination.last !== undefined);
+        //forward
+        if(isForwardPagination) {
+          if(pagination.after) {
+            let decoded_cursor = JSON.parse(models[modelName].base64Decode(pagination.after));
+            nsearch = helper.parseOrderCursorGeneric(search, [ ["<%- idAttribute -%>", "ASC"] ], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor);
+            limit = pagination.first ? pagination.first : undefined;
+            offset = 0;
+          }
+        }else {//backward
+          if(pagination.before) {
+            let decoded_cursor = JSON.parse(models[modelName].base64Decode(pagination.before));
+            nsearch = helper.parseOrderCursorBeforeGeneric(search, [ ["<%- idAttribute -%>", "ASC"] ], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor);
+            limit = pagination.last ? pagination.last : undefined;
+            offset = 0;
+          }
+        }
+      }
+    }
+
+  //get records count
+  let count = (await models[modelName].countRecords(nsearch));
+  
+  //calculate effective records count
+  let effectiveCount = count-offset;
+  if(limit !== undefined) {
+    effectiveCount = Math.min( count-offset, limit );
+  }
+
+  helper.checkCountAndReduceRecordLimitHelper(effectiveCount, context, resolverName);
 }
 
 /**
