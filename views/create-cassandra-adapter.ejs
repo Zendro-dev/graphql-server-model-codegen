@@ -108,7 +108,9 @@ class <%- adapterName -%> {
   }
 
   static async readById(id){
-    const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
+    // -- Create a list of the table columns
+    <% let columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
+    const query = `SELECT <%- columns -%>, token(<%- idAttribute -%>) as toke FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
     let queryResult = await this.storageHandler.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
     let firstResult = queryResult.first();
     let item = new <%- adapterName -%>(firstResult);
@@ -176,7 +178,11 @@ class <%- adapterName -%> {
       arg_cassandra = ' ' + searchTerms.toCassandra('<%- idAttribute -%>', filteringAllowed, stringAttributeArray) + ';';
     }
 
-    let query = 'SELECT * FROM <%- namePl -%>' + arg_cassandra;
+    // -- Create a list of the table columns
+
+    <% columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
+
+    let query = 'SELECT <%- columns -%>, token(<%- idAttribute -%>) as toke FROM <%- namePl -%>' + arg_cassandra;
     
     // === Set page size if needed ===
 
@@ -369,7 +375,9 @@ class <%- adapterName -%> {
   }
 
   static get definition(){
-    return definition;
+    let def = definition;
+    def.attributes.toke = 'String';
+    return def;
   }
 
   static base64Decode(cursor){

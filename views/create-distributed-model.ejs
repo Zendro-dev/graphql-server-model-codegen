@@ -20,11 +20,12 @@ module.exports = class <%- name -%>{
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
 
-  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%><% if (cassandraRestrictions) { -%>, toke<% } %>}){
       this.<%- idAttribute -%> = <%- idAttribute -%>;
        <%for(var key in attributes){-%>
          this.<%=key-%> =<%=key-%>;
         <%}-%>
+        <% if (cassandraRestrictions) { %>this.toke = toke;<% } -%>
   }
 
   static get name(){
@@ -235,8 +236,9 @@ module.exports = class <%- name -%>{
       if(pagination === undefined ){ pagination = { <% if (cassandraRestrictions) { %>limit<% } else { %>first<% } %> : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
       <% if (cassandraRestrictions) { %>
-      let paginated_records = helper.paginateRecordsCursor(nodes, pagination.limit);
-      let hasNextPage = nodes.length > pagination.limit || someHasNextPage;
+      let ordered_records = helper.orderRecordsWithCassandra(nodes, '<%- idAttribute -%>');
+      let paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.limit);
+      let hasNextPage = ordered_records.length > pagination.limit || someHasNextPage;
       let graphQLConnection = helper.toGraphQLCassandraConnectionObject(paginated_records, this, hasNextPage);
       return graphQLConnection;
       <% } else { %>
@@ -259,7 +261,13 @@ module.exports = class <%- name -%>{
   }
 
   static get definition(){
+    <%if (cassandraRestrictions) { -%>
+    let def = definition;
+    def.attributes.toke = 'String';
+    return def;
+    <% } else { -%>
     return definition;
+    <% } -%>
   }
 
   static base64Decode(cursor){

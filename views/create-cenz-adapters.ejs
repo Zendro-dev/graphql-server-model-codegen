@@ -33,6 +33,7 @@ module.exports = class <%- adapterName -%>{
               {
                 <%- idAttribute -%> <%for(var key in attributes){ %>
                 <%= key %> <%}%>
+                <% if (cassandraRestrictions) { %> toke<% } %>
               }
             }`;
 
@@ -96,7 +97,7 @@ module.exports = class <%- adapterName -%>{
     <% } %>
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: <% if (cassandraRestrictions) { %> paginationCursorCassandraInput <% } else { %> paginationCursorInput  $order: [order<%- nameCp -%>Input] <% } %> ){
       <%- namePl -%>Connection(search:$search pagination:$pagination <% if (!cassandraRestrictions) { %> order:$order <% } %>){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
-        <%}-%>} } pageInfo{ <% if (!cassandraRestrictions) { %>startCursor<% } %> endCursor <% if (!cassandraRestrictions) { %>hasPreviousPage <% } %> hasNextPage } } }`
+        <%}-%><% if (cassandraRestrictions) { %> toke<% } %>}} pageInfo{ <% if (!cassandraRestrictions) { %>startCursor<% } %> endCursor <% if (!cassandraRestrictions) { %>hasPreviousPage <% } %> hasNextPage } } }`
 
         try {
           // Send an HTTP request to the remote server
