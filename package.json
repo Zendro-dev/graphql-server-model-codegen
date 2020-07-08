@@ -7,7 +7,9 @@
     "url": "https://github.com/ScienceDb/graphql-server-model-codegen"
   },
   "main": "index.js",
-  "bin": "./index.js",
+  "bin": {
+    "code-generator": "./index.js"
+  },
   "scripts": {
     "test-unit": "mocha ./test/mocha_unit_test.js",
     "test-integration": "bash ./test/sh_integration_test_run.sh",
@@ -19,6 +21,7 @@
     "ajv": "^6.12.2",
     "colors": "^1.4.0",
     "commander": "^5.1.0",
+    "diff": "^4.0.2",
     "ejs": "^3.1.3",
     "inflection": "^1.12.0",
     "js-beautify": "^1.11.0",
