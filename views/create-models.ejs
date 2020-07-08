@@ -106,7 +106,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   static async countRecords(search){
     let options = {};
-    if (search !== undefined) {
+    if (search !== undefined && search !== null) {
 
       //check
       if(typeof search !== 'object') {
@@ -122,7 +122,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   static readAll(search, order, pagination, benignErrorReporter){
     let options = {};
-    if (search !== undefined) {
+    if (search !== undefined && search !== null) {
 
       //check
       if(typeof search !== 'object') {
@@ -178,7 +178,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     /*
      * Search conditions
      */
-    if(search !== undefined){
+    if(search !== undefined && search !== null){
 
       //check
       if(typeof search !== 'object') {
@@ -438,7 +438,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       let options = {};
 
-      if(search!== undefined){
+      if(search !== undefined && search !== null){
         let arg = new searchArg(search);
         let arg_sequelize = arg.toSequelize();
         options['where'] = arg_sequelize;
@@ -478,7 +478,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       /*
        * Search conditions
        */
-      if (search !== undefined) {
+      if (search !== undefined && search !== null) {
           let arg = new searchArg(search);
           let arg_sequelize = arg.toSequelize();
           options['where'] = arg_sequelize;
@@ -606,7 +606,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
     countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
       let options = {};
-      if(search!== undefined){
+      if(search !== undefined && search !== null){
         let arg = new searchArg(search);
         let arg_sequelize = arg.toSequelize();
         options['where'] = arg_sequelize;

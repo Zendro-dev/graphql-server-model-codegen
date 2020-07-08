@@ -10,7 +10,7 @@ dog.prototype.owner = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.owner_id_test)) {
-            if (search === undefined) {
+            if (search === undefined || search === null) {
                 return resolvers.readOnePerson({
                     [models.person.idAttribute()]: this.owner_id_test
                 }, context)

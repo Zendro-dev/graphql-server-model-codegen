@@ -77,7 +77,7 @@ book.prototype.publisher = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.publisher_id)) {
-        if (search === undefined) {
+        if (search === undefined || search === null) {
             return resolvers.readOnePubli_sher({
                 [models.publi_sher.idAttribute()]: this.publisher_id
             }, context)

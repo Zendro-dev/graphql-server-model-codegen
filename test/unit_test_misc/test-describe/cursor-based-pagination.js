@@ -29,7 +29,7 @@ static readAllCursor(search, order, pagination, benignErrorReporter) {
         /*
          * Search conditions
          */
-        if (search !== undefined) {
+        if (search !== undefined && search !== null) {
 
             //check
             if (typeof search !== 'object') {
@@ -199,7 +199,7 @@ module.exports.resolver_read_all_connection = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, "booksConnection");
+            await checkCountAndReduceRecordsLimit({search, pagination}, context, "booksConnection");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await book.readAllCursor(search, order, pagination, benignErrorReporter);
         } else {
@@ -235,7 +235,7 @@ person.prototype.booksConnection = async function({
     pagination
 }, context) {
 if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, 'booksConnection', 'book');
+            await checkCountAndReduceRecordsLimit({search, pagination}, context, 'booksConnection', 'book');
             return this.booksConnectionImpl({
                 search,
                 order,
@@ -265,7 +265,7 @@ booksConnectionImpl({
   /*
    * Search conditions
    */
-  if (search !== undefined) {
+  if (search !== undefined && search !== null) {
       let arg = new searchArg(search);
       let arg_sequelize = arg.toSequelize();
       options['where'] = arg_sequelize;

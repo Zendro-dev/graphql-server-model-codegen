@@ -10,7 +10,7 @@ dog.prototype.researcher = async function({
     search
 }, context) {
     if (helper.isNotUndefinedAndNotNull(this.researcherId)) {
-        if (search === undefined) {
+        if (search === undefined || search === null) {
             return resolvers.readOneResearcher({
                 [models.researcher.idAttribute()]: this.researcherId
             }, context)
@@ -145,7 +145,7 @@ individual.prototype.transcript_countsFilter = function({
 module.exports.countAssociated_model = `
 static async countRecords(search) {
         let options = {};
-        if (search !== undefined) {
+        if (search !== undefined && search !== null) {
 
             //check
             if (typeof search !== 'object') {
@@ -195,7 +195,7 @@ AuthorsFilterImpl({
     }) {
         let options = {};
 
-        if (search !== undefined) {
+        if (search !== undefined && search !== null) {
             let arg = new searchArg(search);
             let arg_sequelize = arg.toSequelize();
             options['where'] = arg_sequelize;
@@ -232,7 +232,7 @@ countFilteredAuthorsImpl({
 
       let options = {};
 
-      if (search !== undefined) {
+      if (search !== undefined && search !== null) {
           let arg = new searchArg(search);
           let arg_sequelize = arg.toSequelize();
           options['where'] = arg_sequelize;
@@ -260,7 +260,7 @@ book.prototype.AuthorsFilter = async function({
     pagination
 }, context) {
       if (await checkAuthorization(context, 'Person', 'read') === true) {
-            await checkCountAndReduceRecordsLimit(search, context, 'AuthorsFilter', 'person');
+            await checkCountAndReduceRecordsLimit({search, pagination}, context, 'AuthorsFilter', 'person');
             return this.AuthorsFilterImpl({
                 search,
                 order,

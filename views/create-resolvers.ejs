@@ -78,7 +78,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = async function({search,order,pagination}, context){
       if (await checkAuthorization(context, '<%- associations_temp[i].target -%>', 'read') === true) {
-        await checkCountAndReduceRecordsLimit(search, context, '<%=associations_temp[i].name%>Filter', '<%- associations_temp[i].target_lc -%>');
+        await checkCountAndReduceRecordsLimit({search, pagination}, context, '<%=associations_temp[i].name%>Filter', '<%- associations_temp[i].target_lc -%>');
         return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -102,7 +102,7 @@ const associationArgsDef = {
        pagination
   }, context) {
       if (await checkAuthorization(context, '<%- associations_temp[i].target -%>', 'read') === true) {
-        await checkCountAndReduceRecordsLimit(search, context, '<%=associations_temp[i].name%>Connection', '<%- associations_temp[i].target_lc -%>');
+        await checkCountAndReduceRecordsLimit({search, pagination}, context, '<%=associations_temp[i].name%>Connection', '<%- associations_temp[i].target_lc -%>');
         return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -149,7 +149,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
     <% if (associations_one[i].holdsForeignKey) { %>
     if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
-        if (search === undefined) {
+        if (search === undefined || search === null) {
           return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
         } else {
           //build new search filter
@@ -336,7 +336,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Filter", '<%- associations_generic_many[i].target_lc -%>');
+      await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%=associations_generic_many[i].name%>Filter", '<%- associations_generic_many[i].target_lc -%>');
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -374,7 +374,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit(search, context, "<%=associations_generic_many[i].name%>Connection", '<%- associations_generic_many[i].target_lc -%>');
+      await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%=associations_generic_many[i].name%>Connection", '<%- associations_generic_many[i].target_lc -%>');
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -526,7 +526,7 @@ module.exports = {
    */
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
-          await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>");
+          await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%- namePl -%>");
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
           return await <%- nameLc -%>.readAll(search, order, pagination, benignErrorReporter);
       } else {
@@ -546,7 +546,7 @@ module.exports = {
    */
    <%- namePl -%>Connection: async function({search, order, pagination}, context){
          if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-           await checkCountAndReduceRecordsLimit(search, context, "<%- namePl -%>Connection");
+           await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%- namePl -%>Connection");
            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
            return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
        } else {
