@@ -14,67 +14,25 @@
 * @param {string} modelName The model to do the count
 */
 async function checkCountAndReduceRecordsLimit({search, pagination}, context, resolverName, modelName = '<%- nameLc -%>') {
-  let limit = undefined;
-  let offset = 0;
-  let nsearch = undefined;
-
-  /*
-   * Search check
-   */
-  if(search !== undefined && search !== null){
-    //check
-    if(typeof search !== 'object') throw new Error('Illegal "search" argument type, it must be an object.');
-    else nsearch = {...search};
+  //defaults
+  let inputPaginationValues = {
+    limit: undefined,
+    offset: 0,
+    search: undefined,
+    order: [ ["<%- idAttribute -%>", "ASC"] ],
   }
- 
-  /**
-   * Pagination options
-   */
-    if(pagination) {
-      /**
-       * Case: limit-offset pagination
-       */
-      if(pagination.limit !== undefined || pagination.offset !== undefined) {
-        limit = pagination.limit ? pagination.limit : undefined;
-        offset = pagination.offset ? pagination.offset : 0;
-      } else {
-        /**
-         * Case: cursor-based pagination
-         */
-        //check valid pagination arguments
-        let argsValid = (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-        if (!argsValid) {
-            throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-        }
-        let isForwardPagination = !(pagination.last !== undefined);
-        //forward
-        if(isForwardPagination) {
-          if(pagination.after) {
-            let decoded_cursor = JSON.parse(models[modelName].base64Decode(pagination.after));
-            nsearch = helper.parseOrderCursorGeneric(search, [ ["<%- idAttribute -%>", "ASC"] ], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor);
-          }
-          limit = pagination.first ? pagination.first : undefined;
-          offset = 0;
-        }else {//backward
-          if(pagination.before) {
-            let decoded_cursor = JSON.parse(models[modelName].base64Decode(pagination.before));
-            nsearch = helper.parseOrderCursorBeforeGeneric(search, [ ["<%- idAttribute -%>", "ASC"] ], decoded_cursor, "<%- idAttribute -%>", pagination.includeCursor);
-          }
-          limit = pagination.last ? pagination.last : undefined;
-          offset = 0;
-        }
-      }
-    }
 
+  //check search
+  helper.checkSearchArgument(search);
+  if(search) inputPaginationValues.search = {...search}; //copy
+
+  //get generic pagination values
+  let paginationValues = helper.getGenericPaginationValues(pagination, "<%- idAttribute -%>", inputPaginationValues);
   //get records count
-  let count = (await models[modelName].countRecords(nsearch));
-  
-  //calculate effective records count
-  let effectiveCount = count-offset;
-  if(limit !== undefined) {
-    effectiveCount = Math.min( count-offset, limit );
-  }
-
+  let count = (await models[modelName].countRecords(paginationValues.search));
+  //get effective records count
+  let effectiveCount = helper.getEffectiveRecordsCount(count, paginationValues.limit, paginationValues.offset);
+  //do check and reduce of record limit.
   helper.checkCountAndReduceRecordLimitHelper(effectiveCount, context, resolverName);
 }
 
