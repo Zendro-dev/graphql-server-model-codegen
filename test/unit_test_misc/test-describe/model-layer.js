@@ -154,7 +154,7 @@ module.exports.add_one_resolver = `
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
-            await createdBook.handleAssociations(inputSanitized, context);
+            await createdBook.handleAssociations(inputSanitized, benignErrorReporter);
             return createdBook;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -222,15 +222,6 @@ static updateOne(input) {
 `
 
 module.exports.update_one_resolver = `
-/**
- * updateBook - Check user authorization and update the record specified in the input argument
- * This function only handles attributes, not associations.
- * @see handleAssociations for further information.
- *
- * @param  {object} input   record to update and new info to update
- * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
- * @return {object}         Updated record
- */
 updateBook: async function(input, context) {
     let authorization = await checkAuthorization(context, 'Book', 'update');
     if (authorization === true) {
@@ -242,7 +233,7 @@ updateBook: async function(input, context) {
         }
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         let updatedBook = await book.updateOne(inputSanitized, benignErrorReporter);
-        await updatedBook.handleAssociations(inputSanitized, context);
+        await updatedBook.handleAssociations(inputSanitized, benignErrorReporter);
         return updatedBook;
     } else {
         throw new Error("You don't have authorization to perform this action");

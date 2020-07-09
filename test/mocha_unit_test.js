@@ -2050,12 +2050,7 @@ describe('Handle Errors in DDM', function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_resolver = await funks.generateJs('create-resolvers-ddm', opts);
     testCompare(generated_resolver, data_test.connections_dogs_resolver_ddm);
-
-    //let g_resolver = generated_resolver.replace(/\s/g, '');
-    //let test_resolver = data_test.connections_dogs_resolver_ddm.replace(/\s/g, '');
-    //expect(g_resolver).to.have.string(test_resolver);
   });
-  //testCompare(generated_resolver, );
 
   it('readAllCursor in cenzontle-webservice-adapter - dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_cenz_adapter_integration_test);

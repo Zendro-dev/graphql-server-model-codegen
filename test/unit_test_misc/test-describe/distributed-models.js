@@ -128,7 +128,7 @@ static readById(id, benignErrorReporter) {
 `
 
 module.exports.book_ddm_count = `
-static countRecords(search, authorizedAdapters, benignErrorReporter) {
+static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
         let authAdapters = [];
         /**
          * Differentiated cases:
@@ -144,6 +144,12 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
             authAdapters = Object.values(this.registeredAdapters);
         } else {
             authAdapters = Array.from(authorizedAdapters)
+        }
+
+        let searchAuthAdapters = [];
+
+        if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+            searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
         }
 
         //use default BenignErrorReporter if no BenignErrorReporter defined
@@ -168,7 +174,8 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
 
                 case 'sql-adapter':
                 case 'cenzontle-webservice-adapter':
-                    return adapter.countRecords(search, benignErrorReporter);
+                case 'cassandra-adapter':
+                    return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
                 case 'default':
                     throw new Error(\`Adapter type: '\${adapter.adapterType}' is not supported\`);
@@ -192,7 +199,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
 `
 
 module.exports.book_ddm_read_all = `
-static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
         let authAdapters = [];
         /**
          * Differentiated cases:
@@ -210,6 +217,12 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
             authAdapters = Array.from(authorizedAdapters)
         }
 
+        let searchAuthAdapters = [];
+
+        if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+            searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+        }
+
         //check valid pagination arguments
         let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
         if (!argsValid) {
@@ -218,8 +231,6 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 
         //use default BenignErrorReporter if no BenignErrorReporter defined
         benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
-
 
         let isForwardPagination = !pagination || !(pagination.last != undefined);
         let promises = authAdapters.map(adapter => {
@@ -242,6 +253,9 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
                 case 'sql-adapter':
                 case 'cenzontle-webservice-adapter':
                     return adapter.readAllCursor(search, order, pagination,benignErrorReporter );
+
+                case 'cassandra-adapter':
+                    return adapter.readAllCursor(search, pagination, searchAuthAdapters.includes(adapter.adapterName));
 
                 default:
                     throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
