@@ -1,5 +1,7 @@
 require('colors');
 var difftool = require('diff');
+const ws_expr = /\s/g;
+const verbose = false;
 
 module.exports = {
   diffByLine: function (actual, expected) {
@@ -8,23 +10,47 @@ module.exports = {
     var report = [];
 
     var lastRemoved = false;
+    var lastAdded = false;
+    var lastIdentical = false;
+    var beforeLastMatched = false;
     var lastValue = '';
 
     diff.forEach((item, i) => {
-      if (lastRemoved && item.added) {
-        if (lastValue.replace(/\s/g, '') != item.value.replace(/\s/g, '')) { //skip whitespace-only differences
-          report.push('Actual:   '+lastValue['red']);
-          report.push('Expected: '+item.value['grey']);
+      var identical = lastValue.replace(ws_expr, '') == item.value.replace(ws_expr, '');
+
+      if (lastRemoved && !item.added)
+      {
+        if (beforeLastMatched && lastValue.replace(ws_expr, '') != '') {
+          report.push('Unexpected: '+lastValue['red']);
+        } else if (verbose) {
+          report.push(lastValue['grey']);
         }
       }
-      else if (!item.added && !item.removed) {
+      if (item.removed) {
+        ;
+      }
+      else if (identical || (!item.added && !item.removed)) {
         report.push(item.value['green']);
       }
+      else if (lastRemoved && item.added) {
+        report.push('Actual:   '+lastValue['red']);
+        report.push('Expected: '+item.value['blue']);
+      }
+      else if (item.added && item.value.replace(ws_expr, '') != '') {
+        report.push('Missing: '+item.value['red']);
+      }
+      else if (verbose) {
 
+      }
+
+      beforeLastMatched = ((!lastAdded && !lastRemoved) || lastIdentical) && i > 2;
       lastRemoved = item.removed;
+      lastAdded = item.added;
       lastValue = item.value;
+      lastIdentical = identical;
     });
 
     return report.join('');
-  }
+  },
+  expr_all_whitespace: ws_expr
 }
