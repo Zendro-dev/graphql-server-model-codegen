@@ -591,7 +591,13 @@ getIndefiniteArticle = function(name) {
 getStringAttributesInCassandraSchema = function(attributes) {
   let res = [];
   for (key in attributes) {
-    if (attributes[key].toUpperCase() === 'STRING') {
+    let attr = attributes[key];
+    if (typeof attr != 'string') { //assume a description object
+      if (attr['type'].toUpperCase() === 'STRING') {
+          res.push(`'${key}'`);
+      }
+    }
+    else if (attr.toUpperCase() === 'STRING') {
       res.push(`'${key}'`);
     }
   }
