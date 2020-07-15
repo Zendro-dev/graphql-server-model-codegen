@@ -398,8 +398,8 @@ const associationArgsDef = {
  */
 -%>
 <%- include('./includes/handleAssociations'); -%>
-<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%>
-<%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "add", ddm: false}); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "remove", ddm: false}); -%>
 
 <%#
 /**

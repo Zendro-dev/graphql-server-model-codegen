@@ -162,6 +162,15 @@ input order<%- nameCp -%>Input{
   order: Order
 }
 
+<%_for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  <%_ if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+input bulkAssociate<%- nameCp -%>With<%-associationsArguments["to_one"][i].target_cp-%>Input{
+  <%- idAttribute -%>: ID!
+  <%-associationsArguments["to_one"][i].targetKey-%>: ID!
+}
+  <%_} -%>
+<%_}-%>
+
 <%#
 /**
  * Section 5
@@ -173,7 +182,6 @@ type Query {
   count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
   vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
   csvTableTemplate<%- nameCp -%>: [String]
-
   <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput ): <%- nameCp -%>Connection
 }
 
@@ -187,6 +195,8 @@ type Query {
   add<%- nameCp -%>(<%if(!defaultId){-%><%- idAttribute -%>: ID!,<%}-%> <%- editableAttributesStr -%> <%for(var key in associationsArguments.schema_attributes.one){-%>, add<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.generic_one){-%>, add<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%>, add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%> <%for(var key in associationsArguments.schema_attributes.generic_many){-%>, add<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID]<%}-%>, skipAssociationsExistenceChecks:Boolean = false): <%- name %>!
   update<%- nameCp -%>(<%- idAttribute -%>: ID!, <%- editableAttributesStr -%> <%for(var key in associationsArguments.schema_attributes.one){-%>, add<%= associationsArguments.schema_attributes.one[key][2]%>:ID, remove<%= associationsArguments.schema_attributes.one[key][2]%>:ID <%}-%> <%for(var key in associationsArguments.schema_attributes.generic_one){-%>, add<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID, remove<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID <%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%>, add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID], remove<%= associationsArguments.schema_attributes.many[key][2]%>:[ID] <%}-%> <%for(var key in associationsArguments.schema_attributes.generic_many){-%>, add<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID], remove<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID] <%}-%>, skipAssociationsExistenceChecks:Boolean = false): <%- name %>!
 delete<%- nameCp -%>(<%- idAttribute -%>: ID!): String!
-bulkAdd<%- nameCp -%>Csv: String }
+bulkAdd<%- nameCp -%>Csv: String
+<%# bulkAssociatons -%>
+<%_for(let i=0; i < associationsArguments["to_one"].length; i++){-%><%_ if (associationsArguments["to_one"][i].holdsForeignKey){-%>bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput: [bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input], skipAssociationsExistenceChecks:Boolean = false): String!<%_}-%><%_}-%>}}
 
 `;

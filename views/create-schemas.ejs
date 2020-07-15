@@ -201,5 +201,5 @@ type <%- nameCp -%>Edge{
     delete<%- nameCp -%>(<%- idAttribute -%>: ID!): String!
     bulkAdd<%- nameCp -%>Csv: String!
     <%# bulkAssociatons -%>
-    <%_for(let i=0; i < associationsArguments["to_one"].length; i++){-%><%_ if (associationsArguments["to_one"][i].holdsForeignKey){-%>bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociateInput: [bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input],  skipAssociationsExistenceChecks:Boolean = false): String!<%_}-%><%_}-%>}
+    <%_for(let i=0; i < associationsArguments["to_one"].length; i++){-%><%_ if (associationsArguments["to_one"][i].holdsForeignKey){-%>bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput: [bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input], skipAssociationsExistenceChecks:Boolean = false): String!<%_}-%><%_}-%>}
 `;

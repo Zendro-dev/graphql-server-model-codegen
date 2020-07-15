@@ -1,0 +1,26 @@
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+
+    <% if(storageType === 'sql'){-%>
+      static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput){
+        let mappedForeignKeys = helper.mapForeignKeystoPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
+        var promises = [];
+        mappedForeignKeys.forEach(({<%-associationsArguments["to_one"][i].targetKey%>, <%- idAttribute-%>}) => {
+            promises.push(super.update({
+                accessionId: <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
+                }, {
+                where: {    
+                  <%- idAttribute-%>: <%- idAttribute-%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>
+                }
+            }));
+        })
+        await Promise.all(promises);
+        return "Records successfully updated"
+      }
+    <%}%>
+
+
+    <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
+    <%}%>
+  <%}%>
+<%}%>
