@@ -271,7 +271,7 @@ static bulkAddCsv(context){
                 });
 
                 email.sendEmail(helpersAcl.getTokenFromContext(context).email,
-                    'ScienceDB batch add',
+                    'Zendro batch add',
                     'Your data has been successfully added to the database.',
                     attach).then(function(info) {
                     fileTools.deleteIfExists(addedZipFilePath);
@@ -288,7 +288,7 @@ static bulkAddCsv(context){
             fs.unlinkSync(tmpFile);
         }).catch((error) => {
             email.sendEmail(helpersAcl.getTokenFromContext(context).email,
-                'ScienceDB batch add', \`\${error.message}\`).then(function(info) {
+                'Zendro batch add', \`\${error.message}\`).then(function(info) {
                 console.error(info);
             }).catch(function(err) {
                 console.error(err);

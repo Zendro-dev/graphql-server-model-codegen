@@ -1,6 +1,6 @@
 # Code-generator
 
-Command line utility to auto-generate the structure files that [this server](https://github.com/ScienceDb/graphql-server)
+Command line utility to auto-generate the structure files that [this server](https://github.com/Zendro/graphql-server)
 will use to perform CRUD operations for each model created.
 
 ## Set up:
@@ -82,7 +82,7 @@ In the same directory of this repository run:
 ```
 $ code-generator -f ./example_json_files -o /your_path_directory
 ```
-If you want to complete the example with the [server](https://github.com/ScienceDb/graphql-server)
+If you want to complete the example with the [server](https://github.com/Zendro/graphql-server)
 make ```/your_path_directory``` the same directory where the server repository is stored.
 
 NOTE: For displaying the explanation about usage we can run the help flag:
@@ -297,7 +297,7 @@ Example:
 ```
 
 ## NOTE:
-THE SAME DATA MODELS DESCRIPTION(.json files) WILL BE USEFUL FOR GENERATING BOTH, THE BACKEND DESCRIBED HERE AND [THE FRONTEND OR GUI](https://github.com/ScienceDb/single-page-app-codegen).
+THE SAME DATA MODELS DESCRIPTION(.json files) WILL BE USEFUL FOR GENERATING BOTH, THE BACKEND DESCRIBED HERE AND [THE FRONTEND OR GUI](https://github.com/Zendro/single-page-app-codegen).
 
 Fields *`label`* and *`sublabel`* in the specification are only needed by the GUI generator, but backend generator will only read required information, therefore extra fields such as *`label`* and *`sublabel`* will be ignored by the backend generator.
 Example:
