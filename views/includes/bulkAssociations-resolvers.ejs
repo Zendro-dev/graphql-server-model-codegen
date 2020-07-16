@@ -14,7 +14,7 @@
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({<%_associationsArguments["to_one"][i].targetKey%>}) => <%_associationsArguments["to_one"][i].targetKey%>)), models.<%_associationsArguments["to_one"][i].target_lc%>);
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({<%_idAttribute%> }) => <%idAttribute%>)), <%_nameLc%>);
       }
-      return await <%_nameLc%>.bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput.bulkAssociationInput, benignErrorReporter);
+      return await <%_nameLc%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput.bulkAssociationInput, benignErrorReporter);
     }
   <%_}%>
 <%_}%>
