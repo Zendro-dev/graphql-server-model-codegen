@@ -717,6 +717,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   <%- include('./includes/create-models-fieldMutations', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
   /**
    * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.

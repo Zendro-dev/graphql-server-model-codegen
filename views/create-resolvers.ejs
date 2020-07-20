@@ -614,6 +614,7 @@ module.exports = {
  * bulkAddModelCsv()
  * updateModel()
  * deleteModel()
+ * bulkAssociate
  */
 -%>
   /**
@@ -703,6 +704,9 @@ module.exports = {
         }
   },
 
+  <%- include('./includes/bulkAssociations-resolvers', {op: "add"}); -%>
+  <%- include('./includes/bulkAssociations-resolvers', {op: "remove"}); -%>
+  
   /**
    * csvTableTemplate<%- nameCp-%> - Returns table's template
    *

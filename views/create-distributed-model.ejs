@@ -51,6 +51,26 @@ module.exports = class <%- name -%>{
     return responsibleAdapter[0];
   }
 
+  /**
+   * mapBulkAssociationInputToAdapters - maps the input of a bulkAssociate to the responsible adapters 
+   * adapter on adapter/index.js. Each key of the object will have
+   *
+   * @param {Array} bulkAssociationInput Array of "edges" between two records to be associated
+   * @return {object} mapped "edge" objects ({id_model1:<id1>, idmodel2:<id2>}) to the adapter responsible for the primary Key
+   */
+  static mapBulkAssociationInputToAdapters(bulkAssociationInput){
+    let mappedInput = {}
+    bulkAssociationInput.map((idMap) => {
+      if(idMap.<%- idAttribute_%>  === undefined && idMap.associatedRecordId !== undefined){
+        idMap['<%- idAttribute_%>'] = idMap['associatedRecordId'];
+        delete idMap['associatedRecordId'];
+      }
+      let responsibleAdapter = this.adapterForIri(idMap.<%- idAttribute_%>);
+      mappedInput[responsibleAdapter] === undefined ? mappedInput[responsibleAdapter] = [idMap] : mappedInput[responsibleAdapter].push(idMap)
+    });
+    return mappedInput;
+  }
+
   static readById(id, benignErrorReporter) {
     if(id!==null){
       let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
@@ -438,10 +458,12 @@ module.exports = class <%- name -%>{
    * is stored in this model. Also for generic-to-one and generic-to-many
    * associations.
    */
-  -%>
+  _%>
   <%- include('./includes/create-ddm-models-fields-mutations', {op: "add"}); %>
   <%- include('./includes/create-ddm-models-fields-mutations', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
 }
