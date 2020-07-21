@@ -3,7 +3,7 @@
     /**
     * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
     *
-    * @param {Id | Array}   <%- idAttribute-%>   IdAttribute(s) of the root model to be updated
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
     */
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {

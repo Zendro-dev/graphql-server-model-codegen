@@ -12,17 +12,14 @@
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput){
         let mappedForeignKeys = helper.mapForeignKeystoPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
         var promises = [];
-        mappedForeignKeys.forEach(({<%-associationsArguments["to_one"][i].targetKey%>, <%- idAttribute-%>}) => {
-            promises.push(super.update({
-                accessionId: <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
-                }, {
-                where: {    
-                  <%- idAttribute-%>: <%- idAttribute-%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>
-                }
-            }));
+        mappedForeignKeys.forEach(({<%-associationsArguments["to_one"][i].targetKey%>, <%- idAttribute_%>}) => {promises.push(super.update({
+              accessionId: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
+              }, { where: { <%- idAttribute-%>: <%- idAttribute-%><% if (op == 'remove') { _%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>
+              }
+          }));
         })
         await Promise.all(promises);
-        return "Records successfully updated"
+        return "Records successfully updated!"
       }
     <%}_%>
     <% if(storageType === 'distributed-data-model'){-%>
@@ -33,7 +30,7 @@
             promises.push(adapters[responsibleAdapter].bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter))
         });
         await Promise.all(promises);
-        return "Records successfully associated!";
+        return "Records successfully updated!";
       }
     <%}_%>
     <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter' || storageType === 'zendro-webservice'){_%>
@@ -56,7 +53,7 @@
             // check if data was send
 
             if (response && response.data && response.data.data) {
-                return response.data.data. bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>;
+                return response.data.data.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>;
             } else {
                 throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
             }
