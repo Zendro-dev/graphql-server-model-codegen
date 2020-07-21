@@ -1,0 +1,51 @@
+module.exports = {
+  aclRules: [
+    //administrator
+    {
+      roles: 'administrator',
+      allows: [{
+        resources: [
+<%for( let i=0; i<adminModels.length; i++ ){-%>
+          '<%- adminModels[i].nameLc _%>',
+<%}-%>
+        ],
+        permissions: '*'
+      }]
+    },
+
+    //models
+<%for( let i=0; i<models.length; i++ ){-%>
+    /**
+     * Model: <%- models[i].nameLc %>
+     */
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].nameLc _%>',
+        permissions: 'create'
+      }]
+    },
+    {
+      roles: 'reader',
+      allows: [{
+        resources: '<%- models[i].nameLc _%>',
+        permissions: 'read'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].nameLc _%>',
+        permissions: 'update'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].nameLc _%>',
+        permissions: 'delete'
+      }]
+    },
+<%}-%>
+  ]
+}

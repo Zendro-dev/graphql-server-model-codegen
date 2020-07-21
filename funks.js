@@ -452,6 +452,26 @@ writeIndexResolvers = async function(dir_write, models){
   });
 }
 
+writeAcls = async function(dir_write, models){
+  //set file name
+  let file_name = dir_write + '/acl_rules.js';
+  //set names
+  let modelsNames = models.map(item => ({nameLc: item[2]}));
+  let adminModelsNames = ['role', 'user', 'role_to_user'].map(item => ({nameLc: item}));
+  //generate
+  await generateSection('acl_rules', {models: modelsNames, adminModels: adminModelsNames}, file_name)
+  .then(() => {
+    //success
+    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+  })
+  .catch((e) => {
+    //error
+    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+    console.log(e);
+    throw e;
+  });
+}
+
 /**
  * convertToType - Generate a string correspondant to the model type as needed for graphql schema.
  *
@@ -826,6 +846,7 @@ writeCommons = async function(dir_write, models){
   console.log(path.join(dir_write,'models'))
   writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
+  await writeAcls(dir_write, models);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
@@ -1105,7 +1126,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
     });
 
     //save data for writeCommons
-    models.push([opts.name , opts.namePl]);
+    models.push([opts.name , opts.namePl, opts.nameLc]);
     };
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
