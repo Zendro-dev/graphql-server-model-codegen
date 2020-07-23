@@ -10,7 +10,7 @@
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { _%>
     <% if(storageType === 'sql' || storageType === 'sql-adapter'){_%>
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput){
-        let mappedForeignKeys = helper.mapForeignKeystoPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
+        let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
         var promises = [];
         mappedForeignKeys.forEach(({<%-associationsArguments["to_one"][i].targetKey%>, <%- idAttribute_%>}) => {promises.push(super.update({
               accessionId: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>

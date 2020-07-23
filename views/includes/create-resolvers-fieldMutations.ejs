@@ -20,7 +20,7 @@
   */
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input, benignErrorReporter) {
     let bulkAssociationInput = input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.map(associatedRecordId => {return {<%-associationsArguments["to_many"][i].targetKey-%>: this.getIdValue(), associatedRecordId: associatedRecordId}});
-    await models.<%-associationsArguments["to_many"][i].target_lc-%>.bulkAssociate<%-associationsArguments["to_many"][i].name_cp-%>With<%-nameCp-%>(bulkAssociationInput, benignErrorReporter);
+    await models.<%-associationsArguments["to_many"][i].target_lc-%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-associationsArguments["to_many"][i].target_cp-%>With<%-nameCp-%>(bulkAssociationInput, benignErrorReporter);
   }
 
 <%}-%>
