@@ -61,10 +61,6 @@ module.exports = class <%- name -%>{
   static mapBulkAssociationInputToAdapters(bulkAssociationInput){
     let mappedInput = {}
     bulkAssociationInput.map((idMap) => {
-      if(idMap.<%- idAttribute_%>  === undefined && idMap.associatedRecordId !== undefined){
-        idMap['<%- idAttribute_%>'] = idMap['associatedRecordId'];
-        delete idMap['associatedRecordId'];
-      }
       let responsibleAdapter = this.adapterForIri(idMap.<%- idAttribute_%>);
       mappedInput[responsibleAdapter] === undefined ? mappedInput[responsibleAdapter] = [idMap] : mappedInput[responsibleAdapter].push(idMap)
     });

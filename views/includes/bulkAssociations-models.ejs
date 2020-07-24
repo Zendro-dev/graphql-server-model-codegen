@@ -13,7 +13,7 @@
         let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
         var promises = [];
         mappedForeignKeys.forEach(({<%-associationsArguments["to_one"][i].targetKey%>, <%- idAttribute_%>}) => {promises.push(super.update({
-              accessionId: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
+        <%-associationsArguments["to_one"][i].targetKey-%>: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
               }, { where: { <%- idAttribute-%>: <%- idAttribute-%><% if (op == 'remove') { _%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>
               }
           }));
@@ -35,18 +35,18 @@
     <%}_%>
     <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter' || storageType === 'zendro-webservice'){_%>
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput, benignErrorReporter){
-        let query = `mutation  bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>($bulkAssociationInput: [bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input]){
+        let query = `mutation  bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>($bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input]){
           bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput: $bulkAssociationInput, skipAssociationsExistenceChecks: true) 
         }`
         try {
             // Send an HTTP request to the remote server
-            let response = await axios.post(remoteCenzontleURL, {
+            let response = await axios.post(remoteZendroURL, {
                 query: query,
                 variables: {bulkAssociationInput: bulkAssociationInput}
             });
             //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
             if (helper.isNonEmptyArray(response.data.errors)) {
-                benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteCenzontleURL));
+                benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
             }
             // STATUS-CODE is 200
             // NO ERROR as such has been detected by the server (Express)
@@ -55,11 +55,11 @@
             if (response && response.data && response.data.data) {
                 return response.data.data.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>;
             } else {
-                throw new Error(`Invalid response from remote cenz-server: ${remoteCenzontleURL}`);
+                throw new Error(`Invalid response from remote cenz-server: ${remoteZendroURL}`);
             }
         } catch (error) {
             //handle caught errors
-            errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteCenzontleURL);
+            errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
         }
     }
     <%}_%>
