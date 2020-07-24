@@ -1,4 +1,5 @@
 const expect = require('chai').expect;
+const assert = require('chai').assert;
 //const test = require('./unit_test_misc/data_test');
 const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
@@ -8,8 +9,19 @@ const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const models_generic = require('./unit_test_misc/data_models_generic');
 const requireFromString = require('require-from-string');
-
+const helpers = require('./unit_test_misc/helpers/reporting_helpers')
 //const components_code = require('./unit_test_misc/components_code');
+
+const testCompare = function(actual, expected, errorMessage = 'Generated output differs from expected') {
+  let act = actual.replace(/\s/g, '');
+  let exp = expected.replace(/\s/g, '');
+  try {
+    expect(act, errorMessage).to.have.string(exp);
+  } catch (e) {
+    report = helpers.diffByLine(actual, expected);
+    assert.fail(errorMessage + ':\n' + report);
+  }
+}
 
 describe('Lower-case models', function(){
 
@@ -2393,4 +2405,25 @@ describe('Handle Errors in DDM', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
+});
+
+describe('bulkAssociation', function(){
+  let data_test = require('./unit_test_misc/test-describe/bulkAssociation');
+  it('schema mutations - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_schema =await funks.generateJs('create-schemas', opts);
+    testCompare(generated_schema, data_test.bulkAssociation_schema_mutation);
+    // let g_model = generated_model.replace(/\s/g, '');
+    // let test_model = data_test.bulkAssociation_schema_mutation.replace(/\s/g, '');
+    // expect(g_model).to.have.string(test_model);
+  });
+
+  it('schema inputType - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model =await funks.generateJs('create-schemas', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.bulkAssociation_schema_inputType.replace(/\s/g, '');
+    expect(g_model).to.have.string(test_model);
+    
+  });
 });
