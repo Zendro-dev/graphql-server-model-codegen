@@ -21,7 +21,7 @@
   */
   static async <%- op -%>_<%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%>(record, <%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>){
     const updated = await sequelize.transaction(async (transaction) => {
-    return await record.<% if (op === 'remove') { %> <%-op-%><% } else { %>set<%}%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>(<%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>, {transaction: transaction});
+    return await record.<%-op-%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>(<%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>, {transaction: transaction});
     });
     return updated;
   }
