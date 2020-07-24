@@ -475,7 +475,7 @@ convertToType = function(many, model_name){
  * @return {object}           Object with all extra info that will be needed to create files with templates.
  */
 module.exports.getOptions = function(dataModel){
-  
+
   let opts = {
       name : dataModel.model,
       nameCp: capitalizeString(dataModel.model),
@@ -509,6 +509,7 @@ module.exports.getOptions = function(dataModel){
   }
 
   opts['definition'] = stringify_obj(dataModel);
+  opts['selfAssociation'] = selfAssociation(dataModel.associations, dataModel.model);
   delete opts.attributes[opts.idAttribute];
 
   return opts;
@@ -569,6 +570,27 @@ getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute
   }
   return editable_attributes;
 }
+
+selfAssociation = function(associations, model_name){
+  let result = {
+    value: false,
+  }
+
+  if(associations!==undefined){
+    Object.entries(associations).forEach(([name, association]) => {
+        if(association.target === model_name ){
+          result[ association.type ] = name;
+        }
+      });
+  }
+
+  if(result.to_many!== undefined && result.to_one !== undefined){
+    result.value = true;
+  }
+
+  return result;
+}
+
 
 /**
  * parseAssociations - Parse associations of a given data model.
