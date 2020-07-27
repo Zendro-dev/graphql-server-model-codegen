@@ -2869,3 +2869,131 @@ describe(
     });
 
   });
+
+  describe('bulkAssociation', function() {
+    // set up the environment
+    before(async function(){
+      //measurements for sql and zendro-server tests
+      let res = itHelpers.request_graph_ql_post('mutation{addMeasurement(measurement_id:"m1" ){measurement_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addMeasurement(measurement_id:"m2" ){measurement_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addMeasurement(measurement_id:"m3" ){measurement_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addMeasurement(measurement_id:"m4" ){measurement_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"a1" ){accession_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addAccession(accession_id:"a2" ){accession_id}}');
+      expect(res.statusCode).to.equal(200);
+      //dogs for distributed tests
+      res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance1-d01") {dog_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance1-d02") {dog_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-d01") {dog_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation {addDog(dog_id: "instance2-d02") {dog_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance1-p01") {person_id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation {addPerson(person_id: "instance2-p01") {person_id}}');
+      expect(res.statusCode).to.equal(200);
+    });
+
+    //clean up records
+    after(async function() {
+      itHelpers.request_graph_ql_post('mutation{deleteMeasurement(measurement_id:"m1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteMeasurement(measurement_id:"m2")}');
+      itHelpers.request_graph_ql_post('mutation{deleteMeasurement(measurement_id:"m3")}');
+      itHelpers.request_graph_ql_post('mutation{deleteMeasurement(measurement_id:"m4")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAccession(accession_id:"a1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAccession(accession_id:"a2")}');
+      itHelpers.request_graph_ql_post('mutation {deleteDog(dog_id: "instance1-d01")}');
+      itHelpers.request_graph_ql_post('mutation {deleteDog(dog_id: "instance1-d02")}');
+      itHelpers.request_graph_ql_post('mutation {deleteDog(dog_id: "instance2-d01")}');
+      itHelpers.request_graph_ql_post('mutation {deleteDog(dog_id: "instance2-d02")}');
+      itHelpers.request_graph_ql_post('mutation {deletePerson(person_id: "instance1-p01")}');
+      itHelpers.request_graph_ql_post('mutation {deletePerson(person_id: "instance2-p01")}');
+    });
+
+    it('01. bulkAssociation - sql', function() {
+      let res = itHelpers.request_graph_ql_post('mutation{bulkAssociateMeasurementWithAccession(bulkAssociationInput: [{measurement_id:"m1", accessionId: "a1"},{measurement_id:"m2", accessionId: "a1"},{measurement_id:"m3", accessionId: "a2"},{measurement_id:"m4", accessionId: "a2"}] )}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data.bulkAssociateMeasurementWithAccession).equal("Records successfully updated!");
+      //check if records have been correctly updated
+      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[{"measurement_id":"m1"},{"measurement_id":"m2"}]},{"accession_id":"a2","measurementsFilter":[{"measurement_id":"m3"},{"measurement_id":"m4"}]}]}
+      });
+    });
+
+    it('02. bulkDisAssociation - sql', function() {
+      let res = itHelpers.request_graph_ql_post('mutation{bulkDisAssociateMeasurementWithAccession(bulkAssociationInput: [{measurement_id:"m1", accessionId: "a1"},{measurement_id:"m2", accessionId: "a1"},{measurement_id:"m3", accessionId: "a2"},{measurement_id:"m4", accessionId: "a2"}] )}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data.bulkDisAssociateMeasurementWithAccession).equal("Records successfully updated!");
+      //check if records have been correctly updated
+      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[]},{"accession_id":"a2","measurementsFilter":[]}]}
+      });
+    });
+
+    it('03. bulkAssociation - zendro-server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{bulkAssociateMeasurementWithAccession(bulkAssociationInput: [{measurement_id:"m1", accessionId: "a1"},{measurement_id:"m2", accessionId: "a1"},{measurement_id:"m3", accessionId: "a2"},{measurement_id:"m4", accessionId: "a2"}] )}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data.bulkAssociateMeasurementWithAccession).equal("Records successfully updated!");
+      //check if records have been correctly updated
+      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[{"measurement_id":"m1"},{"measurement_id":"m2"}]},{"accession_id":"a2","measurementsFilter":[{"measurement_id":"m3"},{"measurement_id":"m4"}]}]}
+      });
+    });
+
+    it('04. bulkDisAssociation - zendro-server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{bulkDisAssociateMeasurementWithAccession(bulkAssociationInput: [{measurement_id:"m1", accessionId: "a1"},{measurement_id:"m2", accessionId: "a1"},{measurement_id:"m3", accessionId: "a2"},{measurement_id:"m4", accessionId: "a2"}] )}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data.bulkDisAssociateMeasurementWithAccession).equal("Records successfully updated!");
+      //check if records have been correctly updated
+      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[]},{"accession_id":"a2","measurementsFilter":[]}]}
+      });
+    });
+
+    it('05. bulkAssociation - ddm', function() {
+      let res = itHelpers.request_graph_ql_post('mutation{bulkAssociateDogWithPerson(bulkAssociationInput: [{dog_id:"instance1-d01", person_id: "instance1-p01"},{dog_id:"instance2-d01", person_id: "instance1-p01"},{dog_id:"instance1-d02", person_id: "instance2-p01"},{dog_id:"instance2-d02", person_id: "instance2-p01"}] )}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data.bulkAssociateDogWithPerson).equal("Records successfully updated!");
+      //check if records have been correctly updated
+      res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id dogsConnection{edges{node{dog_id}}}}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-p01","dogsConnection":{"edges":[{"node":{"dog_id":"instance1-d01"}},{"node":{"dog_id":"instance2-d01"}}]}}},{"node":{"person_id":"instance2-p01","dogsConnection":{"edges":[{"node":{"dog_id":"instance1-d02"}},{"node":{"dog_id":"instance2-d02"}}]}}}]}}
+      });
+    });
+
+    it('06. bulkDisAssociation - ddm', function() {
+      let res = itHelpers.request_graph_ql_post('mutation{bulkDisAssociateDogWithPerson(bulkAssociationInput: [{dog_id:"instance1-d01", person_id: "instance1-p01"},{dog_id:"instance2-d01", person_id: "instance1-p01"},{dog_id:"instance1-d02", person_id: "instance2-p01"},{dog_id:"instance2-d02", person_id: "instance2-p01"}] )}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data.bulkDisAssociateDogWithPerson).equal("Records successfully updated!");
+      //check if records have been correctly updated
+      res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id dogsConnection{edges{node{dog_id}}}}}}}');
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-p01","dogsConnection":{"edges":[]}}},{"node":{"person_id":"instance2-p01","dogsConnection":{"edges":[]}}}]}}
+      });
+    });
+
+
+  });

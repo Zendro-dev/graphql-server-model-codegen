@@ -33,7 +33,7 @@
         return "Records successfully updated!";
       }
     <%}_%>
-    <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter' || storageType === 'zendro-webservice'){_%>
+    <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter' || storageType === 'zendro-server'){_%>
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput, benignErrorReporter){
         let query = `mutation  bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>($bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input]){
           bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput: $bulkAssociationInput, skipAssociationsExistenceChecks: true) 
