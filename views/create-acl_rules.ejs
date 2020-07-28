@@ -6,7 +6,7 @@ module.exports = {
       allows: [{
         resources: [
 <%for( let i=0; i<adminModels.length; i++ ){-%>
-          '<%- adminModels[i].nameLc _%>',
+          '<%- adminModels[i].name _%>',
 <%}-%>
         ],
         permissions: '*'
@@ -16,33 +16,33 @@ module.exports = {
     //models
 <%for( let i=0; i<models.length; i++ ){-%>
     /**
-     * Model: <%- models[i].nameLc %>
+     * Model: <%- models[i].name %>
      */
     {
       roles: 'editor',
       allows: [{
-        resources: '<%- models[i].nameLc _%>',
+        resources: '<%- models[i].name _%>',
         permissions: 'create'
       }]
     },
     {
       roles: 'reader',
       allows: [{
-        resources: '<%- models[i].nameLc _%>',
+        resources: '<%- models[i].name _%>',
         permissions: 'read'
       }]
     },
     {
       roles: 'editor',
       allows: [{
-        resources: '<%- models[i].nameLc _%>',
+        resources: '<%- models[i].name _%>',
         permissions: 'update'
       }]
     },
     {
       roles: 'editor',
       allows: [{
-        resources: '<%- models[i].nameLc _%>',
+        resources: '<%- models[i].name _%>',
         permissions: 'delete'
       }]
     },

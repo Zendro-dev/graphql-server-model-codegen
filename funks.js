@@ -456,8 +456,8 @@ writeAcls = async function(dir_write, models, adapters){
   //set file name
   let file_name = dir_write + '/acl_rules.js';
   //set names
-  let modelsNames = models.map(item => ({nameLc: item[2]}));
-  let adminModelsNames = ['role', 'user', 'role_to_user'].map(item => ({nameLc: item}));
+  let modelsNames = models.map(item => ({name: item[0]}));
+  let adminModelsNames = ['role', 'user', 'role_to_user'].map(item => ({name: item}));
   //generate
   await generateSection('acl_rules', {models: modelsNames, adminModels: adminModelsNames, adapters}, file_name)
   .then(() => {
