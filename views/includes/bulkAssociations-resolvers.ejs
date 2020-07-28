@@ -1,20 +1,21 @@
 <%_for(let i=0; i < associationsArguments["to_one"].length; i++){_%>
   <%_ if (associationsArguments["to_one"][i].holdsForeignKey){_%>
     /**
-     * bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%> - bulk<% if(op === 'remove'){ %>Dis<% } %>Associaton resolver of given ids
+     * bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%> - bulk<% if(op === 'remove'){ %>Dis<% } %>Associaton resolver of given ids
      *
      * @param  {array} bulkAssociationInput Array of associations to <%- op %> , 
      * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
      * @return {string} returns message on success
      */
-    bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>: async function(bulkAssociationInput, context){
+    bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>: async function(bulkAssociationInput, context){
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      //if specified, check existence of the unique given ids
+      // TODO Recordlimit check
+      // if specified, check existence of the unique given ids
       if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({<%-associationsArguments["to_one"][i].targetKey_%>}) => <%-associationsArguments["to_one"][i].targetKey_%>)), models.<%-associationsArguments["to_one"][i].target_lc_%>);
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({<%-idAttribute_%> }) => <%-idAttribute_%>)), <%-nameLc_%>);
       }
-      return await <%-nameLc%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput.bulkAssociationInput, benignErrorReporter);
+      return await <%-nameLc%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput.bulkAssociationInput, benignErrorReporter);
     },
   <%_}_%>
 <%_}_%>

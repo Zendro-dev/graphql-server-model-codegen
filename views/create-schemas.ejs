@@ -167,7 +167,7 @@ type <%- nameCp -%>Edge{
   }
 
   <%_for(let i=0; i < associationsArguments["to_one"].length; i++){_%><%_ if (associationsArguments["to_one"][i].holdsForeignKey) { _%>
-  input bulkAssociation<%- nameCp -%>With<%-associationsArguments["to_one"][i].target_cp-%>Input{
+  input bulkAssociation<%- nameCp -%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>Input{
     <%- idAttribute -%>: ID!
     <%-associationsArguments["to_one"][i].targetKey-%>: ID!
   }<%_} _%><%_}%>
@@ -200,7 +200,7 @@ type <%- nameCp -%>Edge{
     bulkAdd<%- nameCp -%>Csv: String!
     <%# bulkAssociatons -%>
     <%_for(let i=0; i < associationsArguments["to_one"].length; i++){_%><%_if (associationsArguments["to_one"][i].holdsForeignKey){_%>
-bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input], skipAssociationsExistenceChecks:Boolean = false): String!
-    bulkDisAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>(bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].target_cp-%>Input], skipAssociationsExistenceChecks:Boolean = false): String!
+bulkAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>Input], skipAssociationsExistenceChecks:Boolean = false): String!
+    bulkDisAssociate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>Input], skipAssociationsExistenceChecks:Boolean = false): String!
     <%_}-%><%_}-%>  }
 `;
