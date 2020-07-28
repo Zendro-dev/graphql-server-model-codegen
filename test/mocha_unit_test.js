@@ -1335,6 +1335,7 @@ describe('Parse associations', function() {
             "type": "to_one",
             "target": "individual",
             "targetKey": "individual_id",
+            "targetKey_cp": "Individual_id",
             "keyIn": "transcript_count",
             "targetStorageType": "sql",
             "name": "individual",
@@ -1392,6 +1393,7 @@ describe('Parse associations', function() {
           "target": "transcript_count",
           "keyIn": "transcript_count",
           "targetKey": "individual_id",
+          "targetKey_cp": "Individual_id",
           "targetStorageType": "sql",
           "name": "transcript_counts",
           "name_lc": "transcript_counts",
@@ -1450,6 +1452,7 @@ describe('Parse associations', function() {
           "type": "to_many_through_sql_cross_table",
           "target": "Project",
           "targetKey": "projectId",
+          "targetKey_cp": "ProjectId",
           "sourceKey": "researcherId",
           "keysIn": "project_to_researcher",
           "targetStorageType": "sql",
@@ -1519,6 +1522,7 @@ describe('Parse associations', function() {
           "type": "to_many",
           "target": "Dog",
           "targetKey": "personId",
+          "targetKey_cp": "PersonId",
           "keyIn": "Dog",
           "targetStorageType": "sql",
           "name": "dogs",
@@ -1538,6 +1542,7 @@ describe('Parse associations', function() {
           "type": "to_many_through_sql_cross_table",
           "target": "Book",
           "targetKey": "bookId",
+          "targetKey_cp": "BookId",
           "sourceKey": "personId",
           "keysIn": "books_to_people",
           "targetStorageType": "sql",
@@ -1605,6 +1610,7 @@ describe('Parse associations', function() {
           "type": "to_one",
           "target": "Person",
           "targetKey": "personId",
+          "targetKey_cp": "PersonId",
           "keyIn": "Dog",
           "targetStorageType": "sql",
           "label": "firstName",
@@ -1624,6 +1630,7 @@ describe('Parse associations', function() {
           "type": "to_one",
           "target": "Researcher",
           "targetKey": "researcherId",
+          "targetKey_cp": "ResearcherId",
           "keyIn": "Dog",
           "targetStorageType": "sql",
           "label": "firstName",
@@ -2411,19 +2418,62 @@ describe('bulkAssociation', function(){
   let data_test = require('./unit_test_misc/test-describe/bulkAssociation');
   it('schema mutations - book', async function(){
     let opts = funks.getOptions(models.book_extendedIds);
-    let generated_schema =await funks.generateJs('create-schemas', opts);
+    let generated_schema = await funks.generateJs('create-schemas', opts);
     testCompare(generated_schema, data_test.bulkAssociation_schema_mutation);
-    // let g_model = generated_model.replace(/\s/g, '');
-    // let test_model = data_test.bulkAssociation_schema_mutation.replace(/\s/g, '');
-    // expect(g_model).to.have.string(test_model);
   });
 
   it('schema inputType - book', async function(){
     let opts = funks.getOptions(models.book_extendedIds);
-    let generated_model =await funks.generateJs('create-schemas', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.bulkAssociation_schema_inputType.replace(/\s/g, '');
-    expect(g_model).to.have.string(test_model);
-    
+    let generated_schema = await funks.generateJs('create-schemas', opts);
+    testCompare(generated_schema, data_test.bulkAssociation_schema_inputType);
   });
+
+  it('bulkAssociate resolver - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.bulkAssociation_resolver_add);
+  });
+
+  it('bulkDisAssociate resolver - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.bulkAssociation_resolver_remove);
+  });
+
+  it('bulkAssociate model sql - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model = await funks.generateJs('create-models', opts);
+    testCompare(generated_model, data_test.bulkAssociation_model_sql_add);
+  });
+
+  it('bulkDisAssociate model sql - book', async function(){
+    let opts = funks.getOptions(models.book_extendedIds);
+    let generated_model = await funks.generateJs('create-models', opts);
+    testCompare(generated_model, data_test.bulkAssociation_model_sql_remove);
+  });
+
+  it('bulkAssociate model zendro/ddm-adapter - dog', async function(){
+    let opts = funks.getOptions(models_zendro.dog_one_assoc);
+    let generated_model = await funks.generateJs('create-models-zendro', opts);
+    testCompare(generated_model, data_test.bulkAssociation_model_zendro_ddm_adapter_add);
+  });
+
+  it('bulkDisAssociate model zendro/ddm-adapter - dog', async function(){
+    let opts = funks.getOptions(models_zendro.dog_one_assoc);
+    let generated_model = await funks.generateJs('create-models-zendro', opts);
+    testCompare(generated_model, data_test.bulkAssociation_model_zendro_ddm_adapter_remove);
+  });
+
+  it('bulkAssociate model ddm - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm);
+    let generated_model = await funks.generateJs('create-distributed-model', opts);
+    testCompare(generated_model, data_test.bulkAssociation_model_ddm_add);
+  });
+
+  it('bulkDisAssociate model ddm - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm);
+    let generated_model = await funks.generateJs('create-distributed-model', opts);
+    testCompare(generated_model, data_test.bulkAssociation_model_ddm_remove);
+  });
+
 });
