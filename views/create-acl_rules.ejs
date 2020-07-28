@@ -47,5 +47,40 @@ module.exports = {
       }]
     },
 <%}-%>
+
+    //adapters
+<%for( let i=0; i<adapters.length; i++ ){-%>
+    /**
+     * Adapter: <%- adapters[i] %>
+     */
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'create'
+      }]
+    },
+    {
+      roles: 'reader',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'read'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'update'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'delete'
+      }]
+    },
+<%}-%>
   ]
 }

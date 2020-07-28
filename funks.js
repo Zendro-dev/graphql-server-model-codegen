@@ -452,14 +452,14 @@ writeIndexResolvers = async function(dir_write, models){
   });
 }
 
-writeAcls = async function(dir_write, models){
+writeAcls = async function(dir_write, models, adapters){
   //set file name
   let file_name = dir_write + '/acl_rules.js';
   //set names
   let modelsNames = models.map(item => ({nameLc: item[2]}));
   let adminModelsNames = ['role', 'user', 'role_to_user'].map(item => ({nameLc: item}));
   //generate
-  await generateSection('acl_rules', {models: modelsNames, adminModels: adminModelsNames}, file_name)
+  await generateSection('acl_rules', {models: modelsNames, adminModels: adminModelsNames, adapters}, file_name)
   .then(() => {
     //success
     console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
@@ -840,13 +840,14 @@ generateSections = async function(sections, opts, dir_write) {
  *
  * @param  {string} dir_write directory where code is being generated.
  * @param  {array}  models arrays of entries of the form [opts.name , opts.namePl].
+ * @param  {array}  adapters array of adapter name strings.
  */
-writeCommons = async function(dir_write, models){
+writeCommons = async function(dir_write, models, adapters){
   writeSchemaCommons(dir_write);
   console.log(path.join(dir_write,'models'))
   writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
-  await writeAcls(dir_write, models);
+  await writeAcls(dir_write, models, adapters);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
@@ -916,6 +917,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
   let sectionsDirsB = ['models/sql','models/zendro-server', 'models/adapters', 'models/distributed', 'models/generic'];
   let models = [];
+  let adapters = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
   //set output dir
@@ -1126,12 +1128,17 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
     });
 
     //save data for writeCommons
+      //models
     models.push([opts.name , opts.namePl, opts.nameLc]);
-    };
+      //adapters
+    if(['zendro-webservice-adapter', 'ddm-adapter', 'sql-adapter', 'generic-adapter'].includes(opts.storageType)) {
+      adapters.push(opts.adapterName);
+    }
+  };
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
   //generate commons & index's
-  await writeCommons(dir_write, models)
+  await writeCommons(dir_write, models, adapters)
   .then(()=>{//success
     //msg
     console.log("@@ ", colors.green('done'));
