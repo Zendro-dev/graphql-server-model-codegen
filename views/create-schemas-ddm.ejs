@@ -151,7 +151,8 @@ enum <%- name -%>Field {
 -%>
 input search<%- nameCp -%>Input {
   field: <%- name -%>Field
-  value: typeValue
+  value: String!
+  valueType: InputType
   operator: Operator
   excludeAdapterNames: [String]
   search: [search<%- nameCp-%>Input]

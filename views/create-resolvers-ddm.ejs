@@ -43,7 +43,7 @@ const associationArgsDef = {
           let nsearch = helper.addSearchField({
             "search": search,
             "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
-            "value": {"value": this.<%= associations_one[i].targetKey -%> },
+            "value": this.<%= associations_one[i].targetKey -%>,
             "operator": "eq"
           });
           let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context);
@@ -58,7 +58,7 @@ const associationArgsDef = {
         let nsearch = helper.addSearchField({
           "search": search,
           "field": "<%=associations_one[i].targetKey%>",
-          "value": {"value": this.getIdValue()},
+          "value": this.getIdValue(),
           "operator": "eq"
         });
 
@@ -95,7 +95,7 @@ const associationArgsDef = {
       let nsearch = helper.addSearchField({
         "search": search,
         "field": "<%=associations_temp[i].targetKey%>",
-        "value": {"value": this.getIdValue()},
+        "value": this.getIdValue(),
         "operator": "eq"
       });
 
@@ -120,7 +120,7 @@ const associationArgsDef = {
       let nsearch = helper.addSearchField({
         "search": search,
         "field": "<%=associations_temp[i].targetKey%>",
-        "value": {"value": this.getIdValue()},
+        "value": this.getIdValue(),
         "operator": "eq"
       });
 

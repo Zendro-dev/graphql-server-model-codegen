@@ -256,6 +256,16 @@ writeSchemaCommons = function(dir_write){
 
   let commons = `module.exports = \`
 
+  enum InputType{
+    String
+    Int
+    Float
+    Boolean
+    Date
+    Time
+    DateTime
+  }
+
   enum Operator{
     like
     notLike
@@ -475,7 +485,7 @@ convertToType = function(many, model_name){
  * @return {object}           Object with all extra info that will be needed to create files with templates.
  */
 module.exports.getOptions = function(dataModel){
-  
+
   let opts = {
       name : dataModel.model,
       nameCp: capitalizeString(dataModel.model),
