@@ -2476,4 +2476,10 @@ describe('bulkAssociation', function(){
     testCompare(generated_model, data_test.bulkAssociation_model_ddm_remove);
   });
 
+  it('mapBulkAssociationInputToAdapters model ddm - dog', async function(){
+    let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
+    let generated_model = await funks.generateJs('create-distributed-model', opts);
+    testCompare(generated_model, data_test.bulkAssociation_mapBulkAssociationInputToAdapters);
+  });
+
 });

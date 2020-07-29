@@ -56,7 +56,7 @@ module.exports = class <%- name -%>{
    * adapter on adapter/index.js. Each key of the object will have
    *
    * @param {Array} bulkAssociationInput Array of "edges" between two records to be associated
-   * @return {object} mapped "edge" objects ({id_model1:<id1>, idmodel2:<id2>}) to the adapter responsible for the primary Key
+   * @return {object} mapped "edge" objects ({<id_model1>: id, <id_model2>:id}) to the adapter responsible for the primary Key
    */
   static mapBulkAssociationInputToAdapters(bulkAssociationInput){
     let mappedInput = {}

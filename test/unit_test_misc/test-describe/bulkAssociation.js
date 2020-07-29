@@ -27,7 +27,6 @@ module.exports.bulkAssociation_resolver_add = `
  */
 bulkAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
     let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-    // TODO Recordlimit check
     //if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
@@ -51,7 +50,6 @@ module.exports.bulkAssociation_resolver_remove = `
  */
 bulkDisAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
     let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-    // TODO Recordlimit check
     // if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
@@ -236,5 +234,22 @@ static async bulkDisAssociateDogWithPersonId(bulkAssociationInput, benignErrorRe
     });
     await Promise.all(promises);
     return "Records successfully updated!";
+}
+`
+module.exports.bulkAssociation_mapBulkAssociationInputToAdapters = `
+/**
+ * mapBulkAssociationInputToAdapters - maps the input of a bulkAssociate to the responsible adapters 
+ * adapter on adapter/index.js. Each key of the object will have
+ *
+ * @param {Array} bulkAssociationInput Array of "edges" between two records to be associated
+ * @return {object} mapped "edge" objects ({<id_model1>: id, <id_model2>:id}) to the adapter responsible for the primary Key
+ */
+static mapBulkAssociationInputToAdapters(bulkAssociationInput){
+let mappedInput = {}
+bulkAssociationInput.map((idMap) => {
+    let responsibleAdapter = this.adapterForIri(idMap.dog_id);
+    mappedInput[responsibleAdapter] === undefined ? mappedInput[responsibleAdapter] = [idMap] : mappedInput[responsibleAdapter].push(idMap)
+});
+return mappedInput;
 }
 `
