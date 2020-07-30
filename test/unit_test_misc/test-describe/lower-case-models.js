@@ -35,9 +35,7 @@ individual.prototype.transcript_countsFilter = function({
     let nsearch = helper.addSearchField({
         "search": search,
         "field": "individual_id",
-        "value": {
-            "value": this.getIdValue()
-        },
+        "value": this.getIdValue(),
         "operator": "eq"
     });
 

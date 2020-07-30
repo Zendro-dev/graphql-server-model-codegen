@@ -86,9 +86,7 @@ book.prototype.publisher = async function({
             let nsearch = helper.addSearchField({
                 "search": search,
                 "field": models.publi_sher.idAttribute(),
-                "value": {
-                    "value": this.publisher_id
-                },
+                "value": this.publisher_id,
                 "operator": "eq"
             });
             let found = await resolvers.publi_shers({
@@ -154,9 +152,7 @@ person.prototype.worksFilter = function({
         let nsearch = helper.addSearchField({
             "search": search,
             "field": "book_id",
-            "value": {
-                "value": this.getIdValue()
-            },
+            "value": this.getIdValue(),
             "operator": "eq"
         });
 

@@ -59,9 +59,7 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
       let nsearch = helper.addSearchField({
           "search": search,
           "field": "individual_id",
-          "value": {
-              "value": this.getIdValue()
-          },
+          "value": this.getIdValue(),
           "operator": "eq"
       });
 

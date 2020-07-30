@@ -19,9 +19,7 @@ dog.prototype.researcher = async function({
             let nsearch = helper.addSearchField({
                 "search": search,
                 "field": models.researcher.idAttribute(),
-                "value": {
-                    "value": this.researcherId
-                },
+                "value": this.researcherId,
                 "operator": "eq"
             });
             let found = await resolvers.researchers({
@@ -64,9 +62,7 @@ researcher.prototype.dog = async function({
       let nsearch = helper.addSearchField({
           "search": search,
           "field": "researcherId",
-          "value": {
-              "value": this.getIdValue()
-          },
+          "value": this.getIdValue(),
           "operator": "eq"
       });
 
@@ -129,9 +125,7 @@ individual.prototype.transcript_countsFilter = function({
     let nsearch = helper.addSearchField({
         "search": search,
         "field": "individual_id",
-        "value": {
-            "value": this.getIdValue()
-        },
+        "value": this.getIdValue(),
         "operator": "eq"
     });
 
@@ -175,9 +169,7 @@ individual.prototype.countFilteredTranscript_counts = function({
     let nsearch = helper.addSearchField({
         "search": search,
         "field": "individual_id",
-        "value": {
-            "value": this.getIdValue()
-        },
+        "value": this.getIdValue(),
         "operator": "eq"
     });
 
