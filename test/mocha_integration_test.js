@@ -82,7 +82,7 @@ describe(
 
     // This test uses the entry created in the last test
     it('03. Individual update', function() {
-        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"First"}}){id}}');
+        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:"First"}){id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         let individual = resBody.data.individuals[0].id;
 
@@ -115,7 +115,7 @@ describe(
 
     // This test reads the entry created in the last test
     it('05. Individual read one', function() {
-        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"Second"}}){id}}');
+        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, operator:eq, value:"Second"}){id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         let individual = resBody.data.individuals[0].id;
 
@@ -137,7 +137,7 @@ describe(
     // This test finds both entries created before - the first entry was modified in 03 to match the search
     it('06. Individual search with like', function() {
 
-        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, value:{value:"%Second%"}, operator:like}) {name}}');
+        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, value:"%Second%", operator:like}) {name}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
@@ -254,7 +254,7 @@ describe(
 
     // This test reads the entry created in the last test
     it('14. TranscriptCount read one', function() {
-        let res = itHelpers.request_graph_ql_post('{transcript_counts(search: {field:gene operator:eq value:{value:"Gene C"}}) {id}}');
+        let res = itHelpers.request_graph_ql_post('{transcript_counts(search: {field:gene operator:eq value:"Gene C"}) {id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         let tcount = resBody.data.transcript_counts[0].id;
 
@@ -279,7 +279,7 @@ describe(
     // This test reads the 2 entries that were created before (in 11 and 13)
     it('15. TranscriptCount search with like', function() {
 
-        let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:{value:"%ene%"},operator: like}) {gene}}`);
+        let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:"%ene%",operator: like}) {gene}}`);
         let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
@@ -341,8 +341,8 @@ describe(
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.transcript_counts.length).equal(3);
 
-        res = await itHelpers.request_metaquery_post([`{ transcript_counts(search: {field: gene, operator: eq, value: {value: "Gene D"}}) {gene}}`,
-                            `{individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', null);
+        res = await itHelpers.request_metaquery_post([`{ transcript_counts(search: {field: gene, operator: eq, value: "Gene D"}) {gene}}`,
+                            `{individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.', null);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
 
@@ -363,7 +363,7 @@ describe(
         });
 
 
-        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: {value: "Zazan[aeiou]za"}}) {name}}`);
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: "Zazan[aeiou]za"}) {name}}`);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -375,7 +375,7 @@ describe(
             }
         });
 
-        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: notRegexp, value: {value: "^[A-Ya-z].*"}}) {name}}`);
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: notRegexp, value: "^[A-Ya-z].*"}) {name}}`);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -387,8 +387,8 @@ describe(
             }
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', null);
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.', null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -412,8 +412,8 @@ describe(
           errors: []
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {names}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {names}}`], '.', null);
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {names}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {names}}`], '.', null);
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
 
@@ -427,7 +427,8 @@ describe(
                     locations:[
                         {
                             line:1,
-                            column:95
+                            // column:95
+                            column: 86
                         }
                     ]
                 },
@@ -436,15 +437,16 @@ describe(
                     locations:[
                         {
                             line:1,
-                            column:95
+                            // column:95
+                            column: 86
                         }
                     ]
                 }
             ]
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.data', null);
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.data', null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -467,8 +469,8 @@ describe(
             ]
         );
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.~data', null);
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.~data', null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -480,8 +482,8 @@ describe(
 
 
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$');
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, '$');
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -505,8 +507,8 @@ describe(
           errors: []
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$.data');
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, '$.data');
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -529,8 +531,8 @@ describe(
             ]
         );
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, '$~data');
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, '$~data');
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -540,8 +542,8 @@ describe(
         });
 
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], '.', '$');
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.', '$');
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -550,8 +552,8 @@ describe(
             errors: [{message: "State either 'jq' or 'jsonPath' expressions, never both. - jq is . and jsonPath is $"}]
         });
 
-        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}}) {name}}`], null, null);
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
+        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, null);
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -577,12 +579,29 @@ describe(
         let plantId = resBody.data.addIndividual.id;
 
         // Create TranscriptCount with above Plant assigned as Individual
-        res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene D", ' +
-                                                                             'variable: "RPKM", ' +
-                                                                             'count: 321.23, ' +
-                                                                             'tissue_or_condition: "Stem", ' +
-                                                                             `addIndividual: ${plantId}) ` +
-                                                                             '{id gene individual { id name } } }');
+        // res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene D", ' +
+        //                                                                      'variable: "RPKM", ' +
+        //                                                                      'count: 321.23, ' +
+        //                                                                      'tissue_or_condition: "Stem", ' +
+        //                                                                      `addIndividual: ${plantId}) ` +
+        //                                                                      '{id gene individual { id name } } }');
+        res = itHelpers.request_graph_ql_post(`mutation {
+          addTranscript_count(
+            gene: "Gene D",
+            variable: "RPKM",
+            count: 321.23,
+            tissue_or_condition: "Stem",
+            addIndividual: ${plantId}) {
+              id
+              gene
+              individual {
+                id
+                name
+              }
+            }
+          })
+        `);
+
         let tcResBody = JSON.parse(res.body.toString('utf8'));
         let tcId = tcResBody.data.addTranscript_count.id;
         expect(res.statusCode).to.equal(200);
@@ -603,7 +622,7 @@ describe(
 
   // This test uses the entry created in the last test, and relies on this entry having got an association (and thus cannot be erased)
   it('20. TranscriptCount - Deleting a record with associations fails', function() {
-      let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}}) {id individual_id}}');
+      let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:"0"}) {id individual_id}}');
       let tcResBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       let idValue = tcResBody.data.transcript_counts[0].id;
@@ -650,7 +669,7 @@ describe(
     res = itHelpers.request_graph_ql_post(individualAdding);
     res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
-    res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: {value: "${individualName}"}}) {name}}`);
+    res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: "${individualName}"}) {name}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -670,13 +689,13 @@ describe(
     res = itHelpers.request_graph_ql_post(transcript_count_adding);
     res = itHelpers.request_graph_ql_post(transcript_count_adding);
     res = itHelpers.request_graph_ql_post(transcript_count_adding);
-    res = itHelpers.request_graph_ql_post(`{ transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
+    res = itHelpers.request_graph_ql_post(`{ transcript_counts(search:{field: gene, operator: eq, value: "${transcript_count_gene}"}) {gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.transcript_counts.length).equal(11);
 
-    res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: {value: "${individualName}"}}) { name } transcript_counts(search:{field: gene, operator: eq, value: {value: "${transcript_count_gene}"}}) {gene}}`);
+    res = itHelpers.request_graph_ql_post(`{ individuals(search:{field: name, operator: eq, value: "${individualName}"}) { name } transcript_counts(search:{field: gene, operator: eq, value: "${transcript_count_gene}"}) {gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     const errorObject_TranscriptCount = {
@@ -750,7 +769,7 @@ describe(
         expect(resBody).to.deep.equal(errorObject_TranscriptCount);
     }
 
-    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     for(let i = 0; i < individuals.length; i++){
@@ -759,25 +778,25 @@ describe(
         expect(res.statusCode).to.equal(200);
     }
 
-    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     expect(individuals).to.deep.equal([]);
 
-    res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field:gene operator:eq value:{value:"${transcript_count_gene}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field:gene operator:eq value:"${transcript_count_gene}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     let trCounts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
     for (let i = 0; i < trCounts.length; i++){
         res = itHelpers.request_graph_ql_post(`mutation { deleteTranscript_count (id: ${trCounts[i].id}) }`);
         expect(res.statusCode).to.equal(200);
     }
-    res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field:gene operator:eq value:{value:"${transcript_count_gene}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{transcript_counts(search:{field:gene operator:eq value:"${transcript_count_gene}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     trCounts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
     expect(trCounts).to.deep.equal([]);
 
     /**
-     * Check: 
+     * Check:
      * max_limit records validation
      */
     //Add another 30 individuals:
@@ -874,31 +893,31 @@ describe(
     res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
     ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
-    
+
     //test 1: count = 30
-    res = itHelpers.request_graph_ql_post(`{ countIndividuals(search:{field:name operator:eq value:{value:"${individualName}"}}) }`);
-    resBody = JSON.parse(res.body.toString('utf8'));    
+    res = itHelpers.request_graph_ql_post(`{ countIndividuals(search:{field:name operator:eq value:"${individualName}"}) }`);
+    resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.countIndividuals).equal(30);
 
     //test 2: error limit_record
     let err1_msg = "Max record limit of 25 exceeded in individuals";
     let err1_path = ["individuals"];
-    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(resBody.errors[0].message).to.deep.equal(err1_msg);
     expect(resBody.errors[0].path).to.deep.equal(err1_path);
 
     //test 3: pagination (limit-offset): with limit: 24
-    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:24}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:24}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(ids).to.include.members(resBody.data.individuals.map((item) => item.id));
     expect(resBody.data.individuals.map((item) => item.id)).to.not.include(ids[ids.length-1]);
 
     //test 4: pagination (limit-offset): with limit: 5 & offset: 25  (last 5)
-    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:5, offset:25}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:5, offset:25}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(ids).to.include.members(resBody.data.individuals.map((item) => item.id));
@@ -907,7 +926,7 @@ describe(
     //test 5: pagination (limit-offset): with limit: 50 & offset: 25 (last 5)
     let err2_msg = "Request of total individuals exceeds max limit of 25. Please use pagination.";
     let err2_path = ["individuals"];
-    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:50, offset:25}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:50, offset:25}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(resBody.errors[0].message).to.deep.equal(err2_msg);
@@ -916,30 +935,30 @@ describe(
     //test 6: pagination (cursor-based): error limit_record - without pagination
     let err3_msg = "Max record limit of 25 exceeded in individualsConnection";
     let err3_path = ["individualsConnection"];
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{node{id}}}}`);
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(search:{field:name operator:eq value:"${individualName}"}) {edges{node{id}}}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(resBody.errors[0].message).to.deep.equal(err3_msg);
     expect(resBody.errors[0].path).to.deep.equal(err3_path);
 
     //test 7: pagination (cursor-based): error limit_record - with pagination.first: 30
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:30}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{node{id}}}}`);
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:30}, search:{field:name operator:eq value:"${individualName}"}) {edges{node{id}}}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(resBody.errors[0].message).to.deep.equal(err3_msg);
     expect(resBody.errors[0].path).to.deep.equal(err3_path);
 
     //test 8: pagination (cursor-based): with first: 24
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:24}, search:{field:name operator:eq value:{value:"${individualName}"}}) 
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:24}, search:{field:name operator:eq value:"${individualName}"})
     {
       pageInfo {
         startCursor
         endCursor
         hasPreviousPage
         hasNextPage
-      } 
+      }
       edges{
-        cursor 
+        cursor
         node{id}
     }}}`);
     expect(res.statusCode).to.equal(200);
@@ -949,33 +968,33 @@ describe(
 
     //test 9: pagination (cursor-based): with : first:5, after: cursor20
     let cursor20 = resBody.data.individualsConnection.edges.map((item) => item.cursor)[19];
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:5, after:"${cursor20}"}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:5, after:"${cursor20}"}, search:{field:name operator:eq value:"${individualName}"}) {edges{cursor node{id}}}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
     expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-10, 25));
 
     //test 10: pagination (cursor-based): with : last:5
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:5}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:5}, search:{field:name operator:eq value:"${individualName}"}) {edges{cursor node{id}}}}`);
     expect(res.statusCode).to.equal(200);
-    resBody = JSON.parse(res.body.toString('utf8'));      
+    resBody = JSON.parse(res.body.toString('utf8'));
     expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
     expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-5));
 
     //test 11: pagination (cursor-based): with : last:10, before: cursor30, includeCursor: true
     let cursor30 = resBody.data.individualsConnection.edges.map((item) => item.cursor)[4];
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:10, before:"${cursor30}", includeCursor: true}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:10, before:"${cursor30}", includeCursor: true}, search:{field:name operator:eq value:"${individualName}"}) {edges{cursor node{id}}}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
     expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-10));
 
-    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit: 15}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit: 15}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     let individuals_a = JSON.parse(res.body.toString('utf8')).data.individuals;
 
-    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{offset:15, limit: 15}, search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{offset:15, limit: 15}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     let individuals_b = JSON.parse(res.body.toString('utf8')).data.individuals;
 
@@ -1085,7 +1104,7 @@ describe(
   });
 
   it('28. to_many_through_sql_cross_table Filter', function(){
-    res = itHelpers.request_graph_ql_post('{ countries{ name riversFilter(search:{field:length,value:{value:"2000",type:"Int"}, operator:gt}){ name }}}')
+    res = itHelpers.request_graph_ql_post('{ countries{ name riversFilter(search:{field:length,value:"2000",valueType:Int, operator:gt}){ name }}}')
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
 
@@ -1327,7 +1346,7 @@ describe(
     /**
      * op: in ['ita.id', 'itb.id']
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, valueType: "Array", value: "${ita.id},${itb.id}"}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1339,7 +1358,7 @@ describe(
     /**
      * op: notIn ('ita.id', 'itb.id')
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, value: {type: "Array", value: "${ita.id},${itb.id}"}}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, valueType: "Array", value: "${ita.id},${itb.id}"}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1351,7 +1370,7 @@ describe(
     /**
      * op: like '%ene-28%'
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: {value: "%ene-28%"}}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: "%ene-28%"}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1364,7 +1383,7 @@ describe(
     /**
      * op: notLike '%ene-28%'
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: {value: "%ene-28%"}}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: "%ene-28%"}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1376,7 +1395,7 @@ describe(
     /**
      * op: between ['ita.id', 'itc.id']
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, valueType:"Array", value:"${ita.id},${itc.id}" }) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1389,7 +1408,7 @@ describe(
     /**
      * op: notBetween ['ita.id', 'itc.id']
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, value: {type:"Array", value:"${ita.id},${itc.id}" }}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, valueType:"Array", value:"${ita.id},${itc.id}" }) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
