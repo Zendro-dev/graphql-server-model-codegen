@@ -290,11 +290,6 @@ writeSchemaCommons = function(dir_write){
     ASC
   }
 
-  input typeValue{
-    type: String
-    value: String!
-  }
-
   input paginationInput{
     limit: Int
     offset: Int
