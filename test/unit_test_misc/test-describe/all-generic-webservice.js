@@ -120,7 +120,9 @@ type Query {
 
 
 deletePerson(id: ID!): String!
-bulkAddPersonCsv: String! }
+bulkAddPersonCsv: String!
+bulkAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String!
+    bulkDisAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String! }
 
 `
 module.exports.model_person = `

@@ -669,6 +669,7 @@ module.exports.parseAssociations = function(dataModel){
         assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
         assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
         assoc["targetKey"] = association.targetKey;
+        assoc["targetKey_cp"] = capitalizeString(association.targetKey);
         if(association.keyIn){
             assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
         }

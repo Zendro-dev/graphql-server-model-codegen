@@ -463,6 +463,8 @@ module.exports = class <%- name -%>{
   <%- include('./includes/create-models-zendro-fieldMutations', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
 
   static get definition(){
