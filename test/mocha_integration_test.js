@@ -17,7 +17,7 @@ describe(
     after(async function() {
         // Delete associations between individuals and transcript_counts
         // The only ones to exist at this point are from Test 19
-        let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}}) {id individual_id}}');
+        let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:"0"}) {id individual_id}}');
         let tcResBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         let idValues = tcResBody.data.transcript_counts;
@@ -1004,7 +1004,7 @@ describe(
         expect(res.statusCode).to.equal(200);
     }
 
-    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:{value:"${individualName}"}}) {id}}`);
+    res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
     individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     expect(individuals).to.deep.equal([]);
@@ -1956,7 +1956,7 @@ describe(
             }
           });
         // Make sure that no person intended to be stored on server 1 was stored elsewhere
-        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"} excludeAdapterNames:"person_instance1"}) {edges{node{person_id}}}}');
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:"instance1%" excludeAdapterNames:"person_instance1"}) {edges{node{person_id}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -1967,7 +1967,7 @@ describe(
             }
           });
         // Get infos about people on server 1
-        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:"instance1%"}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -2016,7 +2016,7 @@ describe(
             }
           });
           // The same search, but order by name descending
-          res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}} order:{field:name order:DESC}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+          res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:"instance1%"} order:{field:name order:DESC}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
           resBody = JSON.parse(res.body.toString('utf8'));
           expect(res.statusCode).to.equal(200);
           expect(resBody).to.deep.equal({
@@ -2549,7 +2549,7 @@ describe(
        * This integration test assumes that data from previous test (Connection accession) is still stored on the DB.
        * This test will do a OR search.
       */
-        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(search:{operator: or search:[{field:collectors_name value:{value:"%c%"} operator:like },{field:collectors_name value:{value:"%d%"} operator:like} ]}){collectors_name}}');
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(search:{operator: or search:[{field:collectors_name value:"%c%" operator:like },{field:collectors_name value:"%d%" operator:like} ]}){collectors_name}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
