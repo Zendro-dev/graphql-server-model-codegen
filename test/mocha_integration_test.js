@@ -579,28 +579,12 @@ describe(
         let plantId = resBody.data.addIndividual.id;
 
         // Create TranscriptCount with above Plant assigned as Individual
-        // res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene D", ' +
-        //                                                                      'variable: "RPKM", ' +
-        //                                                                      'count: 321.23, ' +
-        //                                                                      'tissue_or_condition: "Stem", ' +
-        //                                                                      `addIndividual: ${plantId}) ` +
-        //                                                                      '{id gene individual { id name } } }');
-        res = itHelpers.request_graph_ql_post(`mutation {
-          addTranscript_count(
-            gene: "Gene D",
-            variable: "RPKM",
-            count: 321.23,
-            tissue_or_condition: "Stem",
-            addIndividual: ${plantId}) {
-              id
-              gene
-              individual {
-                id
-                name
-              }
-            }
-          })
-        `);
+        res = itHelpers.request_graph_ql_post('mutation { addTranscript_count(gene: "Gene D", ' +
+                                                                             'variable: "RPKM", ' +
+                                                                             'count: 321.23, ' +
+                                                                             'tissue_or_condition: "Stem", ' +
+                                                                             `addIndividual: ${plantId}) ` +
+                                                                             '{id gene individual { id name } } }');
 
         let tcResBody = JSON.parse(res.body.toString('utf8'));
         let tcId = tcResBody.data.addTranscript_count.id;
@@ -703,7 +687,8 @@ describe(
             message:"Max record limit of 25 exceeded in transcript_counts",
             locations: [
                       {
-                        column: 95,
+                        // column: 95,
+                        column: 86,
                         line: 1
                       }
                     ],
@@ -1346,7 +1331,7 @@ describe(
     /**
      * op: in ['ita.id', 'itb.id']
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, valueType: "Array", value: "${ita.id},${itb.id}"}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, valueType: Array, value: "${ita.id},${itb.id}"}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1358,7 +1343,7 @@ describe(
     /**
      * op: notIn ('ita.id', 'itb.id')
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, valueType: "Array", value: "${ita.id},${itb.id}"}) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, valueType: Array, value: "${ita.id},${itb.id}"}) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1395,7 +1380,7 @@ describe(
     /**
      * op: between ['ita.id', 'itc.id']
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, valueType:"Array", value:"${ita.id},${itc.id}" }) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, valueType:Array, value:"${ita.id},${itc.id}" }) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1408,7 +1393,7 @@ describe(
     /**
      * op: notBetween ['ita.id', 'itc.id']
      */
-    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, valueType:"Array", value:"${ita.id},${itc.id}" }) {id, gene}}`);
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, valueType:Array, value:"${ita.id},${itc.id}" }) {id, gene}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
