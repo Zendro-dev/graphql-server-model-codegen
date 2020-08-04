@@ -579,13 +579,21 @@ selfAssociation = function(associations, model_name){
   if(associations!==undefined){
     Object.entries(associations).forEach(([name, association]) => {
         if(association.target === model_name ){
-          result[ association.type ] = name;
+          result[ association.type ] = capitalizeString(name);
         }
       });
   }
 
   if(result.to_many!== undefined && result.to_one !== undefined){
     result.value = true;
+  }
+
+  //handle case generic association
+  if(result.generic_to_many!== undefined && result.generic_to_one !== undefined){
+    result.value = true;
+    //helper for checking self association is agnostic to "generic" asociation.
+    result['to_many'] = result.generic_to_many;
+    result['to_one'] = result.generic_to_one;
   }
 
   return result;

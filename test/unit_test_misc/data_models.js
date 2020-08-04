@@ -634,3 +634,39 @@ module.exports.book_extendedIds = {
   "internalId": "internalBookId"
 }
 
+module.exports.sample_self_assoc = {
+  "model": "sample",
+  "storageType": "sql",
+  "attributes": {
+    "name": "String",
+    "material": "String",
+    "life_cycle_phase": "String",
+    "description": "String",
+    "harvest_date": "Date",
+    "library": "String",
+    "barcode_number": "Int",
+    "barcode_sequence": "String",
+    "sample_id": "Int"
+  },
+  "associations": {
+    "parent": {
+      "type" : "to_one",
+      "target" : "sample",
+      "targetKey" : "sample_id",
+      "keyIn": "sample",
+      "targetStorageType" : "sql",
+      "label" : "name",
+      "sublabel": "material"
+    },
+
+    "samples": {
+      "type" : "to_many",
+      "target" : "sample",
+      "targetKey" : "sample_id",
+      "keyIn": "sample",
+      "targetStorageType" : "sql",
+      "label" : "name",
+      "sublabel": "material"
+    }
+  }
+}

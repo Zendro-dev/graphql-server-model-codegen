@@ -696,9 +696,6 @@ module.exports = {
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized, benignErrorReporter);
-            <%if(selfAssociation.value){-%>
-              helper.checkSelfAssociations({to_one: "add<%-selfAssociation.to_one -%>", to_many: "addadd<%-selfAssociation.to_many -%>"},inputSanitized, input[<%-  nameLc  -%>.idAttribute()]);
-            <%}-%>
             await updated<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
             return updated<%- nameCp -%>;
         } else {

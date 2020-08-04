@@ -2394,3 +2394,16 @@ describe('Handle Errors in DDM', function(){
   });
 
 });
+
+
+describe('Handle associations - sample', function(){
+  let data_test = require('./unit_test_misc/test-describe/handle-associations');
+
+  it('self association - sample', async function(){
+    let opts = funks.getOptions(models.sample_self_assoc);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    let g_resolver = generated_resolver.replace(/\s/g, '');
+    let test_resolver = data_test.sample_self_assoc.replace(/\s/g, '');
+    expect(g_resolver).to.have.string(test_resolver);
+  });
+});
