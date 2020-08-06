@@ -1,0 +1,38 @@
+{
+  "model": "sample_string",
+  "storageType": "sql",
+  "attributes": {
+    "id": "String",
+    "name": "String",
+    "material": "String",
+    "life_cycle_phase": "String",
+    "description": "String",
+    "harvest_date": "Date",
+    "library": "String",
+    "barcode_number": "Int",
+    "barcode_sequence": "String",
+    "sample_id": "String"
+  },
+  "associations": {
+    "parent": {
+      "type" : "to_one",
+      "target" : "sample_string",
+      "targetKey" : "sample_id",
+      "keyIn": "sample_string",
+      "targetStorageType" : "sql",
+      "label" : "name",
+      "sublabel": "material"
+    },
+
+    "samples": {
+      "type" : "to_many",
+      "target" : "sample_string",
+      "targetKey" : "sample_id",
+      "keyIn": "sample_string",
+      "targetStorageType" : "sql",
+      "label" : "name",
+      "sublabel": "material"
+    }
+  },
+  "internalId": "id"
+}
