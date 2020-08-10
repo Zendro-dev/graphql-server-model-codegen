@@ -572,30 +572,71 @@ getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute
 }
 
 selfAssociation = function(associations, model_name){
-  let result = {
-    value: false,
-  }
+  // let result = {
+  //   value: false,
+  // }
+  //
+  // if(associations!==undefined){
+  //   Object.entries(associations).forEach(([name, association]) => {
+  //       if(association.target === model_name ){
+  //         result[ association.type ] = capitalizeString(name);
+  //       }
+  //     });
+  // }
+  //
+  // if(result.to_many!== undefined && result.to_one !== undefined){
+  //   result.value = true;
+  // }
+  //
+  // //handle case generic association
+  // if(result.generic_to_many!== undefined && result.generic_to_one !== undefined){
+  //   result.value = true;
+  //   //helper for checking self association is agnostic to "generic" asociation.
+  //   result['to_many'] = result.generic_to_many;
+  //   result['to_one'] = result.generic_to_one;
+  // }
+  //
+  // return result;
+
+
+  let result = {};
+  let self_associations = {};
 
   if(associations!==undefined){
     Object.entries(associations).forEach(([name, association]) => {
         if(association.target === model_name ){
-          result[ association.type ] = capitalizeString(name);
+          if( self_associations.hasOwnProperty(association.targetKey) ){
+            self_associations[association.targetKey].push( name );
+          }else{
+            self_associations[association.targetKey] = [ name ];
+          }
         }
       });
   }
 
-  if(result.to_many!== undefined && result.to_one !== undefined){
-    result.value = true;
-  }
+  for( let s_a in self_associations ){
+    //check that self association comes in pairs
+    if( self_associations[s_a].length === 2 ){
+      let assoc_1 = associations[ self_associations[s_a][0] ];
+      let assoc_2 = associations[ self_associations[s_a][1] ];
+      let key = assoc_1.targetKey; //both targetKeys should be the same, it doesn'r matter which one we choose
 
-  //handle case generic association
-  if(result.generic_to_many!== undefined && result.generic_to_one !== undefined){
-    result.value = true;
-    //helper for checking self association is agnostic to "generic" asociation.
-    result['to_many'] = result.generic_to_many;
-    result['to_one'] = result.generic_to_one;
-  }
 
+      //check that one of them is type to_many and the other one type to_one
+      if( (assoc_1.type === 'to_one' && assoc_2.type === 'to_many' ) ||
+          (assoc_1.type === 'to_many' && assoc_2.type === 'to_one' )
+        ){
+            result[key] = {
+              [assoc_1.type] : assoc_1,
+              [assoc_2.type] : assoc_2
+
+            };
+        }
+     }else{
+      //log warning
+    }
+  }
+  //console.log("RESULT: ", result);
   return result;
 }
 

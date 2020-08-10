@@ -16,7 +16,11 @@
       <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_many"])-%>
       <%for(let i=0; i < to_manyAssociations.length; i++){-%>
         if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>)) {
-          promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, benignErrorReporter));
+          <% let assoc_key = to_manyAssociations[i].targetKey %>
+          <%if( selfAssociation.hasOwnProperty( assoc_key) ){-%>
+            if(helper.checkSelfAssociations({to_one: "add<%-selfAssociation[ to_manyAssociations[i].targetKey ].to_one.name_cp -%>", to_many: "add<%-selfAssociation[to_manyAssociations[i].targetKey].to_one.name_cp -%>"},input, input[<%-  nameLc  -%>.idAttribute()]);)
+          <%}%>
+              promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, benignErrorReporter));
         }<%}-%>
 
       <% to_oneAssociations = associationsArguments["to_one"].concat(associationsArguments["generic_to_one"])-%>
