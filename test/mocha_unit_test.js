@@ -1,4 +1,5 @@
 const expect = require('chai').expect;
+const assert = require('chai').assert;
 //const test = require('./unit_test_misc/data_test');
 const models = require('./unit_test_misc/data_models');
 const funks = require('../funks');
@@ -8,8 +9,19 @@ const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const models_generic = require('./unit_test_misc/data_models_generic');
 const requireFromString = require('require-from-string');
-
+const helpers = require('./unit_test_misc/helpers/reporting_helpers')
 //const components_code = require('./unit_test_misc/components_code');
+
+const testCompare = function(actual, expected, errorMessage = 'Generated output differs from expected') {
+  let act = actual.replace(/\s/g, '');
+  let exp = expected.replace(/\s/g, '');
+  try {
+    expect(act, errorMessage).to.have.string(exp);
+  } catch (e) {
+    report = helpers.diffByLine(actual, expected);
+    assert.fail(errorMessage + ':\n' + report);
+  }
+}
 
 describe('Lower-case models', function(){
 
@@ -1354,7 +1366,8 @@ describe('Parse associations', function() {
           }
         ],
         "genericAssociations": [],
-        "mutations_attributes": ""
+        "mutations_attributes": "",
+        "selfAssociations":{}
       });
   });
 
@@ -1409,7 +1422,8 @@ describe('Parse associations', function() {
         }
       ],
       "genericAssociations": [],
-      "mutations_attributes": ""
+      "mutations_attributes": "",
+      "selfAssociations":{}
     });
   });
 
@@ -1475,7 +1489,8 @@ describe('Parse associations', function() {
         }
       ],
       "genericAssociations": [],
-      "mutations_attributes": ""
+      "mutations_attributes": "",
+      "selfAssociations":{}
     });
   });
 
@@ -1564,7 +1579,8 @@ describe('Parse associations', function() {
         }
       ],
       "genericAssociations": [],
-      "mutations_attributes": ""
+      "mutations_attributes": "",
+      "selfAssociations":{}
     });
   });
 
@@ -1655,7 +1671,8 @@ describe('Parse associations', function() {
         }
       ],
       "genericAssociations": [],
-      "mutations_attributes": ""
+      "mutations_attributes": "",
+      "selfAssociations":{}
     });
   })
 
@@ -2396,14 +2413,12 @@ describe('Handle Errors in DDM', function(){
 });
 
 
-// describe('Handle associations - sample', function(){
-//   let data_test = require('./unit_test_misc/test-describe/handle-associations');
-//
-//   it('self association - sample', async function(){
-//     let opts = funks.getOptions(models.sample_self_assoc);
-//     let generated_resolver =await funks.generateJs('create-resolvers', opts);
-//     let g_resolver = generated_resolver.replace(/\s/g, '');
-//     let test_resolver = data_test.sample_self_assoc.replace(/\s/g, '');
-//     expect(g_resolver).to.have.string(test_resolver);
-//   });
-// });
+describe('Handle associations - sample', function(){
+  let data_test = require('./unit_test_misc/test-describe/handle-associations');
+
+  it('self association - sample', async function(){
+    let opts = funks.getOptions(models.sample_self_assoc);
+    let generated_resolver =await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.sample_self_assoc);
+  });
+});

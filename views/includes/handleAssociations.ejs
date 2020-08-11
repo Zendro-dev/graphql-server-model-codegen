@@ -7,25 +7,20 @@
 */
 <%- nameLc -%>.prototype.handleAssociations = async function(input, benignErrorReporter){
 
-  <%if(selfAssociation.value){-%>
-    helper.checkSelfAssociations({to_one: "add<%-selfAssociation.to_one -%>", to_many: "add<%-selfAssociation.to_many -%>"},input, input[<%-  nameLc  -%>.idAttribute()]);
-  <%}-%>
-
+  <%for(let tk in associationsArguments.selfAssociations){  self_assoc = associationsArguments.selfAssociations[tk]%>
+      let <%-self_assoc.variable_name%> = helper.checkSelfAssociations({ to_one: "add<%-self_assoc.to_one%>", to_many: "add<%-self_assoc.to_many%>"},input, input[<%-nameLc%>.idAttribute()]);
+    <%}%>
     let promises = [];
     <% ['add','remove'].forEach(op => { -%>
       <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_many"])-%>
       <%for(let i=0; i < to_manyAssociations.length; i++){-%>
-        if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>)) {
-          <% let assoc_key = to_manyAssociations[i].targetKey %>
-          <%if( selfAssociation.hasOwnProperty( assoc_key) ){-%>
-            if(helper.checkSelfAssociations({to_one: "add<%-selfAssociation[ to_manyAssociations[i].targetKey ].to_one.name_cp -%>", to_many: "add<%-selfAssociation[to_manyAssociations[i].targetKey].to_one.name_cp -%>"},input, input[<%-  nameLc  -%>.idAttribute()]);)
-          <%}%>
+        if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>) <%if( to_manyAssociations[i].self_assoc && op === 'add'){-%> &&  <%= to_manyAssociations[i].variable_name%> <%}-%>  ) {
               promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, benignErrorReporter));
         }<%}-%>
 
       <% to_oneAssociations = associationsArguments["to_one"].concat(associationsArguments["generic_to_one"])-%>
       <%for(let i=0; i < to_oneAssociations.length; i++){-%>
-        if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=to_oneAssociations[i].name_cp-%>)) {
+        if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=to_oneAssociations[i].name_cp-%>) <%if( to_oneAssociations[i].self_assoc && op === 'add'){-%> &&  <%= to_oneAssociations[i].variable_name%> <%}-%>) {
           promises.push(this.<%-op%>_<%=to_oneAssociations[i].name_lc-%>(input, benignErrorReporter));
         }
       <%}-%>

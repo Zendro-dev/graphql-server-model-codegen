@@ -507,9 +507,8 @@ module.exports.getOptions = function(dataModel){
     name: opts.idAttribute,
     type: opts.idAttributeType
   }
-
   opts['definition'] = stringify_obj(dataModel);
-  opts['selfAssociation'] = selfAssociation(dataModel.associations, dataModel.model);
+  //opts['selfAssociation'] = selfAssociations(dataModel.associations, dataModel.model);
   delete opts.attributes[opts.idAttribute];
 
   return opts;
@@ -571,34 +570,7 @@ getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute
   return editable_attributes;
 }
 
-selfAssociation = function(associations, model_name){
-  // let result = {
-  //   value: false,
-  // }
-  //
-  // if(associations!==undefined){
-  //   Object.entries(associations).forEach(([name, association]) => {
-  //       if(association.target === model_name ){
-  //         result[ association.type ] = capitalizeString(name);
-  //       }
-  //     });
-  // }
-  //
-  // if(result.to_many!== undefined && result.to_one !== undefined){
-  //   result.value = true;
-  // }
-  //
-  // //handle case generic association
-  // if(result.generic_to_many!== undefined && result.generic_to_one !== undefined){
-  //   result.value = true;
-  //   //helper for checking self association is agnostic to "generic" asociation.
-  //   result['to_many'] = result.generic_to_many;
-  //   result['to_one'] = result.generic_to_one;
-  // }
-  //
-  // return result;
-
-
+selfAssociations = function(associations, model_name){
   let result = {};
   let self_associations = {};
 
@@ -619,6 +591,10 @@ selfAssociation = function(associations, model_name){
     if( self_associations[s_a].length === 2 ){
       let assoc_1 = associations[ self_associations[s_a][0] ];
       let assoc_2 = associations[ self_associations[s_a][1] ];
+
+      assoc_1['name'] = self_associations[s_a][0];
+      assoc_2['name'] = self_associations[s_a][1];
+
       let key = assoc_1.targetKey; //both targetKeys should be the same, it doesn'r matter which one we choose
 
 
@@ -627,8 +603,8 @@ selfAssociation = function(associations, model_name){
           (assoc_1.type === 'to_many' && assoc_2.type === 'to_one' )
         ){
             result[key] = {
-              [assoc_1.type] : assoc_1,
-              [assoc_2.type] : assoc_2
+              [assoc_1.type] : capitalizeString(assoc_1.name),
+              [assoc_2.type] : capitalizeString(assoc_2.name)
 
             };
         }
@@ -636,7 +612,6 @@ selfAssociation = function(associations, model_name){
       //log warning
     }
   }
-  //console.log("RESULT: ", result);
   return result;
 }
 
@@ -665,9 +640,14 @@ module.exports.parseAssociations = function(dataModel){
     "generic_to_many": [],
     foreignKeyAssociations: {},
     associations: [],
-    genericAssociations: []
+    genericAssociations: [],
+    "selfAssociations" : {}
   };
   if(associations!==undefined){
+
+    //find self associations
+    associations_info['selfAssociations'] = selfAssociations(associations, dataModel.model);
+
     Object.entries(associations).forEach(([name, association]) => {
       let type = association.type;
       let holdsTheForeignKey = false;
@@ -735,6 +715,13 @@ module.exports.parseAssociations = function(dataModel){
         assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
         assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
       }
+
+      //mark self association
+      if( associations_info['selfAssociations'].hasOwnProperty(assoc.targetKey) ){
+        assoc['self_assoc'] = true;
+        assoc['variable_name'] = 'assoc_by_' + assoc.targetKey;
+        associations_info['selfAssociations'][assoc.targetKey]['variable_name'] = 'assoc_by_' + assoc.targetKey;
+      }//else should be undefined
 
       associations_info[type].push(assoc);
       //associations_info[type].push(assoc);
