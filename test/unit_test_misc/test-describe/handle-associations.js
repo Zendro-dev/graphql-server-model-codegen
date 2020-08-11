@@ -1,7 +1,7 @@
 module.exports.sample_self_assoc = `
 sample.prototype.handleAssociations = async function(input, benignErrorReporter) {
 
-    let assoc_by_sample_id = helper.checkSelfAssociations({to_one: "addParent", to_many: "addSamples"},input, input[sample.idAttribute()]);
+    let assoc_by_sample_id = helper.checkSelfAssociations({to_one: "addParent", to_many: "addSamples"},input, input[sample.idAttribute()], benignErrorReporter);
 
     let promises = [];
     if (helper.isNonEmptyArray(input.addSamples) && assoc_by_sample_id) {

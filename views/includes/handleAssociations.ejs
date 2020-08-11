@@ -8,7 +8,7 @@
 <%- nameLc -%>.prototype.handleAssociations = async function(input, benignErrorReporter){
 
   <%for(let tk in associationsArguments.selfAssociations){  self_assoc = associationsArguments.selfAssociations[tk]%>
-      let <%-self_assoc.variable_name%> = helper.checkSelfAssociations({ to_one: "add<%-self_assoc.to_one%>", to_many: "add<%-self_assoc.to_many%>"},input, input[<%-nameLc%>.idAttribute()]);
+      let <%-self_assoc.variable_name%> = helper.checkSelfAssociations({ to_one: "add<%-self_assoc.to_one%>", to_many: "add<%-self_assoc.to_many%>"},input, input[<%-nameLc%>.idAttribute()], benignErrorReporter);
     <%}%>
     let promises = [];
     <% ['add','remove'].forEach(op => { -%>
