@@ -526,7 +526,12 @@ module.exports = {
    */
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
-          await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%- namePl -%>");
+          if(pagination === undefined){
+            pagination = {limit: context.recordsLimit}
+          } else if(pagination.limit === undefined){
+            pagination.limit = context.recordsLimit;
+          }
+          helper.checkCountAndReduceRecordLimitHelper(pagination.limit, context,  "<%- namePl -%>")
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
           return await <%- nameLc -%>.readAll(search, order, pagination, benignErrorReporter);
       } else {
@@ -545,10 +550,18 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
    <%- namePl -%>Connection: async function({search, order, pagination}, context){
-         if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-           await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%- namePl -%>Connection");
-           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-           return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
+        if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
+          if(pagination === undefined){
+            pagination = {first: context.recordsLimit}
+          } else if(pagination.after !== undefined && pagination.first === undefined){
+            pagination.first = context.recordsLimit;
+          } else if(pagination.before !== undefined && pagination.last === undefined){
+            pagination.last = context.recordsLimit;
+          }
+          let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+          await checkCountAndReduceRecordLimitHelper(limit, context, "<%- namePl -%>Connection");
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+          return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }
