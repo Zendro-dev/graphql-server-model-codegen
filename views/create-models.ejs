@@ -120,15 +120,19 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     return super.count(options);
   }
 
-  static readAll(search, order, pagination, benignErrorReporter){
+  static async readAll(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    // build the sequelize options object for limit-offset-based pagination
     let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());  
     let records = await super.findAll(options);
+    // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
   }
 
-  static readAllCursor(search, order, pagination,benignErrorReporter){
+  static async readAllCursor(search, order, pagination,benignErrorReporter){
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // check valid paginationArguments
     helper.checkCursorBasedPaginationArgument(pagination);
     // build the sequelize options object for cursor-based pagination
@@ -137,11 +141,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     // validationCheck after read
     records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
     // get the first record (if exists) in the opposite direction to determine pageInfo.
-    // if no cursor was given there is no need for an extra query as the results will start at page "1".
+    // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
       let oppOptions = helper.buildOppositeSearch(search, order, pagination, this.idAttribute());
-      console.log("oppOptions: ", oppOptions)
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object

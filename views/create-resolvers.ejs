@@ -526,10 +526,11 @@ module.exports = {
    */
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
+          let recordsLimit = parseInt(globals.LIMIT_RECORDS);
           if(pagination === undefined){
-            pagination = {limit: context.recordsLimit}
+            pagination = {limit: recordsLimit}
           } else if(pagination.limit === undefined){
-            pagination.limit = context.recordsLimit;
+            pagination.limit = recordsLimit;
           }
           helper.checkCountAndReduceRecordLimitHelper(pagination.limit, context,  "<%- namePl -%>")
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
@@ -551,15 +552,16 @@ module.exports = {
    */
    <%- namePl -%>Connection: async function({search, order, pagination}, context){
         if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
+          let recordsLimit = parseInt(globals.LIMIT_RECORDS) 
           if(pagination === undefined){
-            pagination = {first: context.recordsLimit}
+            pagination = {first: recordsLimit}
           } else if(pagination.after !== undefined && pagination.first === undefined){
-            pagination.first = context.recordsLimit;
+            pagination.first = recordsLimit;
           } else if(pagination.before !== undefined && pagination.last === undefined){
-            pagination.last = context.recordsLimit;
+            pagination.last = crecordsLimit;
           }
           let limit = pagination.first !== undefined ? pagination.first : pagination.last;
-          await checkCountAndReduceRecordLimitHelper(limit, context, "<%- namePl -%>Connection");
+          helper.checkCountAndReduceRecordLimitHelper(limit, context, "<%- namePl -%>Connection");
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
           return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
        } else {

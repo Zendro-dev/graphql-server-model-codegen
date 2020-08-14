@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 
 # Clone the skeleton project and install dependencies
 RUN apt-get update && apt-get install -y git procps autoconf libtool make &&\
-  git clone --branch master https://github.com/ScienceDb/graphql-server.git . && \
+  git clone --branch issue142-refactor-readMany https://github.com/ScienceDb/graphql-server.git . && \
   chmod u+x ./migrateDbAndStartServer.sh && \
   npm install --save
 
