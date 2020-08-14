@@ -257,7 +257,6 @@ writeSchemaCommons = function(dir_write){
   let commons = `module.exports = \`
 
   enum InputType{
-    Array
     String
     Int
     Float
