@@ -855,7 +855,8 @@ generateSections = async function(sections, opts, dir_write) {
 writeCommons = async function(dir_write, models, adapters){
   writeSchemaCommons(dir_write);
   console.log(path.join(dir_write,'models'))
-  writeIndexAdapters(path.join(dir_write,'models'));
+  //deprecated due to static adapters index, to be removed
+  // writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
   await writeAcls(dir_write, models, adapters);
   //deprecated due to static global index, to be removed
