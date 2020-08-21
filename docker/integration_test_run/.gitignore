@@ -1,6 +1,3 @@
 # Ignore everything in this directory
-*
-# Except this file
-!.gitignore
-!instance1
-!instance2
+instance1
+instance2
