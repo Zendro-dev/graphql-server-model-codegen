@@ -7,7 +7,7 @@ const {promisify} = require('util');
 const ejsRenderFile = promisify( ejs.renderFile );
 const stringify_obj = require('stringify-object');
 const colors = require('colors/safe');
-const { getDefaultDatabase } = require('./lib/generators-aux');
+const { getModelDatabase } = require('./lib/generators-aux');
 
 
 /**
@@ -502,7 +502,7 @@ module.exports.getOptions = function(dataModel){
     name : dataModel.model,
     nameCp: capitalizeString(dataModel.model),
     storageType : getStorageType(dataModel),
-    database: getDefaultDatabase(dataModel),
+    database: getModelDatabase(dataModel),
     table: inflection.pluralize(uncapitalizeString(dataModel.model)),
     nameLc: uncapitalizeString(dataModel.model),
     namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
