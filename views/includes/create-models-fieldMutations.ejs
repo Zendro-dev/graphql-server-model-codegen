@@ -1,10 +1,10 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
     /**
-    * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+    * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
-    * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+    * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
     */
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
       let updated = await <%- name -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
@@ -14,13 +14,13 @@
 <%}-%>
 <%for(let i=0; i < associationsArguments["to_many_through_sql_cross_table"].length; i++){-%>
   /**
-  * <%- op %>_<%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+  * <%- op %>_<%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
   *
   * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
-  * @param {Id}   <%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+  * @param {Id}   <%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
   */
   static async <%- op -%>_<%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%>(record, <%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>){
-    const updated = await sequelize.transaction(async (transaction) => {
+    const updated = await this.sequelize.transaction(async (transaction) => {
     return await record.<%-op-%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>(<%- op -%><%-associationsArguments["to_many_through_sql_cross_table"][i].name_cp-%>, {transaction: transaction});
     });
     return updated;
