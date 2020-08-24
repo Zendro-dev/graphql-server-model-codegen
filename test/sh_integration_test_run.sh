@@ -56,14 +56,21 @@
 #         This option performs the following actions:
 #
 #         1) Stops and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
-#         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
+#         2) Removes any previously generated code located on the testing environment server instances: ./docker/integration_test_run/servers.
+#
+#     -C, --softCleanup
+#
+#         This option performs the following actions:
+#
+#         1) Stops and removes Docker containers and volumes with docker-compose down command.
+#         2) Removes any previously generated code located on the testing environment server instances: ./docker/integration_test_run/servers.
 #
 #     -g, --generate-code
 #
 #         This option performs the following actions:
 #
 #         1) Stop and removes containers with docker-compose down command (without removing images).
-#         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
+#         2) Removes any previously generated code located on the testing environment server instances: ./docker/integration_test_run/servers.
 #         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
 #         4) Creates and start containers with docker-compose up command.
 #
