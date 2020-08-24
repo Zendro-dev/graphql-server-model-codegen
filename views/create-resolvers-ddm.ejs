@@ -151,7 +151,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
-      checkCountForOneAndReduceRecordsLimit(context);
+      helper.checkCountAndReduceRecordLimitHelper(1, context, "<%- nameLc -%>.prototype.<%=associations_generic_one[i].name%>");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_one[i].name%>Impl({search}, context, benignErrorReporter);
     } else {
@@ -259,13 +259,10 @@ const associationArgsDef = {
  * Local helper fuctions.
  *
  * Functions:
- * checkCountAndReduceRecordsLimit()
- * checkCountForOneAndReduceRecordsLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
-<%- include('./includes/record-limit-helpers'); -%>
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *
@@ -358,6 +355,11 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- namePl -%>Connection: async function({search, order, pagination}, context){
+    // check valid pagination arguments
+    helper.checkCursorBasedPaginationArgument(pagination);
+    // reduce recordsLimit and check if exceeded
+    let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+    helper.checkCountAndReduceRecordLimitHelper(limit, context, "<%- namePl -%>Connection");
 
     //construct benignErrors reporter with context
     let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
@@ -367,28 +369,28 @@ module.exports = {
       throw new Error('No adapters registered for data model "<%- name %>"');
     }//else
 
-      //exclude adapters
-      let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
-      if(adapters.length === 0) {
-        throw new Error('All adapters was excluded for data model "<%- name %>"');
-      }//else
+    //exclude adapters
+    let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
+    if(adapters.length === 0) {
+      throw new Error('All adapters was excluded for data model "<%- name %>"');
+    }//else
 
-      //check: auth adapters
-      let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
-      if (authorizationCheck.authorizedAdapters.length > 0) {
-        //check adapter authorization Errors
-        if (authorizationCheck.authorizationErrors.length > 0) {
-          context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
-        }
-        return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
-      } else { //adapters not auth || errors
-          // else new Error
-          if (authorizationCheck.authorizationErrors.length > 0) {
-              throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-          } else {
-              throw new Error('No available adapters for data model "<%- name %>" ');
-          }
+    //check: auth adapters
+    let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+    if (authorizationCheck.authorizedAdapters.length > 0) {
+      //check adapter authorization Errors
+      if (authorizationCheck.authorizationErrors.length > 0) {
+        context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
       }
+      return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
+    } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+        } else {
+            throw new Error('No available adapters for data model "<%- name %>" ');
+        }
+    }
   },
 
 

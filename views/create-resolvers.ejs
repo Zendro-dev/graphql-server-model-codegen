@@ -78,6 +78,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = async function({search,order,pagination}, context){
       if (await checkAuthorization(context, '<%- associations_temp[i].target -%>', 'read') === true) {
+        helper.checkCountAndReduceRecordLimitHelper(pagination.limit, context, "<%- namePl -%>Connection");
         await checkCountAndReduceRecordsLimit({search, pagination}, context, '<%=associations_temp[i].name%>Filter', '<%- associations_temp[i].target_lc -%>');
         return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
       } else {
@@ -102,7 +103,9 @@ const associationArgsDef = {
        pagination
   }, context) {
       if (await checkAuthorization(context, '<%- associations_temp[i].target -%>', 'read') === true) {
-        await checkCountAndReduceRecordsLimit({search, pagination}, context, '<%=associations_temp[i].name%>Connection', '<%- associations_temp[i].target_lc -%>');
+        helper.checkCursorBasedPaginationArgument(pagination);
+        let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+        helper.checkCountAndReduceRecordLimitHelper(limit, context, "<%- namePl -%>Connection");
         return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -298,7 +301,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
-        checkCountForOneAndReduceRecordsLimit(context);
+        helper.checkCountAndReduceRecordLimitHelper(1, context, "<%- nameLc -%>.prototype.<%=associations_generic_one[i].name%>");
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         return await this.<%=associations_generic_one[i].name%>Impl({search}, context, benignErrorReporter);
     } else {
@@ -406,13 +409,10 @@ const associationArgsDef = {
  * Section 5
  * Local helper fuctions.
  *
- * checkCountAndReduceRecordsLimit()
- * checkCountForOneAndReduceRecordsLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
-<%- include('./includes/record-limit-helpers'); -%>
 
 /**
  * countAllAssociatedRecords - Count records associated with another given record
@@ -526,12 +526,6 @@ module.exports = {
    */
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
-          let recordsLimit = parseInt(globals.LIMIT_RECORDS);
-          if(pagination === undefined){
-            pagination = {limit: recordsLimit}
-          } else if(pagination.limit === undefined){
-            pagination.limit = recordsLimit;
-          }
           helper.checkCountAndReduceRecordLimitHelper(pagination.limit, context,  "<%- namePl -%>")
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
           return await <%- nameLc -%>.readAll(search, order, pagination, benignErrorReporter);
@@ -552,14 +546,7 @@ module.exports = {
    */
    <%- namePl -%>Connection: async function({search, order, pagination}, context){
         if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-          let recordsLimit = parseInt(globals.LIMIT_RECORDS) 
-          if(pagination === undefined){
-            pagination = {first: recordsLimit}
-          } else if(pagination.after !== undefined && pagination.first === undefined){
-            pagination.first = recordsLimit;
-          } else if(pagination.before !== undefined && pagination.last === undefined){
-            pagination.last = crecordsLimit;
-          }
+          helper.checkCursorBasedPaginationArgument(pagination);
           let limit = pagination.first !== undefined ? pagination.first : pagination.last;
           helper.checkCountAndReduceRecordLimitHelper(limit, context, "<%- namePl -%>Connection");
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
@@ -578,7 +565,7 @@ module.exports = {
    */
   readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-        checkCountForOneAndReduceRecordsLimit(context);
+        helper.checkCountAndReduceRecordLimitHelper(1, context, "readOne<%- nameCp -%>")
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         return await <%- nameLc -%>.readById(<%- idAttribute -%>, benignErrorReporter);
       } else {

@@ -108,8 +108,6 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static async readAllCursor(search, order, pagination){
-    // check valid paginationArguments
-    helper.checkCursorBasedPaginationArgument(pagination);
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
