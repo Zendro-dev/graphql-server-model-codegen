@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "zendro-graphql-server-tests",
+  "version": "0.0.1",
+  "description": "Testing environment for Zendro graphql-server-model-codegen",
+  "scripts": {
+    "clean": "bash scripts/clean-project.sh"
+  },
+  "workspaces": {
+    "packages": [
+      "servers/*"
+    ]
+  }
+}

@@ -4,9 +4,6 @@ FROM node:14.3.0-stretch-slim
 WORKDIR /usr/src/app
 
 # Clone the skeleton project and install dependencies
-RUN apt-get update && apt-get install -y git procps autoconf libtool make &&\
-  git clone --branch master https://github.com/ScienceDb/graphql-server.git . && \
-  chmod u+x ./migrateDbAndStartServer.sh && \
-  npm install --save
+RUN apt-get update && apt-get install -y git procps autoconf libtool make jq
 
 EXPOSE 3000

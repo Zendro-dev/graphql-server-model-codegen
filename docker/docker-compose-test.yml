@@ -19,17 +19,9 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
-      - ./integration_test_run/instance1/models/adapters:/usr/src/app/models/adapters
-      - ./integration_test_run/instance1/schemas:/usr/src/app/schemas
-      - ./integration_test_run/instance1/resolvers:/usr/src/app/resolvers
-      - ./integration_test_run/instance1/models/sql:/usr/src/app/models/sql
-      - ./integration_test_run/instance1/models/distributed:/usr/src/app/models/distributed
-      - ./integration_test_run/instance1/models/zendro-server:/usr/src/app/models/zendro-server
-      - ./integration_test_run/instance1/models/generic:/usr/src/app/models/generic
-      - ./integration_test_run/instance1/migrations:/usr/src/app/migrations
-      - ./integration_test_run/instance1/validations:/usr/src/app/validations
-      - ./integration_test_run/instance1/patches:/usr/src/app/patches
-      - ./sequelize_config_instance1.json:/usr/src/app/config/config.json
+      - ./integration_test_run/node_modules:/usr/node_modules
+      - ./integration_test_run/servers/instance1:/usr/src/app
+      - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
 
     ports:
       - "3000:3000"
@@ -47,7 +39,6 @@ services:
       - /bin/sh
       - -c
       - |
-        npm install
         ./migrateDbAndStartServer.sh
 
   gql_ncbi_sim_srv1:
@@ -96,17 +87,9 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
-      - ./integration_test_run/instance2/models/adapters:/usr/src/app/models/adapters
-      - ./integration_test_run/instance2/schemas:/usr/src/app/schemas
-      - ./integration_test_run/instance2/resolvers:/usr/src/app/resolvers
-      - ./integration_test_run/instance2/models/sql:/usr/src/app/models/sql
-      - ./integration_test_run/instance2/models/distributed:/usr/src/app/models/distributed
-      - ./integration_test_run/instance2/models/zendro-server:/usr/src/app/models/zendro-server
-      - ./integration_test_run/instance2/models/generic:/usr/src/app/models/generic
-      - ./integration_test_run/instance2/migrations:/usr/src/app/migrations
-      - ./integration_test_run/instance2/validations:/usr/src/app/validations
-      - ./integration_test_run/instance2/patches:/usr/src/app/patches
-      - ./sequelize_config_instance2.json:/usr/src/app/config/config.json
+      - ./integration_test_run/node_modules:/usr/node_modules
+      - ./integration_test_run/servers/instance2:/usr/src/app
+      - ./data_models_storage_config2.json:/usr/src/app/config/data_models_storage_config.json
 
     ports:
       - "3030:3030"
@@ -123,7 +106,6 @@ services:
       - /bin/sh
       - -c
       - |
-        npm install
         ./migrateDbAndStartServer.sh
 
 networks:
