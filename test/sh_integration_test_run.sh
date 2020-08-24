@@ -480,6 +480,9 @@ setupTestingEnvironment() {
 
   done
 
+  # Use image node-jq
+  export NODE_JQ_SKIP_INSTALL_BINARY=true
+
   # Install module dependencies
   yarn install
   echo -e "@@ Installing ... ${LGREEN}done${NC}"

@@ -17,19 +17,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.graphql_server
-
     volumes:
       - ./integration_test_run/node_modules:/usr/node_modules
       - ./integration_test_run/servers/instance1:/usr/src/app
       - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
-
     ports:
       - "3000:3000"
-
     environment:
       PORT: 3000
       REQUIRE_SIGN_IN: "false"
       LIMIT_RECORDS: 25
+      JQ_PATH: /usr/bin/jq
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
       - integrationtest
@@ -98,6 +96,7 @@ services:
       PORT: 3030
       REQUIRE_SIGN_IN: "false"
       LIMIT_RECORDS: 25
+      JQ_PATH: /usr/bin/jq
     # Await POSTGRES role and DB creation, migrate schema, then start web server:
     networks:
       - integrationtest
