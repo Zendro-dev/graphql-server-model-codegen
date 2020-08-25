@@ -258,25 +258,21 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
     async <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       // build the sequelize options object for limit-offset-based pagination
-      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());  
-      let records = await super.findAll(options);
-      // validationCheck after read
-      return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());  
+      return this.get<%- associations_temp[i].name_cp%>(options)
     }
 
 
     async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
       // build the sequelize options object for cursor-based pagination
-      let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
-      let records = await super.findAll(options);
-      // validationCheck after read
-      records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+      let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+      let records = await this.get<%- associations_temp[i].name_cp%>(options);
       // get the first record (if exists) in the opposite direction to determine pageInfo.
       // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
       let oppRecords = [];
       if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
-        let oppOptions = helper.buildOppositeSearch(search, order, pagination, this.idAttribute());
-        oppRecords = await super.findAll(oppOptions);
+        let oppOptions = helper.buildOppositeSearch(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+        oppRecords = await this.get<%- associations_temp[i].name_cp%>(oppOptions);
       }
       // build the graphql Connection Object
       let edges = helper.buildEdgeObject(records);

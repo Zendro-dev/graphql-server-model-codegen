@@ -98,7 +98,7 @@ module.exports = class <%- name -%>{
   }
 
   static async readAll(search, order, pagination, benignErrorReporter){
-    let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput $order: [order<%- nameCp -%>Input]){
+    let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput! $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>(search:$search pagination:$pagination order:$order){<%- idAttribute -%> <%for(var key in attributes){-%>
          <%=key %>
        <%}-%> } }`
@@ -130,7 +130,7 @@ module.exports = class <%- name -%>{
   }
 
   static async readAllCursor(search, order, pagination, benignErrorReporter){
-    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
+    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput! $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
        <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
 
