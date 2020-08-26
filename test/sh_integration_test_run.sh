@@ -222,9 +222,7 @@ changeInstanceBranch() {
 # Check if generated code exists.
 #
 checkCode() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Check generated code...${NC}"
+  logTask begin "Check generated code"
 
   # Remove generated code.
   for instance in "${INSTANCE_DIRS[@]}"
@@ -250,8 +248,7 @@ checkCode() {
   done
 
   # Msg
-  echo -e "@@ Code check ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Code check"
 }
 
 #
@@ -262,9 +259,7 @@ checkCode() {
 #   Remove generated code.
 #
 cleanup() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting cleanup...${NC}"
+  logTask begin "Starting cleanup"
 
   # Hard down
   docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
@@ -272,10 +267,7 @@ cleanup() {
   # Delete code
   deleteServerSetup
 
-  # Msg
-  echo -e "@@ Cleanup ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-
+  logTask end "Cleanup"
 }
 
 #
@@ -320,8 +312,7 @@ consumeArgs() {
 #
 deleteGenCode() {
 
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Removing generated code...${NC}"
+  logTask begin "Removing generated code"
 
   # Change to workspace root
   cd $TARGET_DIR
@@ -332,8 +323,7 @@ deleteGenCode() {
   # Change to project root
   cd - 1>/dev/null
 
-  echo -e "@@ All code removed ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "All code removed"
 
 }
 
@@ -344,14 +334,13 @@ deleteGenCode() {
 #
 deleteServerSetup() {
 
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Removing Zendro instances...${NC}"
+  logTask begin "Removing Zendro instances"
 
   # Remove workspace modules and server instances
   rm -rf $TARGET_DIR/{graphql-server,servers}
 
-  echo -e "@@ Zendro instances deleted ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Zendro instances deleted"
+
 }
 
 #
@@ -360,9 +349,7 @@ deleteServerSetup() {
 # Do the mocha integration tests.
 #
 doTests() {
- # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting mocha tests...${NC}"
+  logTask begin "Starting mocha tests"
 
   # Wait for graphql server
   waitForGql
@@ -370,9 +357,7 @@ doTests() {
   # Do tests
   mocha ./test/mocha_integration_test.js
 
-  # Msg
-  echo -e "@@ Mocha tests ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Mocha tests"
 }
 
 #
@@ -382,9 +367,7 @@ doTests() {
 #
 genCode() {
 
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Generating code...${NC}"
-
+  logTask start "Generating code"
 
   TARGET_DIR_INSTANCE1="${TARGET_DIR}/${INSTANCE_DIRS[0]}"
   TARGET_DIR_INSTANCE2="${TARGET_DIR}/${INSTANCE_DIRS[1]}"
@@ -404,9 +387,40 @@ genCode() {
   # Add patch for sql model accession validation
   patch -V never ${TARGET_DIR_INSTANCE1}/validations/accession.js ./test/integration_test_misc/accession_validate_instance1.patch
 
-  # Msg
-  echo -e "@@ Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}: ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}"
+
+}
+
+#
+# Function: logTask()
+#
+# Logs a task begin or end message to stdout.
+#
+# USAGE:
+#
+#   $ logTask <mode> "<task message>"
+#
+# <mode> = begin | check | end | log
+#
+logTask() {
+
+  case $1 in
+    begin)
+      echo -e "\n${LGRAY}@@ ----------------------------${NC}"
+      echo -e "${LGRAY}@@ $2...${NC}"
+    ;;
+    check)
+      echo -e "@@ $2 ... ${LGREEN}done${NC}"
+    ;;
+    end)
+      echo -e "@@ $2 ... ${LGREEN}done${NC}"
+      echo -e "${LGRAY}---------------------------- @@${NC}\n"
+    ;;
+    log)
+      echo -e "@@ $2 ..."
+    ;;
+  esac
+
 }
 
 #
@@ -425,31 +439,26 @@ man() {
 # Downs and ups containers
 #
 restartContainers() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Restarting containers...${NC}"
+
+  logTask begin "Restarting containers"
 
   # Soft down
   docker-compose -f ./docker/docker-compose-test.yml down
-  # Msg
-  echo -e "@@ Containers down ... ${LGREEN}done${NC}"
+  logTask check "Containers down"
 
   # Install
   npm install
-  # Msg
-  echo -e "@@ Installing ... ${LGREEN}done${NC}"
+  logTask check "Installing"
 
   # Up
   docker-compose -f ./docker/docker-compose-test.yml up -d
-  # Msg
-  echo -e "@@ Containers up ... ${LGREEN}done${NC}"
+  logTask check "Containers up"
 
   # List
   docker-compose -f ./docker/docker-compose-test.yml ps
 
-  # Msg
-  echo -e "@@ Containers restarted ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Containers restarted"
+
 }
 
 #
@@ -458,21 +467,18 @@ restartContainers() {
 # restart & removeCodeGen
 #
 softCleanup() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting soft cleanup...${NC}"
+
+  logTask begin "Starting soft cleanup"
 
   # Down
   docker-compose -f ./docker/docker-compose-test.yml down -v
-  # Msg
-  echo -e "@@ Containers down ... ${LGREEN}done${NC}"
+  logTask check "Containers down"
 
   # Delete code
   deleteGenCode
 
-  # Msg
-  echo -e "@@ Soft cleanup ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Soft cleanup"
+
 }
 
 #
@@ -482,8 +488,7 @@ softCleanup() {
 #
 setupTestingEnvironment() {
 
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Creating Zendro instances...${NC}"
+  logTask begin "Creating Zendro instances"
 
   # Store current working
   ROOT_DIR=$(pwd)
@@ -506,7 +511,7 @@ setupTestingEnvironment() {
 
   # Install module dependencies
   cd $MAIN_SERVER && npm install
-  echo -e "@@ Installing Zendro server modules ... ${LGREEN}done${NC}"
+  logTask check "Installing Zendro server modules"
   cd -
 
   # Copy graphql-server instances
@@ -515,8 +520,8 @@ setupTestingEnvironment() {
   # Return to root directory
   cd $ROOT_DIR
 
-  echo -e "@@ Zendro instances created ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Zendro instances created"
+
 }
 
 #
@@ -525,26 +530,18 @@ setupTestingEnvironment() {
 # Up docker containers.
 #
 upContainers() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting up containers...${NC}"
 
-  # Install
-  # npm install
-  # Msg
-  echo -e "@@ Installing ... ${LGREEN}done${NC}"
+  logTask begin "Starting up containers"
 
   # Up
   docker-compose -f ./docker/docker-compose-test.yml up -d --no-recreate
-  # Msg
-  echo -e "@@ Containers up ... ${LGREEN}done${NC}"
+  logTask check "Containers up"
 
   # List
   docker-compose -f ./docker/docker-compose-test.yml ps
 
-  # Msg
-  echo -e "@@ Containers up ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Containers up"
+
 }
 
 #
@@ -553,9 +550,8 @@ upContainers() {
 # Waits for GraphQL Server to start, for a maximum amount of T1 seconds.
 #
 waitForGql() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Waiting for GraphQL server to start...${NC}"
+
+  logTask begin "Waiting for GraphQL server to start"
 
   # Wait until the Zendro GraphQL web-server is up and running
   waited=0
@@ -571,9 +567,7 @@ waitForGql() {
     waited=$(expr $waited + 2)
   done
 
-  # Msg
-  echo -e "@@ First GraphQL server is up! ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "First GraphQL server is up!"
 
   until curl 'localhost:3030/graphql' > /dev/null 2>&1
   do
@@ -587,9 +581,8 @@ waitForGql() {
     waited=$(expr $waited + 2)
   done
 
-  # Msg
-  echo -e "@@ Second GraphQL server is up! ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Second GraphQL server is up!"
+
 }
 
 #
@@ -758,14 +751,13 @@ fi
 # Last cleanup
 #
 if [ $KEEP_RUNNING = false ]; then
-
   # Msg
-  echo -e "@@ Doing final cleanup..."
-  # Cleanup
+  logTask log "Doing final cleanup"
+  # Hard clean
   cleanup
 else
   # Msg
-  echo -e "@@ Keeping containers running ... ${LGREEN}done${NC}"
-  # List
+  logTask check "Keeping containers running"
+  # List containers
   docker-compose -f ./docker/docker-compose-test.yml ps
 fi
