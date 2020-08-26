@@ -47,7 +47,7 @@
 #
 #         This option changes the testing branch of the zendro server instances. Changing the branch is a permanent side effect.
 #
-#         It can be used alone, or in conjunction with any other options.
+#         It can be used alone to execute the default script, or in conjunction with -s or -T.
 #
 #         The default branch is set to "master". When running tests for the first time, make sure this option is set to the desired branch.
 #
@@ -95,11 +95,11 @@
 #
 #         Because the containers that manages the test-suite's databases do not use docker named volumes, but transient ones, the databases will be re-initialized by this command, too.
 #
-#     -s, --setup [BRANCH]
+#     -s, --setup
 #
 #         This option performs the following actions:
 #
-#         1) Clones two graphql-server instances, optionally switching to the specified BRANCH.
+#         1) Clones two graphql-server instances, optionally switching to the specified "-b BRANCH".
 #         2) Installs a yarn workspace and links node modules to both instances.
 #
 #     -t, --run-test-only
@@ -139,7 +139,7 @@
 #     To restart containers:
 #     $ yarn test-integration -r
 #
-#     To generate code and start containers:
+#     To generate code:
 #     $ yarn test-integration -g
 #
 #     To do the tests only and keep the containers running at end:
@@ -191,6 +191,30 @@ NC='\033[0m'
 #
 # Functions
 #
+
+#
+# Function: changeInstanceBranch()
+#
+# Attempts to checkout server instances to TARGET_BRANCH
+#
+changeInstanceBranch() {
+
+  # Check that instances are set to the correct branch
+  for instance in ${INSTANCE_DIRS[@]}; do
+
+    instance_path=${TARGET_DIR}/${instance}
+
+    # Verify an instance exists
+    if [ -d $instance_path ]; then
+
+      # Checkout to the new branch
+      cd $instance_path
+      git checkout $TARGET_BRANCH
+      cd - 1>/dev/null
+    fi
+
+  done
+}
 
 #
 # Function: checkCode()
@@ -492,25 +516,6 @@ setupTestingEnvironment() {
 
 }
 
-changeInstanceBranch() {
-
-  # Check that instances are set to the correct branch
-  for instance in ${INSTANCE_DIRS[@]}; do
-
-    instance_path=${TARGET_DIR}/${instance}
-
-    # Verify an instance exists
-    if [ -d $instance_path ]; then
-
-      # Checkout to the new branch
-      cd $instance_path
-      git checkout $TARGET_BRANCH
-      cd - 1>/dev/null
-    fi
-
-  done
-}
-
 #
 # Function: upContainers()
 #
@@ -608,6 +613,9 @@ if [ $# -gt 0 ]; then
 
               echo -e "@@ setting test environment branch to: $TARGET_BRANCH"
 
+              # Reset any branch changes
+              deleteGenCode
+
               # Checkout instances to the specified branch
               changeInstanceBranch
 
@@ -636,12 +644,6 @@ if [ $# -gt 0 ]; then
 
             -s|--setup)
 
-              if [[ ! -z $2 && ! $2 =~ ^-|^-- ]]; then
-                TARGET_BRANCH=$2
-              fi
-
-              echo -e "@@ using test environment branch: $TARGET_BRANCH"
-
               # Setup testing environment
               setupTestingEnvironment
 
@@ -662,8 +664,6 @@ if [ $# -gt 0 ]; then
               softCleanup
               # Generate code
               genCode
-              # Ups containers
-              upContainers
 
               # Done
               exit 0
