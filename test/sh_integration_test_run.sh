@@ -199,21 +199,11 @@ NC='\033[0m'
 #
 changeInstanceBranch() {
 
-  # Check that instances are set to the correct branch
-  for instance in ${INSTANCE_DIRS[@]}; do
+  cd $TARGET_DIR
 
-    instance_path=${TARGET_DIR}/${instance}
+  bash scripts/checkout-branch.sh $TARGET_BRANCH
 
-    # Verify an instance exists
-    if [ -d $instance_path ]; then
-
-      # Checkout to the new branch
-      cd $instance_path
-      git checkout $TARGET_BRANCH
-      cd - 1>/dev/null
-    fi
-
-  done
+  cd - 1>/dev/null
 }
 
 #
@@ -604,9 +594,6 @@ if [ $# -gt 0 ]; then
               fi
 
               echo -e "@@ setting test environment branch to: $TARGET_BRANCH"
-
-              # Reset any branch changes
-              deleteGenCode
 
               # Checkout instances to the specified branch
               changeInstanceBranch
