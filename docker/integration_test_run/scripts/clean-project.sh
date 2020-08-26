@@ -26,15 +26,15 @@ do
     # Forcefully delete all generated files
     for d in ${PATHS[@]}
     do
-      echo $instance/${d}/
-      rm -rf ${d}/*
+      echo $instance/${d}
+      rm -rf ${d}
     done
 
     # Checkout deleted static files
     git checkout $(git diff --no-renames --name-only --diff-filter=D)
 
     # Return to ReconstructDb root directory
-    cd ..
+    cd -
 
   fi
 
