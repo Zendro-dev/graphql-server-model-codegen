@@ -193,20 +193,6 @@ NC='\033[0m'
 #
 
 #
-# Function: changeInstanceBranch()
-#
-# Attempts to checkout server instances to TARGET_BRANCH
-#
-changeInstanceBranch() {
-
-  cd $TARGET_DIR
-
-  bash scripts/checkout-branch.sh $TARGET_BRANCH
-
-  cd - 1>/dev/null
-}
-
-#
 # Function: checkCode()
 #
 # Check if generated code exists.
@@ -595,8 +581,10 @@ if [ $# -gt 0 ]; then
 
               echo -e "@@ setting test environment branch to: $TARGET_BRANCH"
 
-              # Checkout instances to the specified branch
-              changeInstanceBranch
+              # Forcefully checkout instances to the specified branch
+              cd $TARGET_DIR
+              bash scripts/checkout-branch.sh $TARGET_BRANCH
+              cd - 1>/dev/null
 
               shift
               let "NUM_ARGS--"
