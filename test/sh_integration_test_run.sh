@@ -327,7 +327,7 @@ deleteGenCode() {
   cd $TARGET_DIR
 
   # Remove generated files
-  yarn clean
+  bash scripts/clean-workspace.sh
 
   # Change to project root
   cd - 1>/dev/null
@@ -345,11 +345,13 @@ deleteGenCode() {
 deleteServerSetup() {
 
   echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Removing cloned instances...${NC}"
+  echo -e "${LGRAY}@@ Removing Zendro instances...${NC}"
 
   # Remove workspace modules and server instances
-  rm -rf $TARGET_DIR/{node_modules,servers}
+  rm -rf $TARGET_DIR/{graphql-server,servers}
 
+  echo -e "@@ Zendro instances deleted ... ${LGREEN}done${NC}"
+  echo -e "${LGRAY}---------------------------- @@${NC}\n"
 }
 
 #
@@ -480,40 +482,41 @@ softCleanup() {
 #
 setupTestingEnvironment() {
 
+  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
+  echo -e "${LGRAY}@@ Creating Zendro instances...${NC}"
+
+  # Store current working
+  ROOT_DIR=$(pwd)
+  MAIN_SERVER="graphql-server"
+
   # Change working directory
   cd $TARGET_DIR
 
-  # Remove any leftover instances
+  # Recreate server instances
   rm -rf servers/ && mkdir servers/
 
-  for instance in ${INSTANCE_DIRS[@]}; do
+  # Clone graphql-server and checkout the feature branch
+  git clone \
+    --branch $TARGET_BRANCH \
+    git@github.com:Zendro-dev/graphql-server.git \
+    $MAIN_SERVER
 
-    # Clone graphql-server and checkout the feature branch
-    git clone \
-      --branch $TARGET_BRANCH \
-      git@github.com:Zendro-dev/graphql-server.git \
-      $instance
-
-    # Rename package.json#name property.
-    # Unique names are required for workspaces.
-    jq --arg name $( basename $instance ) '.name = $name' \
-      < "${instance}/package.json" \
-      > "tmp.json"
-
-    mv tmp.json $instance/package.json
-
-  done
-
-  # Use image node-jq
+  # Force "node-jq" to use the docke image "jq"
   export NODE_JQ_SKIP_INSTALL_BINARY=true
 
   # Install module dependencies
-  yarn install
-  echo -e "@@ Installing ... ${LGREEN}done${NC}"
-
-  # Return to root directory
+  cd $MAIN_SERVER && npm install
+  echo -e "@@ Installing Zendro server modules ... ${LGREEN}done${NC}"
   cd -
 
+  # Copy graphql-server instances
+  for instance in ${INSTANCE_DIRS[@]}; do cp -r $MAIN_SERVER $instance; done
+
+  # Return to root directory
+  cd $ROOT_DIR
+
+  echo -e "@@ Zendro instances created ... ${LGREEN}done${NC}"
+  echo -e "${LGRAY}---------------------------- @@${NC}\n"
 }
 
 #
