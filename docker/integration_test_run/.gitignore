@@ -1,10 +1,2 @@
 # graphql-server instances
 servers/
-
-# lock files
-yarn.lock
-package-lock.json
-
-# log files
-yarn-error.log
-[p]npm-debug.log
