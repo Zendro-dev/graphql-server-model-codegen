@@ -446,10 +446,6 @@ restartContainers() {
   docker-compose -f ./docker/docker-compose-test.yml down
   logTask check "Containers down"
 
-  # Install
-  npm install
-  logTask check "Installing"
-
   # Up
   docker-compose -f ./docker/docker-compose-test.yml up -d
   logTask check "Containers up"
