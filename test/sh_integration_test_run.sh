@@ -15,12 +15,12 @@
 #
 #   Execution via npm:
 #
-#     yarn test-integration [-- OPTIONS]
+#     npm run test-integration -- [-- OPTIONS]
 #
 #   cleaup:
-#     yarn test-integration-clear
+#     npm run test-integration-clear
 #   or
-#     yarn test-integration -c
+#     npm run test-integration -- -c
 #
 # DESCRIPTION
 #     Command line utility to perform graphql server's integration-test.
@@ -99,8 +99,8 @@
 #
 #         This option performs the following actions:
 #
-#         1) Clones two graphql-server instances, optionally switching to the specified "-b BRANCH".
-#         2) Installs a yarn workspace and links node modules to both instances.
+#         1) Clones the graphql-server repository, optionally switching to the specified "-b BRANCH".
+#         2) Uses the cloned repository to create the server instances necessary for the integration tests.
 #
 #     -t, --run-test-only
 #
@@ -128,34 +128,34 @@
 #     Command line utility to perform graphql server's integration-test.
 #
 #     To see full test-integration info:
-#     $ yarn test-integration -h
+#     $ npm run test-integration -- -h
 #
 #     To run default behavior (cleanup-genCode-doTests-cleanup):
-#     $ yarn test-integration
+#     $ npm run test-integration
 #
 #     To run default behavior but skip final cleanup (cleanup-genCode-doTests):
-#     $ yarn test-integration -k
+#     $ npm run test-integration -- -k
 #
 #     To restart containers:
-#     $ yarn test-integration -r
+#     $ npm run test-integration -- -r
 #
 #     To generate code:
-#     $ yarn test-integration -g
+#     $ npm run test-integration -- -g
 #
 #     To do the tests only and keep the containers running at end:
-#     $ yarn test-integration -t -k
+#     $ npm run test-integration -- -t -k
 #
 #     To generate code and do the tests, removing all Docker images at end:
-#     $ yarn test-integration -T
+#     $ npm run test-integration -- -T
 #
 #     To do a full clean up (removes containers, images and code):
-#     $ yarn test-integration -c
+#     $ npm run test-integration -- -c
 #
 #     To setup a new testing environment
-#     $ yarn test-integration -s [BRANCH]
+#     $ npm run test-integration -- -s [BRANCH]
 #
 #     To do a soft clean up (removes containers, volumes and code, but preserves images):
-#     $ yarn test-integration -C
+#     $ npm run test-integration -- -C
 #
 
 # exit on first error
@@ -456,7 +456,7 @@ softCleanup() {
 #
 # Function: setupTestingEnvironment
 #
-# Clones and initializes a two-server environment using yarn workspaces.
+# Clones and initializes a two-server environment workspace.
 #
 setupTestingEnvironment() {
 
