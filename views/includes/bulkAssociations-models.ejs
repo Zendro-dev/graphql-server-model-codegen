@@ -1,5 +1,6 @@
 <%# bulkAssociations functions for model-layer; paramater: op (add or remove)_%> 
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){_%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey) { _%>
   /**
    * bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%> - bulk<% if(op === 'remove'){ %>Dis<% } %>Associaton of given ids
    *
@@ -7,7 +8,6 @@
    * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
    * @return {string} returns message on success
    */
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { _%>
     <% if(storageType === 'sql' || storageType === 'sql-adapter'){_%>
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput){
         let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");

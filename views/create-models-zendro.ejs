@@ -116,12 +116,12 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response && response.data && response.data.data) {
-        let data = response.data.data.<%- namePl -%> ;
+      if(response && response.data && response.data.data && response.data.data.<%- namePl -%> !== null) {
+        let data = response.data.data.<%- namePl -%>;
         data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
         return data.map(item => {return new <%- name -%>(item) });
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error){
       //handle caught errors
@@ -147,7 +147,7 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response && response.data && response.data.data) {
+      if(response && response.data && response.data.data &&  response.data.data.<%- namePl -%>Connection !== null) {
         let data_edges = response.data.data.<%- namePl -%>Connection.edges;
         let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo;
 
@@ -165,7 +165,7 @@ module.exports = class <%- name -%>{
 
         return { edges, pageInfo };
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors

@@ -101,7 +101,7 @@ module.exports = class <%- adapterName -%>{
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
           // check if data was send
-          if(response && response.data && response.data.data) {
+          if(response && response.data && response.data.data && response.data.data.<%- namePl -%>Connection !== null) {
             return response.data.data.<%- namePl -%>Connection;
           } else {
             throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);

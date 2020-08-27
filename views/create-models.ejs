@@ -396,7 +396,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
    *
    * @return {type} Name of the attribute that functions as an internalId
    */
-
   static idAttribute() {
     return <%- name -%>.definition.id.name;
   }
@@ -406,7 +405,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
    *
    * @return {type} Type given in the JSON model
    */
-
   static idAttributeType() {
     return <%- name -%>.definition.id.type;
   }
@@ -416,7 +414,6 @@ module.exports = class <%- name -%> extends Sequelize.Model{
    *
    * @return {type} id value
    */
-
   getIdValue() {
     return this[<%- name -%>.idAttribute()]
   }

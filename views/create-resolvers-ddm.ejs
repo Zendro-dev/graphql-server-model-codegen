@@ -225,7 +225,9 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      helper.checkCountAndReduceRecordLimitHelper(pagination.limit, context, "<%=associations_generic_many[i].name%>Connection");
+      helper.checkCursorBasedPaginationArgument(pagination);
+      let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+      helper.checkCountAndReduceRecordLimitHelper(limit, context, "<%=associations_generic_many[i].name%>Connection");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -403,6 +405,7 @@ module.exports = {
     //check: adapters auth
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
       if (authorizationCheck === true) {
+        helper.checkCountAndReduceRecordLimitHelper(1, context, "readOne<%- nameCp -%>");
         //construct benignErrors reporter with context
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
 
