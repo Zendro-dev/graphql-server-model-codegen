@@ -33,8 +33,8 @@ do
     # Checkout deleted static files
     git checkout $(git diff --no-renames --name-only --diff-filter=D)
 
-    # Return to ReconstructDb root directory
-    cd -
+    # Return to previous working directory
+    cd - 1>/dev/null
 
   fi
 
