@@ -193,41 +193,6 @@ NC='\033[0m'
 #
 
 #
-# Function: checkCode()
-#
-# Check if generated code exists.
-#
-checkCode() {
-  logTask begin "Check generated code"
-
-  # Remove generated code.
-  for instance in "${INSTANCE_DIRS[@]}"
-  do
-    instance_path="$TARGET_DIR/$instance"
-    # Check if directory exists
-    if [ -d "$TARGET_DIR/$instance" ]; then
-      echo -e "Code directory ${LGREEN}${instance}${NC} exists."
-
-      # Check if directory is empty
-      #if [ -n "$(ls -A ${instance} 2>/dev/null)" ]; then
-      #  echo -e "@@ Code at: $instance ... ${LGREEN}ok${NC}"
-      #else
-      #  echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$instance${NC} exists but is empty!, please try -T option ... ${YEL}exit${NC}"
-      #  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      #  exit 0
-      #fi
-    else
-      echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}${instance}${NC} does not exist!, please try -T option ... ${YEL}exit${NC}"
-      echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      exit 0
-    fi
-  done
-
-  # Msg
-  logTask end "Code check"
-}
-
-#
 # Function: checkGqlServer()
 #
 # Check if Zendro GraphQL servers respond to requests.
@@ -688,8 +653,8 @@ if [ $# -gt 0 ]; then
             ;;
 
             -t|--run-tests-only)
-              # Check code
-              checkCode
+              # Check workspace folders
+              checkWorkspace
               # Restart containers
               upContainers
               # Wait for graphql servers
