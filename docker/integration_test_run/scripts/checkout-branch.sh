@@ -4,19 +4,26 @@
 
 TARGET_BRANCH=$1
 
+
 if [[ -d "servers" ]]; then
 
   for instance in $(ls servers)
   do
 
-    if [[ -d "$instance" ]]; then
+    INSTANCE_PATH="servers/$instance"
+
+    if [[ -d "$INSTANCE_PATH" ]]; then
 
       # Change into instance directory
-      cd $instance
+      cd $INSTANCE_PATH
 
-      # Forcefully checkout target branch
-      # WARNING: discards all changes!
+      # Forcefully checkout to target branch
+      # WARNING: discards all changes when switching branches!
       git checkout --force $TARGET_BRANCH
+
+      # Synchronize with remote
+      git fetch --all
+      git reset --hard
 
       # Return to previous working directory
       cd - 1>/dev/null
