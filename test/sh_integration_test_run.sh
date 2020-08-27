@@ -178,7 +178,7 @@ INSTANCE_DIRS=(
 TEST_MODELS_INSTANCE1="./test/integration_test_models_instance1"
 TEST_MODELS_INSTANCE2="./test/integration_test_models_instance2"
 MANPAGE="./man/sh_integration_test_run.man"
-T1=180
+SERVER_CHECK_WAIT_TIME=60
 DO_DEFAULT=true
 KEEP_RUNNING=false
 NUM_ARGS=$#
@@ -243,9 +243,9 @@ checkGqlServer() {
   do
 
     # Exit with error code 1
-    if [ $elapsedTime == $T1 ]; then
+    if [ $elapsedTime == $SERVER_CHECK_WAIT_TIME ]; then
 
-      logTask error "zendro graphql web server does not start, the wait time limit was reached (${T1}s)"
+      logTask error "zendro graphql web server does not start, the wait time limit was reached (${SERVER_CHECK_WAIT_TIME}s)"
       return 1
 
     fi
@@ -591,7 +591,7 @@ upContainers() {
 #
 # Function: waitForGql()
 #
-# Waits for GraphQL Server to start, for a maximum amount of T1 seconds.
+# Waits for GraphQL Server to start, for a maximum amount of SERVER_CHECK_WAIT_TIME seconds.
 #
 waitForGql() {
 
