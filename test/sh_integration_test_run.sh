@@ -310,7 +310,7 @@ consumeArgs() {
           # set flag
           KEEP_RUNNING=true
 
-          logTask msg "Keep containers running at end: $KEEP_RUNNING"
+          logTask begin "Keep containers running at end: $KEEP_RUNNING"
 
           # Remove last argument
           shift
@@ -510,7 +510,7 @@ resetDockerSetup() {
 
   docker-compose -f ./docker/docker-compose-test.yml down -v
 
-  logTask check "Containers down"
+  logTask end "Containers down"
 
 }
 
@@ -568,7 +568,6 @@ upContainers() {
 
   # Up
   docker-compose -f ./docker/docker-compose-test.yml up -d --no-recreate
-  logTask check "Containers up"
 
   # List
   docker-compose -f ./docker/docker-compose-test.yml ps
@@ -802,9 +801,9 @@ if [ $KEEP_RUNNING = false ]; then
 
 else
 
-  logTask check "Keeping containers running"
-
   # List containers
   docker-compose -f ./docker/docker-compose-test.yml ps
+
+  logTask end "Keep containers running"
 
 fi
