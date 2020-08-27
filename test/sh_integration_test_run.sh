@@ -228,6 +228,39 @@ checkCode() {
 }
 
 #
+# Function: checkWorkspace()
+#
+# Check if graphql-server instance folders exist.
+#
+checkWorkspace() {
+
+  logTask begin "Check graphql-server instances"
+
+  FAIL=false
+
+  for instance in ${INSTANCE_DIRS[@]}; do
+
+    instance_name=$(basename $instance)
+
+    if [[ ! -d "$TARGET_DIR/$instance" ]]; then
+
+      FAIL=true
+      logTask error "Server directory: ${RED}${instance_name}${NC} does not exist!"
+    else
+      logTask msg "${instance_name} exists"
+    fi
+
+  done
+
+  if [[ $FAIL == true ]]; then
+    logTask quit "One or more server instances were not installed. Please use ${YEL}-s${NC} or execute a full test run with ${YEL}-k${NC} before using this command."
+    exit 0
+  fi
+
+  logTask end "Instances check"
+}
+
+#
 # Function: cleanup()
 #
 # Default actions (without --keep-running):
@@ -392,8 +425,14 @@ logTask() {
       echo -e "@@ $2 ... ${LGREEN}done${NC}"
       echo -e "${LGRAY}---------------------------- @@${NC}\n"
     ;;
-    log)
-      echo -e "@@ $2 ..."
+    error)
+      echo -e "!!${RED}ERROR${NC}: $2"
+    ;;
+    msg)
+      echo -e "@@ $2"
+    ;;
+    quit)
+      echo -e "@@ $2 ... ${YEL}exit${NC}"
     ;;
   esac
 
@@ -627,9 +666,11 @@ if [ $# -gt 0 ]; then
             ;;
 
             -g|--generate-code)
-              # Light cleanup
-              softCleanup
-              # Generate code
+              # Check server instances
+              checkWorkspace
+              # Remove previously generated code
+              deleteGenCode
+              # Run code generator
               genCode
 
               # Done
@@ -723,7 +764,7 @@ fi
 #
 if [ $KEEP_RUNNING = false ]; then
   # Msg
-  logTask log "Doing final cleanup"
+  logTask msg "Doing final cleanup"
   # Hard clean
   cleanup
 else
