@@ -228,6 +228,38 @@ checkCode() {
 }
 
 #
+# Function: checkGqlServer()
+#
+# Check if Zendro GraphQL servers respond to requests.
+#
+checkGqlServer() {
+
+  host="localhost:${1}/graphql"
+
+  logTask msg "Testing GraphQL server connection @ $host"
+
+  elapsedTime=0
+  until curl "$host" > /dev/null 2>&1
+  do
+
+    # Exit with error code 1
+    if [ $elapsedTime == $T1 ]; then
+
+      logTask error "zendro graphql web server does not start, the wait time limit was reached (${T1}s)"
+      return 1
+
+    fi
+
+    # Wait 2s and rety
+    sleep 2
+    elapsedTime=$(expr $elapsedTime + 2)
+  done
+
+  return 0
+
+}
+
+#
 # Function: checkWorkspace()
 #
 # Check if graphql-server instance folders exist.
@@ -305,7 +337,7 @@ consumeArgs() {
         ;;
 
         *)
-          logTask msg "Discarting option: ${RED}$a${NC}"
+          logTask msg "Discarding option: ${RED}$a${NC}"
 
           # Remove last argument
           shift
@@ -500,17 +532,13 @@ softCleanup() {
 #
 setupTestingEnvironment() {
 
-  logTask begin "Creating Zendro instances"
+  # Remove any existing setup
+  deleteServerSetup
 
-  # Store current working
-  ROOT_DIR=$(pwd)
-  MAIN_SERVER="graphql-server"
+  logTask begin "Cloning main Zendro server"
 
-  # Change working directory
-  cd $TARGET_DIR
-
-  # Recreate server instances
-  rm -rf servers/ && mkdir servers/
+  # Declare main server path
+  MAIN_SERVER="${TARGET_DIR}/graphql-server"
 
   # Clone graphql-server and checkout the feature branch
   git clone \
@@ -522,15 +550,19 @@ setupTestingEnvironment() {
   export NODE_JQ_SKIP_INSTALL_BINARY=true
 
   # Install module dependencies
-  cd $MAIN_SERVER && npm install
-  logTask check "Installing Zendro server modules"
-  cd -
+  npm install --prefix $MAIN_SERVER
+
+  logTask end "Installed Zendro server"
 
   # Copy graphql-server instances
-  for instance in ${INSTANCE_DIRS[@]}; do cp -r $MAIN_SERVER $instance; done
+  logTask begin "Creating Zendro instances"
 
-  # Return to root directory
-  cd $ROOT_DIR
+  for instance in ${INSTANCE_DIRS[@]}; do
+
+    mkdir -p $TARGET_DIR/servers
+    cp -r $MAIN_SERVER ${TARGET_DIR}/${instance}
+
+  done
 
   logTask end "Zendro instances created"
 
@@ -563,37 +595,26 @@ upContainers() {
 #
 waitForGql() {
 
-  logTask begin "Waiting for GraphQL server to start"
+  logTask begin "Waiting for GraphQL servers to start"
 
-  # Wait until the Zendro GraphQL web-server is up and running
-  waited=0
-  until curl 'localhost:3000/graphql' > /dev/null 2>&1
-  do
-    if [ $waited == $T1 ]; then
-      # Msg: error
-      echo -e "!!${RED}ERROR${NC}: zendro graphql web server does not start, the wait time limit was reached ($T1).\n"
-      echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      exit 0
-    fi
-    sleep 2
-    waited=$(expr $waited + 2)
+  hosts=(3000 3030)
+  pids=( )
+
+  for h in ${hosts[@]}; do
+
+    checkGqlServer $h &
+    pids+="$! "
+
   done
 
-  logTask end "First GraphQL server is up!"
+  # Wait until Zendro GraphQL servers are up and running
+  for id in ${pids[@]}; do
 
-  until curl 'localhost:3030/graphql' > /dev/null 2>&1
-  do
-    if [ $waited == $T1 ]; then
-      # Msg: error
-      echo -e "!!${RED}ERROR${NC}: zendro graphql web server does not start, the wait time limit was reached ($T1).\n"
-      echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      exit 0
-    fi
-    sleep 2
-    waited=$(expr $waited + 2)
+    wait $id || exit 0
+
   done
 
-  logTask end "Second GraphQL server is up!"
+  logTask end "GraphQL servers are up!"
 
 }
 
