@@ -384,18 +384,16 @@ deleteServerSetup() {
 #
 # Function: doTests()
 #
-# Do the mocha integration tests.
+# Run integration tests using mocha.
 #
 doTests() {
+
   logTask begin "Starting mocha tests"
 
-  # Wait for graphql server
-  waitForGql
-
-  # Do tests
   mocha ./test/mocha_integration_test.js
 
   logTask end "Mocha tests"
+
 }
 
 #
@@ -695,6 +693,8 @@ if [ $# -gt 0 ]; then
               checkCode
               # Restart containers
               upContainers
+              # Wait for graphql servers
+              waitForGql
               # Do the tests
               doTests
 
@@ -717,6 +717,8 @@ if [ $# -gt 0 ]; then
               genCode
               # Up containers
               upContainers
+              # Wait for graphql servers
+              waitForGql
               # Do the tests
               doTests
 
@@ -776,6 +778,9 @@ if [ $DO_DEFAULT = true ]; then
 
   # Ups containers
   upContainers
+
+  # Wait for graphql servers
+  waitForGql
 
   # Do the tests
   doTests
