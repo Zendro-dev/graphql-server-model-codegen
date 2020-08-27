@@ -296,17 +296,18 @@ consumeArgs() {
 
           # set flag
           KEEP_RUNNING=true
-          # Msg
-          echo -e "@@ Keep containers running at end: $KEEP_RUNNING"
-          # Past argument
+
+          logTask msg "Keep containers running at end: $KEEP_RUNNING"
+
+          # Remove last argument
           shift
           let "NUM_ARGS--"
         ;;
 
         *)
-          # Msg
-          echo -e "@@ Discarting option: ${RED}$a${NC}"
-          # Past argument
+          logTask msg "Discarting option: ${RED}$a${NC}"
+
+          # Remove last argument
           shift
           let "NUM_ARGS--"
         ;;
@@ -376,7 +377,7 @@ doTests() {
 #
 genCode() {
 
-  logTask start "Generating code"
+  logTask begin "Generating code"
 
   TARGET_DIR_INSTANCE1="${TARGET_DIR}/${INSTANCE_DIRS[0]}"
   TARGET_DIR_INSTANCE2="${TARGET_DIR}/${INSTANCE_DIRS[1]}"
@@ -409,7 +410,7 @@ genCode() {
 #
 #   $ logTask <mode> "<task message>"
 #
-# <mode> = begin | check | end | log
+# <mode> = begin | check | end | msg | quit
 #
 logTask() {
 
@@ -614,11 +615,11 @@ if [ $# -gt 0 ]; then
               TARGET_BRANCH=$1
 
               if [[ -z $TARGET_BRANCH || $TARGET_BRANCH =~ ^-|^-- ]]; then
-                echo -e "@@ -b requires a value: ... ${key} ${RED}<BRANCH>${NC} $@ ... ${YEL}exit${NC}"
-                exit 1
+                logTask quit "-b requires a value: ... ${key} ${RED}<BRANCH>${NC} $@"
+                exit 0
               fi
 
-              echo -e "@@ setting test environment branch to: $TARGET_BRANCH"
+              logTask msg "setting test environment branch to: $TARGET_BRANCH"
 
               # Forcefully checkout instances to the specified branch
               cd $TARGET_DIR
@@ -633,7 +634,7 @@ if [ $# -gt 0 ]; then
               # Set flag
               KEEP_RUNNING=true
               # Msg
-              echo -e "@@ keep containers running at end: $KEEP_RUNNING"
+              logTask msg "keep containers running at end: $KEEP_RUNNING"
 
               # Past argument
               shift
@@ -735,8 +736,8 @@ if [ $# -gt 0 ]; then
 
             *)
               # Msg
-              echo -e "@@ Bad option: ... ${RED}$key${NC} ... ${YEL}exit${NC}"
-              exit 1
+              logTask quit "Bad option: ... ${RED}$key${NC} ... ${YEL}exit${NC}"
+              exit 0
             ;;
         esac
     done
