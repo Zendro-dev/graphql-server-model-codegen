@@ -56,7 +56,7 @@
 #         This option performs the following actions:
 #
 #         1) Stops and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
-#         2) Removes any previously generated code located on the testing environment server instances: ./docker/integration_test_run/servers.
+#         2) Removes the testing environment server instances: ./docker/integration_test_run/{graphql-server,servers}.
 #
 #     -C, --softCleanup
 #
@@ -293,25 +293,6 @@ checkWorkspace() {
 }
 
 #
-# Function: cleanup()
-#
-# Default actions (without --keep-running):
-#   Remove docker items (containers, images, etc.).
-#   Remove generated code.
-#
-cleanup() {
-  logTask begin "Starting cleanup"
-
-  # Hard down
-  docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
-
-  # Delete code
-  deleteServerSetup
-
-  logTask end "Cleanup"
-}
-
-#
 # Function: consumeArgs()
 #
 # Shift the remaining arguments on $# list, and sets the flag KEEP_RUNNING=true if
@@ -345,6 +326,21 @@ consumeArgs() {
         ;;
       esac
   done
+}
+
+#
+# Function: deleteDockerSetup()
+#
+# Removes docker containers, images, and volumes.
+#
+deleteDockerSetup() {
+
+  logTask begin "Removing docker setup"
+
+  docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
+
+  logTask end "Removed docker setup"
+
 }
 
 #
@@ -506,22 +502,17 @@ restartContainers() {
 }
 
 #
-# Function: softCleanup()
+# Function: resetDockerSetup()
 #
-# restart & removeCodeGen
+# Stops docker-compose testing environment, removes containers and volumes.
 #
-softCleanup() {
+resetDockerSetup() {
 
-  logTask begin "Starting soft cleanup"
+  logTask begin "Removing docker containers and volumes"
 
-  # Down
   docker-compose -f ./docker/docker-compose-test.yml down -v
+
   logTask check "Containers down"
-
-  # Delete code
-  deleteGenCode
-
-  logTask end "Soft cleanup"
 
 }
 
@@ -719,9 +710,10 @@ if [ $# -gt 0 ]; then
             ;;
 
             -T|--generate-code-and-run-tests)
-              # Light cleanup
-              softCleanup
-              # Generate code
+              # Reset containers and volumes
+              resetDockerSetup
+              # Re-generate code
+              deleteGenCode
               genCode
               # Up containers
               upContainers
@@ -740,17 +732,19 @@ if [ $# -gt 0 ]; then
             ;;
 
             -c|--cleanup)
-              # Cleanup
-              cleanup
-
+              # Docker cleanup
+              deleteDockerSetup
+              # Testing environment cleanup
+              deleteServerSetup
               # Done
               exit 0
             ;;
 
             -C|--soft-cleanup)
-              # Soft cleanup
-              softCleanup
-
+              # Reset containers and volumes
+              resetDockerSetup
+              # Remove generated code
+              deleteGenCode
               # Done
               exit 0
             ;;
@@ -768,30 +762,44 @@ fi
 # Default
 #
 if [ $DO_DEFAULT = true ]; then
-  # Default: no arguments
-    # Cleanup
-    cleanup
-    # Clone and install testing environment
-    setupTestingEnvironment
-    # Generate code
-    genCode
-    # Ups containers
-    upContainers
-    # Do the tests
-    doTests
+
+  # Default run: no arguments #
+
+  # Docker cleanup
+  deleteDockerSetup
+
+  # Reset testing environment
+  setupTestingEnvironment
+
+  # Generate code
+  genCode
+
+  # Ups containers
+  upContainers
+
+  # Do the tests
+  doTests
+
 fi
 
 #
 # Last cleanup
 #
 if [ $KEEP_RUNNING = false ]; then
-  # Msg
+
   logTask msg "Doing final cleanup"
-  # Hard clean
-  cleanup
+
+  # Docker cleanup
+  deleteDockerSetup
+
+  # Testing environment cleanup
+  deleteServerSetup
+
 else
-  # Msg
+
   logTask check "Keeping containers running"
+
   # List containers
   docker-compose -f ./docker/docker-compose-test.yml ps
+
 fi
