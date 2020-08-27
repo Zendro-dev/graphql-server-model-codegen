@@ -4,21 +4,25 @@
 
 TARGET_BRANCH=$1
 
-for instance in $(ls servers)
-do
+if [[ -d "servers" ]]; then
 
-  if [[ -d "$instance" ]]; then
+  for instance in $(ls servers)
+  do
 
-    # Change into instance directory
-    cd $instance
+    if [[ -d "$instance" ]]; then
 
-    # Forcefully checkout target branch
-    # WARNING: discards all changes!
-    git checkout --force $TARGET_BRANCH
+      # Change into instance directory
+      cd $instance
 
-    # Return to previous working directory
-    cd - 1>/dev/null
+      # Forcefully checkout target branch
+      # WARNING: discards all changes!
+      git checkout --force $TARGET_BRANCH
 
-  fi
+      # Return to previous working directory
+      cd - 1>/dev/null
 
-done
+    fi
+
+  done
+
+fi
