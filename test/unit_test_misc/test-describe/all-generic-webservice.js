@@ -30,12 +30,12 @@ type book{
   """
   @search-request
   """
-  authorsFilter(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput): [Person]
+  authorsFilter(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput!): [Person]
 
   """
   @search-request
   """
-  authorsConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput): PersonConnection
+  authorsConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput!): PersonConnection
 
   """
   @count-request
@@ -92,7 +92,8 @@ book.prototype.publisher = async function({
                 "operator": "eq"
             });
             let found = await resolvers.publi_shers({
-                search: nsearch
+                search: nsearch,
+                pagination: {limit: 1}
             }, context);
             if (found) {
                 return found[0]
@@ -106,12 +107,12 @@ book.prototype.publisher = async function({
 
 module.exports.schema_person = `
 type Query {
-  people(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput ): [Person]
+  people(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput! ): [Person]
   readOnePerson(id: ID!): Person
   countPeople(search: searchPersonInput ): Int
   vueTablePerson : VueTablePerson    csvTableTemplatePerson: [String]
 
-  peopleConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput ): PersonConnection
+  peopleConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput! ): PersonConnection
 }
 
   type Mutation {

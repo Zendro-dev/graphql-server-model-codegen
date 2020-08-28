@@ -25,7 +25,8 @@ dog.prototype.researcher = async function({
                 "operator": "eq"
             });
             let found = await resolvers.researchers({
-                search: nsearch
+                search: nsearch,
+                pagination: {limit: 1}
             }, context);
             if (found) {
                 return found[0]
@@ -71,16 +72,13 @@ researcher.prototype.dog = async function({
       });
 
       let found = await resolvers.dogs({
-          search: nsearch
+          search: nsearch,
+          pagination: {limit: 2}
       }, context);
       if(found){
           if(found.length > 1){
-              let foundIds = [];
-              found.forEach(dog => {
-                  foundIds.push(dog.getIdValue())
-              })
               context.benignErrors.push(new Error(
-                  \`Not unique "to_one" association Error: Found \${found.length} dogs matching researcher with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog. Found Dogs \${models.dog.idAttribute()}s: [\${foundIds.toString()}]\`
+                \`Not unique "to_one" association Error: Found > 1 dogs matching researcher with id \${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog.\`
               ));
           }
           return found[0];
@@ -144,20 +142,10 @@ individual.prototype.transcript_countsFilter = function({
 `
 module.exports.countAssociated_model = `
 static async countRecords(search) {
-        let options = {};
-        if (search !== undefined && search !== null) {
-
-            //check
-            if (typeof search !== 'object') {
-                throw new Error('Illegal "search" argument type, it must be an object.');
-            }
-
-            let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
-            options['where'] = arg_sequelize;
-        }
-        return super.count(options);
-    }
+    let options = {}
+    options['where'] = helper.searchConditionsToSequelize(search);
+    return super.count(options);
+}
 `
 
 module.exports.countAssociated_resolver = `
@@ -193,52 +181,18 @@ AuthorsFilterImpl({
         order,
         pagination
     }) {
-        let options = {};
-
-        if (search !== undefined && search !== null) {
-            let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
-            options['where'] = arg_sequelize;
-        }
-
-        return this.countAuthors(options).then(items => {
-            if (order !== undefined) {
-                options['order'] = order.map((orderItem) => {
-                    return [orderItem.field, orderItem.order];
-                });
-            } else if (pagination !== undefined) {
-                options['order'] = [
-                    [models.person.idAttribute(), "ASC"]
-                ];
-            }
-            if (pagination !== undefined) {
-                options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
-                options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
-            } else {
-                options['offset'] = 0;
-                options['limit'] = items;
-            }
-            if (globals.LIMIT_RECORDS < options['limit']) {
-                throw new Error(\`Request of total authorsFilter exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-            }
-            return this.getAuthors(options);
-        });
+      // build the sequelize options object for limit-offset-based pagination
+      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.person.idAttribute());  
+      return this.getAuthors(options);
     }
 `
 module.exports.belongsToMany_model_count = `
 countFilteredAuthorsImpl({
       search
   }) {
-
-      let options = {};
-
-      if (search !== undefined && search !== null) {
-          let arg = new searchArg(search);
-          let arg_sequelize = arg.toSequelize();
-          options['where'] = arg_sequelize;
-      }
-
-      return this.countAuthors(options);
+    let options = {}
+    options['where'] = helper.searchConditionsToSequelize(search);
+    return this.countAuthors(options);
   }
 `
 
@@ -260,7 +214,7 @@ book.prototype.AuthorsFilter = async function({
     pagination
 }, context) {
       if (await checkAuthorization(context, 'Person', 'read') === true) {
-            await checkCountAndReduceRecordsLimit({search, pagination}, context, 'AuthorsFilter', 'person');
+            helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "AuthorsFilter");
             return this.AuthorsFilterImpl({
                 search,
                 order,

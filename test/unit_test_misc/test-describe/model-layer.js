@@ -1,19 +1,8 @@
 module.exports.count_in_sequelize_model = `
 static async countRecords(search) {
-        let options = {};
-        if (search !== undefined && search !== null) {
-
-            //check
-            if (typeof search !== 'object') {
-                throw new Error('Illegal "search" argument type, it must be an object.');
-            }
-
-            let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
-            options['where'] = arg_sequelize;
-        }
-        return super.count(options);
-    }
+    let options = {}
+    options['where'] = helper.searchConditionsToSequelize(search);
+    return super.count(options);
 `
 
 module.exports.count_in_webservice_model = `
@@ -46,49 +35,15 @@ module.exports.count_in_resolvers = `
     },
 `
 module.exports.read_all = `
-static readAll(search, order, pagination, benignErrorReporter) {
-        let options = {};
-        if (search !== undefined && search !== null) {
-
-            //check
-            if (typeof search !== 'object') {
-                throw new Error('Illegal "search" argument type, it must be an object.');
-            }
-
-            let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
-            options['where'] = arg_sequelize;
-        }
-
-        //use default BenignErrorReporter if no BenignErrorReporter defined
-        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-        return super.count(options).then(async items => {
-            if (order !== undefined) {
-                options['order'] = order.map((orderItem) => {
-                    return [orderItem.field, orderItem.order];
-                });
-            } else if (pagination !== undefined) {
-                options['order'] = [
-                    ["id", "ASC"]
-                ];
-            }
-
-            if (pagination !== undefined) {
-                options['offset'] = pagination.offset === undefined ? 0 : pagination.offset;
-                options['limit'] = pagination.limit === undefined ? (items - options['offset']) : pagination.limit;
-            } else {
-                options['offset'] = 0;
-                options['limit'] = items;
-            }
-
-            if (globals.LIMIT_RECORDS < options['limit']) {
-                throw new Error(\`Request of total dogs exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-            }
-            let records = await super.findAll(options);
-            return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
-        });
-    }
-
+static async readAll(search, order, pagination, benignErrorReporter) {
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    // build the sequelize options object for limit-offset-based pagination
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());
+    let records = await super.findAll(options);
+    // validationCheck after read
+    return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+}
 `
 
 module.exports.read_all_resolver = `
@@ -108,7 +63,7 @@ module.exports.read_all_resolver = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
-            await checkCountAndReduceRecordsLimit({search, pagination}, context, "dogs");
+            helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "dogs");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await dog.readAll(search, order, pagination, benignErrorReporter);
         } else {
