@@ -33,7 +33,7 @@ async function checkCountAndReduceRecordsLimit({search, pagination}, context, re
   //get effective records count
   let effectiveCount = helper.getEffectiveRecordsCount(count, paginationValues.limit, paginationValues.offset);
   //do check and reduce of record limit.
-  helper.checkCountAndReduceRecordLimitHelper(effectiveCount, context, resolverName);
+  helper.checkCountAndReduceRecordsLimit(effectiveCount, context, resolverName);
 }
 
 /**
@@ -42,5 +42,5 @@ async function checkCountAndReduceRecordsLimit({search, pagination}, context, re
 * @param {object} context Provided to every resolver holds contextual information like the resquest query and user info.
 */
 function checkCountForOneAndReduceRecordsLimit(context) {
-  helper.checkCountAndReduceRecordLimitHelper(1, context, "readOne<%- nameCp -%>")
+  helper.checkCountAndReduceRecordsLimit(1, context, "readOne<%- nameCp -%>")
 }

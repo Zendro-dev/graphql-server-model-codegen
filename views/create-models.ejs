@@ -259,7 +259,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     async <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       // build the sequelize options object for limit-offset-based pagination
       let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());  
-      return this.get<%- associations_temp[i].name_cp%>(options)
+      return this.get<%- associations_temp[i].name_cp%>(options);
     }
 
 
@@ -281,7 +281,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     }
 
     countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
-      let options = helper.searchConditionsToSequelize(search);
+      let options = {}
+      options['where'] = helper.searchConditionsToSequelize(search);
       return this.count<%- associations_temp[i].name_cp%>(options);
     }
   <%}-%>

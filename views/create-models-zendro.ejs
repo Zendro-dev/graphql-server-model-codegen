@@ -60,7 +60,7 @@ module.exports = class <%- name -%>{
         await validatorUtil.validateData('validateAfterRead', this, item);
         return item;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -89,7 +89,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return response.data.data.count<%- namePlCp -%>;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error){
       //handle caught errors
@@ -209,7 +209,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.add<%- nameCp -%>);
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -243,7 +243,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -285,7 +285,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.update<%- nameCp -%>);
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
