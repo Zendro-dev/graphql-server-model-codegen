@@ -15,7 +15,7 @@
 #
 #   Execution via npm:
 #
-#     npm run test-integration [-- OPTIONS]
+#     npm run test-integration -- [-- OPTIONS]
 #
 #   cleaup:
 #     npm run test-integration-clear
@@ -25,28 +25,66 @@
 # DESCRIPTION
 #     Command line utility to perform graphql server's integration-test.
 #
-#     Intergation-test case creates a docker-compose ambient with three servers:
+#     The integration-test command creates a docker-compose environment with three servers:
 #
 #     gql_postgres
 #     gql_science_db_graphql_server
 #     gql_ncbi_sim_srv
 #
-#     By default, after the test run, all corresponding Docker images will be completely removed from the docker, this cleanup step can be skiped with -k option as described below.
+#     The default behavior performs the following actions:
 #
-#     Default behavior performs the following actions:
-#
-#         1) Stop and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
-#         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
-#         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
-#         4) Creates and start containers with docker-compose up command.
-#         5) Excecutes integration tests. The code should exists, otherwise the integration tests are not executed.
-#         6) Do cleanup as described on 1) and 2) steps (use -k option to skip this step).
+#         0) Checks the local testing environment (./docker/integration_test_run) and performs an initial setup the first time the command is run.
+#         1) Stops and removes Docker containers with docker-compose down command. It also removes Docker images (--rmi) and volumes (-v) created in previous runs.
+#         2) Removes any previously generated code located on the project's testing environment: ./docker/integration_test_run.
+#         3) Generates the code using the test models located on the project's test directory: ./test/integration_test_models.
+#         4) Creates and starts containers with docker-compose up command.
+#         5) Execcutes integration tests.
+#         6) Do a cleanup as described on steps 1) and 2) (use -k option to skip this step).
 #
 #     The options are as follows:
+#
+#     -b, --branch
+#
+#         This option changes the testing branch of the zendro server instances. Changing the branch is a permanent side effect.
+#
+#         It can be used alone to execute the default script, or in conjunction with -s or -T.
+#
+#         The default branch is set to "master". When running tests for the first time, make sure this option is set to the desired branch.
+#
+#     -c, --cleanup
+#
+#         This option performs the following actions:
+#
+#         1) Stops and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
+#         2) Removes the testing environment server instances: ./docker/integration_test_run/{graphql-server,servers}.
+#
+#     -C, --softCleanup
+#
+#         This option performs the following actions:
+#
+#         1) Stops and removes Docker containers and volumes with docker-compose down command.
+#         2) Removes any previously generated code located on the testing environment server instances: ./docker/integration_test_run/servers.
+#
+#     -g, --generate-code
+#
+#         This option performs the following actions:
+#
+#         1) Stop and removes containers with docker-compose down command (without removing images).
+#         2) Removes any previously generated code located on the testing environment server instances: ./docker/integration_test_run/servers.
+#         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
+#         4) Creates and start containers with docker-compose up command.
 #
 #     -h, --help
 #
 #         Display this help and exit.
+#
+#     -k, --keep-running
+#
+#         This option skips the cleanup step at the end of the integration-test-suite and keeps the Docker containers running.
+#
+#         It can be used alone, or in conjunction with the options -t or -T.
+#
+#         If this option is not specified, then, by default, the cleanup step is performed at the end of the tests (see -c option).
 #
 #     -r, --restart-containers
 #
@@ -57,14 +95,12 @@
 #
 #         Because the containers that manages the test-suite's databases do not use docker named volumes, but transient ones, the databases will be re-initialized by this command, too.
 #
-#     -g, --generate-code
+#     -s, --setup
 #
 #         This option performs the following actions:
 #
-#         1) Stop and removes containers with docker-compose down command (without removing images).
-#         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
-#         3) Re-generates the code from the test models located on current project's local directory: ./test/integration_test_models. The code is generated on local directory: ./docker/integration_test_run.
-#         4) Creates and start containers with docker-compose up command.
+#         1) Clones the graphql-server repository, optionally switching to the specified "-b BRANCH".
+#         2) Uses the cloned repository to create the server instances necessary for the integration tests.
 #
 #     -t, --run-test-only
 #
@@ -88,21 +124,6 @@
 #
 #         If option -k is also specified, then cleanup step is skipped at the end of the integration-test-suite, otherwise, the cleanup step is performed at the end of the tests (see -c option).
 #
-#     -k, --keep-running
-#
-#         This option skips the cleanup step at the end of the integration-test-suite and keeps the Docker containers running.
-#
-#         This option can be used alone, or in conjunction with the options -t or -T.
-#
-#         If this option is not specified, then, by default, the cleanup step is performed at the end of the tests (see -c option).
-#
-#     -c, --cleanup
-#
-#         This option performs the following actions:
-#
-#         1) Stops and removes Docker containers with docker-compose down command, also removes Docker images (--rmi) and named or anonymous volumes (-v).
-#         2) Removes any previously generated code located on current project's local directory: ./docker/integration_test_run.
-#
 # EXAMPLES
 #     Command line utility to perform graphql server's integration-test.
 #
@@ -118,7 +139,7 @@
 #     To restart containers:
 #     $ npm run test-integration -- -r
 #
-#     To generate code and start containers:
+#     To generate code:
 #     $ npm run test-integration -- -g
 #
 #     To do the tests only and keep the containers running at end:
@@ -126,10 +147,15 @@
 #
 #     To generate code and do the tests, removing all Docker images at end:
 #     $ npm run test-integration -- -T
-
+#
 #     To do a full clean up (removes containers, images and code):
 #     $ npm run test-integration -- -c
 #
+#     To setup a new testing environment
+#     $ npm run test-integration -- -s [BRANCH]
+#
+#     To do a soft clean up (removes containers, volumes and code, but preserves images):
+#     $ npm run test-integration -- -C
 #
 
 # exit on first error
@@ -138,35 +164,21 @@ set -e
 #
 # Constants
 #
-DOCKER_SERVICES=(gql_postgres \
-                 gql_science_db_graphql_server \
-                 gql_ncbi_sim_srv)
+DOCKER_SERVICES=(
+  gql_postgres
+  gql_science_db_graphql_server
+  gql_ncbi_sim_srv
+)
+TARGET_BRANCH=master
+TARGET_DIR="./docker/integration_test_run"
+INSTANCE_DIRS=(
+  "servers/instance1"
+  "servers/instance2"
+)
 TEST_MODELS_INSTANCE1="./test/integration_test_models_instance1"
 TEST_MODELS_INSTANCE2="./test/integration_test_models_instance2"
-TARGET_DIR_INSTANCE1="./docker/integration_test_run/instance1"
-TARGET_DIR_INSTANCE2="./docker/integration_test_run/instance2"
-CODEGEN_DIRS=($TARGET_DIR_INSTANCE1"/models/adapters" \
-              $TARGET_DIR_INSTANCE1"/models/sql" \
-              $TARGET_DIR_INSTANCE1"/models/distributed" \
-              $TARGET_DIR_INSTANCE1"/models/generic" \
-              $TARGET_DIR_INSTANCE1"/models/zendro-server"
-              $TARGET_DIR_INSTANCE1"/migrations" \
-              $TARGET_DIR_INSTANCE1"/schemas" \
-              $TARGET_DIR_INSTANCE1"/resolvers" \
-              $TARGET_DIR_INSTANCE1"/validations" \
-              $TARGET_DIR_INSTANCE1"/patches" \
-              $TARGET_DIR_INSTANCE2"/models/adapters" \
-              $TARGET_DIR_INSTANCE2"/models/sql" \
-              $TARGET_DIR_INSTANCE2"/models/distributed" \
-              $TARGET_DIR_INSTANCE2"/models/generic" \
-              $TARGET_DIR_INSTANCE2"/models/zendro-server"
-              $TARGET_DIR_INSTANCE2"/migrations" \
-              $TARGET_DIR_INSTANCE2"/schemas" \
-              $TARGET_DIR_INSTANCE2"/resolvers" \
-              $TARGET_DIR_INSTANCE2"/validations" \
-              $TARGET_DIR_INSTANCE2"/patches")
 MANPAGE="./man/sh_integration_test_run.man"
-T1=180
+SERVER_CHECK_WAIT_TIME=60
 DO_DEFAULT=true
 KEEP_RUNNING=false
 NUM_ARGS=$#
@@ -181,279 +193,68 @@ NC='\033[0m'
 #
 
 #
-# Function: deleteGenCode()
+# Function: checkGqlServer()
 #
-# Delete generated code.
+# Check if Zendro GraphQL servers respond to requests.
 #
-deleteGenCode() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Removing generated code...${NC}"
+checkGqlServer() {
 
-  # Remove generated code.
-  for i in "${CODEGEN_DIRS[@]}"
+  host="localhost:${1}/graphql"
+
+  logTask msg "Testing GraphQL server connection @ $host"
+
+  elapsedTime=0
+  until curl "$host" > /dev/null 2>&1
   do
-    if [ -d $i ]; then
-      rm -rf $i
-      if [ $? -eq 0 ]; then
-          echo -e "@ Removed: $i ... ${LGREEN}done${NC}"
-      else
-          echo -e "!!${RED}ERROR${NC}: trying to remove: ${RED}$i${NC} fails ... ${YEL}exit${NC}"
-          exit 0
-      fi
+
+    # Exit with error code 1
+    if [ $elapsedTime == $SERVER_CHECK_WAIT_TIME ]; then
+
+      logTask error "zendro graphql web server does not start, the wait time limit was reached (${SERVER_CHECK_WAIT_TIME}s)"
+      return 1
+
     fi
+
+    # Wait 2s and rety
+    sleep 2
+    elapsedTime=$(expr $elapsedTime + 2)
   done
 
+  return 0
 
-  # Msg
-  echo -e "@@ All code removed ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
 }
 
 #
-# Function: checkCode()
+# Function: checkWorkspace()
 #
-# Check if generated code exists.
+# Check if graphql-server instance folders exist.
 #
-checkCode() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Check generated code...${NC}"
+checkWorkspace() {
 
-  # Remove generated code.
-  for i in "${CODEGEN_DIRS[@]}"
-  do
-    # Check if directory exists
-    if [ -d $i ]; then
-      echo -e "Code directory ${LGREEN}$i${NC} exists."
+  logTask begin "Check graphql-server instances"
 
-      # Check if directory is empty
-      #if [ -n "$(ls -A ${i} 2>/dev/null)" ]; then
-      #  echo -e "@@ Code at: $i ... ${LGREEN}ok${NC}"
-      #else
-      #  echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} exists but is empty!, please try -T option ... ${YEL}exit${NC}"
-      #  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      #  exit 0
-      #fi
+  FAIL=false
+
+  for instance in ${INSTANCE_DIRS[@]}; do
+
+    instance_name=$(basename $instance)
+
+    if [[ ! -d "$TARGET_DIR/$instance" ]]; then
+
+      FAIL=true
+      logTask error "Server directory: ${RED}${instance_name}${NC} does not exist!"
     else
-      echo -e "!!${RED}ERROR${NC}: Code directory: ${RED}$i${NC} does not exists!, please try -T option ... ${YEL}exit${NC}"
-      echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      exit 0
+      logTask msg "${instance_name} exists"
     fi
+
   done
 
-  # Msg
-  echo -e "@@ Code check ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-}
+  if [[ $FAIL == true ]]; then
+    logTask quit "One or more server instances were not installed. Please use ${YEL}-s${NC} or execute a full test run with ${YEL}-k${NC} before using this command."
+    exit 0
+  fi
 
-#
-# Function: restartContainers()
-#
-# Downs and ups containers
-#
-restartContainers() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Restarting containers...${NC}"
-
-  # Soft down
-  docker-compose -f ./docker/docker-compose-test.yml down
-  # Msg
-  echo -e "@@ Containers down ... ${LGREEN}done${NC}"
-
-  # Install
-  npm install
-  # Msg
-  echo -e "@@ Installing ... ${LGREEN}done${NC}"
-
-  # Up
-  docker-compose -f ./docker/docker-compose-test.yml up -d
-  # Msg
-  echo -e "@@ Containers up ... ${LGREEN}done${NC}"
-
-  # List
-  docker-compose -f ./docker/docker-compose-test.yml ps
-
-  # Msg
-  echo -e "@@ Containers restarted ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-}
-
-#
-# Function: cleanup()
-#
-# Default actions (without --keep-running):
-#   Remove docker items (containers, images, etc.).
-#   Remove generated code.
-#
-cleanup() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting cleanup...${NC}"
-
-  # Hard down
-  docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
-
-  # Delete code
-  deleteGenCode
-
-  # Msg
-  echo -e "@@ Cleanup ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-
-}
-
-#
-# Function: softCleanup()
-#
-# restart & removeCodeGen
-#
-softCleanup() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting soft cleanup...${NC}"
-
-  # Down
-  docker-compose -f ./docker/docker-compose-test.yml down
-  # Msg
-  echo -e "@@ Containers down ... ${LGREEN}done${NC}"
-
-  # Delete code
-  deleteGenCode
-
-  # Msg
-  echo -e "@@ Soft cleanup ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-}
-
-#
-# Function: waitForGql()
-#
-# Waits for GraphQL Server to start, for a maximum amount of T1 seconds.
-#
-waitForGql() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Waiting for GraphQL server to start...${NC}"
-
-  # Wait until the Science-DB GraphQL web-server is up and running
-  waited=0
-  until curl 'localhost:3000/graphql' > /dev/null 2>&1
-  do
-    if [ $waited == $T1 ]; then
-      # Msg: error
-      echo -e "!!${RED}ERROR${NC}: science-db graphql web server does not start, the wait time limit was reached ($T1).\n"
-      echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      exit 0
-    fi
-    sleep 2
-    waited=$(expr $waited + 2)
-  done
-
-  # Msg
-  echo -e "@@ First GraphQL server is up! ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-
-  until curl 'localhost:3030/graphql' > /dev/null 2>&1
-  do
-    if [ $waited == $T1 ]; then
-      # Msg: error
-      echo -e "!!${RED}ERROR${NC}: science-db graphql web server does not start, the wait time limit was reached ($T1).\n"
-      echo -e "${LGRAY}---------------------------- @@${NC}\n"
-      exit 0
-    fi
-    sleep 2
-    waited=$(expr $waited + 2)
-  done
-
-  # Msg
-  echo -e "@@ Second GraphQL server is up! ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-}
-
-#
-# Function: genCode()
-#
-# Generate code.
-#
-genCode() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Generating code...${NC}"
-
-  # Install
-  npm install
-  # Msg
-  echo -e "@@ Installing ... ${LGREEN}done${NC}"
-
-  # Generate
-  node ./index.js -f ${TEST_MODELS_INSTANCE1} -o ${TARGET_DIR_INSTANCE1}
-  node ./index.js -f ${TEST_MODELS_INSTANCE2} -o ${TARGET_DIR_INSTANCE2}
-
-  # Patch the resolver for web-server
-  #patch -V never ${TARGET_DIR_INSTANCE1}/resolvers/aminoacidsequence.js ./docker/ncbi_sim_srv/amino_acid_sequence_resolver.patch
-  patch -V never ${TARGET_DIR_INSTANCE1}/models/generic/aminoacidsequence.js ./docker/ncbi_sim_srv/model_aminoacidsequence.patch
-  # Add monkey-patching validation with AJV
-  patch -V never ${TARGET_DIR_INSTANCE1}/validations/individual.js ./test/integration_test_misc/individual_validate.patch
-  # Add patch for model webservice (generic) association
-  # patch -V never ${TARGET_DIR_INSTANCE1}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
-
-  # Add patch for sql model accession validation
-  patch -V never ${TARGET_DIR_INSTANCE1}/validations/accession.js ./test/integration_test_misc/accession_validate_instance1.patch
-
-  # Msg
-  echo -e "@@ Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}: ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-}
-
-#
-# Function: upContainers()
-#
-# Up docker containers.
-#
-upContainers() {
-  # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting up containers...${NC}"
-
-  # Install
-  npm install
-  # Msg
-  echo -e "@@ Installing ... ${LGREEN}done${NC}"
-
-  # Up
-  docker-compose -f ./docker/docker-compose-test.yml up -d --no-recreate
-  # Msg
-  echo -e "@@ Containers up ... ${LGREEN}done${NC}"
-
-  # List
-  docker-compose -f ./docker/docker-compose-test.yml ps
-
-  # Msg
-  echo -e "@@ Containers up ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
-}
-
-#
-# Function: doTests()
-#
-# Do the mocha integration tests.
-#
-doTests() {
- # Msg
-  echo -e "\n${LGRAY}@@ ----------------------------${NC}"
-  echo -e "${LGRAY}@@ Starting mocha tests...${NC}"
-
-  # Wait for graphql server
-  waitForGql
-
-  # Do tests
-  mocha ./test/mocha_integration_test.js
-
-  # Msg
-  echo -e "@@ Mocha tests ... ${LGREEN}done${NC}"
-  echo -e "${LGRAY}---------------------------- @@${NC}\n"
+  logTask end "Instances check"
 }
 
 #
@@ -473,23 +274,162 @@ consumeArgs() {
 
           # set flag
           KEEP_RUNNING=true
-          # Msg
-          echo -e "@@ Keep containers running at end: $KEEP_RUNNING"
-          # Past argument
+
+          logTask begin "Keep containers running at end: $KEEP_RUNNING"
+
+          # Remove last argument
           shift
           let "NUM_ARGS--"
         ;;
 
         *)
-          # Msg
-          echo -e "@@ Discarting option: ${RED}$a${NC}"
-          # Past argument
+          logTask msg "Discarding option: ${RED}$a${NC}"
+
+          # Remove last argument
           shift
           let "NUM_ARGS--"
         ;;
       esac
   done
 }
+
+#
+# Function: deleteDockerSetup()
+#
+# Removes docker containers, images, and volumes.
+#
+deleteDockerSetup() {
+
+  logTask begin "Removing docker setup"
+
+  docker-compose -f ./docker/docker-compose-test.yml down -v --rmi all
+
+  logTask end "Removed docker setup"
+
+}
+
+#
+# Function: deleteGenCode()
+#
+# Delete generated code.
+#
+deleteGenCode() {
+
+  logTask begin "Removing generated code"
+
+  # Change to workspace root
+  cd $TARGET_DIR
+
+  # Remove generated files
+  bash scripts/clean-workspace.sh
+
+  # Change to project root
+  cd - 1>/dev/null
+
+  logTask end "All code removed"
+
+}
+
+#
+# Function: deleteServerSetup()
+#
+# Delete testing environment.
+#
+deleteServerSetup() {
+
+  logTask begin "Removing Zendro instances"
+
+  # Remove workspace modules and server instances
+  rm -rf $TARGET_DIR/{graphql-server,servers}
+
+  logTask end "Zendro instances deleted"
+
+}
+
+#
+# Function: doTests()
+#
+# Run integration tests using mocha.
+#
+doTests() {
+
+  logTask begin "Starting mocha tests"
+
+  mocha ./test/mocha_integration_test.js
+
+  logTask end "Mocha tests"
+
+}
+
+#
+# Function: genCode()
+#
+# Generate code.
+#
+genCode() {
+
+  logTask begin "Generating code"
+
+  TARGET_DIR_INSTANCE1="${TARGET_DIR}/${INSTANCE_DIRS[0]}"
+  TARGET_DIR_INSTANCE2="${TARGET_DIR}/${INSTANCE_DIRS[1]}"
+
+  # Generate code
+  node ./index.js -f ${TEST_MODELS_INSTANCE1} -o ${TARGET_DIR_INSTANCE1}
+  node ./index.js -f ${TEST_MODELS_INSTANCE2} -o ${TARGET_DIR_INSTANCE2}
+
+  # Patch the resolver for web-server
+  # patch -V never ${TARGET_DIR_INSTANCE1}/resolvers/aminoacidsequence.js ./docker/ncbi_sim_srv/amino_acid_sequence_resolver.patch
+  patch -V never ${TARGET_DIR_INSTANCE1}/models/generic/aminoacidsequence.js ./docker/ncbi_sim_srv/model_aminoacidsequence.patch
+  # Add monkey-patching validation with AJV
+  patch -V never ${TARGET_DIR_INSTANCE1}/validations/individual.js ./test/integration_test_misc/individual_validate.patch
+  # Add patch for model webservice (generic) association
+  # patch -V never ${TARGET_DIR_INSTANCE1}/models/transcript_count.js ./docker/ncbi_sim_srv/model_transcript_count.patch
+
+  # Add patch for sql model accession validation
+  patch -V never ${TARGET_DIR_INSTANCE1}/validations/accession.js ./test/integration_test_misc/accession_validate_instance1.patch
+
+  logTask end "Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}"
+
+}
+
+#
+# Function: logTask()
+#
+# Logs a task begin or end message to stdout.
+#
+# USAGE:
+#
+#   $ logTask <mode> "<task message>"
+#
+# <mode> = begin | check | end | msg | quit
+#
+logTask() {
+
+  case $1 in
+    begin)
+      echo -e "\n${LGRAY}@@ ----------------------------${NC}"
+      echo -e "${LGRAY}@@ $2...${NC}"
+    ;;
+    check)
+      echo -e "@@ $2 ... ${LGREEN}done${NC}"
+    ;;
+    end)
+      echo -e "@@ $2 ... ${LGREEN}done${NC}"
+      echo -e "${LGRAY}---------------------------- @@${NC}\n"
+    ;;
+    error)
+      echo -e "!!${RED}ERROR${NC}: $2"
+    ;;
+    msg)
+      echo -e "@@ $2"
+    ;;
+    quit)
+      echo -e "@@ $2 ... ${YEL}exit${NC}"
+    ;;
+  esac
+
+}
+
 #
 # Function: man()
 #
@@ -501,20 +441,174 @@ man() {
 }
 
 #
+# Function: restartContainers()
+#
+# Downs and ups containers
+#
+restartContainers() {
+
+  logTask begin "Restarting containers"
+
+  # Soft down
+  docker-compose -f ./docker/docker-compose-test.yml down
+  logTask check "Containers down"
+
+  # Up
+  docker-compose -f ./docker/docker-compose-test.yml up -d
+  logTask check "Containers up"
+
+  # List
+  docker-compose -f ./docker/docker-compose-test.yml ps
+
+  logTask end "Containers restarted"
+
+}
+
+#
+# Function: resetDockerSetup()
+#
+# Stops docker-compose testing environment, removes containers and volumes.
+#
+resetDockerSetup() {
+
+  logTask begin "Removing docker containers and volumes"
+
+  docker-compose -f ./docker/docker-compose-test.yml down -v
+
+  logTask end "Containers down"
+
+}
+
+#
+# Function: setupTestingEnvironment
+#
+# Clones and initializes a two-server environment workspace.
+#
+setupTestingEnvironment() {
+
+  # Remove any existing setup
+  deleteServerSetup
+
+  logTask begin "Cloning main Zendro server"
+
+  # Declare main server path
+  MAIN_SERVER="${TARGET_DIR}/graphql-server"
+
+  # Clone graphql-server and checkout the feature branch
+  git clone \
+    --branch $TARGET_BRANCH \
+    git@github.com:Zendro-dev/graphql-server.git \
+    $MAIN_SERVER
+
+  # Force "node-jq" to use the docke image "jq"
+  export NODE_JQ_SKIP_INSTALL_BINARY=true
+
+  # Install module dependencies
+  npm install --prefix $MAIN_SERVER
+
+  logTask end "Installed Zendro server"
+
+  # Copy graphql-server instances
+  logTask begin "Creating Zendro instances"
+
+  for instance in ${INSTANCE_DIRS[@]}; do
+
+    mkdir -p $TARGET_DIR/servers
+    cp -r $MAIN_SERVER ${TARGET_DIR}/${instance}
+
+  done
+
+  logTask end "Zendro instances created"
+
+}
+
+#
+# Function: upContainers()
+#
+# Up docker containers.
+#
+upContainers() {
+
+  logTask begin "Starting up containers"
+
+  # Up
+  docker-compose -f ./docker/docker-compose-test.yml up -d --no-recreate
+
+  # List
+  docker-compose -f ./docker/docker-compose-test.yml ps
+
+  logTask end "Containers up"
+
+}
+
+#
+# Function: waitForGql()
+#
+# Waits for GraphQL Server to start, for a maximum amount of SERVER_CHECK_WAIT_TIME seconds.
+#
+waitForGql() {
+
+  logTask begin "Waiting for GraphQL servers to start"
+
+  hosts=(3000 3030)
+  pids=( )
+
+  for h in ${hosts[@]}; do
+
+    checkGqlServer $h &
+    pids+="$! "
+
+  done
+
+  # Wait until Zendro GraphQL servers are up and running
+  for id in ${pids[@]}; do
+
+    wait $id || exit 0
+
+  done
+
+  logTask end "GraphQL servers are up!"
+
+}
+
+#
 # Main
 #
 if [ $# -gt 0 ]; then
-    #Processes comand line arguments.
+    # Process comand line arguments.
     while [[ $NUM_ARGS -gt 0 ]]
     do
         key="$1"
 
         case $key in
+            -b|--branch)
+
+              shift
+              let "NUM_ARGS--"
+
+              TARGET_BRANCH=$1
+
+              if [[ -z $TARGET_BRANCH || $TARGET_BRANCH =~ ^-|^-- ]]; then
+                logTask quit "-b requires a value: ... ${key} ${RED}<BRANCH>${NC} $@"
+                exit 0
+              fi
+
+              logTask msg "setting test environment branch to: $TARGET_BRANCH"
+
+              # Forcefully checkout instances to the specified branch
+              cd $TARGET_DIR
+              bash scripts/checkout-branch.sh $TARGET_BRANCH
+              cd - 1>/dev/null
+
+              shift
+              let "NUM_ARGS--"
+            ;;
+
             -k|--keep-running)
               # Set flag
               KEEP_RUNNING=true
               # Msg
-              echo -e "@@ keep containers running at end: $KEEP_RUNNING"
+              logTask msg "keep containers running at end: $KEEP_RUNNING"
 
               # Past argument
               shift
@@ -529,6 +623,15 @@ if [ $# -gt 0 ]; then
               exit 0
             ;;
 
+            -s|--setup)
+
+              # Setup testing environment
+              setupTestingEnvironment
+
+              # Done
+              exit 0
+            ;;
+
             -r|--restart-containers)
               # Restart containers
               restartContainers
@@ -538,22 +641,24 @@ if [ $# -gt 0 ]; then
             ;;
 
             -g|--generate-code)
-              # Light cleanup
-              softCleanup
-              # Generate code
+              # Check server instances
+              checkWorkspace
+              # Remove previously generated code
+              deleteGenCode
+              # Run code generator
               genCode
-              # Ups containers
-              upContainers
 
               # Done
               exit 0
             ;;
 
             -t|--run-tests-only)
-              # Check code
-              checkCode
+              # Check workspace folders
+              checkWorkspace
               # Restart containers
               upContainers
+              # Wait for graphql servers
+              waitForGql
               # Do the tests
               doTests
 
@@ -569,12 +674,15 @@ if [ $# -gt 0 ]; then
             ;;
 
             -T|--generate-code-and-run-tests)
-              # Light cleanup
-              softCleanup
-              # Generate code
+              # Reset containers and volumes
+              resetDockerSetup
+              # Re-generate code
+              deleteGenCode
               genCode
               # Up containers
               upContainers
+              # Wait for graphql servers
+              waitForGql
               # Do the tests
               doTests
 
@@ -590,16 +698,26 @@ if [ $# -gt 0 ]; then
             ;;
 
             -c|--cleanup)
-              # Cleanup
-              cleanup
+              # Docker cleanup
+              deleteDockerSetup
+              # Testing environment cleanup
+              deleteServerSetup
+              # Done
+              exit 0
+            ;;
 
+            -C|--soft-cleanup)
+              # Reset containers and volumes
+              resetDockerSetup
+              # Remove generated code
+              deleteGenCode
               # Done
               exit 0
             ;;
 
             *)
               # Msg
-              echo -e "@@ Bad option: ... ${RED}$key${NC} ... ${YEL}exit${NC}"
+              logTask quit "Bad option: ... ${RED}$key${NC} ... ${YEL}exit${NC}"
               exit 0
             ;;
         esac
@@ -610,15 +728,27 @@ fi
 # Default
 #
 if [ $DO_DEFAULT = true ]; then
-  # Default: no arguments
-    # Cleanup
-    cleanup
-    # Generate code
-    genCode
-    # Ups containers
-    upContainers
-    # Do the tests
-    doTests
+
+  # Default run: no arguments #
+
+  # Docker cleanup
+  deleteDockerSetup
+
+  # Reset testing environment
+  setupTestingEnvironment
+
+  # Generate code
+  genCode
+
+  # Ups containers
+  upContainers
+
+  # Wait for graphql servers
+  waitForGql
+
+  # Do the tests
+  doTests
+
 fi
 
 #
@@ -626,13 +756,19 @@ fi
 #
 if [ $KEEP_RUNNING = false ]; then
 
-  # Msg
-  echo -e "@@ Doing final cleanup..."
-  # Cleanup
-  cleanup
+  logTask msg "Doing final cleanup"
+
+  # Docker cleanup
+  deleteDockerSetup
+
+  # Testing environment cleanup
+  deleteServerSetup
+
 else
-  # Msg
-  echo -e "@@ Keeping containers running ... ${LGREEN}done${NC}"
-  # List
+
+  # List containers
   docker-compose -f ./docker/docker-compose-test.yml ps
+
+  logTask end "Keep containers running"
+
 fi

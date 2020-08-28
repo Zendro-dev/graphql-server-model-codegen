@@ -777,7 +777,7 @@ describe(
     expect(trCounts).to.deep.equal([]);
 
     /**
-     * Check: 
+     * Check:
      * max_limit records validation
      */
     //Add another 30 individuals:
@@ -874,10 +874,10 @@ describe(
     res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
     ids.push(JSON.parse(res.body.toString('utf8')).data.addIndividual.id);
-    
+
     //test 1: count = 30
     res = itHelpers.request_graph_ql_post(`{ countIndividuals(search:{field:name operator:eq value:{value:"${individualName}"}}) }`);
-    resBody = JSON.parse(res.body.toString('utf8'));    
+    resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.countIndividuals).equal(30);
 
@@ -930,16 +930,16 @@ describe(
     expect(resBody.errors[0].path).to.deep.equal(err3_path);
 
     //test 8: pagination (cursor-based): with first: 24
-    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:24}, search:{field:name operator:eq value:{value:"${individualName}"}}) 
+    res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:24}, search:{field:name operator:eq value:{value:"${individualName}"}})
     {
       pageInfo {
         startCursor
         endCursor
         hasPreviousPage
         hasNextPage
-      } 
+      }
       edges{
-        cursor 
+        cursor
         node{id}
     }}}`);
     expect(res.statusCode).to.equal(200);
@@ -952,14 +952,14 @@ describe(
     res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:5, after:"${cursor20}"}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
-    
+
     expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
     expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-10, 25));
 
     //test 10: pagination (cursor-based): with : last:5
     res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{last:5}, search:{field:name operator:eq value:{value:"${individualName}"}}) {edges{cursor node{id}}}}`);
     expect(res.statusCode).to.equal(200);
-    resBody = JSON.parse(res.body.toString('utf8'));      
+    resBody = JSON.parse(res.body.toString('utf8'));
     expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
     expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-5));
 
@@ -990,7 +990,7 @@ describe(
     individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
     expect(individuals).to.deep.equal([]);
 
-  }).timeout(5000);
+  }).timeout(10000);
 
   //one_to_one associations where foreignKey is in the target model
   it('22. one_to_one associations setup', function() {
