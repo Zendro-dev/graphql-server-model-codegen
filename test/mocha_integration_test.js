@@ -747,7 +747,7 @@ describe(
           ]
         },
         {
-          "message": "Invalid response from remote zendro-server: http://server1:3000/graphql",
+          "message": "Remote zendro-server (http://server1:3000/graphql) did not respond with data.",
           "locations": ""
         }
       ],
@@ -860,7 +860,14 @@ describe(
     expect(resBody.data.countries.length).equal(3);
   });
 
-  it('28. to_many_through_sql_cross_table Filter', function(){
+  it('28. to_many_through_sql_cross_table countFiltered', function(){
+    res = itHelpers.request_graph_ql_post('{readOneCountry(country_id: "NED"){country_id countFilteredRivers}}');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.readOneCountry.countFilteredRivers).equal(1);
+  });
+
+  it('29. to_many_through_sql_cross_table Filter', function(){
     res = itHelpers.request_graph_ql_post('{ countries(pagination:{limit:5}){ name riversFilter(search:{field:length,value:{value:"2000",type:"Int"}, operator:gt},pagination:{limit:5}){ name }}}')
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
@@ -894,7 +901,7 @@ describe(
     })
   });
 
-  it('29. to_many_through_sql_cross_table Cleanup', function(){
+  it('30. to_many_through_sql_cross_table Cleanup', function(){
     res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_1_rhine")}');
     expect(res.statusCode).to.equal(200);
     res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_2_donau")}');
@@ -907,7 +914,7 @@ describe(
     expect(res.statusCode).to.equal(200);
   });
 
-  it('30. Cursor based pagination', function() {
+  it('31. Cursor based pagination', function() {
     let res = itHelpers.request_graph_ql_post('{transcript_countsConnection(pagination:{first:25}){edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     let edges = resBody.data.transcript_countsConnection.edges;
@@ -956,7 +963,7 @@ describe(
   }});
   })
 
-  it('31. Error output for wrong parameter', function() {
+  it('32. Error output for wrong parameter', function() {
     let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(400);
@@ -1064,7 +1071,7 @@ describe(
     });
   });
 
-  it('32. Complementary search operators', async () => {
+  it('33. Complementary search operators', async () => {
     //items
     let ita = null;
     let itb = null;
