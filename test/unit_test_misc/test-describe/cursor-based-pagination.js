@@ -28,7 +28,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
-      let oppOptions = helper.buildOppositeSearch(search, order, pagination, this.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, pagination, this.idAttribute());
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
@@ -121,7 +121,7 @@ booksConnectionImpl({
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
-      let oppOptions = helper.buildOppositeSearch(search, order, pagination, models.book.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, pagination, models.book.idAttribute());
       oppRecords = await this.getBooks(oppOptions);
     }
     // build the graphql Connection Object

@@ -2779,3 +2779,59 @@ describe(
 
 
   });
+
+  describe('generic readAllCursor', function() {
+    
+    before(async function(){
+      // add 10 cats
+      let res = itHelpers.request_graph_ql_post('mutation{addCat(name:"cat1" ){name}}');
+      expect(res.statusCode).to.equal(200);
+      for (let i = 2; i < 10; i++) {  
+        res = itHelpers.request_graph_ql_post(`mutation{addCat(name:"cat${i}" ){name}}`);
+        expect(res.statusCode).to.equal(200);
+      }
+    });
+
+    after(async function(){
+      // delete all cats
+      let res = itHelpers.request_graph_ql_post('{cats(pagination:{limit: 15}){id}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      let catIds = resBody.data.cats;
+      for (let i = 0; i < catIds.length; i++) {  
+        res = itHelpers.request_graph_ql_post(`mutation{deleteCat(id:${catIds[i].id})}`);
+        expect(res.statusCode).to.equal(200);
+      }
+    });
+
+    it('01. generic readAllCursor', function() {
+      let res = itHelpers.request_graph_ql_post('{catsConnection(pagination: {last: 4, before: "eyJuYW1lIjoiY2F0NSIsInJhY2UiOm51bGwsImFnZSI6bnVsbCwiaWQiOjV9"}, search: {field: id, value: {type: "Int", value: "7"}, operator: lte},order:{field:name,order:DESC}) { edges { node { id name } cursor} pageInfo { hasNextPage hasPreviousPage}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {
+          "catsConnection": {
+            "edges": [
+              {
+                "node": {
+                  "id": "7",
+                  "name": "cat7"
+                },
+                "cursor": "eyJuYW1lIjoiY2F0NyIsInJhY2UiOm51bGwsImFnZSI6bnVsbCwiaWQiOjd9"
+              },
+              {
+                "node": {
+                  "id": "6",
+                  "name": "cat6"
+                },
+                "cursor": "eyJuYW1lIjoiY2F0NiIsInJhY2UiOm51bGwsImFnZSI6bnVsbCwiaWQiOjZ9"
+              }
+            ],
+            "pageInfo": {
+              "hasNextPage": true,
+              "hasPreviousPage": false
+            }
+          }
+        }
+      })
+    });
+  });

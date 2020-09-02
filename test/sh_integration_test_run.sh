@@ -402,6 +402,9 @@ genCode() {
   # Add patch for sql model accession validation
   patch -V never ${TARGET_DIR_INSTANCE1}/validations/accession.js ./test/integration_test_misc/accession_validate_instance1.patch
 
+  # Add patch for sql model cat to use generic readAllCursor
+  patch -V never ${TARGET_DIR_INSTANCE1}/models/sql/cat.js ./test/integration_test_misc/cat_readAllCursor.patch
+
   # Msg
   echo -e "@@ Code generated on ${TARGET_DIR_INSTANCE1} and ${TARGET_DIR_INSTANCE2}: ... ${LGREEN}done${NC}"
   echo -e "${LGRAY}---------------------------- @@${NC}\n"
