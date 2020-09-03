@@ -25,7 +25,8 @@ dog.prototype.owner = async function({
                     "operator": "eq"
                 });
                 let found = await resolvers.people({
-                    search: nsearch
+                    search: nsearch,
+                    pagination: {limit:1}
                 }, context);
                 if (found) {
                     return found[0]
@@ -86,7 +87,7 @@ module.exports.academicTeam_schema = `
 """
 @search-request
 """
-membersFilter(search: searchResearcherInput, order: [ orderResearcherInput ], pagination: paginationInput): [Researcher]
+membersFilter(search: searchResearcherInput, order: [ orderResearcherInput ], pagination: paginationInput!): [Researcher]
 `
 
 module.exports.academicTeam_model = `

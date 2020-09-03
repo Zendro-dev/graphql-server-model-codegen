@@ -70,7 +70,7 @@ type <%- name -%>
   """
   @search-request
   """
-  <%=key%>Connection(search: search<%= associationsArguments.schema_attributes.many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.many[key][1] -%>Input ], pagination: paginationCursorInput): <%= associationsArguments.schema_attributes.many[key][1]-%>Connection
+  <%=key%>Connection(search: search<%= associationsArguments.schema_attributes.many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.many[key][1] -%>Input ], pagination: paginationCursorInput!): <%= associationsArguments.schema_attributes.many[key][1]-%>Connection
   """
   @count-request
   """
@@ -87,13 +87,13 @@ type <%- name -%>
   """
   @search-request
   """
-  <%=key%>Filter(search: search<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input ], pagination: paginationInput): [<%= associationsArguments.schema_attributes.generic_many[key][0]-%>]
+  <%=key%>Filter(search: search<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input ], pagination: paginationInput!): [<%= associationsArguments.schema_attributes.generic_many[key][0]-%>]
 
 
   """
   @search-request
   """
-  <%=key%>Connection(search: search<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input ], pagination: paginationCursorInput): <%= associationsArguments.schema_attributes.generic_many[key][1]-%>Connection
+  <%=key%>Connection(search: search<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input, order: [ order<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input ], pagination: paginationCursorInput!): <%= associationsArguments.schema_attributes.generic_many[key][1]-%>Connection
 
   """
   @count-request
@@ -179,7 +179,7 @@ type Query {
   count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
   vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
   csvTableTemplate<%- nameCp -%>: [String]
-  <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput ): <%- nameCp -%>Connection
+  <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput! ): <%- nameCp -%>Connection
 }
 <%#
 /**

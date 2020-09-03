@@ -1,0 +1,9 @@
+{
+  "model": "Cat",
+  "storageType": "sql",
+  "attributes": {
+    "name": "String",
+    "race": "String",
+    "age": "Int"
+  }
+}

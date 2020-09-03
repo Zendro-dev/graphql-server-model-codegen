@@ -26,7 +26,7 @@ static async readById(iri, benignErrorReporter) {
               if (response && response.data && response.data.data) {
                 return response.data.data.readOneBook;
               } else {
-                throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+                throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
               }
             } catch(error) {
               //handle caught errors
@@ -56,7 +56,7 @@ static async countRecords(search, benignErrorReporter) {
         if (response && response.data && response.data.data) {
           return response.data.data.countBooks;
         } else {
-          throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+          throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
         }
       } catch(error) {
         //handle caught errors
@@ -67,12 +67,7 @@ static async countRecords(search, benignErrorReporter) {
 
 module.exports.book_adapter_read_all = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
-        //check valid pagination arguments
-        let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-        if (!argsValid) {
-            throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-        }
-        let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+        let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput! $order: [orderBookInput]){
       booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
          genre
          publisher_id
@@ -87,10 +82,10 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
           // check if data was send
-          if(response && response.data && response.data.data) {
+          if(response && response.data && response.data.data && response.data.data.booksConnection !== null) {
             return response.data.data.booksConnection;
           } else {
-            throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+            throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
           }
         } catch(error) {
           //handle caught errors
@@ -205,12 +200,6 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
             authAdapters = Object.values(this.registeredAdapters);
         } else {
             authAdapters = Array.from(authorizedAdapters)
-        }
-
-        //check valid pagination arguments
-        let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-        if (!argsValid) {
-            throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
         }
 
         //use default BenignErrorReporter if no BenignErrorReporter defined
@@ -412,18 +401,14 @@ person.prototype.parrot = async function({
         });
 
         let found = (await resolvers.parrotsConnection({
-            search: nsearch
+            search: nsearch,
+            pagination:{first:2}
         }, context)).edges;
 
         if (found.length > 0) {
             if (found.length > 1) {
-                let foundIds = [];
-                found.forEach(parrot => {
-                    foundIds.push(parrot.node.getIdValue())
-                })
                 context.benignErrors.push(new Error(
-                    \`Not unique "to_one" association Error: Found \${found.length} parrots matching person with id \${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving
-    the foreign key into the Person model. Returning first Parrot. Found Parrots \${models.parrot.idAttribute()}s: [\${foundIds.toString()}]\`
+                  \`Not unique "to_one" association Error: Found > 1 parrots matching person with id \${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the Person model. Returning first Parrot.\`
                 ));
             }
             return found[0].node;

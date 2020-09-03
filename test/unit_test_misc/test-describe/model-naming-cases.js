@@ -15,7 +15,7 @@ module.exports.resolvers_webservice_aminoAcid = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
-            await checkCountAndReduceRecordsLimit({search, pagination}, context, "aminoAcidSequences");
+            helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "aminoAcidSequences");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await aminoAcidSequence.readAll(search, order, pagination, benignErrorReporter);
         } else {
@@ -26,11 +26,11 @@ module.exports.resolvers_webservice_aminoAcid = `
 
 module.exports.schema_webservice_aminoAcid = `
 type Query {
-  aminoAcidSequences(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationInput ): [aminoAcidSequence]
+  aminoAcidSequences(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationInput! ): [aminoAcidSequence]
   readOneAminoAcidSequence(id: ID!): aminoAcidSequence
   countAminoAcidSequences(search: searchAminoAcidSequenceInput ): Int
   vueTableAminoAcidSequence : VueTableAminoAcidSequence    csvTableTemplateAminoAcidSequence: [String]
-  aminoAcidSequencesConnection(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationCursorInput ): AminoAcidSequenceConnection
+  aminoAcidSequencesConnection(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationCursorInput! ): AminoAcidSequenceConnection
 }
 `
 
@@ -135,7 +135,7 @@ module.exports.transcriptCount_resolvers_camelcase=`
         id
     }, context) {
         if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
-            checkCountForOneAndReduceRecordsLimit(context);
+            helper.checkCountAndReduceRecordsLimit(1, context, "readOneTranscriptCount");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await transcriptCount.readById(id, benignErrorReporter);
         } else {

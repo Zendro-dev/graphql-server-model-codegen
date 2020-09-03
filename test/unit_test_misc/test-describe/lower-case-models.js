@@ -1,11 +1,11 @@
 module.exports.transcript_count_schema = `
 type Query {
-  transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput ): [transcript_count]
+  transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput! ): [transcript_count]
   readOneTranscript_count(id: ID!): transcript_count
   countTranscript_counts(search: searchTranscript_countInput ): Int
   vueTableTranscript_count : VueTableTranscript_count    csvTableTemplateTranscript_count: [String]
 
-  transcript_countsConnection(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput ): Transcript_countConnection
+  transcript_countsConnection(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput! ): Transcript_countConnection
 }
 
   type Mutation {

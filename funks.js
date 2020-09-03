@@ -288,7 +288,7 @@ writeSchemaCommons = function(dir_write){
   }
 
   input paginationInput{
-    limit: Int
+    limit: Int!
     offset: Int
   }
 

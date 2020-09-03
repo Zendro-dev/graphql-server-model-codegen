@@ -24,7 +24,7 @@ static async readById( id, benignErrorReporter){
       await validatorUtil.validateData('validateAfterRead', this, item);
       return item;
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error) {
     //handle caught errors
@@ -37,7 +37,7 @@ static async readById( id, benignErrorReporter){
 module.exports.read_all = `
 static async readAll(search, order, pagination, benignErrorReporter){
   let query = \`query
-  books($search: searchBookInput $pagination: paginationInput $order: [orderBookInput] )
+  books($search: searchBookInput $pagination: paginationInput! $order: [orderBookInput] )
  {books(search:$search pagination:$pagination order:$order){id title genre publisher_id } }\`
 
   //use default BenignErrorReporter if no BenignErrorReporter defined
@@ -53,12 +53,12 @@ static async readAll(search, order, pagination, benignErrorReporter){
     // STATUS-CODE is 200
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
-    if(response&&response.data&&response.data.data) {
+    if(response&&response.data&&response.data.data && response.data.data.books !== null) {
       let data = response.data.data.books;
       data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
       return data.map(item => {return new Book(item)});
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error){
     //handle caught errors
@@ -89,7 +89,7 @@ static async countRecords(search, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return response.data.data.countBooks;
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error){
     //handle caught errors
@@ -122,7 +122,7 @@ static async addOne(input, benignErrorReporter) {
     if(response&&response.data&&response.data.data) {
       return new Book(response.data.data.addBook);
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error) {
     //handle caught errors
@@ -153,7 +153,7 @@ static async deleteOne(id, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return response.data.data.deleteBook;
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error) {
     //handle caught errors
@@ -187,7 +187,7 @@ static async updateOne(input, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return new Book(response.data.data.updateBook);
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error) {
     //handle caught errors
@@ -308,7 +308,7 @@ static async countRecords(search, benignErrorReporter){
     if(response&&response.data&&response.data.data) {
       return response.data.data.countPeople;
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error){
     //handle caught errors
@@ -352,7 +352,7 @@ static async add_personId(id, personId, benignErrorReporter) {
     if(response && response.data && response.data.data) {
       return new Dog(response.data.data.updateDog);
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error){
     //handle caught errors
@@ -396,7 +396,7 @@ static async remove_personId(id, personId, benignErrorReporter) {
     if(response && response.data && response.data.data) {
       return new Dog(response.data.data.updateDog);
     } else {
-      throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+      throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
   } catch(error){
     //handle caught errors

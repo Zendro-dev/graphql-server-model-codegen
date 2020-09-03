@@ -9,7 +9,8 @@ const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const models_generic = require('./unit_test_misc/data_models_generic');
 const requireFromString = require('require-from-string');
-const helpers = require('./unit_test_misc/helpers/reporting_helpers')
+const helpers = require('./unit_test_misc/helpers/reporting_helpers');
+const { test } = require('mocha');
 //const components_code = require('./unit_test_misc/components_code');
 
 const testCompare = function(actual, expected, errorMessage = 'Generated output differs from expected') {
@@ -86,17 +87,6 @@ describe('Empty associations', function(){
   });
 
 
-});
-
-describe('Limit for records', function(){
-  let data_test = require('./unit_test_misc/test-describe/limit-for-records');
-  it('Model - book', async function(){
-    let opts = funks.getOptions(models.book);
-    let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.limit_records_model.replace(/\s/g, '');
-    expect(g_model, 'Incorrect model').to.have.string(test_model);
-  });
 });
 
 describe('Better name for search argument', function(){
@@ -218,9 +208,7 @@ describe('Model naming cases ', function(){
   it('Resolvers - aminoAcidSequence', async function(){
     let opts = funks.getOptions(models.aminoAcidSequence);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolvers = data_test.resolvers_webservice_aminoAcid.replace(/\s/g, '');
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.resolvers_webservice_aminoAcid)
   });
 
   it('GraphQL Schema - aminoAcidSequence', async function(){
@@ -274,9 +262,7 @@ describe('Model naming cases ', function(){
   it('Resolvers - transcriptCount', async function(){
     let opts = funks.getOptions(models.transcriptCount_indiv);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolvers = data_test.transcriptCount_resolvers_camelcase.replace(/\s/g, '');
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.transcriptCount_resolvers_camelcase);
   });
 
 });
@@ -569,6 +555,8 @@ describe('Model Layer', function(){
   it('Read all model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
+    // console.log(generated_model);
+    // testCompare(generated_model,  data_test.read_all)
     let g_model = generated_model.replace(/\s/g, '');
     let test_model = data_test.read_all.replace(/\s/g, '');
     expect(g_model, 'No read all method found').to.have.string(test_model);
@@ -748,9 +736,7 @@ describe('Decouple association from resolvers', function(){
   it('BelongsToMany implementation in model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.belongsToMany_model.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.belongsToMany_model);
   })
 
   it('BelongsToMany implementation in model count - book', async function(){
@@ -764,9 +750,7 @@ describe('Decouple association from resolvers', function(){
   it('BelongsToMany implementation in resolver - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolver = data_test.belongsToMany_resolver.replace(/\s/g, '');
-    expect(g_resolvers, 'No method found').to.have.string(test_resolver);
+    testCompare(generated_resolvers, data_test.belongsToMany_resolver)
   });
 
   it('BelongsToMany count implementation in resolver - book', async function(){
@@ -935,17 +919,13 @@ describe('Cursor based pagination', function(){
   it('Connection read all resolver - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
-    let g_resolver = generated_resolver.replace(/\s/g, '');
-    let test_resolver = data_test.resolver_read_all_connection.replace(/\s/g, '');
-    expect(g_resolver, 'No method found').to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.resolver_read_all_connection);
   });
 
   it('Connection read all model - book', async function(){
     let opts = funks.getOptions(models.book);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.model_read_all_connection.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.model_read_all_connection);
   })
 
   it('Association connection query - person', async function(){
@@ -959,17 +939,13 @@ describe('Cursor based pagination', function(){
   it('Association connection resolver - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_resolver =await funks.generateJs('create-resolvers', opts);
-    let g_resolver = generated_resolver.replace(/\s/g, '');
-    let test_resolver = data_test.resolver_to_many_association.replace(/\s/g, '');
-    expect(g_resolver, 'No method found').to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.resolver_to_many_association);
   });
 
   it('Many-to-many connection model - person', async function(){
     let opts = funks.getOptions(models.person);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.model_many_to_many_association.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.model_many_to_many_association);
   })
 
   it('Read all connection in zendro server  - book', async function(){
@@ -1013,9 +989,7 @@ describe('Distributed data models', function(){
   it('Read All Records adapter- book', async function(){
     let opts = funks.getOptions(models_distributed.book);
     let generated_adapter =await funks.generateJs('create-zendro-adapters', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.book_adapter_read_all.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect adapter').to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.book_adapter_read_all);
   });
 
   it('Registry distributed data model- book', async function(){
@@ -1045,9 +1019,7 @@ describe('Distributed data models', function(){
   it('Read all distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.book_ddm_read_all.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+    testCompare(generated_adapter,data_test.book_ddm_read_all );
   });
 
   // Check for changes!
@@ -1071,9 +1043,7 @@ describe('Distributed data models', function(){
   it('one-To-one association distributed resolver - Person', async function(){
     let opts = funks.getOptions(models_distributed.person_ddm);
     let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
-    let g_resolver = generated_resolver.replace(/\s/g, '');
-    let test_resolver = data_test.person_ddm_resolver_one_to_one.replace(/\s/g, '');
-    expect(g_resolver, 'Incorrect distributed data model').to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.person_ddm_resolver_one_to_one);
   });
 
 });
@@ -1259,9 +1229,10 @@ describe('SQL-adapter', function(){
   it('readAllCursor - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.readAllCursor.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.readAllCursor);
+    // let g_adapter = generated_adapter.replace(/\s/g, '');
+    // let test_adapter = data_test.readAllCursor.replace(/\s/g, '');
+    // expect(g_adapter).to.have.string(test_adapter);
   });
 
   it('deleteOne - peopleLocal', async function(){
