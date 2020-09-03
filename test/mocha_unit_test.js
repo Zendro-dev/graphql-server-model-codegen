@@ -573,9 +573,7 @@ describe('Model Layer', function(){
   it('Add one model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.add_one_model.replace(/\s/g, '');
-    expect(g_model, 'No add one method found').to.have.string(test_model);
+    testCompare(generated_model,data_test.add_one_model);
   })
 
   it('Add one resolver - book', async function(){
@@ -605,9 +603,10 @@ describe('Model Layer', function(){
   it('Update one model - book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.update_one_model.replace(/\s/g, '');
-    expect(g_model, 'No add one method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.update_one_model)
+    // let g_model = generated_model.replace(/\s/g, '');
+    // let test_model = data_test.update_one_model.replace(/\s/g, '');
+    // expect(g_model, 'No add one method found').to.have.string(test_model);
   })
 
   it('Update one resolver - book', async function(){
@@ -1062,17 +1061,13 @@ describe('To-one associations editing', function(){
   it('AddOne with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.person_addOne_model.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.person_addOne_model);
   })
 
   it('Update with to-one association - person', async function(){
     let opts = funks.getOptions(models.person_one_assoc);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.person_update_model.replace(/\s/g, '');
-    expect(g_model, 'No method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.person_update_model);
   })
 
 });
@@ -1131,9 +1126,7 @@ describe('Create and update transaction', function(){
   it('Update - transcript_count', async function(){
     let opts = funks.getOptions(models.transcript_count);
     let generated_resolvers =await funks.generateJs('create-models', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolvers = data_test.update_transcript_count.replace(/\s/g, '');
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.update_transcript_count);
   });
 });
 
@@ -1213,9 +1206,7 @@ describe('SQL-adapter', function(){
   it('addOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.addOne.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.addOne);
   });
 
   it('count - peopleLocal', async function(){
@@ -1230,9 +1221,6 @@ describe('SQL-adapter', function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     testCompare(generated_adapter, data_test.readAllCursor);
-    // let g_adapter = generated_adapter.replace(/\s/g, '');
-    // let test_adapter = data_test.readAllCursor.replace(/\s/g, '');
-    // expect(g_adapter).to.have.string(test_adapter);
   });
 
   it('deleteOne - peopleLocal', async function(){
@@ -1246,9 +1234,7 @@ describe('SQL-adapter', function(){
   it('updateOne - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.updateOne.replace(/\s/g, '');
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.updateOne);
   });
 
   it('stripAssociations - peopleLocal', async function(){
