@@ -3,7 +3,7 @@ static async updateOne(input) {
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
     try {
-        let result = await sequelize.transaction(async (t) => {
+        let result = await this.sequelize.transaction(async (t) => {
           let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
           return updated;
         });
