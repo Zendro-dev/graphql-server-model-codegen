@@ -2,10 +2,12 @@ let fs = require('fs');
 const ejs = require('ejs');
 const inflection = require('inflection');
 const jsb = require('js-beautify').js_beautify;
+const { join, parse } = require('path');
 const {promisify} = require('util');
 const ejsRenderFile = promisify( ejs.renderFile );
 const stringify_obj = require('stringify-object');
 const colors = require('colors/safe');
+const { getModelDatabase } = require('./lib/generators-aux');
 
 
 /**
@@ -458,6 +460,26 @@ writeIndexResolvers = async function(dir_write, models){
   });
 }
 
+writeAcls = async function(dir_write, models, adapters){
+  //set file name
+  let file_name = dir_write + '/acl_rules.js';
+  //set names
+  let modelsNames = models.map(item => ({name: item[0]}));
+  let adminModelsNames = ['role', 'user', 'role_to_user'].map(item => ({name: item}));
+  //generate
+  await generateSection('acl_rules', {models: modelsNames, adminModels: adminModelsNames, adapters}, file_name)
+  .then(() => {
+    //success
+    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
+  })
+  .catch((e) => {
+    //error
+    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
+    console.log(e);
+    throw e;
+  });
+}
+
 /**
  * convertToType - Generate a string correspondant to the model type as needed for graphql schema.
  *
@@ -483,26 +505,27 @@ convertToType = function(many, model_name){
 module.exports.getOptions = function(dataModel){
 
   let opts = {
-      name : dataModel.model,
-      nameCp: capitalizeString(dataModel.model),
-      storageType : getStorageType(dataModel),
-      table: inflection.pluralize(uncapitalizeString(dataModel.model)),
-      nameLc: uncapitalizeString(dataModel.model),
-      namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
-      namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
-      attributes: getOnlyTypeAttributes(dataModel.attributes),
-      jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
-      associationsArguments: module.exports.parseAssociations(dataModel),
-      arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
-      indices: dataModel.indices,
-      definitionObj : dataModel,
-      attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
-      url: dataModel.url || "",
-      externalIds: dataModel.externalIds || [],
-      regex: dataModel.regex || "",
-      adapterName: dataModel.adapterName || "",
-      registry: dataModel.registry || [],
-      idAttribute: getIdAttribute(dataModel)
+    name : dataModel.model,
+    nameCp: capitalizeString(dataModel.model),
+    storageType : getStorageType(dataModel),
+    database: getModelDatabase(dataModel),
+    table: inflection.pluralize(uncapitalizeString(dataModel.model)),
+    nameLc: uncapitalizeString(dataModel.model),
+    namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
+    namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
+    attributes: getOnlyTypeAttributes(dataModel.attributes),
+    jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
+    associationsArguments: module.exports.parseAssociations(dataModel),
+    arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
+    indices: dataModel.indices,
+    definitionObj : dataModel,
+    attributesDescription: getOnlyDescriptionAttributes(dataModel.attributes),
+    url: dataModel.url || "",
+    externalIds: dataModel.externalIds || [],
+    regex: dataModel.regex || "",
+    adapterName: dataModel.adapterName || "",
+    registry: dataModel.registry || [],
+    idAttribute: getIdAttribute(dataModel)
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
@@ -655,6 +678,7 @@ module.exports.parseAssociations = function(dataModel){
         assoc["target_cp"] = capitalizeString(association.target) ;//inflection.capitalize(association.target);
         assoc["target_cp_pl"] = capitalizeString(inflection.pluralize(association.target));//inflection.capitalize(inflection.pluralize(association.target));
         assoc["targetKey"] = association.targetKey;
+        assoc["targetKey_cp"] = capitalizeString(association.targetKey);
         if(association.keyIn){
             assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
         }
@@ -694,7 +718,7 @@ generateAssociationsMigrations =  function( opts, dir_write){
     //       assoc["source"] = opts.table;
     //       assoc["cross"] = false;
     //       let generatedMigration = await module.exports.generateJs('create-association-migration',assoc);
-    //       let name_migration = createNameMigration(dir_write, 'z-column-'+assoc.targetKey+'-to-'+opts.table);
+    //       let name_migration = createNameMigration(dir_write, '', 'z-column-'+assoc.targetKey+'-to-'+opts.table);
     //       fs.writeFile( name_migration, generatedMigration, function(err){
     //         if (err)
     //         {
@@ -710,7 +734,7 @@ generateAssociationsMigrations =  function( opts, dir_write){
       if(assoc.targetStorageType === 'sql'){
           assoc["source"] = opts.table;
           let generatedMigration = await module.exports.generateJs('create-through-migration',assoc);
-          let name_migration = createNameMigration(dir_write, 'z-through-'+assoc.keysIn);
+          let name_migration = createNameMigration(dir_write, '', 'z-through-'+assoc.keysIn);
           fs.writeFile( name_migration, generatedMigration, function(err){
             if (err)
             {
@@ -731,11 +755,11 @@ generateAssociationsMigrations =  function( opts, dir_write){
  * @param  {string} model_name Name of the model.
  * @return {string}            Path where generated file will be written.
  */
-createNameMigration = function(dir_write, model_name){
+createNameMigration = function(rootDir, migrationsDir, model_name){
   let date = new Date();
-   date = date.toISOString().slice(0,19).replace(/[^0-9]/g, "");
+  date = date.toISOString().slice(0,19).replace(/[^0-9]/g, "");
   //return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
-  return dir_write + '/migrations/' + date + '-'+model_name +'.js';
+  return join(rootDir, migrationsDir, `${date}-${model_name}.js`);
 };
 
  /**
@@ -745,9 +769,15 @@ createNameMigration = function(dir_write, model_name){
   * @param  {object} opts      Object with options needed for the template that will generate the section
   * @param  {string} dir_write Path (including name of the file) where the generated section will be written as a file.
   */
-generateSection = async function(section, opts, dir_write ){
+generateSection = async function(section, opts, filePath ){
   let generatedSection = await module.exports.generateJs('create-'+section ,opts);
-  fs.writeFileSync(dir_write, generatedSection);
+
+  const parsedPath = parse(filePath);
+  if (!fs.existsSync(parsedPath.dir)) {
+    fs.mkdirSync(parsedPath.dir);
+  }
+
+  fs.writeFileSync(filePath, generatedSection);
 };
 
 /**
@@ -788,7 +818,7 @@ generateSections = async function(sections, opts, dir_write) {
         break;
       //migrations
       case 'migrations':
-        file_name = createNameMigration(dir_write, section.fileName);
+        file_name = createNameMigration(dir_write, section.dir, section.fileName);
         break;
       //validations & patches
       case 'validations':
@@ -826,12 +856,15 @@ generateSections = async function(sections, opts, dir_write) {
  *
  * @param  {string} dir_write directory where code is being generated.
  * @param  {array}  models arrays of entries of the form [opts.name , opts.namePl].
+ * @param  {array}  adapters array of adapter name strings.
  */
-writeCommons = async function(dir_write, models){
+writeCommons = async function(dir_write, models, adapters){
   writeSchemaCommons(dir_write);
   console.log(path.join(dir_write,'models'))
-  writeIndexAdapters(path.join(dir_write,'models'));
+  //deprecated due to static adapters index, to be removed
+  // writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
+  await writeAcls(dir_write, models, adapters);
   //deprecated due to static global index, to be removed
   //writeIndexModelsCommons(dir_write);
 };
@@ -901,6 +934,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
   let sectionsDirsB = ['models/sql','models/zendro-server', 'models/adapters', 'models/distributed', 'models/generic'];
   let models = [];
+  let adapters = [];
   let attributes_schema = {};
   let summary_associations = {'one-many': [], 'many-many': {}};
   //set output dir
@@ -1024,15 +1058,16 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
     //set sections
     let sections = []; //schemas, resolvers, models, migrations, validations, patches
+    const migrationsDir = join('migrations', opts.database);
     switch(opts.storageType) {
       case 'sql':
         sections = [
-          {dir: 'schemas',    template: 'schemas',    fileName: opts.nameLc},
-          {dir: 'resolvers',  template: 'resolvers',  fileName: opts.nameLc},
-          {dir: 'models/sql',     template: 'models',     fileName: opts.nameLc},
-          {dir: 'migrations', template: 'migrations', fileName: opts.nameLc},
+          {dir: 'schemas',     template: 'schemas',     fileName: opts.nameLc},
+          {dir: 'resolvers',   template: 'resolvers',   fileName: opts.nameLc},
+          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},
+          {dir: migrationsDir, template: 'migrations',  fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName:opts.nameLc},
+          {dir: 'patches',     template: 'patches',     fileName: opts.nameLc},
         ]
         break;
 
@@ -1081,9 +1116,9 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
       case 'sql-adapter':
         sections = [
-          {dir: 'models/adapters',     template: 'sql-adapter',  fileName: opts.adapterName},
-          {dir: 'migrations',   template: 'migrations',   fileName: opts.nameLc},
-          {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
+          {dir: 'models/adapters', template: 'sql-adapter', fileName: opts.adapterName},
+          {dir: migrationsDir,     template: 'migrations',  fileName: opts.nameLc     },
+          {dir: 'patches',         template: 'patches',     fileName: opts.adapterName},
         ]
         break;
 
@@ -1111,12 +1146,17 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
     });
 
     //save data for writeCommons
-    models.push([opts.name , opts.namePl]);
-    };
+      //models
+    models.push([opts.name , opts.namePl, opts.nameLc]);
+      //adapters
+    if(['zendro-webservice-adapter', 'ddm-adapter', 'sql-adapter', 'generic-adapter'].includes(opts.storageType)) {
+      adapters.push(opts.adapterName);
+    }
+  };
   //msg
   console.log("@@ Generating code for... ", colors.blue("commons & index's"));
   //generate commons & index's
-  await writeCommons(dir_write, models)
+  await writeCommons(dir_write, models, adapters)
   .then(()=>{//success
     //msg
     console.log("@@ ", colors.green('done'));

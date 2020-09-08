@@ -68,7 +68,7 @@ module.exports.request_join_post = async function (modelAdjacencies){
     let token = jsonwebtoken.sign({
         id: 1,
         email: "sci.db.service@gmail.com",
-        roles: "admin"
+        roles: "administrator"
     }, 'something-secret', { expiresIn: '1h' });
 
     // returning the response object
@@ -124,7 +124,7 @@ module.exports.batch_upload_csv = async function (csvPath, mutation){
     let token = jsonwebtoken.sign({
         id: 1,
         email: "sci.db.service@gmail.com",
-        roles: "admin"
+        roles: "administrator"
     }, 'something-secret', { expiresIn: '1h' });
 
     let formData = new FormData();

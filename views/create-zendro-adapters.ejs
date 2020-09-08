@@ -243,5 +243,8 @@ module.exports = class <%- adapterName -%>{
       errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
   }
+
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
   
 }

@@ -1,6 +1,2 @@
-# Ignore everything in this directory
-*
-# Except this file
-!.gitignore
-!instance1
-!instance2
+# graphql-server instances
+servers/

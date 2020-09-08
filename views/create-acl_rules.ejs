@@ -1,0 +1,86 @@
+module.exports = {
+  aclRules: [
+    //administrator
+    {
+      roles: 'administrator',
+      allows: [{
+        resources: [
+<%for( let i=0; i<adminModels.length; i++ ){-%>
+          '<%- adminModels[i].name _%>',
+<%}-%>
+        ],
+        permissions: '*'
+      }]
+    },
+
+    //models
+<%for( let i=0; i<models.length; i++ ){-%>
+    /**
+     * Model: <%- models[i].name %>
+     */
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'create'
+      }]
+    },
+    {
+      roles: 'reader',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'read'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'update'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'delete'
+      }]
+    },
+<%}-%>
+
+    //adapters
+<%for( let i=0; i<adapters.length; i++ ){-%>
+    /**
+     * Adapter: <%- adapters[i] %>
+     */
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'create'
+      }]
+    },
+    {
+      roles: 'reader',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'read'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'update'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- adapters[i] _%>',
+        permissions: 'delete'
+      }]
+    },
+<%}-%>
+  ]
+}

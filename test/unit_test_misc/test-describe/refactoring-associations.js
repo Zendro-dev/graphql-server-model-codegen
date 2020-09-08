@@ -181,32 +181,38 @@ researcher.prototype.remove_dog = async function(input, benignErrorReporter) {
 module.exports.add_assoc_to_many_fieldMutation_resolver = `
 /**
  * add_individuals - field Mutation for to_many associations to add
+ * uses bulkAssociate to efficiently update associations
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  */
 accession.prototype.add_individuals = async function(input, benignErrorReporter) {
-    let results = [];
-    for await (associatedRecordId of input.addIndividuals) {
-        results.push(models.individual.add_accessionId(associatedRecordId, this.getIdValue(), benignErrorReporter));
-    }
-    await Promise.all(results);
+    let bulkAssociationInput = input.addIndividuals.map(associatedRecordId => {
+        return {
+            accessionId: this.getIdValue(),
+            [models.individual.idAttribute()]: associatedRecordId
+        }
+    });
+    await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
 `
 
 module.exports.remove_assoc_to_many_fieldMutation_resolver = `
 /**
  * remove_individuals - field Mutation for to_many associations to remove
+ * uses bulkAssociate to efficiently update associations
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  */
 accession.prototype.remove_individuals = async function(input, benignErrorReporter) {
-    let results = [];
-    for await (associatedRecordId of input.removeIndividuals) {
-        results.push(models.individual.remove_accessionId(associatedRecordId, this.getIdValue(), benignErrorReporter));
-    }
-    await Promise.all(results);
+    let bulkAssociationInput = input.removeIndividuals.map(associatedRecordId => {
+        return {
+            accessionId: this.getIdValue(),
+            [models.individual.idAttribute()]: associatedRecordId
+        }
+    });
+    await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
 `
 
@@ -266,32 +272,38 @@ accession.prototype.remove_location = async function(input, benignErrorReporter)
 module.exports.to_many_add = `
 /**
  * add_individuals - field Mutation for to_many associations to add
+ * uses bulkAssociate to efficiently update associations
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  */
 accession.prototype.add_individuals = async function(input, benignErrorReporter) {
-    let results = [];
-    for await (associatedRecordId of input.addIndividuals) {
-      results.push(models.individual.add_accessionId(associatedRecordId, this.getIdValue(), benignErrorReporter));
-    }
-    await Promise.all(results);
+    let bulkAssociationInput = input.addIndividuals.map(associatedRecordId => {
+        return {
+            accessionId: this.getIdValue(),
+            [models.individual.idAttribute()]: associatedRecordId
+        }
+    });
+    await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
 `
 
 module.exports.to_many_remove = `
 /**
  * remove_individuals - field Mutation for to_many associations to remove
+ * uses bulkAssociate to efficiently update associations
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  */
 accession.prototype.remove_individuals = async function(input, benignErrorReporter) {
-    let results = [];
-    for await (associatedRecordId of input.removeIndividuals) {
-        results.push(models.individual.remove_accessionId(associatedRecordId, this.getIdValue(), benignErrorReporter));
-    }
-    await Promise.all(results);
+    let bulkAssociationInput = input.removeIndividuals.map(associatedRecordId => {
+        return {
+            accessionId: this.getIdValue(),
+            [models.individual.idAttribute()]: associatedRecordId
+        }
+    });
+    await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
 `
 

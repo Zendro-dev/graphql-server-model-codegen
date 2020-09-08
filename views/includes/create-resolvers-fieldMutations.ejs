@@ -13,16 +13,14 @@
 <%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
   /**
   * <%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> - field Mutation for to_many associations to <%- op %>
+  * uses bulkAssociate to efficiently update associations
   *
   * @param {object} input   Info of input Ids to <%- op %>  the association
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
   */
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input, benignErrorReporter) {
-    let results = [];
-    for await(associatedRecordId of input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>) {
-      results.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey-%>(associatedRecordId, this.getIdValue(), benignErrorReporter));
-    }
-    await Promise.all(results);
+    let bulkAssociationInput = input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.map(associatedRecordId => {return {<%-associationsArguments["to_many"][i].targetKey-%>: this.getIdValue(), [models.<%-associationsArguments["to_many"][i].target_lc-%>.idAttribute()]: associatedRecordId}});
+    await models.<%-associationsArguments["to_many"][i].target_lc-%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-associationsArguments["to_many"][i].target_cp-%>With<%-associationsArguments["to_many"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter);
   }
 
 <%}-%>

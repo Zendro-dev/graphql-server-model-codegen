@@ -398,8 +398,8 @@ const associationArgsDef = {
  */
 -%>
 <%- include('./includes/handleAssociations'); -%>
-<%- include('./includes/create-resolvers-fieldMutations', {op: "add"}); -%>
-<%- include('./includes/create-resolvers-fieldMutations', {op: "remove"}); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "add", ddm: false}); -%>
+<%- include('./includes/create-resolvers-fieldMutations', {op: "remove", ddm: false}); -%>
 
 <%#
 /**
@@ -614,6 +614,7 @@ module.exports = {
  * bulkAddModelCsv()
  * updateModel()
  * deleteModel()
+ * bulkAssociate
  */
 -%>
   /**
@@ -703,6 +704,9 @@ module.exports = {
         }
   },
 
+  <%- include('./includes/bulkAssociations-resolvers', {op: "add"}); -%>
+  <%- include('./includes/bulkAssociations-resolvers', {op: "remove"}); -%>
+  
   /**
    * csvTableTemplate<%- nameCp-%> - Returns table's template
    *
