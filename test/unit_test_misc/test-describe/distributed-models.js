@@ -405,9 +405,7 @@ person.prototype.parrot = async function({
         let nsearch = helper.addSearchField({
             "search": search,
             "field": "personId",
-            "value": {
-                "value": this.getIdValue()
-            },
+            "value": this.getIdValue(),
             "operator": "eq"
         });
 

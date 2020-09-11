@@ -52,7 +52,7 @@ static async readById(id) {
 module.exports.addOne = `
 static async addOne(input) {
       try {
-          const result = await sequelize.transaction(async (t) => {
+          const result = await this.sequelize.transaction(async (t) => {
               let item = await super.create(input, {
                   transaction: t
               });
@@ -260,7 +260,7 @@ module.exports.deleteOne = `
 module.exports.updateOne = `
     static async updateOne(input) {
       try {
-        let result = await sequelize.transaction( async (t) =>{
+        let result = await this.sequelize.transaction( async (t) =>{
           let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
           return updated;
           });

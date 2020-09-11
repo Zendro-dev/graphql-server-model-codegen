@@ -19,9 +19,7 @@ dog.prototype.owner = async function({
                 let nsearch = helper.addSearchField({
                     "search": search,
                     "field": models.person.idAttribute(),
-                    "value": {
-                        "value": this.owner_id_test
-                    },
+                    "value": this.owner_id_test,
                     "operator": "eq"
                 });
                 let found = await resolvers.people({
@@ -68,9 +66,7 @@ academicTeam.prototype.membersFilter = function({
     let nsearch = helper.addSearchField({
         "search": search,
         "field": "academicTeamId",
-        "value": {
-            "value": this.getIdValue()
-        },
+        "value": this.getIdValue(),
         "operator": "eq"
     });
 
