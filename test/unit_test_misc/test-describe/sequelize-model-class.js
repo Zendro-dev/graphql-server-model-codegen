@@ -21,6 +21,13 @@ static init(sequelize, DataTypes){
 }
 `
 
+module.exports.book_model_storage_handler = `
+get storageHandler() {
+  // return sequelize as storageHandler
+  return this.sequelize;
+}
+`
+
 module.exports.book_model_associations = `
 static associate(models){
   Book.belongsToMany(models.person, {

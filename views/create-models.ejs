@@ -67,6 +67,11 @@ module.exports = class <%- name -%> extends Sequelize.Model{
      } );
   }
 
+  get storageHandler() {
+    // return sequelize as storageHandler
+    return this.sequelize;
+  }
+  
   static associate(models){
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>

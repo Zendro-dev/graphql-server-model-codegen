@@ -519,6 +519,14 @@ describe('Update sequelize model to class', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
+  it('Model storage handler - Book', async function(){
+    let opts = funks.getOptions(models.book_authors);
+    let generated_model =await funks.generateJs('create-models', opts);
+    let g_model = generated_model.replace(/\s/g, '');
+    let test_model = data_test.book_model_storage_handler.replace(/\s/g, '');
+    expect(g_model, 'Incorrect model').to.have.string(test_model);
+  });
+
   it('Model associations - Book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
