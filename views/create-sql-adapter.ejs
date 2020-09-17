@@ -75,6 +75,11 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return '<%- storageType -%>';
   }
 
+  get storageHandler() {
+    // return sequelize as storageHandler
+    return this.sequelize;
+  }
+  
   static recognizeId(iri){
     return iriRegex.test(iri);
   }

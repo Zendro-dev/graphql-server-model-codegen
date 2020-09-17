@@ -31,7 +31,12 @@ static init(sequelize, DataTypes) {
     });
 }
 `
-
+module.exports.storageHandler = `
+get storageHandler() {
+    // return sequelize as storageHandler
+    return this.sequelize;
+}
+`
 module.exports.recognizeId = `
 static recognizeId(iri) {
     return iriRegex.test(iri);
