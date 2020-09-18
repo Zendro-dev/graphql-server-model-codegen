@@ -31,7 +31,15 @@ static init(sequelize, DataTypes) {
     });
 }
 `
-
+module.exports.storageHandler = `
+/**
+ * Get the storage handler, which is a static property of the data model class.
+ * @returns sequelize.
+ */
+get storageHandler() {
+ return this.sequelize;
+}
+`
 module.exports.recognizeId = `
 static recognizeId(iri) {
     return iriRegex.test(iri);
