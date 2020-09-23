@@ -21,6 +21,16 @@ static init(sequelize, DataTypes){
 }
 `
 
+module.exports.book_model_storage_handler = `
+/**
+ * Get the storage handler, which is a static property of the data model class.
+ * @returns sequelize.
+ */
+get storageHandler() {
+ return this.sequelize;
+}
+`
+
 module.exports.book_model_associations = `
 static associate(models){
   Book.belongsToMany(models.person, {

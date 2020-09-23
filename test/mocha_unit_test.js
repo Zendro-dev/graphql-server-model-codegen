@@ -519,6 +519,12 @@ describe('Update sequelize model to class', function(){
     expect(g_model, 'Incorrect model').to.have.string(test_model);
   });
 
+  it('Model storage handler - Book', async function(){
+    let opts = funks.getOptions(models.book_authors);
+    let generated_model =await funks.generateJs('create-models', opts);
+    testCompare(generated_model, data_test.book_model_storage_handler);
+  });
+
   it('Model associations - Book', async function(){
     let opts = funks.getOptions(models.book_authors);
     let generated_model =await funks.generateJs('create-models', opts);
@@ -1224,12 +1230,18 @@ describe('SQL-adapter', function(){
     expect(g_adapter).to.have.string(test_adapter);
   });
 
-  it('recognizeId - peopleLocal', async function(){
+  it('storageHandler - peopleLocal', async function(){
     let opts = funks.getOptions(models_distributed.person_adapter_sql);
     let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
     let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.recognizeId.replace(/\s/g, '');
+    let test_adapter = data_test.constructor.replace(/\s/g, '');
     expect(g_adapter).to.have.string(test_adapter);
+  });
+
+  it('recognizeId - peopleLocal', async function(){
+    let opts = funks.getOptions(models_distributed.person_adapter_sql);
+    let generated_adapter =await funks.generateJs('create-sql-adapter', opts);
+    testCompare(generated_adapter, data_test.storageHandler);
   });
 
   it('readById - peopleLocal', async function(){

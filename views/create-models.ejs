@@ -67,6 +67,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
      } );
   }
 
+  /**
+    * Get the storage handler, which is a static property of the data model class.
+    * @returns sequelize.
+    */
+  get storageHandler() {
+    return this.sequelize;
+  }
+  
   static associate(models){
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>

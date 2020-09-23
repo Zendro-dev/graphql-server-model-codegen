@@ -17,13 +17,13 @@ if [[ -d "servers" ]]; then
       # Change into instance directory
       cd $INSTANCE_PATH
 
-      # Forcefully checkout to target branch
-      # WARNING: discards all changes when switching branches!
-      git checkout --force $TARGET_BRANCH
-
       # Synchronize with remote
       git fetch --all
-      git reset --hard
+      # WARNING: discards all changes when switching branches!
+      # Forcefully checkout to target branch
+      git checkout --force $TARGET_BRANCH
+      # move HEAD to latest commit
+      git reset --hard origin/$TARGET_BRANCH
 
       # Return to previous working directory
       cd - 1>/dev/null

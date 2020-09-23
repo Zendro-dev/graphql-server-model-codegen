@@ -497,7 +497,7 @@ setupTestingEnvironment() {
   # Clone graphql-server and checkout the feature branch
   git clone \
     --branch $TARGET_BRANCH \
-    git@github.com:Zendro-dev/graphql-server.git \
+    https://github.com/Zendro-dev/graphql-server.git \
     $MAIN_SERVER
 
   # Force "node-jq" to use the docke image "jq"
