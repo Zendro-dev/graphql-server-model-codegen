@@ -634,3 +634,29 @@ module.exports.book_extendedIds = {
   "internalId": "internalBookId"
 }
 
+module.exports.author_foreignKeyArray = {
+    "model" : "author",
+    "storageType" : "sql",
+    "database": "default-sql",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[String]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "author",
+        "targetStorageType": "sql"
+      }
+    },
+
+    "internalId": "id"
+  }

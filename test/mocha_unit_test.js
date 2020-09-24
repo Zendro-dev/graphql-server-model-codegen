@@ -2495,3 +2495,14 @@ describe('bulkAssociation', function(){
   });
 
 });
+
+
+describe('Foreign-key array', function(){
+  let data_test = require('./unit_test_misc/test-describe/foreign-key-array');
+
+  it('schema - book', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_schema = await funks.generateJs('create-schemas', opts);
+    testCompare(generated_schema, data_test.schema);
+  });
+});

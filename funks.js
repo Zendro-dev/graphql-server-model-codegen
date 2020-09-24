@@ -172,8 +172,12 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "type": "null" }
         ]
       }
-    } else {
-      throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
+    // }else if(jsonSchemaProps[key] === "[String]"){
+    //
+    // } else if(jsonSchemaProps[key] === "[Int]"){
+
+    }else {
+      //throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
     }
   }
 
@@ -585,12 +589,20 @@ getEditableAssociations = function(associations) {
       editableAssociations.push(association);
     }
   })
+
+  //for cases many to many through foreignKey array
+  associations['to_many'].forEach(association => {
+    if (association.keyIn !== association.target){
+      editableAssociations.push(association);
+    }
+  })
+
   return editableAssociations;
 }
 
 getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
   let editable_attributes = {};
-  let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
+  let target_keys = parsedAssocForeignKeys.map( assoc => { if(assoc.reverseAssociationType) return assoc.sourceKey; return assoc.targetKey; });
   for(let attrib in attributes ){
     if(!target_keys.includes(attrib) && attrib !== idAttribute){
       editable_attributes[ attrib ] = attributes[attrib];
