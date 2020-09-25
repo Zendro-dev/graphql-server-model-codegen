@@ -2526,5 +2526,18 @@ describe('Foreign-key array', function(){
     testCompare(generated_resolver, data_test.resolver_count_association);
   });
 
+  it(' resolver add association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_add_association);
+  });
+
+  it(' resolver remove association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_remove_association);
+  });
+
+
 
 });

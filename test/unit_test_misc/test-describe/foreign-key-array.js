@@ -64,3 +64,33 @@ author.prototype.countFilteredBooks = function({search}, context){
 }
 
 `
+
+module.exports.resolver_add_association = `
+author.prototype.add_books = async function(input, benignErrorReporter){
+
+  //handle inverse association
+  let promises = [];
+  input.addBooks.forEach( id => {
+    promises.push( models.book.add_author_ids( id ,[ this.getIdValue()], benignErrorReporter ) );
+  });
+  await Promise.all(promises);
+
+  await author.add_book_ids(this.getIdValue(), input.addBooks, benignErrorReporter);
+  this.book_ids =  helper.unionIds(this.book_ids, input.addBooks);
+}
+`
+
+module.exports.resolver_remove_association = `
+author.prototype.remove_books = async function(input, benignErrorReporter){
+
+  //handle inverse association
+  let promises = [];
+  input.removeBooks.forEach( id => {
+    promises.push( models.book.remove_author_ids( id ,[ this.getIdValue()], benignErrorReporter ) );
+  });
+  await Promise.all(promises);
+
+  await author.remove_book_ids(this.getIdValue(), input.removeBooks, benignErrorReporter);
+  this.book_ids = helper.differenceIds(this.book_ids, input.removeBooks);
+}
+`
