@@ -2538,6 +2538,16 @@ describe('Foreign-key array', function(){
     testCompare(generated_resolver, data_test.resolver_remove_association);
   });
 
+  it('model add association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_model = await funks.generateJs('create-models', opts);
+    testCompare(generated_model, data_test.model_add_association);
+  });
 
+  it('model remove association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_model = await funks.generateJs('create-models', opts);
+    testCompare(generated_model, data_test.model_remove_association);
+  });
 
 });

@@ -94,3 +94,21 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
   this.book_ids = helper.differenceIds(this.book_ids, input.removeBooks);
 }
 `
+
+ module.exports.model_add_association = `
+ static async add_book_ids(id, book_ids){
+
+   let record = await super.findByPk(id);
+   let updated_ids = helper.unionIds(record.book_ids, book_ids);
+   await record.update( {book_ids: updated_ids} );
+
+ }
+ `
+
+ module.exports.model_remove_association = `
+ static async remove_book_ids(id, book_ids){
+   let record = await super.findByPk(id);
+   let updated_ids = helper.differenceIds(record.book_ids, book_ids);
+   await record.update( {book_ids: updated_ids} );
+ }
+ `

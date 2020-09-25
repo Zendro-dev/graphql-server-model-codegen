@@ -12,6 +12,22 @@
     }
   <%} -%>
 <%}-%>
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+  <% if (associationsArguments["to_many"][i].reverseAssociationType === 'to_many') { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_many"][i].targetKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+    */
+    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>) {
+
+      let record = await super.findByPk(id);
+      let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%> , <%-associationsArguments["to_many"][i].sourceKey-%>);
+      await record.update( {<%-associationsArguments["to_many"][i].sourceKey-%> :updated_ids} );
+    }
+  <%} -%>
+<%}-%>
 <%for(let i=0; i < associationsArguments["to_many_through_sql_cross_table"].length; i++){-%>
   /**
   * <%- op %>_<%-associationsArguments["to_many_through_sql_cross_table"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
