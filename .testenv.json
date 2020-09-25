@@ -1,0 +1,67 @@
+{
+  "cwd": "./test/integration-tests/env",
+  "docker": "../docker-compose-test.yml",
+  "services": [
+    {
+      "template": "gql",
+      "codegen": "gql-codegen",
+      "name": "gql_science_db_graphql_server1",
+      "port": 3000
+    },
+    {
+      "template": "gql",
+      "codegen": "gql-codegen",
+      "name": "gql_science_db_graphql_server2",
+      "port": 3030
+    }
+  ],
+  "models": [
+    {
+      "path": "../integration_test_models_instance1",
+      "target": [ "gql_science_db_graphql_server1" ]
+    },
+    {
+      "path": "../integration_test_models_instance2",
+      "target": [ "gql_science_db_graphql_server2" ]
+    }
+  ],
+  "patches": [
+    {
+      "opts": [ "-V", "never" ],
+      "src": "../patches/model_aminoacidsequence.patch",
+      "dest": "gql_science_db_graphql_server1/models/generic/aminoacidsequence.js"
+    },
+    {
+      "opts": [ "-V", "never" ],
+      "src": "../patches/individual_validate.patch",
+      "dest": "gql_science_db_graphql_server1/validations/individual.js"
+    },
+    {
+      "opts": [ "-V", "never" ],
+      "src": "../patches/accession_validate_instance1.patch",
+      "dest": "gql_science_db_graphql_server1/validations/accession.js"
+    }
+  ],
+  "templates": [
+    {
+      "name": "gql",
+      "branch": "master",
+      "url": "https://github.com/Zendro-dev/graphql-server.git"
+    },
+    {
+      "name": "gql-codegen",
+      "url": "../../../.git",
+      "source": true
+    },
+    {
+      "name": "spa",
+      "branch": "master",
+      "url": "https://github.com/Zendro-dev/single-page-app.git"
+    },
+    {
+      "name": "spa-codegen",
+      "branch": "master",
+      "url": "https://github.com/Zendro-dev/single-page-app-codegen.git"
+    }
+  ]
+}

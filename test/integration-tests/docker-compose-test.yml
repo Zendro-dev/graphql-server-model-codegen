@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.8"
 
 services:
   gql_postgres1:
@@ -18,7 +18,8 @@ services:
       context: .
       dockerfile: Dockerfile.graphql_server
     volumes:
-      - ./integration_test_run/servers/instance1:/usr/src/app
+      - ./env/node_modules:/usr/node_modules
+      - ./env/services/gql_science_db_graphql_server1:/usr/src/app
       - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
     ports:
       - "3000:3000"
@@ -84,7 +85,8 @@ services:
       dockerfile: Dockerfile.graphql_server
 
     volumes:
-      - ./integration_test_run/servers/instance2:/usr/src/app
+      - ./env/node_modules:/usr/node_modules
+      - ./env/services/gql_science_db_graphql_server2:/usr/src/app
       - ./data_models_storage_config2.json:/usr/src/app/config/data_models_storage_config.json
 
     ports:
