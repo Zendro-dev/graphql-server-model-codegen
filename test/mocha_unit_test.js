@@ -11,6 +11,7 @@ const models_generic = require('./unit_test_misc/data_models_generic');
 const requireFromString = require('require-from-string');
 const helpers = require('./unit_test_misc/helpers/reporting_helpers')
 //const components_code = require('./unit_test_misc/components_code');
+var colors = require('colors');
 
 const testCompare = function(actual, expected, errorMessage = 'Generated output differs from expected') {
   let act = actual.replace(/\s/g, '');
@@ -2500,9 +2501,30 @@ describe('bulkAssociation', function(){
 describe('Foreign-key array', function(){
   let data_test = require('./unit_test_misc/test-describe/foreign-key-array');
 
-  it('schema - book', async function(){
+  it('schema - author', async function(){
     let opts = funks.getOptions(models.author_foreignKeyArray);
     let generated_schema = await funks.generateJs('create-schemas', opts);
-    testCompare(generated_schema, data_test.schema);
+    testCompare(generated_schema, data_test.add_and_update);
+
   });
+
+  it(' resolver filter association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_filter_association);
+  });
+
+  it(' resolver connection association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_connection_association);
+  });
+
+  it(' resolver count association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_count_association);
+  });
+
+
 });

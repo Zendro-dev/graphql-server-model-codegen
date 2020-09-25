@@ -643,7 +643,7 @@ module.exports.author_foreignKeyArray = {
         "name": "String",
         "lastname": "String",
         "email": "String",
-        "book_ids": "[String]"
+        "book_ids": "[ String ]"
     },
 
     "associations":{

@@ -172,12 +172,12 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "type": "null" }
         ]
       }
-    // }else if(jsonSchemaProps[key] === "[String]"){
-    //
-    // } else if(jsonSchemaProps[key] === "[Int]"){
+    }else if(jsonSchemaProps[key] === "[String]"){
+
+    } else if(jsonSchemaProps[key] === "[Int]"){
 
     }else {
-      //throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
+      throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
     }
   }
 
@@ -207,7 +207,8 @@ attributesArrayString = function(attributes){
 
 
 /**
- * getOnlyTypeAttributes - Creates an object which keys are the attributes and the value its type
+ * getOnlyTypeAttributes - Creates an object which keys are the attributes and the value its type and also removes all spaces from both,
+ *                          the type and the attribute itself
  *
  * @param  {object} attributes Object containing the attributes to parse
  * @return {object}            Object simplified, all values are strings indicating the attribute's type.
@@ -217,10 +218,12 @@ getOnlyTypeAttributes = function(attributes){
 
     for(key in attributes){
 
+      let key_no_spaces = key.replace(/\s+/g, '');
+
       if(attributes[key] && typeof attributes[key]==='object' && attributes[key].constructor === Object ){
-        only_type[ key ] = attributes[key].type;
+        only_type[ key_no_spaces ] = attributes[key].type.replace(/\s+/g, '');
       }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
-        only_type[key] =  attributes[key];
+        only_type[key_no_spaces] =  attributes[key].replace(/\s+/g, '');
       }
 
     }
@@ -241,10 +244,12 @@ getOnlyDescriptionAttributes = function(attributes){
 
     for(key in attributes){
 
+      let key_no_spaces = key.replace(/\s+/g, '');
+
       if(attributes[key] && typeof attributes[key]==='object' && attributes[key].constructor === Object ){
-        only_description[ key ] = attributes[key].description || "";
+        only_description[ key_no_spaces ] = attributes[key].description || "";
       }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
-        only_description[key] = "";
+        only_description[key_no_spaces] = "";
       }
 
     }
