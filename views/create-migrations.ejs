@@ -17,7 +17,7 @@ module.exports = {
     return queryInterface.createTable('<%-namePl-%>', {
 
       <%- idAttribute -%>: {
-        type: Sequelize[ dict['<%= idAttributeType %>'] ],
+        type: Sequelize<%if(idAttributeType === 'String'){%>.STRING<%}else{%>[ dict['<%= idAttributeType %>'] ]<%}-%>,
         primaryKey: true<%if(defaultId){-%>,
         autoIncrement: true
         <%}-%>

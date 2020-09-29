@@ -81,7 +81,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>
         <%if (key !== 'associations'){-%>
-          <%if(associationsArguments[key][i].targetStorageType === 'sql'){-%>
+          <%if(associationsArguments[key][i].targetStorageType === 'sql' && !associationsArguments[key][i].assocThroughArray){-%>
             <%if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
               <%- name -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>

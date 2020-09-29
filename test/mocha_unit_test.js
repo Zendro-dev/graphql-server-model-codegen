@@ -1360,7 +1360,8 @@ describe('Parse associations', function() {
             "target_cp": "Individual",
             "target_cp_pl": "Individuals",
             "keyIn_lc": "transcript_count",
-            "holdsForeignKey": true
+            "holdsForeignKey": true,
+            "assocThroughArray": false
           }
         ],
         "to_many": [],
@@ -1417,7 +1418,8 @@ describe('Parse associations', function() {
           "target_cp": "Transcript_count",
           "target_cp_pl": "Transcript_counts",
           "keyIn_lc": "transcript_count",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "to_many_through_sql_cross_table": [],
@@ -1478,7 +1480,8 @@ describe('Parse associations', function() {
           "name": "assoc",
           "name_lc": "assoc",
           "name_cp": "Assoc",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "generic_to_one": [],
@@ -1547,7 +1550,8 @@ describe('Parse associations', function() {
           "target_cp": "Dog",
           "target_cp_pl": "Dogs",
           "keyIn_lc": "dog",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "to_many_through_sql_cross_table": [
@@ -1567,7 +1571,8 @@ describe('Parse associations', function() {
           "target_pl": "Books",
           "target_cp": "Book",
           "target_cp_pl": "Books",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "generic_to_one": [],
@@ -1637,7 +1642,8 @@ describe('Parse associations', function() {
           "target_cp": "Person",
           "target_cp_pl": "People",
           "keyIn_lc": "dog",
-          "holdsForeignKey": true
+          "holdsForeignKey": true,
+          "assocThroughArray": false
         },
         {
           "type": "to_one",
@@ -1656,7 +1662,8 @@ describe('Parse associations', function() {
           "target_cp": "Researcher",
           "target_cp_pl": "Researchers",
           "keyIn_lc": "dog",
-          "holdsForeignKey": true
+          "holdsForeignKey": true,
+          "assocThroughArray": false
         }
       ],
       "to_many": [],

@@ -172,11 +172,11 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "type": "null" }
         ]
       }
-    }else if(jsonSchemaProps[key] === "[String]"){
-
-    } else if(jsonSchemaProps[key] === "[Int]"){
-
-    }else {
+    }else if(jsonSchemaProps[key] === "[String]" || jsonSchemaProps[key] === "[Int]" ){
+      jsonSchemaProps[key] = {
+        "type": ["array", "null"]
+      }
+    } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
     }
   }
@@ -646,6 +646,7 @@ module.exports.parseAssociations = function(dataModel){
     Object.entries(associations).forEach(([name, association]) => {
       let type = association.type;
       let holdsTheForeignKey = false;
+      let assocThroughArray = false;
       let isStandardAssociation = (association.type !== 'generic_to_many' && association.type !== 'generic_to_one');
 
       //push association
@@ -663,6 +664,9 @@ module.exports.parseAssociations = function(dataModel){
       if(association.type === 'to_many') {
         //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
         associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+        if(association.reverseAssociationType === 'to_many'){
+          assocThroughArray = true;
+        }
       //}else if(associations_type["one"].includes(association.type))
       } else if(association.type === 'to_one') {
         associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
@@ -700,6 +704,7 @@ module.exports.parseAssociations = function(dataModel){
             assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
         }
         assoc["holdsForeignKey"] = holdsTheForeignKey;
+        assoc["assocThroughArray"] = assocThroughArray;
       } else {
         //generic
         assoc["name"] = name;
