@@ -52,16 +52,6 @@
       "name": "gql-codegen",
       "url": "../../../.git",
       "source": true
-    },
-    {
-      "name": "spa",
-      "branch": "master",
-      "url": "https://github.com/Zendro-dev/single-page-app.git"
-    },
-    {
-      "name": "spa-codegen",
-      "branch": "master",
-      "url": "https://github.com/Zendro-dev/single-page-app-codegen.git"
     }
   ]
 }
