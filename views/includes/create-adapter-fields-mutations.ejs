@@ -6,7 +6,7 @@
   * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
   * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
   <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
-  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services   
+  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
   <% } _%>
   */
 
@@ -29,14 +29,14 @@
                     <%-associationsArguments["to_one"][i].targetKey-%>
                   }
                 }`
-             
+
         try {
           // Send an HTTP request to the remote server
           let response = await axios.post(remoteZendroURL, {query:query});
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
-          } 
+          }
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
           // check if data was send
@@ -69,3 +69,25 @@
 
  <%}-%>
 <%} -%>
+
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+  <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+    */
+
+    <%if(storageType === 'sql-adapter'){-%>
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>) {
+
+        let record = await super.findByPk(id);
+        let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%> , <%-associationsArguments["to_many"][i].sourceKey-%>);
+        await record.update( {<%-associationsArguments["to_many"][i].sourceKey-%> :updated_ids} );
+      }
+    <%}-%>
+      <%#  /*** End of the the sql-adapter case */ -%>
+
+  <%} -%>
+<%}-%>

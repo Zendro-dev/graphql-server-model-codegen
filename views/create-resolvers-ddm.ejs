@@ -91,6 +91,15 @@ const associationArgsDef = {
    */
    <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
 
+     <%if(associations_temp[i].assocThroughArray){%>
+         let nsearch = helper.addSearchField({
+           "search": search,
+           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+           "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+           "valueType": "Array",
+           "operator": "in"
+         });
+     <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -98,7 +107,7 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
+      <%}-%>
       return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
   }
 
@@ -115,7 +124,15 @@ const associationArgsDef = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
    <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
-
+     <%if(associations_temp[i].assocThroughArray){%>
+         let nsearch = helper.addSearchField({
+           "search": search,
+           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+           "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+           "valueType": "Array",
+           "operator": "in"
+         });
+     <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -123,7 +140,7 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
+      <%}-%>
       return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
   }
 <%}-%>

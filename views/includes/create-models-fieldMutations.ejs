@@ -13,9 +13,9 @@
   <%} -%>
 <%}-%>
 <%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
-  <% if (associationsArguments["to_many"][i].reverseAssociationType === 'to_many') { -%>
+  <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
     /**
-    * <%- op %>_<%-associationsArguments["to_many"][i].targetKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+    * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
