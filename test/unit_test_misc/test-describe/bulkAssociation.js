@@ -150,7 +150,7 @@ static async bulkAssociateDogWithVeterinarianId(bulkAssociationInput, benignErro
         if (response && response.data && response.data.data) {
             return response.data.data.bulkAssociateDogWithVeterinarianId;
         } else {
-            throw new Error(\`Invalid response from remote cenz-server: \${remoteZendroURL}\`);
+            throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
         }
     } catch (error) {
         //handle caught errors
@@ -190,7 +190,7 @@ static async bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput, benignE
         if (response && response.data && response.data.data) {
             return response.data.data.bulkDisAssociateDogWithVeterinarianId;
         } else {
-            throw new Error(\`Invalid response from remote cenz-server: \${remoteZendroURL}\`);
+            throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
         }
     } catch (error) {
         //handle caught errors

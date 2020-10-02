@@ -17,7 +17,11 @@ describe(
     after(async function() {
         // Delete associations between individuals and transcript_counts
         // The only ones to exist at this point are from Test 19
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:"0"}) {id individual_id}}');
+=======
+        let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}},pagination:{limit:25}) {id individual_id}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         let tcResBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         let idValues = tcResBody.data.transcript_counts;
@@ -37,7 +41,7 @@ describe(
         }
 
         // Delete all individuals
-        res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+        res = itHelpers.request_graph_ql_post('{ individuals(pagination:{limit:25}) {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
         for(let i = 0; i < individuals.length; i++){
@@ -49,7 +53,7 @@ describe(
         expect(cnt).to.equal(0)
 
         // Delete all transcript_counts
-        res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+        res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination:{limit:25}) {id} }');
         let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
 
         for(let i = 0; i < transcript_counts.length; i++){
@@ -82,7 +86,11 @@ describe(
 
     // This test uses the entry created in the last test
     it('03. Individual update', function() {
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:"First"}){id}}');
+=======
+        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"First"}}, pagination:{limit:25}){id}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         let resBody = JSON.parse(res.body.toString('utf8'));
         let individual = resBody.data.individuals[0].id;
 
@@ -104,7 +112,7 @@ describe(
     it('04. Individual add one more and find both', function() {
 
         itHelpers.request_graph_ql_post('mutation { addIndividual(name: "Second") {id} }');
-        let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+        let res = itHelpers.request_graph_ql_post('{ individuals(pagination:{limit:25}) {id} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
@@ -115,7 +123,11 @@ describe(
 
     // This test reads the entry created in the last test
     it('05. Individual read one', function() {
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, operator:eq, value:"Second"}){id}}');
+=======
+        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name operator:eq value:{value:"Second"}},pagination:{limit:25}){id}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         let resBody = JSON.parse(res.body.toString('utf8'));
         let individual = resBody.data.individuals[0].id;
 
@@ -137,7 +149,11 @@ describe(
     // This test finds both entries created before - the first entry was modified in 03 to match the search
     it('06. Individual search with like', function() {
 
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, value:"%Second%", operator:like}) {name}}');
+=======
+        let res = itHelpers.request_graph_ql_post('{individuals(search:{field:name, value:{value:"%Second%"}, operator:like},pagination:{limit:25}) {name}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
@@ -177,7 +193,7 @@ describe(
     // After this test, the 2 entries created before are gone
     it('09. Individual delete all', async function() {
 
-        let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+        let res = itHelpers.request_graph_ql_post('{ individuals(pagination:{limit:25}) {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
         for(let i = 0; i < individuals.length; i++){
@@ -217,7 +233,7 @@ describe(
 
     // This test modifies the entry created in the last test
     it('12. TranscriptCount update', function() {
-        let res = itHelpers.request_graph_ql_post('{transcript_counts{id}}');
+        let res = itHelpers.request_graph_ql_post('{transcript_counts(pagination:{limit:25}){id}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         let tcount = resBody.data.transcript_counts[0].id;
 
@@ -243,7 +259,7 @@ describe(
                                                                        'variable: "RPKM", ' +
                                                                        'count: 321.23, ' +
                                                                        'tissue_or_condition: "Stem") {id} }');
-        let res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+        let res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination:{limit:25}) {id} }');
         let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
@@ -254,7 +270,11 @@ describe(
 
     // This test reads the entry created in the last test
     it('14. TranscriptCount read one', function() {
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post('{transcript_counts(search: {field:gene operator:eq value:"Gene C"}) {id}}');
+=======
+        let res = itHelpers.request_graph_ql_post('{transcript_counts(search: {field:gene operator:eq value:{value:"Gene C"}},pagination:{limit:25}) {id}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         let resBody = JSON.parse(res.body.toString('utf8'));
         let tcount = resBody.data.transcript_counts[0].id;
 
@@ -279,7 +299,11 @@ describe(
     // This test reads the 2 entries that were created before (in 11 and 13)
     it('15. TranscriptCount search with like', function() {
 
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:"%ene%",operator: like}) {gene}}`);
+=======
+        let res = itHelpers.request_graph_ql_post(`{transcript_counts(search: {field: gene,value:{value:"%ene%"},operator: like},pagination:{limit:25}) {gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         let resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
@@ -335,14 +359,19 @@ describe(
                               'count: 444.44, ' +
                               'tissue_or_condition: "Root"' +
                               ') { id } }');
-        res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+        res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination:{limit:25}) {id} }');
         resBody = JSON.parse(res.body.toString('utf8'));
 
         expect(res.statusCode).to.equal(200);
         expect(resBody.data.transcript_counts.length).equal(3);
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ transcript_counts(search: {field: gene, operator: eq, value: "Gene D"}) {gene}}`,
                             `{individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.', null);
+=======
+        res = await itHelpers.request_metaquery_post([`{ transcript_counts(search: {field: gene, operator: eq, value: {value: "Gene D"}}, pagination:{limit:10}) {gene}}`,
+                            `{individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], '.', null);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
 
@@ -363,7 +392,11 @@ describe(
         });
 
 
+<<<<<<< HEAD
         res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: "Zazan[aeiou]za"}) {name}}`);
+=======
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: regexp, value: {value: "Zazan[aeiou]za"}},pagination:{limit:25}) {name}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -375,7 +408,11 @@ describe(
             }
         });
 
+<<<<<<< HEAD
         res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: notRegexp, value: "^[A-Ya-z].*"}) {name}}`);
+=======
+        res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: notRegexp, value: {value: "^[A-Ya-z].*"}},pagination:{limit:25}) {name}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -387,8 +424,13 @@ describe(
             }
         });
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.', null);
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], '.', null);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -412,8 +454,13 @@ describe(
           errors: []
         });
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {names}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {names}}`], '.', null);
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {names}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {names}}`], '.', null);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
 
@@ -427,8 +474,12 @@ describe(
                     locations:[
                         {
                             line:1,
+<<<<<<< HEAD
                             // column:95
                             column: 86
+=======
+                            column:117
+>>>>>>> origin/issue142-refactor-readMany-merge-master
                         }
                     ]
                 },
@@ -437,16 +488,25 @@ describe(
                     locations:[
                         {
                             line:1,
+<<<<<<< HEAD
                             // column:95
                             column: 86
+=======
+                            column:116
+>>>>>>> origin/issue142-refactor-readMany-merge-master
                         }
                     ]
                 }
             ]
         });
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.data', null);
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], '.data', null);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -469,8 +529,13 @@ describe(
             ]
         );
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.~data', null);
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], '.~data', null);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -482,8 +547,13 @@ describe(
 
 
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, '$');
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], null, '$');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -507,8 +577,13 @@ describe(
           errors: []
         });
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, '$.data');
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], null, '$.data');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -531,8 +606,13 @@ describe(
             ]
         );
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
                                 `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, '$~data');
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+                                `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], null, '$~data');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -542,8 +622,13 @@ describe(
         });
 
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
         `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], '.', '$');
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+        `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:25}) {name}}`], '.', '$');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -552,8 +637,13 @@ describe(
             errors: [{message: "State either 'jq' or 'jsonPath' expressions, never both. - jq is . and jsonPath is $"}]
         });
 
+<<<<<<< HEAD
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}) {name}}`,
         `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}) {name}}`], null, null);
+=======
+        res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazanaza"}},pagination:{limit:10}) {name}}`,
+        `{secondPerson: individuals (search: {field: name, operator: eq, value: {value: "Zazaniza"}},pagination:{limit:5}) {name}}`], null, null);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -606,7 +696,11 @@ describe(
 
   // This test uses the entry created in the last test, and relies on this entry having got an association (and thus cannot be erased)
   it('20. TranscriptCount - Deleting a record with associations fails', function() {
+<<<<<<< HEAD
       let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:"0"}) {id individual_id}}');
+=======
+      let res = itHelpers.request_graph_ql_post('{transcript_counts(search:{field:individual_id operator:ne value:{value:"0"}},pagination:{limit:25}) {id individual_id}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
       let tcResBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       let idValue = tcResBody.data.transcript_counts[0].id;
@@ -632,8 +726,10 @@ describe(
   });
 
   // This test is independent of the other ones
-  it('21. Limit check', function() {
+  it('21. Limit check', function(){
+    // create 8 individuals to tests field Resolver Limits
     let individualName = "CountIndividual";
+<<<<<<< HEAD
     let individualAdding = `mutation { addIndividual (name: "${individualName}") { name }}`;
     let res = itHelpers.request_graph_ql_post(individualAdding);
     expect(res.statusCode).to.equal(200);
@@ -881,58 +977,89 @@ describe(
 
     //test 1: count = 30
     res = itHelpers.request_graph_ql_post(`{ countIndividuals(search:{field:name operator:eq value:"${individualName}"}) }`);
-    resBody = JSON.parse(res.body.toString('utf8'));
-    expect(res.statusCode).to.equal(200);
-    expect(resBody.data.countIndividuals).equal(30);
+=======
+    let individualAdding = `mutation { addIndividual (name: "${individualName}") { name id}}`;
+    let individualsCreated = [];
 
+    for(let i = 0; i < 8; i++){
+      res = itHelpers.request_graph_ql_post(individualAdding);
+      expect(res.statusCode).to.equal(200);
+      individualsCreated.push( JSON.parse(res.body.toString('utf8')).data.addIndividual.id)
+    }
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`{ individuals (search: {field: name, operator: eq, value: {value: "${individualName}"}},pagination:{limit:25}) {name}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
+    resBody = JSON.parse(res.body.toString('utf8'));
+
+<<<<<<< HEAD
     //test 2: error limit_record
     let err1_msg = "Max record limit of 25 exceeded in individuals";
     let err1_path = ["individuals"];
     res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:"${individualName}"}) {id}}`);
+=======
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     expect(res.statusCode).to.equal(200);
-    resBody = JSON.parse(res.body.toString('utf8'));
-    expect(resBody.errors[0].message).to.deep.equal(err1_msg);
-    expect(resBody.errors[0].path).to.deep.equal(err1_path);
+    expect(resBody.data.individuals.length).equal(8);
 
+<<<<<<< HEAD
     //test 3: pagination (limit-offset): with limit: 24
     res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:24}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
+=======
+    //  sql record in Limit
+    res = itHelpers.request_graph_ql_post(`{ individuals (pagination:{limit:25}) {name}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     expect(res.statusCode).to.equal(200);
-    resBody = JSON.parse(res.body.toString('utf8'));
-    expect(ids).to.include.members(resBody.data.individuals.map((item) => item.id));
-    expect(resBody.data.individuals.map((item) => item.id)).to.not.include(ids[ids.length-1]);
 
+<<<<<<< HEAD
     //test 4: pagination (limit-offset): with limit: 5 & offset: 25  (last 5)
     res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:5, offset:25}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
+=======
+    // sql record in Limit with field Resolver
+    res = itHelpers.request_graph_ql_post(`{ individuals (pagination:{limit:8}) {name transcript_countsConnection(pagination:{first:2}){edges{node{id}}}}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     expect(res.statusCode).to.equal(200);
-    resBody = JSON.parse(res.body.toString('utf8'));
-    expect(ids).to.include.members(resBody.data.individuals.map((item) => item.id));
-    expect(resBody.data.individuals.map((item) => item.id)).to.have.deep.members(ids.slice(-5));
 
+<<<<<<< HEAD
     //test 5: pagination (limit-offset): with limit: 50 & offset: 25 (last 5)
     let err2_msg = "Request of total individuals exceeds max limit of 25. Please use pagination.";
     let err2_path = ["individuals"];
     res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:50, offset:25}, search:{field:name operator:eq value:"${individualName}"}) {id}}`);
     expect(res.statusCode).to.equal(200);
+=======
+    //  sql record over Limit
+    res = itHelpers.request_graph_ql_post(`{ individuals (pagination:{limit:26}) {name}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
-    expect(resBody.errors[0].message).to.deep.equal(err2_msg);
-    expect(resBody.errors[0].path).to.deep.equal(err2_path);
+    expect(resBody.errors[0].message).equal("Max record limit of 25 exceeded in individuals");
 
+<<<<<<< HEAD
     //test 6: pagination (cursor-based): error limit_record - without pagination
     let err3_msg = "Max record limit of 25 exceeded in individualsConnection";
     let err3_path = ["individualsConnection"];
     res = itHelpers.request_graph_ql_post(`{individualsConnection(search:{field:name operator:eq value:"${individualName}"}) {edges{node{id}}}}`);
     expect(res.statusCode).to.equal(200);
+=======
+    //  sql record over Limit wth field Resolver
+    res = itHelpers.request_graph_ql_post(`{ individuals (pagination:{limit:8}) {name transcript_countsConnection(pagination:{first:3}){edges{node{id}}}}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
-    expect(resBody.errors[0].message).to.deep.equal(err3_msg);
-    expect(resBody.errors[0].path).to.deep.equal(err3_path);
+    expect(resBody.errors[0].message).equal("Max record limit of 25 exceeded in transcript_countsConnection");
+    expect(resBody.errors.length).equal(3);
 
+<<<<<<< HEAD
     //test 7: pagination (cursor-based): error limit_record - with pagination.first: 30
     res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:30}, search:{field:name operator:eq value:"${individualName}"}) {edges{node{id}}}}`);
+=======
+    // remove individuals
+    res = itHelpers.request_graph_ql_post(`{individuals(pagination:{limit:25}){id}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     expect(res.statusCode).to.equal(200);
-    resBody = JSON.parse(res.body.toString('utf8'));
-    expect(resBody.errors[0].message).to.deep.equal(err3_msg);
-    expect(resBody.errors[0].path).to.deep.equal(err3_path);
+    for(let i = 0; i < individualsCreated.length; i++){
+      res = itHelpers.request_graph_ql_post(`mutation { deleteIndividual (id: ${individualsCreated[i]}) }`);
+      expect(res.statusCode).to.equal(200);
+    }
 
+<<<<<<< HEAD
     //test 8: pagination (cursor-based): with first: 24
     res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:24}, search:{field:name operator:eq value:"${individualName}"})
     {
@@ -946,17 +1073,62 @@ describe(
         cursor
         node{id}
     }}}`);
+=======
+    // zendro-server over Limit on remote Server
+    res = itHelpers.request_graph_ql_post_instance2(`{accessions(pagination:{limit:26}){accession_id}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString('utf8'));
-    expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
-    expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.not.include(ids[ids.length-1]);
+    expect(resBody).to.deep.equal({
+      "errors": [
+        {
+          "message": "Remote server (http://server1:3000/graphql) did not respond with data.",
+          "locations": [
+            {
+              "line": 1,
+              "column": 2
+            }
+          ],
+          "path": [
+            "accessions"
+          ]
+        },
+        {
+          "message": "Max record limit of 25 exceeded in accessions",
+          "locations": [
+            {
+              "line": 2,
+              "column": 7
+            }
+          ],
+          "extensions": {
+            "receivedFrom": [
+              "http://server1:3000/graphql"
+            ]
+          },
+          "path": [
+            "accessions"
+          ]
+        }
+      ],
+      "data": {
+        "accessions": null
+      }
+    });
 
+<<<<<<< HEAD
     //test 9: pagination (cursor-based): with : first:5, after: cursor20
     let cursor20 = resBody.data.individualsConnection.edges.map((item) => item.cursor)[19];
     res = itHelpers.request_graph_ql_post(`{individualsConnection(pagination:{first:5, after:"${cursor20}"}, search:{field:name operator:eq value:"${individualName}"}) {edges{cursor node{id}}}}`);
     expect(res.statusCode).to.equal(200);
+=======
+    // DDM over Limit on local adapter
+    res = itHelpers.request_graph_ql_post(`{peopleConnection(pagination: {first: 26}) { edges { node { person_id } } } }`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody.errors[0].message).equal("Max record limit of 25 exceeded in peopleConnection");
 
+<<<<<<< HEAD
     expect(ids).to.include.members(resBody.data.individualsConnection.edges.map((item) => item.node.id));
     expect(resBody.data.individualsConnection.edges.map((item) => item.node.id)).to.have.deep.members(ids.slice(-10, 25));
 
@@ -990,23 +1162,67 @@ describe(
     }
 
     res = itHelpers.request_graph_ql_post(`{individuals(search:{field:name operator:eq value:"${individualName}"}) {id}}`);
+=======
+    // DDM over Limit on remote zendro-adapter
+    // add a local person to make sure data + errors get delivered
+    res = itHelpers.request_graph_ql_post(`mutation{ addPerson( person_id:"instance2_p0001"){person_id} }`)
     expect(res.statusCode).to.equal(200);
-    individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
-    expect(individuals).to.deep.equal([]);
-
-  }).timeout(10000);
+    res = itHelpers.request_graph_ql_post_instance2(`{peopleConnection(pagination: {first: 26}) { edges { node { person_id } } } }`);
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      "errors": [
+        {
+          "message": "Max record limit of 25 exceeded in peopleConnection",
+          "locations": [
+            {
+              "line": 2,
+              "column": 7
+            }
+          ],
+          "extensions": {
+            "receivedFrom": [
+              "http://server1:3000/graphql"
+            ]
+          },
+          "path": [
+            "peopleConnection"
+          ]
+        },
+        {
+          "message": "Remote zendro-server (http://server1:3000/graphql) did not respond with data.",
+          "locations": ""
+        }
+      ],
+      "data": {
+        "peopleConnection": {
+          "edges": [
+            {
+              "node": {
+                "person_id": "instance2_p0001"
+              }
+            }
+          ]
+        }
+      }
+    })
+    // remove the person
+    res = itHelpers.request_graph_ql_post(`mutation{ deletePerson( person_id:"instance2_p0001")}`)
+>>>>>>> origin/issue142-refactor-readMany-merge-master
+    expect(res.statusCode).to.equal(200);
+  })
 
   //one_to_one associations where foreignKey is in the target model
   it('22. one_to_one associations setup', function() {
     //setup
     itHelpers.request_graph_ql_post('mutation { addCountry(country_id: "GER", name: "Germany") {country_id} }');
-    let res = itHelpers.request_graph_ql_post('{ countries {country_id} }');
+    let res = itHelpers.request_graph_ql_post('{ countries(pagination:{limit:25}) {country_id} }');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.countries.length).equal(1);
 
     itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_B", name: "Berlin", addUnique_country:"GER") {capital_id} }');
-    res = itHelpers.request_graph_ql_post('{ capitals {capital_id} }');
+    res = itHelpers.request_graph_ql_post('{ capitals(pagination:{limit:25}) {capital_id} }');
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.capitals.length).equal(1);
@@ -1014,7 +1230,7 @@ describe(
 
   it('23. one_to_one associations success', function() {
     //test success
-    res = itHelpers.request_graph_ql_post('{ countries {country_id unique_capital{ capital_id}} }');
+    res = itHelpers.request_graph_ql_post('{ countries(pagination:{limit:10}) {country_id unique_capital{ capital_id}} }');
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal(
@@ -1025,13 +1241,13 @@ describe(
   it('24. one_to_one associations error', function() {
     //test error
     itHelpers.request_graph_ql_post('mutation { addCapital(capital_id:"GER_BN", name: "Bonn", addUnique_country:"GER") {capital_id} }');
-    res = itHelpers.request_graph_ql_post('{ countries {country_id unique_capital{ capital_id}} }');
+    res = itHelpers.request_graph_ql_post('{ countries(pagination:{limit:10}) {country_id unique_capital{ capital_id}} }');
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors:[
         {
-          message:'Not unique "to_one" association Error: Found 2 capitals matching country with country_id GER. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the country model. Returning first capital. Found capitals capital_ids: [GER_B,GER_BN]',
+          message:'Not unique \"to_one\" association Error: Found > 1 capitals matching country with country_id GER. Consider making this a \"to_many\" association, or using unique constraints, or moving the foreign key into the country model. Returning first capital.',
           locations: ""
         }
       ],
@@ -1077,19 +1293,31 @@ describe(
 
   it('27. to_many_through_sql_cross_table simple', function(){
     //Filter
-    res = itHelpers.request_graph_ql_post('{countries{name riversFilter{name} countFilteredRivers} countCountries}')
+    res = itHelpers.request_graph_ql_post('{countries(pagination:{limit:5}){name riversFilter(pagination:{limit:5}){name} countFilteredRivers} countCountries}')
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.countries.length).equal(3);
     //Connection
-    res = itHelpers.request_graph_ql_post('{countries{name riversConnection{edges{node{name}}} countFilteredRivers} countCountries}')
+    res = itHelpers.request_graph_ql_post('{countries(pagination:{limit:5}){name riversConnection(pagination:{first:5}){edges{node{name}}} countFilteredRivers} countCountries}')
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.countries.length).equal(3);
   });
 
+<<<<<<< HEAD
   it('28. to_many_through_sql_cross_table Filter', function(){
     res = itHelpers.request_graph_ql_post('{ countries{ name riversFilter(search:{field:length,value:"2000",valueType:Int, operator:gt}){ name }}}')
+=======
+  it('28. to_many_through_sql_cross_table countFiltered', function(){
+    res = itHelpers.request_graph_ql_post('{readOneCountry(country_id: "NED"){country_id countFilteredRivers}}');
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.readOneCountry.countFilteredRivers).equal(1);
+  });
+
+  it('29. to_many_through_sql_cross_table Filter', function(){
+    res = itHelpers.request_graph_ql_post('{ countries(pagination:{limit:5}){ name riversFilter(search:{field:length,value:{value:"2000",type:"Int"}, operator:gt},pagination:{limit:5}){ name }}}')
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
 
@@ -1097,6 +1325,14 @@ describe(
     {
       "data": {
         "countries": [
+          {
+            "name": "Austria",
+            "riversFilter": [
+              {
+                "name": "donau"
+              }
+            ]
+          },
           {
             "name": "Germany",
             "riversFilter": [
@@ -1108,21 +1344,13 @@ describe(
           {
             "name": "Netherlands",
             "riversFilter": []
-          },
-          {
-            "name": "Austria",
-            "riversFilter": [
-              {
-                "name": "donau"
-              }
-            ]
           }
         ]
       }
     })
   });
 
-  it('29. to_many_through_sql_cross_table Cleanup', function(){
+  it('30. to_many_through_sql_cross_table Cleanup', function(){
     res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_1_rhine")}');
     expect(res.statusCode).to.equal(200);
     res = itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"river_2_donau")}');
@@ -1135,8 +1363,8 @@ describe(
     expect(res.statusCode).to.equal(200);
   });
 
-  it('30. Cursor based pagination', function() {
-    let res = itHelpers.request_graph_ql_post('{transcript_countsConnection{edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
+  it('31. Cursor based pagination', function() {
+    let res = itHelpers.request_graph_ql_post('{transcript_countsConnection(pagination:{first:25}){edges{cursor node{id gene}} pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     let edges = resBody.data.transcript_countsConnection.edges;
 
@@ -1184,7 +1412,7 @@ describe(
   }});
   })
 
-  it('31. Error output for wrong parameter', function() {
+  it('32. Error output for wrong parameter', function() {
     let res = itHelpers.request_graph_ql_post('{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(400);
@@ -1292,7 +1520,7 @@ describe(
     });
   });
 
-  it('32. Complementary search operators', async () => {
+  it('33. Complementary search operators', async () => {
     //items
     let ita = null;
     let itb = null;
@@ -1331,7 +1559,11 @@ describe(
     /**
      * op: in ['ita.id', 'itb.id']
      */
+<<<<<<< HEAD
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, valueType: Array, value: "${ita.id},${itb.id}"}) {id, gene}}`);
+=======
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: in, value: {type: "Array", value: "${ita.id},${itb.id}"}}, pagination:{limit:25}) {id, gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1343,7 +1575,11 @@ describe(
     /**
      * op: notIn ('ita.id', 'itb.id')
      */
+<<<<<<< HEAD
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, valueType: Array, value: "${ita.id},${itb.id}"}) {id, gene}}`);
+=======
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notIn, value: {type: "Array", value: "${ita.id},${itb.id}"}},pagination:{limit:25}) {id, gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1355,7 +1591,11 @@ describe(
     /**
      * op: like '%ene-28%'
      */
+<<<<<<< HEAD
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: "%ene-28%"}) {id, gene}}`);
+=======
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: like, value: {value: "%ene-28%"}},pagination:{limit:25}) {id, gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1368,7 +1608,11 @@ describe(
     /**
      * op: notLike '%ene-28%'
      */
+<<<<<<< HEAD
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: "%ene-28%"}) {id, gene}}`);
+=======
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: gene, operator: notLike, value: {value: "%ene-28%"}},pagination:{limit:25}) {id, gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1380,7 +1624,11 @@ describe(
     /**
      * op: between ['ita.id', 'itc.id']
      */
+<<<<<<< HEAD
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, valueType:Array, value:"${ita.id},${itc.id}" }) {id, gene}}`);
+=======
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: between, value: {type:"Array", value:"${ita.id},${itc.id}" }},pagination:{limit:25}) {id, gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1393,7 +1641,11 @@ describe(
     /**
      * op: notBetween ['ita.id', 'itc.id']
      */
+<<<<<<< HEAD
     res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, valueType:Array, value:"${ita.id},${itc.id}" }) {id, gene}}`);
+=======
+    res = await itHelpers.request_graph_ql_post(`query { transcript_counts(search: {field: id, operator: notBetween, value: {type:"Array", value:"${ita.id},${itc.id}" }},pagination:{limit:25}) {id, gene}}`);
+>>>>>>> origin/issue142-refactor-readMany-merge-master
     resBody = JSON.parse(res.body.toString('utf8'));
 
     expect(res.statusCode).to.equal(200);
@@ -1409,7 +1661,7 @@ describe(
     'Web service model',
     function() {
         after(async function() {
-            let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+            let res = itHelpers.request_graph_ql_post('{ individuals(pagination:{limit:25}) {id} }');
             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
             for(let i = 0; i < individuals.length; i++){
@@ -1420,7 +1672,7 @@ describe(
             let cnt = await itHelpers.count_all_records('countIndividuals');
             expect(cnt).to.equal(0);
 
-            res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+            res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination:{limit:25}) {id} }');
             let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
 
             for(let i = 0; i < transcript_counts.length; i++){
@@ -1502,7 +1754,7 @@ describe(
 describe( 'Batch Upload', function() {
     // For now, only individuals are present in this section
     after(async function() {
-        let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+        let res = itHelpers.request_graph_ql_post('{ individuals(pagination:{limit:25}) {id} }');
         let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
         for(let i = 0; i < individuals.length; i++){
@@ -1513,7 +1765,7 @@ describe( 'Batch Upload', function() {
         let cnt = await itHelpers.count_all_records('countIndividuals');
         expect(cnt).to.equal(0);
 
-        res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+        res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination:{limit:25}) {id} }');
         let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
 
         for(let i = 0; i < transcript_counts.length; i++){
@@ -1549,7 +1801,7 @@ describe(
     'Generic async validation tests',
     function() {
         after(async function() {
-            let res = itHelpers.request_graph_ql_post('{ individuals {id} }');
+            let res = itHelpers.request_graph_ql_post('{ individuals(pagination:{limit:25}) {id} }');
             let individuals = JSON.parse(res.body.toString('utf8')).data.individuals;
 
             for(let i = 0; i < individuals.length; i++){
@@ -1560,7 +1812,7 @@ describe(
             let cnt = await itHelpers.count_all_records('countIndividuals');
             expect(cnt).to.equal(0);
 
-            res = itHelpers.request_graph_ql_post('{ transcript_counts {id} }');
+            res = itHelpers.request_graph_ql_post('{ transcript_counts(pagination:{limit:25}) {id} }');
             let transcript_counts = JSON.parse(res.body.toString('utf8')).data.transcript_counts;
 
             for(let i = 0; i < transcript_counts.length; i++){
@@ -1662,7 +1914,7 @@ describe(
         function() {
 
             after(async function() {
-                let res = itHelpers.request_graph_ql_post('{ sequencingExperiments {id} }');
+                let res = itHelpers.request_graph_ql_post('{ sequencingExperiments(pagination:{limit:25}) {id} }');
                 let sequencingExperiments = JSON.parse(res.body.toString('utf8')).data.sequencingExperiments;
 
                 for(let i = 0; i < sequencingExperiments.length; i++){
@@ -1747,29 +1999,28 @@ describe(
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
           "errors": [
-              {
-                  "message": "LIMIT must not be negative",
-                  "locations": "",
-                  "extensions": {
-                      "receivedFrom": ["http://server2:3030/graphql"]
-                  }
-              },
-              {
-                "message": "LIMIT must not be negative",
-                "locations": ""
-              }
+            {
+              "message": "LIMIT must not be negative",
+              "locations": [
+                {
+                  "line": 1,
+                  "column": 2
+                }
+              ],
+              "path": [
+                "dogsConnection"
+              ]
+            }
           ],
           "data": {
-              "dogsConnection": {
-                  "edges": []
-              }
+            "dogsConnection": null
           }
       });
 
     });
 
     it('02. Update the person to associate with a dog', function() {
-        let res = itHelpers.request_graph_ql_post('mutation {updatePerson(person_id:"instance1-01" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges {node {dog_id name}}}}}');
+        let res = itHelpers.request_graph_ql_post('mutation {updatePerson(person_id:"instance1-01" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges {node {dog_id name}}}}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -1813,7 +2064,7 @@ describe(
     });
 
     it('04. Update the person to remove the second dog', function() {
-        let res = itHelpers.request_graph_ql_post('mutation{updatePerson(person_id:"instance1-01" removeDogs:"instance2-02") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
+        let res = itHelpers.request_graph_ql_post('mutation{updatePerson(person_id:"instance1-01" removeDogs:"instance2-02") {person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -1867,7 +2118,7 @@ describe(
               }
             }
           });
-        res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id name countFilteredDogs}}}}');
+        res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first:25}){edges{node{person_id name countFilteredDogs}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -1918,7 +2169,7 @@ describe(
               }
             }
           });
-        res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-03" name:"Emily" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}');
+        res = itHelpers.request_graph_ql_post('mutation{addPerson(person_id:"instance1-03" name:"Emily" addDogs:"instance2-01") {person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -1941,7 +2192,11 @@ describe(
             }
           });
         // Make sure that no person intended to be stored on server 1 was stored elsewhere
+<<<<<<< HEAD
         res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:"instance1%" excludeAdapterNames:"person_instance1"}) {edges{node{person_id}}}}');
+=======
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"} excludeAdapterNames:"person_instance1"},pagination:{first:5}) {edges{node{person_id}}}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -1952,7 +2207,11 @@ describe(
             }
           });
         // Get infos about people on server 1
+<<<<<<< HEAD
         res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:"instance1%"}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+=======
+        res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}},pagination:{first:5}) {edges{node{person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}}}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -2001,7 +2260,11 @@ describe(
             }
           });
           // The same search, but order by name descending
+<<<<<<< HEAD
           res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:"instance1%"} order:{field:name order:DESC}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+=======
+          res = itHelpers.request_graph_ql_post('{peopleConnection(search:{field:person_id operator:like value:{value:"instance1%"}} order:{field:name order:DESC}, pagination:{first:5}) {edges{node{person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}}}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
           resBody = JSON.parse(res.body.toString('utf8'));
           expect(res.statusCode).to.equal(200);
           expect(resBody).to.deep.equal({
@@ -2050,7 +2313,7 @@ describe(
             }
           });
         // Get the first 3 people by name
-        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{first:3}) {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}}}}');
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{first:3}) {edges{node{person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -2137,7 +2400,7 @@ describe(
         //parseOrderCursor Tests (after)
         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
           first:2, after:"eyJuYW1lIjoiQmVydGhhIiwicGVyc29uX2lkIjoiaW5zdGFuY2UyLTAxIn0="}) \
-          {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
+          {edges{node{person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}cursor} pageInfo{startCursor endCursor hasNextPage hasPreviousPage}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal(
@@ -2181,7 +2444,7 @@ describe(
         //parseOrderCursor Tests (before + includeCursor)
         res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC} pagination:{\
           last:2, before:"eyJuYW1lIjoiRG9yYSIsInBlcnNvbl9pZCI6Imluc3RhbmNlMi0wMiJ9", includeCursor:true})\
-          {edges{node{person_id name countFilteredDogs dogsConnection{edges{node{dog_id name}}}}cursor}\
+          {edges{node{person_id name countFilteredDogs dogsConnection(pagination:{first:5}){edges{node{dog_id name}}}}cursor}\
           pageInfo{startCursor endCursor hasPreviousPage hasNextPage}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2244,7 +2507,7 @@ describe(
             }
           });
         // Make sure that no dog is left
-        res = itHelpers.request_graph_ql_post('{dogsConnection{edges{node{dog_id}}}}');
+        res = itHelpers.request_graph_ql_post('{dogsConnection(pagination:{first:5}){edges{node{dog_id}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -2273,7 +2536,7 @@ describe(
             }
           });
         // Make sure that only Anthony, Bertha and Charlie are left
-        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC}){edges{node{person_id name}}}}');
+        res = itHelpers.request_graph_ql_post('{peopleConnection(order:{field:name order:ASC},pagination:{first:5}){edges{node{person_id name}}}}');
         resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -2304,7 +2567,7 @@ describe(
           });
     })
     it('09. Delete all remaining people', async function() {
-        let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
+        let res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first:5}){edges{node{person_id}}}}');
         let people = JSON.parse(res.body.toString('utf8')).data.peopleConnection.edges;
 
         for(let i = 0; i < people.length; i++){
@@ -2320,13 +2583,13 @@ describe(
     it('10. one_to_one ddm associations setup', function() {
       //setup
       itHelpers.request_graph_ql_post('mutation { addPerson(person_id: "instance1-person01") {person_id} }');
-      let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id}}}}');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first:5}){edges{node{person_id}}}}');
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody.data.peopleConnection.edges.length).equal(1);
 
       itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot01", addUnique_person:"instance1-person01") {parrot_id} }');
-      res = itHelpers.request_graph_ql_post('{parrotsConnection{edges{node{parrot_id}}}}');
+      res = itHelpers.request_graph_ql_post('{parrotsConnection(pagination:{first:5}){edges{node{parrot_id}}}}');
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody.data.parrotsConnection.edges.length).equal(1);
@@ -2334,7 +2597,7 @@ describe(
 
     it('11. one_to_one ddm associations success', function() {
       //test success
-      let res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id unique_parrot{parrot_id}}}}}');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first:5}){edges{node{person_id unique_parrot{parrot_id}}}}}');
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal(
@@ -2360,14 +2623,14 @@ describe(
     it('12. one_to_one ddm associations error', function() {
       //test error
       itHelpers.request_graph_ql_post_instance2('mutation { addParrot(parrot_id:"instance2-parrot02", addUnique_person:"instance1-person01") {parrot_id} }');
-      let res = itHelpers.request_graph_ql_post('{peopleConnection {edges {node {person_id unique_parrot {parrot_id}}}}}');
+      let res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first:5}) {edges {node {person_id unique_parrot {parrot_id}}}}}');
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal(
         {
           errors:[
             {
-              message:'Not unique "to_one" association Error: Found 2 parrots matching person with person_id instance1-person01. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the person model. Returning first parrot. Found parrots parrot_ids: [instance2-parrot01,instance2-parrot02]',
+              message:'Not unique \"to_one\" association Error: Found > 1 parrots matching person with person_id instance1-person01. Consider making this a \"to_many\" association, or using unique constraints, or moving the foreign key into the person model. Returning first parrot.',
               locations: ""
             }
           ],
@@ -2467,7 +2730,7 @@ describe(
         itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "b-instance1" collectors_name:"bb"){ accession_id}}');
         itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "c-instance1" collectors_name:"cc"){ accession_id}}');
         itHelpers.request_graph_ql_post_instance2('mutation {addAccession(accession_id: "d-instance1" collectors_name:"dd"){ accession_id}}');
-        let res = itHelpers.request_graph_ql_post_instance2('query {accessionsConnection{ edges{node{accession_id}}}}');
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessionsConnection(pagination:{first:5}){ edges{node{accession_id}}}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
         expect(resBody).to.deep.equal({
@@ -2504,7 +2767,7 @@ describe(
       /**
        * This integration test assumes that data from previous test (Connection accession) is still stored on the DB.
       */
-        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(order: {field: collectors_name order: DESC}){collectors_name}}');
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(order: {field: collectors_name order: DESC},pagination:{limit:5}){collectors_name}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2534,7 +2797,11 @@ describe(
        * This integration test assumes that data from previous test (Connection accession) is still stored on the DB.
        * This test will do a OR search.
       */
+<<<<<<< HEAD
         let res = itHelpers.request_graph_ql_post_instance2('query {accessions(search:{operator: or search:[{field:collectors_name value:"%c%" operator:like },{field:collectors_name value:"%d%" operator:like} ]}){collectors_name}}');
+=======
+        let res = itHelpers.request_graph_ql_post_instance2('query {accessions(search:{operator: or search:[{field:collectors_name value:{value:"%c%"} operator:like },{field:collectors_name value:{value:"%d%"} operator:like} ]},pagination:{limit:5}){collectors_name}}');
+>>>>>>> origin/issue142-refactor-readMany-merge-master
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2702,7 +2969,7 @@ describe(
        itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_2" ){measurement_id}}');
        itHelpers.request_graph_ql_post_instance2('mutation{addMeasurement(measurement_id:"measuremente_test_3" ){measurement_id}}');
 
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"zendro-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAccession(accession_id:"zendro-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC},pagination:{limit:5}){measurement_id}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2730,7 +2997,7 @@ describe(
        * This test assumes that association from previous test (13.Create with association(to-many) accession-measurement) still is stored in the DB.
        * */
 
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(pagination:{limit:5}){measurement_id}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2752,7 +3019,7 @@ describe(
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
 
-      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC}){measurement_id}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" addMeasurements:["measuremente_test_1","measuremente_test_3"]){ measurementsFilter(order:{field: measurement_id order: ASC},pagination:{limit:5}){measurement_id}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2781,7 +3048,7 @@ describe(
        * This test assumes that association from previous tests (13.Create with association(to-many and 14.Remove association(to-many) accession-measurement) accession-measurement) still is stored in the DB.
        * */
 
-      let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id:"zendro-3-accession"){ measurementsConnection(order:{field: measurement_id order: ASC}){ edges{node{measurement_id}}}}}');
+      let res = itHelpers.request_graph_ql_post_instance2('query {readOneAccession(accession_id:"zendro-3-accession"){ measurementsConnection(order:{field: measurement_id order: ASC}, pagination:{first:5}){ edges{node{measurement_id}}}}}');
 
         let resBody = JSON.parse(res.body.toString('utf8'));
         expect(res.statusCode).to.equal(200);
@@ -2812,7 +3079,7 @@ describe(
         });
 
         //remove associations for cleaning
-         itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter{measurement_id}}}');
+         itHelpers.request_graph_ql_post_instance2('mutation{updateAccession(accession_id:"zendro-3-accession" removeMeasurements:["measuremente_test_1","measuremente_test_2","measuremente_test_3"]){ measurementsFilter(pagination:{limit:5}){measurement_id}}}');
     });
 
 
@@ -2833,7 +3100,7 @@ describe(
     });
 
     it('19. Delete all remaining accessions', async function() {
-        let res = itHelpers.request_graph_ql_post_instance2('{accessions{accession_id}}');
+        let res = itHelpers.request_graph_ql_post_instance2('{accessions(pagination:{limit:25}){accession_id}}');
         let accessions = JSON.parse(res.body.toString('utf8')).data.accessions;
 
         for(let i = 0; i < accessions.length; i++){
@@ -2847,7 +3114,7 @@ describe(
 
 
     it('20. Delete all remaining measurements', async function() {
-        let res = itHelpers.request_graph_ql_post_instance2('{measurements{measurement_id}}');
+        let res = itHelpers.request_graph_ql_post_instance2('{measurements(pagination:{limit:25}){measurement_id}}');
         let measurements = JSON.parse(res.body.toString('utf8')).data.measurements;
 
         for(let i = 0; i < measurements.length; i++){
@@ -2860,7 +3127,7 @@ describe(
     });
 
     it('21. Delete all remaining locations', async function() {
-        let res = itHelpers.request_graph_ql_post_instance2('{locations{locationId}}');
+        let res = itHelpers.request_graph_ql_post_instance2('{locations(pagination:{limit:25}){locationId}}');
         let locations = JSON.parse(res.body.toString('utf8')).data.locations;
 
         for(let i = 0; i < locations.length; i++){
@@ -2905,7 +3172,7 @@ describe(
       expect(res.statusCode).to.equal(200);
     });
 
-    //clean up records
+    // clean up records
     after(async function() {
       itHelpers.request_graph_ql_post('mutation{deleteMeasurement(measurement_id:"m1")}');
       itHelpers.request_graph_ql_post('mutation{deleteMeasurement(measurement_id:"m2")}');
@@ -2927,7 +3194,7 @@ describe(
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody.data.bulkAssociateMeasurementWithAccessionId).equal("Records successfully updated!");
       //check if records have been correctly updated
-      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      res = itHelpers.request_graph_ql_post('{accessions(pagination:{limit: 10}){accession_id measurementsFilter(pagination:{limit:5}){measurement_id}}}')
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[{"measurement_id":"m1"},{"measurement_id":"m2"}]},{"accession_id":"a2","measurementsFilter":[{"measurement_id":"m3"},{"measurement_id":"m4"}]}]}
@@ -2940,7 +3207,7 @@ describe(
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody.data.bulkDisAssociateMeasurementWithAccessionId).equal("Records successfully updated!");
       //check if records have been correctly updated
-      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      res = itHelpers.request_graph_ql_post('{accessions(pagination:{limit: 10}){accession_id measurementsFilter(pagination:{limit:5}){measurement_id}}}')
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[]},{"accession_id":"a2","measurementsFilter":[]}]}
@@ -2953,7 +3220,7 @@ describe(
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody.data.bulkAssociateMeasurementWithAccessionId).equal("Records successfully updated!");
       //check if records have been correctly updated
-      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      res = itHelpers.request_graph_ql_post('{accessions(pagination:{limit: 10}){accession_id measurementsFilter(pagination:{limit:5}){measurement_id}}}')
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[{"measurement_id":"m1"},{"measurement_id":"m2"}]},{"accession_id":"a2","measurementsFilter":[{"measurement_id":"m3"},{"measurement_id":"m4"}]}]}
@@ -2966,7 +3233,7 @@ describe(
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody.data.bulkDisAssociateMeasurementWithAccessionId).equal("Records successfully updated!");
       //check if records have been correctly updated
-      res = itHelpers.request_graph_ql_post('{accessions{accession_id measurementsFilter{measurement_id}}}')
+      res = itHelpers.request_graph_ql_post('{accessions(pagination:{limit: 10}){accession_id measurementsFilter(pagination:{limit:5}){measurement_id}}}')
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data":{"accessions":[{"accession_id":"a1","measurementsFilter":[]},{"accession_id":"a2","measurementsFilter":[]}]}
@@ -2979,7 +3246,7 @@ describe(
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody.data.bulkAssociateDogWithPerson_id).equal("Records successfully updated!");
       //check if records have been correctly updated
-      res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id dogsConnection{edges{node{dog_id}}}}}}}');
+      res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first: 10}){edges{node{person_id dogsConnection(pagination:{first:5}){edges{node{dog_id}}}}}}}');
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-p01","dogsConnection":{"edges":[{"node":{"dog_id":"instance1-d01"}},{"node":{"dog_id":"instance2-d01"}}]}}},{"node":{"person_id":"instance2-p01","dogsConnection":{"edges":[{"node":{"dog_id":"instance1-d02"}},{"node":{"dog_id":"instance2-d02"}}]}}}]}}
@@ -2992,7 +3259,7 @@ describe(
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody.data.bulkDisAssociateDogWithPerson_id).equal("Records successfully updated!");
       //check if records have been correctly updated
-      res = itHelpers.request_graph_ql_post('{peopleConnection{edges{node{person_id dogsConnection{edges{node{dog_id}}}}}}}');
+      res = itHelpers.request_graph_ql_post('{peopleConnection(pagination:{first: 10}){edges{node{person_id dogsConnection(pagination:{first:5}){edges{node{dog_id}}}}}}}');
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data":{"peopleConnection":{"edges":[{"node":{"person_id":"instance1-p01","dogsConnection":{"edges":[]}}},{"node":{"person_id":"instance2-p01","dogsConnection":{"edges":[]}}}]}}
@@ -3000,4 +3267,60 @@ describe(
     });
 
 
+  });
+
+  describe('generic readAllCursor', function() {
+    
+    before(async function(){
+      // add 10 cats
+      let res = itHelpers.request_graph_ql_post('mutation{addCat(name:"cat1" ){name}}');
+      expect(res.statusCode).to.equal(200);
+      for (let i = 2; i < 10; i++) {  
+        res = itHelpers.request_graph_ql_post(`mutation{addCat(name:"cat${i}" ){name}}`);
+        expect(res.statusCode).to.equal(200);
+      }
+    });
+
+    after(async function(){
+      // delete all cats
+      let res = itHelpers.request_graph_ql_post('{cats(pagination:{limit: 15}){id}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      let catIds = resBody.data.cats;
+      for (let i = 0; i < catIds.length; i++) {  
+        res = itHelpers.request_graph_ql_post(`mutation{deleteCat(id:${catIds[i].id})}`);
+        expect(res.statusCode).to.equal(200);
+      }
+    });
+
+    it('01. generic readAllCursor', function() {
+      let res = itHelpers.request_graph_ql_post('{catsConnection(pagination: {last: 4, before: "eyJuYW1lIjoiY2F0NSIsInJhY2UiOm51bGwsImFnZSI6bnVsbCwiaWQiOjV9"}, search: {field: id, value: {type: "Int", value: "7"}, operator: lte},order:{field:name,order:DESC}) { edges { node { id name } cursor} pageInfo { hasNextPage hasPreviousPage}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {
+          "catsConnection": {
+            "edges": [
+              {
+                "node": {
+                  "id": "7",
+                  "name": "cat7"
+                },
+                "cursor": "eyJuYW1lIjoiY2F0NyIsInJhY2UiOm51bGwsImFnZSI6bnVsbCwiaWQiOjd9"
+              },
+              {
+                "node": {
+                  "id": "6",
+                  "name": "cat6"
+                },
+                "cursor": "eyJuYW1lIjoiY2F0NiIsInJhY2UiOm51bGwsImFnZSI6bnVsbCwiaWQiOjZ9"
+              }
+            ],
+            "pageInfo": {
+              "hasNextPage": true,
+              "hasPreviousPage": false
+            }
+          }
+        }
+      })
+    });
   });

@@ -398,7 +398,7 @@ let query = \`
       if(response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
       }
     } catch(error) {
       //handle caught errors
@@ -442,7 +442,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       if(response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
       }
     } catch(error) {
       //handle caught errors
@@ -547,7 +547,7 @@ static async addOne(input, benignErrorReporter) {
       if (response && response.data && response.data.data) {
         return response.data.data.addAccession;
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
       }
     } catch(error) {
       //handle caught errors
@@ -589,7 +589,7 @@ static async updateOne(input, benignErrorReporter) {
       if (response && response.data && response.data.data) {
         return response.data.data.updateAccession;
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
       }
     } catch(error) {
       //handle caught errors
