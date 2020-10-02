@@ -29,7 +29,56 @@
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
           benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
-        } 
+        }
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if(response && response.data && response.data.data) {
+          return new <%- name -%>(response.data.data.update<%- nameCp -%>);
+        } else {
+          throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        }
+      } catch(error){
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+      }
+    }
+  <%}-%>
+<%}-%>
+
+
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+  <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (adapter-layer) for to_many associationsArguments to <%- op %>
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Array}   <%-associationsArguments["to_many"][i].sourcetKey-%> Array of ids (stored in "Me") of the Association to be updated.
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+    */
+    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {
+      let query = `
+            mutation
+              update<%- nameCp-%>{
+                update<%- nameCp-%>(
+                  <%- idAttribute -%>:"${<%- idAttribute -%>}"
+                  <%- op %><%= associationsArguments["to_many"][i].name_cp%>:"[${<%-associationsArguments["to_many"][i].sourceKey-%>.join(,)}]"
+                ){
+                  <%- idAttribute -%>
+                  <%-associationsArguments["to_many"][i].sourceKey-%>
+                }
+              }`
+
+      //use default BenignErrorReporter if no BenignErrorReporter defined
+      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+      try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteZendroURL, {query:query});
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+        if(helper.isNonEmptyArray(response.data.errors)) {
+          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
