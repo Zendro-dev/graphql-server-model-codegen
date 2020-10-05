@@ -2557,4 +2557,16 @@ describe('Foreign-key array', function(){
     testCompare(generated_model, data_test.model_remove_association);
   });
 
+  it('model remote server, add association - author', async function(){
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_model = await funks.generateJs('create-models-zendro', opts);
+    testCompare(generated_model, data_test.remote_model_add_association);
+  });
+
+  it('model remote server, remove association - author', async function(){
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_model = await funks.generateJs('create-models-zendro', opts);
+    testCompare(generated_model, data_test.remote_model_remove_association);
+  });
+
 });

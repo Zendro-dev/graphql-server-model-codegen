@@ -112,3 +112,84 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
    await record.update( {book_ids: updated_ids} );
  }
  `
+
+ module.exports.remote_model_add_association =`
+ static async add_book_ids(id, book_ids,benignErrorReporter) {
+
+   let query = \`
+         mutation
+           updatePost_author{
+             updatePost_author(
+               id:"\${id}"
+               addBooks:["\${book_ids.join("\\",\\"")}"]
+             ){
+               id
+               book_ids
+             }
+           }\`
+   //use default BenignErrorReporter if no BenignErrorReporter defined
+   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+   try {
+     // Send an HTTP request to the remote server
+     let response = await axios.post(remoteZendroURL, {query:query});
+     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+     if(helper.isNonEmptyArray(response.data.errors)) {
+       benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+     }
+     // STATUS-CODE is 200
+     // NO ERROR as such has been detected by the server (Express)
+     // check if data was send
+     if(response && response.data && response.data.data) {
+       return new post_author(response.data.data.updatePost_author);
+     } else {
+       throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+     }
+   } catch(error){
+     //handle caught errors
+     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+   }
+
+ }
+
+ `
+
+ module.exports.remote_model_remove_association =`
+ static async remove_book_ids(id, book_ids,benignErrorReporter) {
+
+   let query = \`
+         mutation
+           updatePost_author{
+             updatePost_author(
+               id:"\${id}"
+               removeBooks:["\${book_ids.join("\\",\\"")}"]
+             ){
+               id
+               book_ids
+             }
+           }\`
+   //use default BenignErrorReporter if no BenignErrorReporter defined
+   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+
+   try {
+     // Send an HTTP request to the remote server
+     let response = await axios.post(remoteZendroURL, {query:query});
+     //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+     if(helper.isNonEmptyArray(response.data.errors)) {
+       benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+     }
+     // STATUS-CODE is 200
+     // NO ERROR as such has been detected by the server (Express)
+     // check if data was send
+     if(response && response.data && response.data.data) {
+       return new post_author(response.data.data.updatePost_author);
+     } else {
+       throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+     }
+   } catch(error){
+     //handle caught errors
+     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+   }
+ }
+
+ `

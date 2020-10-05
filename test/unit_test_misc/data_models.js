@@ -660,3 +660,29 @@ module.exports.author_foreignKeyArray = {
 
     "internalId": "id"
   }
+
+module.exports.author_zendro_remote = {
+    "model" : "post_author",
+    "storageType" : "zendro-server",
+    "url": "http://server1-graphql-container:3000/graphql",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "post_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "post_author",
+        "targetStorageType": "zendro-server"
+      }
+    },
+    "internalId": "id"
+  }

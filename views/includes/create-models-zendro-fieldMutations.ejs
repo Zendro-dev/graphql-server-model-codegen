@@ -62,7 +62,7 @@
               update<%- nameCp-%>{
                 update<%- nameCp-%>(
                   <%- idAttribute -%>:"${<%- idAttribute -%>}"
-                  <%- op %><%= associationsArguments["to_many"][i].name_cp%>:"[${<%-associationsArguments["to_many"][i].sourceKey-%>.join(,)}]"
+                  <%- op %><%= associationsArguments["to_many"][i].name_cp%>:["${<%-associationsArguments["to_many"][i].sourceKey-%>.join("\",\"")}"]
                 ){
                   <%- idAttribute -%>
                   <%-associationsArguments["to_many"][i].sourceKey-%>
