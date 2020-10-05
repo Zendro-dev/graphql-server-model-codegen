@@ -6,13 +6,13 @@
       "template": "gql",
       "codegen": "gql-codegen",
       "name": "gql_science_db_graphql_server1",
-      "port": 3000
+      "url": "http://localhost:3000/graphql"
     },
     {
       "template": "gql",
       "codegen": "gql-codegen",
       "name": "gql_science_db_graphql_server2",
-      "port": 3030
+      "url": "http://localhost:3030/graphql"
     }
   ],
   "models": [
@@ -52,6 +52,18 @@
       "name": "gql-codegen",
       "url": "../../../.git",
       "source": true
+    }
+  ],
+  "tests": [
+    {
+      "name": "integration",
+      "runner": "mocha",
+      "target": "gql-codegen/test/mocha_integration_test.js"
+    },
+    {
+      "name": "unit",
+      "runner": "mocha",
+      "target": "gql-codegen/test/mocha_unit_test.js"
     }
   ]
 }
