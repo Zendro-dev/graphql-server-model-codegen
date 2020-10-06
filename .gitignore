@@ -7,4 +7,4 @@ npm-debug.log
 package-lock.json
 
 # ModelGen output folders
-test/integration-tests/env
+test/integration_test_env
