@@ -1,6 +1,6 @@
 {
-  "cwd": "./test/integration-tests/env",
-  "docker": "../docker-compose-test.yml",
+  "cwd": "./test/integration_test_env",
+  "docker": "../integration_test_misc/docker-compose-test.yml",
   "services": [
     {
       "name": "gql_science_db_graphql_server1",
@@ -17,28 +17,28 @@
   ],
   "models": [
     {
-      "path": "../integration_test_models_instance1",
+      "path": "../integration_test_misc/integration_test_models_instance1",
       "target": [ "gql_science_db_graphql_server1" ]
     },
     {
-      "path": "../integration_test_models_instance2",
+      "path": "../integration_test_misc/integration_test_models_instance2",
       "target": [ "gql_science_db_graphql_server2" ]
     }
   ],
   "patches": [
     {
       "opts": [ "-V", "never" ],
-      "src": "../patches/model_aminoacidsequence.patch",
+      "src": "../integration_test_misc/patches/model_aminoacidsequence.patch",
       "dest": "gql_science_db_graphql_server1/models/generic/aminoacidsequence.js"
     },
     {
       "opts": [ "-V", "never" ],
-      "src": "../patches/individual_validate.patch",
+      "src": "../integration_test_misc/patches/individual_validate.patch",
       "dest": "gql_science_db_graphql_server1/validations/individual.js"
     },
     {
       "opts": [ "-V", "never" ],
-      "src": "../patches/accession_validate_instance1.patch",
+      "src": "../integration_test_misc/patches/accession_validate_instance1.patch",
       "dest": "gql_science_db_graphql_server1/validations/accession.js"
     }
   ],
@@ -50,7 +50,7 @@
     },
     {
       "name": "gql-codegen",
-      "url": "../../../.git",
+      "url": "../../.git",
       "source": true
     }
   ],
