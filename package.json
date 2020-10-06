@@ -9,9 +9,9 @@
   "main": "index.js",
   "bin": "./index.js",
   "scripts": {
-    "test:env": "zendro-env",
-    "test:unit": "mocha ./test/mocha_unit_test.js",
-    "test:integration": "mocha ./test/mocha_integration_test.js"
+    "test-env": "zendro-env",
+    "test-unit": "mocha ./test/mocha_unit_test.js",
+    "test-integration": "zendro-env integration"
   },
   "author": "Science-DB team",
   "license": "GPL-3.0",
