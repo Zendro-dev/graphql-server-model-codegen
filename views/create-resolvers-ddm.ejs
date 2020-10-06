@@ -226,7 +226,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
       helper.checkCursorBasedPaginationArgument(pagination);
-      let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+      let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
       helper.checkCountAndReduceRecordsLimit(limit, context, "<%=associations_generic_many[i].name%>Connection");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
@@ -358,7 +358,7 @@ module.exports = {
     // check valid pagination arguments
     helper.checkCursorBasedPaginationArgument(pagination);
     // reduce recordsLimit and check if exceeded
-    let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+    let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
     helper.checkCountAndReduceRecordsLimit(limit, context, "<%- namePl -%>Connection");
 
     //construct benignErrors reporter with context
