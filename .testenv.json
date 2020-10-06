@@ -65,5 +65,8 @@
       "runner": "mocha",
       "target": "gql-codegen/test/mocha_unit_test.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_JQ_SKIP_INSTALL_BINARY": true
+  }
 }
