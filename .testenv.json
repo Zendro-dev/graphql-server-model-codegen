@@ -3,15 +3,15 @@
   "docker": "../docker-compose-test.yml",
   "services": [
     {
+      "name": "gql_science_db_graphql_server1",
       "template": "gql",
       "codegen": "gql-codegen",
-      "name": "gql_science_db_graphql_server1",
       "url": "http://localhost:3000/graphql"
     },
     {
+      "name": "gql_science_db_graphql_server2",
       "template": "gql",
       "codegen": "gql-codegen",
-      "name": "gql_science_db_graphql_server2",
       "url": "http://localhost:3030/graphql"
     }
   ],
