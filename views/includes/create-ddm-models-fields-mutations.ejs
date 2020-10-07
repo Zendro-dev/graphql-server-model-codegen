@@ -13,3 +13,19 @@
   }
   <%}-%>
 <%}-%>
+
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+    <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
+  /**
+  * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+  */
+  static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {
+    let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
+    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter);
+  }
+  <%}-%>
+<%}-%>

@@ -686,3 +686,85 @@ module.exports.author_zendro_remote = {
     },
     "internalId": "id"
   }
+
+module.exports.author_ddm_array_fk ={
+    "model" : "sq_author",
+    "storageType" : "distributed-data-model",
+    "registry": ["author_remote","author_local"],
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "sq_author",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+    "internalId": "id"
+  }
+
+module.exports.author_sql_adapter_array_fk ={
+    "model" : "sq_author",
+    "storageType" : "sql-adapter",
+    "adapterName": "author_local",
+    "regex": "local",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "sq_author",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+    "internalId": "id"
+  }
+
+
+module.exports.author_zendro_adapter_array_fk ={
+    "model" : "sq_author",
+    "storageType" : "zendro-webservice-adapter",
+    "adapterName": "author_remote",
+    "regex": "remote",
+    "url": "http://server1-graphql-container:3000/graphql",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "sq_author",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+    "internalId": "id"
+  }

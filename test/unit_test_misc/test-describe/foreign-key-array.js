@@ -193,3 +193,59 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
  }
 
  `
+
+module.exports.ddm_model_add = `
+static async add_book_ids(id, book_ids, benignErrorReporter) {
+  let responsibleAdapter = this.adapterForIri(id);
+  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter);
+
+}
+
+`
+module.exports.sql_adapter_add = `
+static async add_book_ids(id, book_ids) {
+
+    let record = await super.findByPk(id);
+    let updated_ids = helper.unionIds(record.book_ids, book_ids);
+    await record.update({
+        book_ids: updated_ids
+    });
+}
+`
+
+module.exports.zendro_adapter_remove = `
+static async remove_book_ids(id, book_ids, benignErrorReporter) {
+    let query = \`
+            mutation
+              updateSq_author{
+                updateSq_author(
+                  id:"\${id}"
+                  removeBooks:["\${book_ids.join("\\",\\"")}"]
+                  skipAssociationsExistenceChecks: true
+                ){
+                  id                      book_ids                    }
+              }\`
+
+    try {
+        // Send an HTTP request to the remote server
+        let response = await axios.post(remoteZendroURL, {
+            query: query
+        });
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+        if (helper.isNonEmptyArray(response.data.errors)) {
+            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        }
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if (response && response.data && response.data.data) {
+            return response.data.data.updateSq_author;
+        } else {
+            throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        }
+    } catch (error) {
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+    }
+}
+`

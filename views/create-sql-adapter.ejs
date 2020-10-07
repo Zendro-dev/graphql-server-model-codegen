@@ -53,6 +53,8 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
                 }
               }
             }
+            <%}-%> <% if(type_seq === '[String]' || type_seq === '[Int]'  ){-%>,
+            defaultValue: []
             <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>

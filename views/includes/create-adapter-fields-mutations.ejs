@@ -89,5 +89,44 @@
     <%}-%>
       <%#  /*** End of the the sql-adapter case */ -%>
 
+      <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
+        static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {
+          let query = `
+                mutation
+                  update<%- nameCp-%>{
+                    update<%- nameCp-%>(
+                      <%- idAttribute -%>:"${<%- idAttribute -%>}"
+                      <%- op %><%= associationsArguments["to_many"][i].name_cp%>:["${<%-associationsArguments["to_many"][i].sourceKey-%>.join("\",\"")}"]
+                      skipAssociationsExistenceChecks: true
+                    ){
+                      <%- idAttribute -%>
+                      <%-associationsArguments["to_many"][i].sourceKey-%>
+                    }
+                  }`
+
+          try {
+            // Send an HTTP request to the remote server
+            let response = await axios.post(remoteZendroURL, {query:query});
+            //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+            if(helper.isNonEmptyArray(response.data.errors)) {
+              benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            }
+            // STATUS-CODE is 200
+            // NO ERROR as such has been detected by the server (Express)
+            // check if data was send
+            if(response && response.data && response.data.data) {
+              return response.data.data.update<%- nameCp -%>;
+            } else {
+              throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+            }
+          } catch(error) {
+            //handle caught errors
+            errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+          }
+        }
+    <%}-%>
+    <%#  /** End of the zendro-webservice-adapter case and the ddm-adapter case */ -%>
+
+
   <%} -%>
 <%}-%>

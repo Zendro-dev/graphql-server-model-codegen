@@ -2569,4 +2569,24 @@ describe('Foreign-key array', function(){
     testCompare(generated_model, data_test.remote_model_remove_association);
   });
 
+
+  it('ddm model add association - author', async function(){
+    let opts = funks.getOptions(models.author_ddm_array_fk);
+    let generated_model = await funks.generateJs('create-distributed-model', opts);
+    testCompare(generated_model, data_test.ddm_model_add);
+  });
+
+  it('model remote server, add association - author', async function(){
+    let opts = funks.getOptions(models.author_sql_adapter_array_fk);
+    let generated_model = await funks.generateJs('create-sql-adapter', opts);
+    testCompare(generated_model, data_test.sql_adapter_add);
+  });
+
+  it('model remote server, remove association - author', async function(){
+    let opts = funks.getOptions(models.author_zendro_adapter_array_fk);
+    let generated_model = await funks.generateJs('create-zendro-adapters', opts);
+    testCompare(generated_model, data_test.zendro_adapter_remove);
+  });
+
+
 });
