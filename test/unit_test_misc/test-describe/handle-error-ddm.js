@@ -186,7 +186,7 @@ dogsConnection: async function({
   // check valid pagination arguments
   helper.checkCursorBasedPaginationArgument(pagination);
   // reduce recordsLimit and check if exceeded
-  let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+  let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
   helper.checkCountAndReduceRecordsLimit(limit, context, "dogsConnection");
 
   //construct benignErrors reporter with context

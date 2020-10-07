@@ -1,6 +1,6 @@
---- cat_orig.js	2020-09-02 18:00:11.682172967 +0200
-+++ cat.js	2020-09-02 18:00:16.886172869 +0200
-@@ -92,18 +92,14 @@
+--- cat.js	2020-10-06 18:42:36.570510305 -0500
++++ cat_update.js	2020-10-06 18:49:45.965601657 -0500
+@@ -100,21 +100,14 @@
      static async readAllCursor(search, order, pagination, benignErrorReporter) {
          //use default BenignErrorReporter if no BenignErrorReporter defined
          benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
@@ -15,10 +15,13 @@
          // get the first record (if exists) in the opposite direction to determine pageInfo.
          // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
          let oppRecords = [];
-         if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
--            let oppOptions = helper.buildOppositeSearchSequelize(search, order, pagination, this.idAttribute());
+         if (pagination && (pagination.after || pagination.before)) {
+-            let oppOptions = helper.buildOppositeSearchSequelize(search, order, {
+-                ...pagination,
+-                includeCursor: false
+-            }, this.idAttribute());
 -            oppRecords = await super.findAll(oppOptions);
-+            let oppOptions = helper.buildOppositeSearchGeneric(search, order, pagination, this.idAttribute());
++            let oppOptions = helper.buildOppositeSearchGeneric(search, order, {...pagination, includeCursor: false}, this.idAttribute());
 +            oppRecords = await Cat.readAll(oppOptions['search'], oppOptions['order'], oppOptions['pagination'], benignErrorReporter);
          }
          // build the graphql Connection Object

@@ -27,8 +27,8 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
-    if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, pagination, this.idAttribute());
+    if (pagination && (pagination.after || pagination.before)) {
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
@@ -56,7 +56,7 @@ module.exports.resolver_read_all_connection = `
     }, context) {
         if (await checkAuthorization(context, 'Book', 'read') === true) {
             helper.checkCursorBasedPaginationArgument(pagination);
-            let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+            let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
             helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await book.readAllCursor(search, order, pagination, benignErrorReporter);
@@ -94,7 +94,7 @@ person.prototype.booksConnection = async function({
 }, context) {
 if (await checkAuthorization(context, 'Book', 'read') === true) {
             helper.checkCursorBasedPaginationArgument(pagination);
-            let limit = pagination.first !== undefined ? pagination.first : pagination.last;
+            let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
             helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
             return this.booksConnectionImpl({
                 search,
@@ -120,8 +120,8 @@ booksConnectionImpl({
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
-    if (pagination && (pagination.after !== undefined || pagination.before !== undefined)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, pagination, models.book.idAttribute());
+    if (pagination && (pagination.after || pagination.before)) {
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, models.book.idAttribute());
       oppRecords = await this.getBooks(oppOptions);
     }
     // build the graphql Connection Object
