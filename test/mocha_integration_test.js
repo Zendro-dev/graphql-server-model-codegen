@@ -7,8 +7,10 @@ const itHelpers = require('./integration_test_misc/integration_test_helpers');
 //HINT:
 //DELETE FROM transcript_counts;
 //DELETE FROM individuals;
+//DELETE FROM cats;
 //ALTER SEQUENCE individuals_id_seq RESTART WITH 1;
 //ALTER SEQUENCE transcript_counts_id_seq RESTART WITH 1;
+//ALTER SEQUENCE cats_id_seq RESTART WITH 1;
 
 describe(
   'Clean GraphQL Server: one new basic function per test ("Individual" model)',

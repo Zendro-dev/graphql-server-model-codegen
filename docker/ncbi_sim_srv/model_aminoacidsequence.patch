@@ -1,6 +1,16 @@
---- aminoacidsequence.js	2020-10-06 18:33:07.223334159 -0500
-+++ aminoacidsequence_update.js	2020-10-06 18:34:57.729008780 -0500
-@@ -75,10 +75,9 @@
+--- aminoacidsequence.js	2020-06-09 19:10:05.446587902 -0500
++++ aminoacidsequence_update.js	2020-06-09 19:16:53.527756704 -0500
+@@ -1,6 +1,9 @@
+ const _ = require('lodash');
+ const globals = require('../../config/globals');
+ const helper = require('../../utils/helper');
++const request = require('sync-request');
++const baseUrl = 'http://gql_ncbi_sim_srv:3344/aminoAcidSequence/';
++
+ 
+ // An exact copy of the the model definition that comes from the .json file
+ const definition = {
+@@ -85,10 +88,10 @@
       */
      static async readById(id, benignErrorReporter) {
  
@@ -11,10 +21,11 @@
 +      let res = request('get', baseUrl + id);
 +      if(res.statusCode !== 200) throw new Error(`Remote service response status code for ${id}: ${res.statusCode}`);
 +      return new aminoacidsequence(JSON.parse(res.body.toString('utf8')));
++
      }
  
      /**
-@@ -137,10 +136,22 @@
+@@ -147,10 +150,22 @@
       */
      static async readAll(search, order, pagination, benignErrorReporter) {
  
