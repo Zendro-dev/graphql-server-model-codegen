@@ -3005,7 +3005,7 @@ const itHelpers = require('./integration_test_misc/integration_test_helpers');
 
 
   describe('Foreign-key array', function() {
-    // set up the environment
+    //set up the environment
     before(async function(){
       //measurements for sql and zendro-server tests
       let res = itHelpers.request_graph_ql_post('mutation{addBook(id:"remote_b1" title:"t1"){id} }');
@@ -3020,9 +3020,10 @@ const itHelpers = require('./integration_test_misc/integration_test_helpers');
       itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b1")}');
       itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b2")}');
       itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a2")}');
     });
 
-    it('01. Create record and add association through arrary', function() {
+    it('01. Create record and add association - sql', function() {
       let res = itHelpers.request_graph_ql_post('mutation{addAuthor(id:"remote_a1" name:"n1" addBooks:["remote_b1","remote_b2"]){id book_ids}}');
       expect(res.statusCode).to.equal(200);
       let resBody = JSON.parse(res.body.toString('utf8'));
@@ -3036,7 +3037,7 @@ const itHelpers = require('./integration_test_misc/integration_test_helpers');
       });
     });
 
-    it('02. Query associated records through array', function() {
+    it('02. Query associated records - sql', function() {
       let res = itHelpers.request_graph_ql_post('{readOneBook(id:"remote_b1"){id authorsFilter(pagination: {limit: 2}){id}}}');
       expect(res.statusCode).to.equal(200);
       let resBody = JSON.parse(res.body.toString('utf8'));
@@ -3045,7 +3046,7 @@ const itHelpers = require('./integration_test_misc/integration_test_helpers');
     });
 
 
-    it('03. Update record and remove association through arrary', function() {
+    it('03. Update record and remove association - sql', function() {
       let res = itHelpers.request_graph_ql_post('mutation{updateAuthor(id:"remote_a1" name:"n1" removeBooks:["remote_b1","remote_b2"]){id book_ids}}');
       expect(res.statusCode).to.equal(200);
       let resBody = JSON.parse(res.body.toString('utf8'));
@@ -3053,6 +3054,42 @@ const itHelpers = require('./integration_test_misc/integration_test_helpers');
       expect(resBody.data).to.deep.equal({updateAuthor: { id: 'remote_a1', book_ids: [ ] }});
       //check inverse association
       res = itHelpers.request_graph_ql_post('{books(pagination:{limit: 2}){id author_ids}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {"books": [{"id": "remote_b1","author_ids": []},{"id": "remote_b2","author_ids": []}]}
+      });
+    });
+
+    it('04. Create record and add association - remote zendro server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAuthor(id:"remote_a2" name:"n2" addBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been created correctly
+      expect(resBody.data).to.deep.equal({addAuthor: { id: 'remote_a2', book_ids: [ 'remote_b1', 'remote_b2' ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{books(pagination:{limit: 2}){id author_ids}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {"books": [  {"id": "remote_b1","author_ids": ["remote_a2"]},{"id": "remote_b2","author_ids": ["remote_a2"]}]}
+      });
+    });
+
+    it('05. Query associated records - remote zendro server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('{readOneBook(id:"remote_b1"){id authorsFilter(pagination: {limit: 2}){id}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({readOneBook: {"id": "remote_b1", "authorsFilter": [{"id": "remote_a2"}]}});
+    });
+
+    it('06. Update record and remove association - remote zendro server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAuthor(id:"remote_a2" name:"n1" removeBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been updated correctly
+      expect(resBody.data).to.deep.equal({updateAuthor: { id: 'remote_a2', book_ids: [ ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{books(pagination:{limit: 2}){id author_ids}} ')
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(resBody).to.deep.equal({
         "data": {"books": [{"id": "remote_b1","author_ids": []},{"id": "remote_b2","author_ids": []}]}
