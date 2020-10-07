@@ -99,17 +99,20 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
  static async add_book_ids(id, book_ids){
 
    let record = await super.findByPk(id);
-   let updated_ids = helper.unionIds(record.book_ids, book_ids);
-   await record.update( {book_ids: updated_ids} );
-
+   if(record!==null){
+     let updated_ids = helper.unionIds(record.book_ids, book_ids);
+     await record.update( {book_ids: updated_ids} );
+   }
  }
  `
 
  module.exports.model_remove_association = `
  static async remove_book_ids(id, book_ids){
    let record = await super.findByPk(id);
-   let updated_ids = helper.differenceIds(record.book_ids, book_ids);
-   await record.update( {book_ids: updated_ids} );
+   if(record!==null){
+     let updated_ids = helper.differenceIds(record.book_ids, book_ids);
+     await record.update( {book_ids: updated_ids} );
+   }
  }
  `
 
@@ -206,10 +209,12 @@ module.exports.sql_adapter_add = `
 static async add_book_ids(id, book_ids) {
 
     let record = await super.findByPk(id);
-    let updated_ids = helper.unionIds(record.book_ids, book_ids);
-    await record.update({
-        book_ids: updated_ids
-    });
+    if(record!==null){
+      let updated_ids = helper.unionIds(record.book_ids, book_ids);
+      await record.update({
+          book_ids: updated_ids
+      });
+    }
 }
 `
 
