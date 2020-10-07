@@ -374,8 +374,8 @@ genCode() {
   TARGET_DIR_INSTANCE2="${TARGET_DIR}/${INSTANCE_DIRS[1]}"
 
   # Generate code
-  node ./index.js -f ${TEST_MODELS_INSTANCE1} -o ${TARGET_DIR_INSTANCE1}
-  node ./index.js -f ${TEST_MODELS_INSTANCE2} -o ${TARGET_DIR_INSTANCE2}
+  node ./index.js -m -f ${TEST_MODELS_INSTANCE1} -o ${TARGET_DIR_INSTANCE1}
+  node ./index.js -m -f ${TEST_MODELS_INSTANCE2} -o ${TARGET_DIR_INSTANCE2}
 
   # Patch the resolver for web-server
   # patch -V never ${TARGET_DIR_INSTANCE1}/resolvers/aminoacidsequence.js ./docker/ncbi_sim_srv/amino_acid_sequence_resolver.patch
