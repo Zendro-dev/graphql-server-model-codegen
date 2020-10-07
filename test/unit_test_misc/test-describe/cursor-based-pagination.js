@@ -11,175 +11,31 @@ type BookEdge{
 `
 
 module.exports.connection_book_query = `
-booksConnection(search: searchBookInput, order: [orderBookInput], pagination: paginationCursorInput): BookConnection
+booksConnection(search: searchBookInput, order: [orderBookInput], pagination: paginationCursorInput!): BookConnection
 `
 
 module.exports.model_read_all_connection = `
-static readAllCursor(search, order, pagination, benignErrorReporter) {
-        //check valid pagination arguments
-        let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-        if (!argsValid) {
-            throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-        }
-
-        let isForwardPagination = !pagination || !(pagination.last != undefined);
-        let options = {};
-        options['where'] = {};
-
-        /*
-         * Search conditions
-         */
-        if (search !== undefined && search !== null) {
-
-            //check
-            if (typeof search !== 'object') {
-                throw new Error('Illegal "search" argument type, it must be an object.');
-            }
-
-            let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
-            options['where'] = arg_sequelize;
-        }
-
-        //use default BenignErrorReporter if no BenignErrorReporter defined
-        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
-        /*
-         * Count
-         */
-        return super.count(options).then(countA => {
-            options['offset'] = 0;
-            options['order'] = [];
-            options['limit'] = countA;
-            /*
-             * Order conditions
-             */
-            if (order !== undefined) {
-                options['order'] = order.map((orderItem) => {
-                    return [orderItem.field, orderItem.order];
-                });
-            }
-            if (!options['order'].map(orderItem => {
-                    return orderItem[0]
-                }).includes("id")) {
-                options['order'] = [...options['order'], ...[
-                    ["id", "ASC"]
-                ]];
-            }
-
-            /*
-             * Pagination conditions
-             */
-            if (pagination) {
-                //forward
-                if (isForwardPagination) {
-                    if (pagination.after) {
-                        let decoded_cursor = JSON.parse(this.base64Decode(pagination.after));
-                        options['where'] = {
-                            ...options['where'],
-                            ...helper.parseOrderCursor(options['order'], decoded_cursor, "id", pagination.includeCursor)
-                        };
-                    }
-                } else { //backward
-                    if (pagination.before) {
-                        let decoded_cursor = JSON.parse(this.base64Decode(pagination.before));
-                        options['where'] = {
-                            ...options['where'],
-                            ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, "id", pagination.includeCursor)
-                        };
-                    }
-                }
-            }
-            //woptions: copy of {options} with only 'where' options
-            let woptions = {};
-            woptions['where'] = {
-                ...options['where']
-            };
-            /*
-             *  Count (with only where-options)
-             */
-            return super.count(woptions).then(countB => {
-                /*
-                 * Limit conditions
-                 */
-                if (pagination) {
-                    //forward
-                    if (isForwardPagination) {
-
-                        if (pagination.first) {
-                            options['limit'] = pagination.first;
-                        }
-                    } else { //backward
-                        if (pagination.last) {
-                            options['limit'] = pagination.last;
-                            options['offset'] = Math.max((countB - pagination.last), 0);
-                        }
-                    }
-                }
-                //check: limit
-                if (globals.LIMIT_RECORDS < options['limit']) {
-                    throw new Error(\`Request of total books exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-                }
-
-                /*
-                 * Get records
-                 */
-                return super.findAll(options).then(async records => {
-                  //validate records
-                  records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
-
-                    let edges = [];
-                    let pageInfo = {
-                        hasPreviousPage: false,
-                        hasNextPage: false,
-                        startCursor: null,
-                        endCursor: null
-                    };
-
-                    //edges
-                    if (records.length > 0) {
-                        edges = records.map(record => {
-                            return {
-                                node: record,
-                                cursor: record.base64Enconde()
-                            }
-                        });
-                    }
-
-                    //forward
-                    if (isForwardPagination) {
-
-                        pageInfo = {
-                            hasPreviousPage: ((countA - countB) > 0),
-                            hasNextPage: (pagination && pagination.first ? (countB > pagination.first) : false),
-                            startCursor: (records.length > 0) ? edges[0].cursor : null,
-                            endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
-                        }
-                    } else { //backward
-
-                        pageInfo = {
-                            hasPreviousPage: (pagination && pagination.last ? (countB > pagination.last) : false),
-                            hasNextPage: ((countA - countB) > 0),
-                            startCursor: (records.length > 0) ? edges[0].cursor : null,
-                            endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
-                        }
-                    }
-
-                    return {
-                        edges,
-                        pageInfo
-                    };
-
-                }).catch(error => {
-                    throw error;
-                });
-            }).catch(error => {
-                throw error;
-            });
-        }).catch(error => {
-            throw error;
-        });
+static async readAllCursor(search, order, pagination, benignErrorReporter){
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    
+    // build the sequelize options object for cursor-based pagination
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
+    let records = await super.findAll(options);
+    // validationCheck after read
+    records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+    // get the first record (if exists) in the opposite direction to determine pageInfo.
+    // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
+    let oppRecords = [];
+    if (pagination && (pagination.after || pagination.before)) {
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+      oppRecords = await super.findAll(oppOptions);
     }
+    // build the graphql Connection Object
+    let edges = helper.buildEdgeObject(records);
+    let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
+    return {edges, pageInfo};
+}
 `
 
 module.exports.resolver_read_all_connection = `
@@ -199,7 +55,9 @@ module.exports.resolver_read_all_connection = `
         pagination
     }, context) {
         if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit({search, pagination}, context, "booksConnection");
+            helper.checkCursorBasedPaginationArgument(pagination);
+            let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+            helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return await book.readAllCursor(search, order, pagination, benignErrorReporter);
         } else {
@@ -213,7 +71,7 @@ module.exports.schema_to_many_association = `
 """
 @search-request
 """
-booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput): BookConnection
+booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput!): BookConnection
 
 `
 
@@ -235,7 +93,9 @@ person.prototype.booksConnection = async function({
     pagination
 }, context) {
 if (await checkAuthorization(context, 'Book', 'read') === true) {
-            await checkCountAndReduceRecordsLimit({search, pagination}, context, 'booksConnection', 'book');
+            helper.checkCursorBasedPaginationArgument(pagination);
+            let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+            helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
             return this.booksConnectionImpl({
                 search,
                 order,
@@ -253,166 +113,27 @@ booksConnectionImpl({
   order,
   pagination
 }) {
-  //check valid pagination arguments
-  let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-  if (!argsValid) {
-    throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-  }
-  let isForwardPagination = !pagination || !(pagination.last != undefined);
-  let options = {};
-  options['where'] = {};
-
-  /*
-   * Search conditions
-   */
-  if (search !== undefined && search !== null) {
-      let arg = new searchArg(search);
-      let arg_sequelize = arg.toSequelize();
-      options['where'] = arg_sequelize;
-  }
-
-  /*
-   * Count
-   */
-  return this.countBooks(options).then(countA => {
-      options['offset'] = 0;
-      options['order'] = [];
-      options['limit'] = countA;
-      /*
-       * Order conditions
-       */
-      if (order !== undefined) {
-          options['order'] = order.map((orderItem) => {
-              return [orderItem.field, orderItem.order];
-          });
-      }
-      if (!options['order'].map(orderItem => {
-              return orderItem[0]
-          }).includes(models.book.idAttribute())) {
-          options['order'] = [...options['order'], ...[
-              [models.book.idAttribute(), "ASC"]
-          ]];
-      }
-      /*
-       * Pagination conditions
-       */
-      if (pagination) {
-          //forward
-          if (isForwardPagination) {
-              if (pagination.after) {
-                  let decoded_cursor = JSON.parse(Person.base64Decode(pagination.after));
-                  options['where'] = {
-                      ...options['where'],
-                      ...helper.parseOrderCursor(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
-                  };
-              }
-          } else { //backward
-              if (pagination.before) {
-                  let decoded_cursor = JSON.parse(Person.base64Decode(pagination.before));
-                  options['where'] = {
-                      ...options['where'],
-                      ...helper.parseOrderCursorBefore(options['order'], decoded_cursor, models.book.idAttribute(), pagination.includeCursor)
-                  };
-              }
-          }
-      }
-      //woptions: copy of {options} with only 'where' options
-      let woptions = {};
-      woptions['where'] = {
-          ...options['where']
-      };
-
-      /*
-       *  Count (with only where-options)
-       */
-      return this.countBooks(woptions).then(countB => {
-          /*
-           * Limit conditions
-           */
-          if (pagination) {
-              //forward
-              if (isForwardPagination) {
-                  if (pagination.first) {
-                      options['limit'] = pagination.first;
-                  }
-              } else { //backward
-                  if (pagination.last) {
-                      options['limit'] = pagination.last;
-                      options['offset'] = Math.max((countB - pagination.last), 0);
-                  }
-              }
-          }
-          //check: limit
-          if (globals.LIMIT_RECORDS < options['limit']) {
-              throw new Error(\`Request of total booksConnection exceeds max limit of \${globals.LIMIT_RECORDS}. Please use pagination.\`);
-          }
-
-          /*
-           * Get records
-           */
-          return this.getBooks(options).then(records => {
-              let edges = [];
-              let pageInfo = {
-                  hasPreviousPage: false,
-                  hasNextPage: false,
-                  startCursor: null,
-                  endCursor: null
-              };
-              //edges
-              if (records.length > 0) {
-                  edges = records.map(record => {
-                      return {
-                          node: record,
-                          cursor: record.base64Enconde()
-                      }
-                  });
-              }
-
-              //forward
-              if (isForwardPagination) {
-
-                  pageInfo = {
-                      hasPreviousPage: ((countA - countB) > 0),
-                      hasNextPage: (pagination && pagination.first ? (countB > pagination.first) : false),
-                      startCursor: (records.length > 0) ? edges[0].cursor : null,
-                      endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
-                  }
-              } else { //backward
-
-                  pageInfo = {
-                      hasPreviousPage: (pagination && pagination.last ? (countB > pagination.last) : false),
-                      hasNextPage: ((countA - countB) > 0),
-                      startCursor: (records.length > 0) ? edges[0].cursor : null,
-                      endCursor: (records.length > 0) ? edges[edges.length - 1].cursor : null
-                  }
-              }
-              return {
-                  edges,
-                  pageInfo
-              };
-
-          }).catch(error => {
-              throw error;
-          });
-      }).catch(error => {
-          throw error;
-      });
-  }).catch(error => {
-      throw error;
-  });
-
+    
+    // build the sequelize options object for cursor-based pagination
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.book.idAttribute());
+    let records = await this.getBooks(options);
+    // get the first record (if exists) in the opposite direction to determine pageInfo.
+    // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
+    let oppRecords = [];
+    if (pagination && (pagination.after || pagination.before)) {
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, models.book.idAttribute());
+      oppRecords = await this.getBooks(oppOptions);
+    }
+    // build the graphql Connection Object
+    let edges = helper.buildEdgeObject(records);
+    let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
+    return {edges, pageInfo};
 }
 `
 
 module.exports.read_all_zendro_server = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
-    //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-    if (!argsValid) {
-      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-    }
-
-    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput $order: [orderBookInput]){
+    let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput! $order: [orderBookInput]){
         booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
           genre
           publisher_id
@@ -431,7 +152,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response&&response.data&&response.data.data) {
+      if(response&&response.data&&response.data.data&&response.data.data.booksConnection !== null) {
         let data_edges = response.data.data.booksConnection.edges;
         let pageInfo = response.data.data.booksConnection.pageInfo;
         //validate after read
@@ -448,7 +169,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
         return { edges, pageInfo };
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
       }
     } catch(error) {
       //handle caught errors
@@ -492,7 +213,7 @@ static async updateOne(input, benignErrorReporter){
         if(response&&response.data&&response.data.data) {
         return new Person(response.data.data.updatePerson);
         } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
         }
     } catch(error) {
         //handle caught errors

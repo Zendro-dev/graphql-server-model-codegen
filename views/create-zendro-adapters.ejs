@@ -49,7 +49,7 @@ module.exports = class <%- adapterName -%>{
         if (response && response.data && response.data.data) {
           return response.data.data.readOne<%- nameCp -%>;
         } else {
-          throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+          throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
         }
       } catch(error) {
         //handle caught errors
@@ -77,7 +77,7 @@ module.exports = class <%- adapterName -%>{
         if (response && response.data && response.data.data) {
           return response.data.data.count<%- namePlCp -%>;
         } else {
-          throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+          throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
         }
       } catch(error) {
         //handle caught errors
@@ -87,12 +87,7 @@ module.exports = class <%- adapterName -%>{
   }
 
   static async readAllCursor(search, order, pagination, benignErrorReporter){
-    //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-    if (!argsValid) {
-      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-    }
-    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
+    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput! $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
 
@@ -106,10 +101,10 @@ module.exports = class <%- adapterName -%>{
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
           // check if data was send
-          if(response && response.data && response.data.data) {
+          if(response && response.data && response.data.data && response.data.data.<%- namePl -%>Connection !== null) {
             return response.data.data.<%- namePl -%>Connection;
           } else {
-            throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+            throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
           }
         } catch(error) {
           //handle caught errors
@@ -144,7 +139,7 @@ module.exports = class <%- adapterName -%>{
         if (response && response.data && response.data.data) {
           return response.data.data.add<%- nameCp -%>;
         } else {
-          throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+          throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
         }
       } catch(error) {
         //handle caught errors
@@ -170,7 +165,7 @@ module.exports = class <%- adapterName -%>{
       if (response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -205,7 +200,7 @@ module.exports = class <%- adapterName -%>{
       if (response && response.data && response.data.data) {
         return response.data.data.update<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors

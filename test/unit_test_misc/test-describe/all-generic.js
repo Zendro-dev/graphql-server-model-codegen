@@ -13,8 +13,8 @@
  * (Assumed input with no whitespaces).
  */
 //to_many firms
-module.exports.test1_1 = /.+Filter\(search:search.+Input,order:\[order.+Input\],pagination:paginationInput\):\[.+\].+typeQuery{/;
-module.exports.test1_2 = /.+Connection\(search:search.+Input,order:\[order.+Input\],pagination:paginationCursorInput\):.+Connection.+typeQuery{/;
+module.exports.test1_1 = /.+Filter\(search:search.+Input,order:\[order.+Input\],pagination:paginationInput!\):\[.+\].+typeQuery{/;
+module.exports.test1_2 = /.+Connection\(search:search.+Input,order:\[order.+Input\],pagination:paginationCursorInput!\):.+Connection.+typeQuery{/;
 module.exports.test1_3 = /.+countFiltered.+\(search:search.+Input\):Int.+typeQuery{{/;
 module.exports.test1_4 = /typeMutation{add.+\(.+add.+:\[ID\]/;
 module.exports.test1_5 = /typeMutation{.+update.+\(.+add.+:\[ID\]/;
@@ -30,8 +30,8 @@ module.exports.test1_10 = /typeMutation{.+update.+\(.+remove.+:ID/;
  * 2. sql <to_many> generic - person
  */
 //to_many firms (particular case)
-module.exports.test2_1 = /dogsFilter\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationInput\):\[Dog\].+typeQuery{/;
-module.exports.test2_2 = /dogsConnection\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationCursorInput\):DogConnection.+typeQuery{/;
+module.exports.test2_1 = /dogsFilter\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationInput!\):\[Dog\].+typeQuery{/;
+module.exports.test2_2 = /dogsConnection\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationCursorInput!\):DogConnection.+typeQuery{/;
 module.exports.test2_3 = /countFilteredDogs\(search:searchDogInput\):Int.+typeQuery{/;
 module.exports.test2_4 = /typeMutation{addPerson\(.+addDogs:\[ID\]/;
 module.exports.test2_5 = /typeMutation{.+updatePerson\(.+addDogs:\[ID\]/;
@@ -59,8 +59,8 @@ module.exports.test4_4 = /typeMutation{.+updatePerson\(.+removeUnique_homeTown:I
  * 5. generic <to_many> sql - hometown
  */
 //to_many firms (particular case)
-module.exports.test5_1 = /peopleFilter\(search:searchPersonInput,order:\[orderPersonInput\],pagination:paginationInput\):\[Person\].+typeQuery{/;
-module.exports.test5_2 = /peopleConnection\(search:searchPersonInput,order:\[orderPersonInput\],pagination:paginationCursorInput\):PersonConnection.+typeQuery{/;
+module.exports.test5_1 = /peopleFilter\(search:searchPersonInput,order:\[orderPersonInput\],pagination:paginationInput!\):\[Person\].+typeQuery{/;
+module.exports.test5_2 = /peopleConnection\(search:searchPersonInput,order:\[orderPersonInput\],pagination:paginationCursorInput!\):PersonConnection.+typeQuery{/;
 module.exports.test5_3 = /countFilteredPeople\(search:searchPersonInput\):Int.+typeQuery{/;
 module.exports.test5_4 = /typeMutation{addHometown\(.+addPeople:\[ID\]/;
 module.exports.test5_5 = /typeMutation{.+updateHometown\(.+addPeople:\[ID\]/;
@@ -191,8 +191,8 @@ module.exports.test14_4 = /typeMutation{.+updateDog\(.+removeOwner:ID/;
  * 15_b.  ddm <generic_to_many> - person
  */
 //to_many firms (particular case)
-module.exports.test15_1 = /dogsFilter\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationInput\):\[Dog\].+typeQuery{/;
-module.exports.test15_2 = /dogsConnection\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationCursorInput\):DogConnection.+typeQuery{/;
+module.exports.test15_1 = /dogsFilter\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationInput!\):\[Dog\].+typeQuery{/;
+module.exports.test15_2 = /dogsConnection\(search:searchDogInput,order:\[orderDogInput\],pagination:paginationCursorInput!\):DogConnection.+typeQuery{/;
 module.exports.test15_3 = /countFilteredDogs\(search:searchDogInput\):Int.+typeQuery{/;
 module.exports.test15_4 = /typeMutation{addPerson\(.+addDogs:\[ID\]/;
 module.exports.test15_5 = /typeMutation{.+updatePerson\(.+addDogs:\[ID\]/;

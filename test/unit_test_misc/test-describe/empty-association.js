@@ -1,11 +1,11 @@
 module.exports.transcript_count_no_assoc_schema = `
 type Query {
-  transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput ): [transcript_count]
+  transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput! ): [transcript_count]
   readOneTranscript_count(id: ID!): transcript_count
   countTranscript_counts(search: searchTranscript_countInput ): Int
   vueTableTranscript_count : VueTableTranscript_count    csvTableTemplateTranscript_count: [String]
 
-  transcript_countsConnection(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput ): Transcript_countConnection
+  transcript_countsConnection(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput! ): Transcript_countConnection
 }
 
   type Mutation {
@@ -29,20 +29,19 @@ module.exports.individual_no_assoc_resolvers = `
      * @return {array}             Array of records holding conditions specified by search, order and pagination argument
      */
     individuals: async function({
-        search,
-        order,
-        pagination
-    }, context) {
-
-        if (await checkAuthorization(context, 'individual', 'read') === true) {
-            await checkCountAndReduceRecordsLimit({search, pagination}, context, "individuals");
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await individual.readAll(search, order, pagination,benignErrorReporter);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
-
-    },`
+      search,
+      order,
+      pagination
+  }, context) {
+      if (await checkAuthorization(context, 'individual', 'read') === true) {
+          helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "individuals");
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+          return await individual.readAll(search, order, pagination, benignErrorReporter);
+      } else {
+          throw new Error("You don't have authorization to perform this action");
+      }
+  }
+  ,`
 
 module.exports.transcript_count_no_assoc_model = `
 static associate(models) {
