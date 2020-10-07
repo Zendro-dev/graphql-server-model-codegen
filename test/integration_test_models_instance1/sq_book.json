@@ -1,0 +1,26 @@
+{
+    "model" : "sq_book",
+    "storageType" : "sql",
+    "database": "default-sql",
+    "attributes" : {
+        "id": "String",
+        "title": "String",
+        "genre": "String",
+        "ISBN": "String",
+        "author_ids": "[ String]"
+    },
+
+    "associations":{
+      "authors":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_author",
+        "targetKey": "book_ids",
+        "sourceKey": "author_ids",
+        "keyIn": "sq_book",
+        "targetStorageType": "sql"
+      }
+    },
+
+    "internalId": "id"
+  }
