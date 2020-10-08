@@ -83,12 +83,6 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
         authAdapters = Array.from(authorizedAdapters)
     }
 
-    //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-    if (!argsValid) {
-        throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-    }
-
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
@@ -189,6 +183,11 @@ dogsConnection: async function({
     order,
     pagination
 }, context) {
+  // check valid pagination arguments
+  helper.checkCursorBasedPaginationArgument(pagination);
+  // reduce recordsLimit and check if exceeded
+  let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+  helper.checkCountAndReduceRecordsLimit(limit, context, "dogsConnection");
 
   //construct benignErrors reporter with context
   let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
@@ -268,12 +267,7 @@ countDogs: async function({
 
 module.exports.readAllCursor_dogs_adapter_ddm = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-    if (!argsValid) {
-        throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-    }
-    let query = \`query dogsConnection($search: searchDogInput $pagination: paginationCursorInput $order: [orderDogInput]){
+    let query = \`query dogsConnection($search: searchDogInput $pagination: paginationCursorInput! $order: [orderDogInput]){
   dogsConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  dog_id  name
      person_id
    } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
@@ -289,10 +283,10 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response && response.data && response.data.data) {
+      if(response && response.data && response.data.data && response.data.data.dogsConnection !== null) {
         return response.data.data.dogsConnection;
       } else {
-        throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+        throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
       }
     } catch(error) {
       //handle caught errors

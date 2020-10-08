@@ -60,7 +60,7 @@ module.exports = class <%- name -%>{
         await validatorUtil.validateData('validateAfterRead', this, item);
         return item;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -89,7 +89,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return response.data.data.count<%- namePlCp -%>;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error){
       //handle caught errors
@@ -98,7 +98,7 @@ module.exports = class <%- name -%>{
   }
 
   static async readAll(search, order, pagination, benignErrorReporter){
-    let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput $order: [order<%- nameCp -%>Input]){
+    let query = `query <%- namePl -%>($search: search<%- nameCp -%>Input $pagination: paginationInput! $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>(search:$search pagination:$pagination order:$order){<%- idAttribute -%> <%for(var key in attributes){-%>
          <%=key %>
        <%}-%> } }`
@@ -116,12 +116,12 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response && response.data && response.data.data) {
-        let data = response.data.data.<%- namePl -%> ;
+      if(response && response.data && response.data.data && response.data.data.<%- namePl -%> !== null) {
+        let data = response.data.data.<%- namePl -%>;
         data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
         return data.map(item => {return new <%- name -%>(item) });
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error){
       //handle caught errors
@@ -130,13 +130,7 @@ module.exports = class <%- name -%>{
   }
 
   static async readAllCursor(search, order, pagination, benignErrorReporter){
-    //check valid pagination arguments
-    let argsValid = (pagination === undefined) || (pagination.first && !pagination.before && !pagination.last) || (pagination.last && !pagination.after && !pagination.first);
-    if (!argsValid) {
-      throw new Error('Illegal cursor based pagination arguments. Use either "first" and optionally "after", or "last" and optionally "before"!');
-    }
-
-    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput $order: [order<%- nameCp -%>Input]){
+    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput! $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
        <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
 
@@ -153,7 +147,7 @@ module.exports = class <%- name -%>{
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
       // check if data was send
-      if(response && response.data && response.data.data) {
+      if(response && response.data && response.data.data &&  response.data.data.<%- namePl -%>Connection !== null) {
         let data_edges = response.data.data.<%- namePl -%>Connection.edges;
         let pageInfo = response.data.data.<%- namePl -%>Connection.pageInfo;
 
@@ -171,7 +165,7 @@ module.exports = class <%- name -%>{
 
         return { edges, pageInfo };
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -215,7 +209,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.add<%- nameCp -%>);
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -249,7 +243,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors
@@ -291,7 +285,7 @@ module.exports = class <%- name -%>{
       if(response && response.data && response.data.data) {
         return new <%- name -%>(response.data.data.update<%- nameCp -%>);
       } else {
-        throw new Error(`Invalid response from remote zendro-server: ${remoteZendroURL}`);
+        throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
     } catch(error) {
       //handle caught errors

@@ -88,7 +88,7 @@ services:
     environment:
       PORT: 3030
       REQUIRE_SIGN_IN: "false"
-      LIMIT_RECORDS: 25
+      LIMIT_RECORDS: 26
       JQ_PATH: /usr/bin/jq
     networks:
       - integrationtest

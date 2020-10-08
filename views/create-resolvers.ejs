@@ -78,7 +78,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = async function({search,order,pagination}, context){
       if (await checkAuthorization(context, '<%- associations_temp[i].target -%>', 'read') === true) {
-        await checkCountAndReduceRecordsLimit({search, pagination}, context, '<%=associations_temp[i].name%>Filter', '<%- associations_temp[i].target_lc -%>');
+        helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "<%=associations_temp[i].name%>Filter");
         return this.<%=associations_temp[i].name%>FilterImpl({search, order, pagination});
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -102,7 +102,9 @@ const associationArgsDef = {
        pagination
   }, context) {
       if (await checkAuthorization(context, '<%- associations_temp[i].target -%>', 'read') === true) {
-        await checkCountAndReduceRecordsLimit({search, pagination}, context, '<%=associations_temp[i].name%>Connection', '<%- associations_temp[i].target_lc -%>');
+        helper.checkCursorBasedPaginationArgument(pagination);
+        let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+        helper.checkCountAndReduceRecordsLimit(limit, context, "<%=associations_temp[i].name%>Connection");
         return this.<%=associations_temp[i].name%>ConnectionImpl({search,order,pagination});
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -159,7 +161,7 @@ const associationArgsDef = {
             "value": this.<%= associations_one[i].targetKey -%>,
             "operator": "eq"
           });
-          let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+          let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch, pagination: {limit:1}}, context);
           if (found) {
             return found[0]
           }
@@ -175,13 +177,11 @@ const associationArgsDef = {
           "operator": "eq"
         });
 
-        let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch}, context);
+        let found = await resolvers.<%=associations_one[i].target_lc_pl%>({search: nsearch, pagination: {limit:2}}, context);
         if(found) {
           if(found.length > 1){
-            let foundIds = [];
-            found.forEach(<%=associations_one[i].target_lc%> => {foundIds.push(<%=associations_one[i].target_lc%>.getIdValue())})
             context.benignErrors.push(new Error(
-              `Not unique "to_one" association Error: Found ${found.length} <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>. Found <%=associations_one[i].target_pl-%> ${models.<%=associations_one[i].target_lc-%>.idAttribute()}s: [${foundIds.toString()}]`
+              `Not unique "to_one" association Error: Found > 1 <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>.`
             ));
           }
           return found[0];
@@ -298,7 +298,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
-        checkCountForOneAndReduceRecordsLimit(context);
+        helper.checkCountAndReduceRecordsLimit(1, context, "<%=associations_generic_one[i].name%>");
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         return await this.<%=associations_generic_one[i].name%>Impl({search}, context, benignErrorReporter);
     } else {
@@ -336,7 +336,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%=associations_generic_many[i].name%>Filter", '<%- associations_generic_many[i].target_lc -%>');
+      helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "<%=associations_generic_many[i].name%>Filter");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -374,7 +374,9 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%=associations_generic_many[i].name%>Connection", '<%- associations_generic_many[i].target_lc -%>');
+      helper.checkCursorBasedPaginationArgument(pagination);
+      let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+      helper.checkCountAndReduceRecordsLimit(limit, context, "<%=associations_generic_many[i].name%>Connection");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -406,13 +408,10 @@ const associationArgsDef = {
  * Section 5
  * Local helper fuctions.
  *
- * checkCountAndReduceRecordsLimit()
- * checkCountForOneAndReduceRecordsLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
-<%- include('./includes/record-limit-helpers'); -%>
 
 /**
  * countAllAssociatedRecords - Count records associated with another given record
@@ -526,7 +525,7 @@ module.exports = {
    */
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
-          await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%- namePl -%>");
+          helper.checkCountAndReduceRecordsLimit(pagination.limit, context,  "<%- namePl -%>");
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
           return await <%- nameLc -%>.readAll(search, order, pagination, benignErrorReporter);
       } else {
@@ -545,10 +544,12 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
    <%- namePl -%>Connection: async function({search, order, pagination}, context){
-         if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-           await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%- namePl -%>Connection");
-           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-           return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
+        if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
+          helper.checkCursorBasedPaginationArgument(pagination);
+          let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+          helper.checkCountAndReduceRecordsLimit(limit, context, "<%- namePl -%>Connection");
+          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+          return await <%- nameLc -%>.readAllCursor(search, order, pagination, benignErrorReporter);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }
@@ -563,7 +564,7 @@ module.exports = {
    */
   readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-        checkCountForOneAndReduceRecordsLimit(context);
+        helper.checkCountAndReduceRecordsLimit(1, context, "readOne<%- nameCp -%>");
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         return await <%- nameLc -%>.readById(<%- idAttribute -%>, benignErrorReporter);
       } else {

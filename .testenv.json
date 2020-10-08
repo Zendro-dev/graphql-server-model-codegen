@@ -17,10 +17,12 @@
   ],
   "models": [
     {
+      "opts": [ "--migrations" ],
       "path": "../integration_test_misc/integration_test_models_instance1",
       "target": [ "gql_science_db_graphql_server1" ]
     },
     {
+      "opts": [ "--migrations" ],
       "path": "../integration_test_misc/integration_test_models_instance2",
       "target": [ "gql_science_db_graphql_server2" ]
     }
@@ -40,6 +42,11 @@
       "opts": [ "-V", "never" ],
       "src": "../integration_test_misc/patches/accession_validate_instance1.patch",
       "dest": "gql_science_db_graphql_server1/validations/accession.js"
+    },
+    {
+      "opts": [ "-V", "never" ],
+      "src": "../integration_test_misc/patches/cat_readAllCursor.patch",
+      "dest": "gql_science_db_graphql_server1/models/sql/cat.js"
     }
   ],
   "templates": [

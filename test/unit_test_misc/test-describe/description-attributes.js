@@ -26,12 +26,12 @@ type Person{
   """
   @search-request
   """
-  dogsFilter(search: searchDogInput, order: [ orderDogInput ], pagination: paginationInput): [Dog]
+  dogsFilter(search: searchDogInput, order: [ orderDogInput ], pagination: paginationInput!): [Dog]
 
   """
   @search-request
   """
-  dogsConnection(search: searchDogInput, order: [ orderDogInput ], pagination: paginationCursorInput): DogConnection
+  dogsConnection(search: searchDogInput, order: [ orderDogInput ], pagination: paginationCursorInput!): DogConnection
 
   """
   @count-request
@@ -41,12 +41,12 @@ type Person{
   """
   @search-request
   """
-  booksFilter(search: searchBookInput, order: [ orderBookInput ], pagination: paginationInput): [Book]
+  booksFilter(search: searchBookInput, order: [ orderBookInput ], pagination: paginationInput!): [Book]
 
   """
   @search-request
   """
-  booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput): BookConnection
+  booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput!): BookConnection
 
   """
   @count-request
@@ -83,12 +83,12 @@ type Person{
   """
   @search-request
   """
-  dogsFilter(search: searchDogInput, order: [ orderDogInput ], pagination: paginationInput): [Dog]
+  dogsFilter(search: searchDogInput, order: [ orderDogInput ], pagination: paginationInput!): [Dog]
 
   """
   @search-request
   """
-  dogsConnection(search: searchDogInput, order: [ orderDogInput ], pagination: paginationCursorInput): DogConnection
+  dogsConnection(search: searchDogInput, order: [ orderDogInput ], pagination: paginationCursorInput!): DogConnection
 
   """
   @count-request
@@ -98,12 +98,12 @@ type Person{
   """
   @search-request
   """
-  booksFilter(search: searchBookInput, order: [ orderBookInput ], pagination: paginationInput): [Book]
+  booksFilter(search: searchBookInput, order: [ orderBookInput ], pagination: paginationInput!): [Book]
 
   """
   @search-request
   """
-  booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput): BookConnection
+  booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput!): BookConnection
 
   """
   @count-request

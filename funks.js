@@ -294,7 +294,7 @@ writeSchemaCommons = function(dir_write){
   }
 
   input paginationInput{
-    limit: Int
+    limit: Int!
     offset: Int
   }
 
@@ -941,9 +941,9 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
   dir_write = (dir_write===undefined) ? __dirname : dir_write;
   //msg
   console.log(colors.white('\n@ Starting code generation in: \n', colors.dim(path.resolve(dir_write))), "\n");
-  //op: verbose
+  //op: verbose, migrations
   let verbose = (options && typeof options === 'object' && typeof options.verbose === 'boolean') ? options.verbose : false;
-
+  let migrations = options.migrations
   /**
    * Create sections dirs
    */
@@ -1064,11 +1064,13 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',     template: 'schemas',     fileName: opts.nameLc},
           {dir: 'resolvers',   template: 'resolvers',   fileName: opts.nameLc},
-          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},
-          {dir: migrationsDir, template: 'migrations',  fileName: opts.nameLc},
+          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},          
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',     template: 'patches',     fileName: opts.nameLc},
         ]
+        if (migrations){
+          sections.push({dir: migrationsDir, template: 'migrations',  fileName: opts.nameLc})
+        }
         break;
 
       case 'zendro-server':
