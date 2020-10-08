@@ -4,7 +4,7 @@ Command line utility to generate the structure files that Zendro [graphql-server
 
 ## Set up
 Clone the repository and run:
-```
+```sh
 $ npm install -g
 ```
 If you only want to install it locally run `npm install` instead
@@ -12,43 +12,31 @@ If you only want to install it locally run `npm install` instead
 ## Usage
 
 To run the unit-test case:
-```
+```sh
 $ npm run test-unit
 ```
 
 To run the integration-test case
-```
+```sh
 $ npm run test-integration [-- OPTIONS]
 ```
 Note:
-Integration-test case creates a docker-compose environment with three servers:
+Integration-test case creates a `docker-compose` environment with three servers:
 
-```
+```sh
 gql_postgres
 gql_science_db_graphql_server
 gql_ncbi_sim_srv
 ```
 
-### Examples of use - Test integration
+### Examples of use - Integration Tests
 
-To see full test-integration info:
-```bash
-$ npm run test-integration -- -h
-```
+This repository uses [`zendro-env`](https://github.com/Zendro-dev/zendro-integration-tests) to create the integration-tests environment and launch the `mocha` test-runner. Find more information in its repository documentation.
 
+#### Default
 To execute a default test run:
 ```bash
 $ npm run test-integration
-```
-
-To test a specific `graphql-server` branch:
-```bash
-$ npm run test-integration -- b <branch_name>
-```
-
-To generate code:
-```bash
-$ npm run test-integration -- -g
 ```
 
 To generate code and do the tests, removing all Docker images at end:
@@ -66,19 +54,27 @@ To do the tests only and keep the containers running at end:
 $ npm run test-integration -- -t -k
 ```
 
-To restart containers:
+#### Environment Commands
+
+To get information about available commands and options:
 ```bash
-$ npm run test-integration -- -r
+$ npm run test-env -- --help
+```
+
+To manage docker containers:
+```bash
+$ npm run test-env -- docker        # up containers and check connections
+$ npm run test-env -- docker --down # down containers
 ```
 
 To clean generated code, remove containers and volumes:
 ```bash
-$ npm run test-integration -- -C
+$ npm run test-env -- -C
 ```
 
 To do a full clean up (removes containers, images and code):
 ```bash
-$ npm run test-integration -- -c
+$ npm run test-env -- -c
 ```
 
 ### Examples of use - Code Generator

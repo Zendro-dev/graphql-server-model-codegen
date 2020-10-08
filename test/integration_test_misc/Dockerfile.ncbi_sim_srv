@@ -1,0 +1,10 @@
+FROM node:11.6.0-alpine
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Update and install tooling
+RUN apk update && apk add bash
+
+# Map the port
+EXPOSE 3344

@@ -4,20 +4,6 @@
 # NPM package manager temporary files and folders
 node_modules
 npm-debug.log
-package-lock.json
 
 # ModelGen output folders
-migrations
-generic
-sql
-distributed
-adapters
-zendro-server
-resolvers
-schemas
-validations
-patches
-adapters
-seeders
-TestConcept.js
-.eslintrc.js
+test/integration_test_env

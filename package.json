@@ -9,9 +9,9 @@
   "main": "index.js",
   "bin": "./index.js",
   "scripts": {
+    "test-env": "zendro-env",
     "test-unit": "mocha ./test/mocha_unit_test.js",
-    "test-integration": "bash ./test/sh_integration_test_run.sh",
-    "test-integration-clear": "bash ./test/sh_integration_test_run.sh -c"
+    "test-integration": "zendro-env integration"
   },
   "author": "Science-DB team",
   "license": "GPL-3.0",
@@ -33,6 +33,7 @@
     "eslint-plugin-ejs": "0.0.2",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^7.1.2",
-    "require-from-string": "^2.0.2"
+    "require-from-string": "^2.0.2",
+    "zendro-env": "https://github.com/Zendro-dev/zendro-integration-tests.git"
   }
 }
