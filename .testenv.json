@@ -1,5 +1,8 @@
 {
   "cwd": "./test/integration_test_env",
+  "env": {
+    "NODE_JQ_SKIP_INSTALL_BINARY": true
+  },
   "docker": "../integration_test_misc/docker-compose-test.yml",
   "services": [
     {
@@ -72,8 +75,5 @@
       "runner": "mocha",
       "target": "gql-codegen/test/mocha_unit_test.js"
     }
-  ],
-  "env": {
-    "NODE_JQ_SKIP_INSTALL_BINARY": true
-  }
+  ]
 }
