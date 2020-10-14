@@ -221,7 +221,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
 
     <%if(associations_temp[i].assocThroughArray){%>
-      if(this.<%=associations_temp[i].sourceKey%>.lenght !== 0){
+      if(this.<%=associations_temp[i].sourceKey%>.length !== 0){
         let nsearch = helper.addSearchField({
           "search": search,
           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
@@ -254,7 +254,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
 
     <%if(associations_temp[i].assocThroughArray){%>
-        if(this.<%=associations_temp[i].sourceKey%>.lenght === 0) return 0;
+        if(this.<%=associations_temp[i].sourceKey%>.length === 0) return 0;
         let nsearch = helper.addSearchField({
           "search": search,
           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
@@ -288,7 +288,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
 
     <%if(associations_temp[i].assocThroughArray){%>
-      if(this.<%=associations_temp[i].sourceKey%>.lenght !== 0){
+      if(this.<%=associations_temp[i].sourceKey%>.length !== 0){
         let nsearch = helper.addSearchField({
           "search": search,
           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),

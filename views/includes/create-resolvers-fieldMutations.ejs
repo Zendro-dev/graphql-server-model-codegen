@@ -24,7 +24,7 @@
       //handle inverse association
       let promises = [];
       input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.forEach( id =>{
-        promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(id, [ this.getIdValue() ], benignErrorReporter) );
+        promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(id, [`${this.getIdValue()}`], benignErrorReporter) );
       });
       await Promise.all(promises);
 

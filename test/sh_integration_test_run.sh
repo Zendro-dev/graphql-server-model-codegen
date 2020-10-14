@@ -169,7 +169,7 @@ DOCKER_SERVICES=(
   gql_science_db_graphql_server
   gql_ncbi_sim_srv
 )
-TARGET_BRANCH=master
+TARGET_BRANCH=issue-foreign-key-arrays
 TARGET_DIR="./docker/integration_test_run"
 INSTANCE_DIRS=(
   "servers/instance1"

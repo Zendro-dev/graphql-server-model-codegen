@@ -11,19 +11,21 @@ author.prototype.booksFilter = function({
     pagination
 }, context){
 
-  let nsearch = helper.addSearchField({
-        "search": search,
-        "field": models.book.idAttribute(),
-        "value": this.book_ids.join(','),
-        "valueType": "Array",
-        "operator": "in"
-    });
+  if(this.book_ids.length !== 0){
+    let nsearch = helper.addSearchField({
+          "search": search,
+          "field": models.book.idAttribute(),
+          "value": this.book_ids.join(','),
+          "valueType": "Array",
+          "operator": "in"
+      });
 
-  return resolvers.books({
-      search: nsearch,
-      order: order,
-      pagination: pagination
-  }, context);
+    return resolvers.books({
+        search: nsearch,
+        order: order,
+        pagination: pagination
+    }, context);
+  }
 }
 
 `
@@ -34,7 +36,7 @@ author.prototype.booksConnection = function({
     order,
     pagination
 }, context){
-
+  if(this.book_ids.length !== 0){
   let nsearch = helper.addSearchField({
         "search": search,
         "field": models.book.idAttribute(),
@@ -48,11 +50,14 @@ author.prototype.booksConnection = function({
         order: order,
         pagination: pagination
     }, context);
+  }
 }
 `
 
 module.exports.resolver_count_association = `
 author.prototype.countFilteredBooks = function({search}, context){
+
+  if(this.book_ids.length === 0) return 0;
   let nsearch = helper.addSearchField({
         "search": search,
         "field":models.book.idAttribute(),
@@ -71,7 +76,7 @@ author.prototype.add_books = async function(input, benignErrorReporter){
   //handle inverse association
   let promises = [];
   input.addBooks.forEach( id => {
-    promises.push( models.book.add_author_ids( id ,[ this.getIdValue()], benignErrorReporter ) );
+    promises.push( models.book.add_author_ids( id ,[ \`\${this.getIdValue()}\`], benignErrorReporter ) );
   });
   await Promise.all(promises);
 
@@ -86,7 +91,7 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
   //handle inverse association
   let promises = [];
   input.removeBooks.forEach( id => {
-    promises.push( models.book.remove_author_ids( id ,[ this.getIdValue()], benignErrorReporter ) );
+    promises.push( models.book.remove_author_ids( id ,[ \`\${this.getIdValue()}\`], benignErrorReporter ) );
   });
   await Promise.all(promises);
 
