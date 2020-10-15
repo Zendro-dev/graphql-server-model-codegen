@@ -20,7 +20,15 @@
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
     */
-    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      //handle inverse association
+      if(handle_inverse){
+        let promises = [];
+        <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+        });
+        await Promise.all(promises);
+      }
 
       let record = await super.findByPk(id);
       if(record!==null){

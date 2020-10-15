@@ -72,14 +72,6 @@ author.prototype.countFilteredBooks = function({search}, context){
 
 module.exports.resolver_add_association = `
 author.prototype.add_books = async function(input, benignErrorReporter){
-
-  //handle inverse association
-  let promises = [];
-  input.addBooks.forEach( id => {
-    promises.push( models.book.add_author_ids( id ,[ \`\${this.getIdValue()}\`], benignErrorReporter ) );
-  });
-  await Promise.all(promises);
-
   await author.add_book_ids(this.getIdValue(), input.addBooks, benignErrorReporter);
   this.book_ids =  helper.unionIds(this.book_ids, input.addBooks);
 }
@@ -87,21 +79,21 @@ author.prototype.add_books = async function(input, benignErrorReporter){
 
 module.exports.resolver_remove_association = `
 author.prototype.remove_books = async function(input, benignErrorReporter){
-
-  //handle inverse association
-  let promises = [];
-  input.removeBooks.forEach( id => {
-    promises.push( models.book.remove_author_ids( id ,[ \`\${this.getIdValue()}\`], benignErrorReporter ) );
-  });
-  await Promise.all(promises);
-
   await author.remove_book_ids(this.getIdValue(), input.removeBooks, benignErrorReporter);
   this.book_ids = helper.differenceIds(this.book_ids, input.removeBooks);
 }
 `
 
  module.exports.model_add_association = `
- static async add_book_ids(id, book_ids){
+ static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true){
+   //handle inverse association
+   if (handle_inverse) {
+   let promises = [];
+   book_ids.forEach( idx => {
+     promises.push( models.book.add_author_ids( idx ,[ \`\${id}\`], benignErrorReporter, false ) );
+   });
+   await Promise.all(promises);
+    }
 
    let record = await super.findByPk(id);
    if(record!==null){
@@ -112,7 +104,16 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
  `
 
  module.exports.model_remove_association = `
- static async remove_book_ids(id, book_ids){
+ static async remove_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true){
+   //handle inverse association
+   if (handle_inverse) {
+   let promises = [];
+   book_ids.forEach( idx => {
+     promises.push( models.book.remove_author_ids(idx, [ \`\${id}\`], benignErrorReporter, false ));
+   });
+   await Promise.all(promises);
+   }
+
    let record = await super.findByPk(id);
    if(record!==null){
      let updated_ids = helper.differenceIds(record.book_ids, book_ids);
@@ -211,7 +212,16 @@ static async add_book_ids(id, book_ids, benignErrorReporter) {
 
 `
 module.exports.sql_adapter_add = `
-static async add_book_ids(id, book_ids) {
+static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true) {
+
+  //handle inverse association
+  if (handle_inverse) {
+      let promises = [];
+      book_ids.forEach(idx => {
+          promises.push(models.sq_book.add_author_ids(idx, [\`\${id}\`], benignErrorReporter, false));
+      });
+      await Promise.all(promises);
+  }
 
     let record = await super.findByPk(id);
     if(record!==null){
@@ -222,6 +232,8 @@ static async add_book_ids(id, book_ids) {
     }
 }
 `
+
+
 
 module.exports.zendro_adapter_remove = `
 static async remove_book_ids(id, book_ids, benignErrorReporter) {

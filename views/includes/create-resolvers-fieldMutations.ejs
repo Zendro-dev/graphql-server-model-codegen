@@ -20,14 +20,7 @@
   */
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input, benignErrorReporter) {
 
-    <%if(associationsArguments["to_many"][i].reverseAssociationType === 'to_many'){-%>
-      //handle inverse association
-      let promises = [];
-      input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.forEach( id =>{
-        promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(id, [`${this.getIdValue()}`], benignErrorReporter) );
-      });
-      await Promise.all(promises);
-
+    <%if(associationsArguments["to_many"][i].assocThroughArray){-%>
       await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_many"][i].sourceKey%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>, benignErrorReporter);
       this.<%-associationsArguments["to_many"][i].sourceKey%> = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(this.<%-associationsArguments["to_many"][i].sourceKey%>, input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>);
     <%}else{-%>
