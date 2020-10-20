@@ -133,6 +133,7 @@ attributesToString = function(attributes){
  */
 attributesToJsonSchemaProperties = function(attributes) {
   let jsonSchemaProps = Object.assign({}, attributes)
+  let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']
 
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
@@ -171,6 +172,10 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "isoDateTime": true },
           { "type": "null" }
         ]
+      }
+    } else if (arrayType.includes(jsonSchemaProps[key])){
+      jsonSchemaProps[key] = {
+        "type": ["array", "null"]
       }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);

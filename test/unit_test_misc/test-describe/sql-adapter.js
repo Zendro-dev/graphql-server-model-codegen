@@ -31,6 +31,48 @@ static init(sequelize, DataTypes) {
     });
 }
 `
+module.exports.array_constructor = `
+static init(sequelize, DataTypes) {
+    return super.init({
+  
+        arrId: {
+            type: Sequelize[dict['String']],
+            primaryKey: true
+        },
+        country: {
+            type: Sequelize[dict['String']]
+        },
+        arrStr: {
+            type: Sequelize.ARRAY(Sequelize[dict['String']])
+        },
+        arrInt: {
+            type: Sequelize.ARRAY(Sequelize[dict['Int']])
+        },
+        arrFloat: {
+            type: Sequelize.ARRAY(Sequelize[dict['Float']])
+        },
+        arrBool: {
+            type: Sequelize.ARRAY(Sequelize[dict['Boolean']])
+        },
+        arrDate: {
+            type: Sequelize.ARRAY(Sequelize[dict['Date']])
+        },
+        arrTime: {
+            type: Sequelize.ARRAY(Sequelize[dict['Time']])
+        },
+        arrDateTime: {
+            type: Sequelize.ARRAY(Sequelize[dict['DateTime']])
+        }
+  
+  
+    }, {
+        modelName: "arr",
+        tableName: "arrs",
+        sequelize
+    });
+}
+`
+
 module.exports.storageHandler = `
 /**
  * Get the storage handler, which is a static property of the data model class.

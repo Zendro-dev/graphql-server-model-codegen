@@ -634,3 +634,21 @@ module.exports.book_extendedIds = {
   "internalId": "internalBookId"
 }
 
+module.exports.arr = {
+  "model": "Arr",
+  "storageType": "sql",
+  "attributes" : {
+    "arrId": "String",
+    "country": "String",
+    "arrStr": "[String]",
+    "arrInt": "[Int]",
+    "arrFloat": "[Float]",
+    "arrBool": "[Boolean]",
+    "arrDate": "[Date]",
+    "arrTime": "[Time]",
+    "arrDateTime": "[DateTime]"
+  },
+
+  "internalId" : "arrId"
+
+}

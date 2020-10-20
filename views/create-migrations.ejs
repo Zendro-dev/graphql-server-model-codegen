@@ -35,7 +35,10 @@ module.exports = {
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
         <%=  keys[i] %>: {
-            type: Sequelize[ dict['<%= type_seq %>'] ]<%if(externalIds.includes(keys[i])){-%>,
+            type: <%if(type_seq[0]==='['){-%>
+              Sequelize.ARRAY(Sequelize[ dict['<%= type_seq.slice(1, -1) %>'] ])
+              <% } else {-%>
+              Sequelize[ dict['<%= type_seq %>'] ]<%}-%><%if(externalIds.includes(keys[i])){-%>,
             allowNull: false,
             unique: true
             <%}-%>

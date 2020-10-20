@@ -2829,3 +2829,72 @@ describe(
       })
     });
   });
+
+
+  describe(
+    'Array type attributes: create, update and read record for Arr table',
+    function() {
+  
+      after(async function() {
+          // Delete all arrs
+          res = itHelpers.request_graph_ql_post('{ arrs(pagination:{limit:25}) {arrId} }');
+          let arrs = JSON.parse(res.body.toString('utf8')).data.arrs;
+  
+          for(let i = 0; i < arrs.length; i++){
+              res = itHelpers.request_graph_ql_post(`mutation { deleteArr (arrId: ${arrs[i].arrId}) }`);
+              expect(res.statusCode).to.equal(200);
+          }
+  
+          let cnt = await itHelpers.count_all_records('countArrs');
+          expect(cnt).to.equal(0)
+  
+      })
+  
+  
+      it('01. Arr create', async function() {
+          let res = itHelpers.request_graph_ql_post('mutation { addArr(arrId: 1, country: "Germany", ' +
+          'arrStr:["str1", "str2", "str3"], arrInt:[1, 2, 3], arrFloat:[1.1, 3.34, 453.232], arrBool:[true, false]) { arrId } }');
+
+          expect(res.statusCode).to.equal(200);
+  
+          let cnt = await itHelpers.count_all_records('countArrs');
+          expect(cnt).to.equal(1);
+      });
+  
+  
+      it('02. Arr update', function() {
+          res = itHelpers.request_graph_ql_post(`mutation { updateArr(arrId: 1, arrDate: ["2001-11-15", "2020-10-05"]) {arrId arrDate} }`);
+          resBody = JSON.parse(res.body.toString('utf8'));
+  
+          expect(res.statusCode).to.equal(200);
+          expect(resBody).to.deep.equal({
+              data: {
+                  updateArr: {
+                      arrId: "1",
+                      arrDate: ["2001-11-15", "2020-10-05"]
+                  }
+              }
+          })
+      });
+  
+  
+      it('03. Arr read', function() {  
+          res = itHelpers.request_graph_ql_post('{ readOneArr(arrId : 1) { arrId country arrInt arrBool arrDate } }');
+          resBody = JSON.parse(res.body.toString('utf8'));
+  
+          expect(res.statusCode).to.equal(200);
+          expect(resBody).to.deep.equal({
+              data: {
+                  readOneArr: {
+                      arrId: "1",
+                      country: "Germany", 
+                      arrInt: [1, 2, 3], 
+                      arrBool: [true, false],
+                      arrDate: ["2001-11-15", "2020-10-05"]
+                  }
+              }
+          })
+  
+      });
+
+    })  
