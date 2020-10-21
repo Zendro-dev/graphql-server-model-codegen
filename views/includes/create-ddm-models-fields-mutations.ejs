@@ -23,9 +23,9 @@
   * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated.
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
   */
-  static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {
+  static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
     let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter);
+    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse);
   }
   <%}-%>
 <%}-%>

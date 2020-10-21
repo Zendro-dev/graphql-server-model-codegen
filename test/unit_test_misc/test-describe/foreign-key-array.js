@@ -204,9 +204,9 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
  `
 
 module.exports.ddm_model_add = `
-static async add_book_ids(id, book_ids, benignErrorReporter) {
+static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true) {
   let responsibleAdapter = this.adapterForIri(id);
-  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter);
+  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter, handle_inverse);
 
 }
 
