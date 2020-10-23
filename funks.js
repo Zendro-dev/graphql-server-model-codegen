@@ -291,6 +291,9 @@ writeSchemaCommons = function(dir_write){
     ne
     regexp
     notRegexp
+    contains
+    contained
+    not
   }
 
   enum Order{
