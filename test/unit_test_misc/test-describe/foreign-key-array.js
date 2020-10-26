@@ -152,7 +152,7 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
      if(response && response.data && response.data.data) {
        return new post_author(response.data.data.updatePost_author);
      } else {
-       throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+       throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
      }
    } catch(error){
      //handle caught errors
@@ -193,7 +193,7 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
      if(response && response.data && response.data.data) {
        return new post_author(response.data.data.updatePost_author);
      } else {
-       throw new Error(\`Invalid response from remote zendro-server: \${remoteZendroURL}\`);
+       throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
      }
    } catch(error){
      //handle caught errors

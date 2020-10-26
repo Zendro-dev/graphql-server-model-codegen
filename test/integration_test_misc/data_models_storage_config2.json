@@ -4,8 +4,7 @@
     "username": "sciencedb",
     "password": "sciencedb",
     "database": "sciencedb_development",
-    "host": "gql_postgres1",
-    "dialect": "postgres",
-    "operatorsAliases": false
+    "host": "gql_postgres2",
+    "dialect": "postgres"
   }
 }

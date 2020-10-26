@@ -46,7 +46,7 @@ const associationArgsDef = {
             "value": this.<%= associations_one[i].targetKey -%>,
             "operator": "eq"
           });
-          let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context);
+          let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch,  pagination: {first:1}}, context);
           if (found) {
             return found[0]
           }
@@ -62,14 +62,12 @@ const associationArgsDef = {
           "operator": "eq"
         });
 
-        let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch}, context)).edges;
+        let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch, pagination: {first:2}}, context)).edges;
 
         if(found.length > 0) {
           if(found.length > 1){
-            let foundIds = [];
-            found.forEach(<%=associations_one[i].target_lc%> => {foundIds.push(<%=associations_one[i].target_lc%>.node.getIdValue())})
             context.benignErrors.push(new Error(
-              `Not unique "to_one" association Error: Found ${found.length} <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this association a "to_many", using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>. Found <%=associations_one[i].target_pl-%> ${models.<%=associations_one[i].target_lc-%>.idAttribute()}s: [${foundIds.toString()}]`
+              `Not unique "to_one" association Error: Found > 1 <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>.`
             ));
           }
           return found[0].node;
@@ -172,7 +170,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
-      checkCountForOneAndReduceRecordsLimit(context);
+      helper.checkCountAndReduceRecordsLimit(1, context, "<%=associations_generic_one[i].name%>");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_one[i].name%>Impl({search}, context, benignErrorReporter);
     } else {
@@ -210,7 +208,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%=associations_generic_many[i].name%>Filter", '<%- associations_generic_many[i].target_lc -%>');
+      helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "<%=associations_generic_many[i].name%>Filter");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -248,7 +246,9 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Connection = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      await checkCountAndReduceRecordsLimit({search, pagination}, context, "<%=associations_generic_many[i].name%>Connection", '<%- associations_generic_many[i].target_lc -%>' );
+      helper.checkCursorBasedPaginationArgument(pagination);
+      let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+      helper.checkCountAndReduceRecordsLimit(limit, context, "<%=associations_generic_many[i].name%>Connection");
       let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
     } else {
@@ -280,13 +280,10 @@ const associationArgsDef = {
  * Local helper fuctions.
  *
  * Functions:
- * checkCountAndReduceRecordsLimit()
- * checkCountForOneAndReduceRecordsLimit()
  * countAllAssociatedRecords()
  * validForDeletion()
  */
 -%>
-<%- include('./includes/record-limit-helpers'); -%>
 /**
  * countAllAssociatedRecords - Count records associated with another given record
  *
@@ -379,6 +376,11 @@ module.exports = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- namePl -%>Connection: async function({search, order, pagination}, context){
+    // check valid pagination arguments
+    helper.checkCursorBasedPaginationArgument(pagination);
+    // reduce recordsLimit and check if exceeded
+    let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
+    helper.checkCountAndReduceRecordsLimit(limit, context, "<%- namePl -%>Connection");
 
     //construct benignErrors reporter with context
     let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
@@ -388,28 +390,28 @@ module.exports = {
       throw new Error('No adapters registered for data model "<%- name %>"');
     }//else
 
-      //exclude adapters
-      let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
-      if(adapters.length === 0) {
-        throw new Error('All adapters was excluded for data model "<%- name %>"');
-      }//else
+    //exclude adapters
+    let adapters = helper.removeExcludedAdapters(search, registeredAdapters);
+    if(adapters.length === 0) {
+      throw new Error('All adapters was excluded for data model "<%- name %>"');
+    }//else
 
-      //check: auth adapters
-      let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
-      if (authorizationCheck.authorizedAdapters.length > 0) {
-        //check adapter authorization Errors
-        if (authorizationCheck.authorizationErrors.length > 0) {
-          context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
-        }
-        return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
-      } else { //adapters not auth || errors
-          // else new Error
-          if (authorizationCheck.authorizationErrors.length > 0) {
-              throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
-          } else {
-              throw new Error('No available adapters for data model "<%- name %>" ');
-          }
+    //check: auth adapters
+    let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
+    if (authorizationCheck.authorizedAdapters.length > 0) {
+      //check adapter authorization Errors
+      if (authorizationCheck.authorizationErrors.length > 0) {
+        context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
       }
+      return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
+    } else { //adapters not auth || errors
+        // else new Error
+        if (authorizationCheck.authorizationErrors.length > 0) {
+            throw new Error(authorizationCheck.authorizationErrors.reduce((a, c) => `${a}, ${c.message}`));
+        } else {
+            throw new Error('No available adapters for data model "<%- name %>" ');
+        }
+    }
   },
 
 
@@ -424,6 +426,7 @@ module.exports = {
     //check: adapters auth
       let authorizationCheck = await checkAuthorization(context, <%- nameLc _%>.adapterForIri(<%- idAttribute _%>), 'read');
       if (authorizationCheck === true) {
+        helper.checkCountAndReduceRecordsLimit(1, context, "readOne<%- nameCp -%>");
         //construct benignErrors reporter with context
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
 

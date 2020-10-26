@@ -2,7 +2,7 @@ module.exports.researcher_schema = `
 """
 @search-request
 """
-projectsFilter(search: searchProjectInput, order: [ orderProjectInput ], pagination: paginationInput): [Project]
+projectsFilter(search: searchProjectInput, order: [ orderProjectInput ], pagination: paginationInput!): [Project]
 `
 module.exports.researcher_resolver = `
 /**
