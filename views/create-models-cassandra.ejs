@@ -235,10 +235,10 @@ class <%- name -%> {
   }
 
   <%# generic fieldResolvers %> 
-  <%- include('./includes/create-generic-fieldResolvers') %>
+  <%- include('./includes/create-generic-fieldResolvers'); %>
   
-  <%- include('./includes/create-models-fieldMutations-cassandra', {op: "add"}); %> 
-  <%- include('./includes/create-models-fieldMutations-cassandra', {op: "remove"}); %>
+  <%- include('./includes/create-models-cassandra-fieldMutations', {op: "add"}); %> 
+  <%- include('./includes/create-models-cassandra-fieldMutations', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %> 
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %> 
   
