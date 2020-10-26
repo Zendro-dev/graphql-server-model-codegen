@@ -172,6 +172,10 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "type": "null" }
         ]
       }
+    } else if (jsonSchemaProps[key] === 'uuid') {
+      jsonSchemaProps[key] = {
+        "type": ["uuid", "null"]
+      }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
     }
@@ -248,6 +252,38 @@ getOnlyDescriptionAttributes = function(attributes){
     return only_description;
 }
 
+getCassandraType = function(type) {
+  switch (type.toLowerCase()) {
+    case 'string':
+      return 'text';
+    case 'integer':
+    case 'int':
+      return 'int';
+    case 'id':
+      return 'uuid';
+    default:
+      return type;
+  }
+}
+
+getOnlyCassandraTypeAttributes = function(attributes, idAttribute) {
+  let only_type = {};
+
+    for(key in attributes){
+      if (key == idAttribute) {
+        continue;
+      }
+      if(attributes[key] && typeof attributes[key]==='object' && attributes[key].constructor === Object ){
+        only_type[ key ] = attributes[key].type;
+      }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
+        only_type[key] =  getCassandraType(attributes[key]);
+      }
+
+    }
+
+    return only_type;
+}
+
 /**
  * writeSchemaCommons - Writes a 'commons.js' file into the given directory. This file contains
  * general parts of the graphql schema that are common for all models.
@@ -287,6 +323,21 @@ writeSchemaCommons = function(dir_write){
     regexp
     notRegexp
   }
+  
+  enum CassandraOperator{
+    eq
+    lt
+    gt
+    le
+    ge
+    ne
+    _in
+    cont   # CONTAINS
+    ctk    # CONTAINS KEY
+    tlt    # Token < Token
+    tgt    # Token > Token
+    and
+  }
 
   enum Order{
     DESC
@@ -306,10 +357,20 @@ writeSchemaCommons = function(dir_write){
     includeCursor: Boolean
   }
 
+  input paginationCursorCassandraInput{
+    first: Int!
+    after: String
+  }
+
   type pageInfo{
     startCursor: String
     endCursor: String
     hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+  }
+
+  type pageCassandraInfo{
+    endCursor: String
     hasNextPage: Boolean!
   }
 
@@ -386,63 +447,6 @@ writeIndexModelsCommons = function(dir_write){
     });
 };
 
-writeIndexAdapters = function(dir_write){
-  let index = `
-  const fs = require('fs');
-  const path = require('path');
-  const Sequelize = require('sequelize');
-  sequelize = require('../../connection');
-
-  let adapters = {};
-  module.exports = adapters;
-
-  fs.readdirSync(__dirname)
-    .filter( file =>{ return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
-  }).forEach( file =>{
-
-    let adapter = require(path.join(__dirname, file));
-    if( adapters[adapter.adapterName] ){
-      throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
-    }
-
-    switch(adapter.adapterType) {
-      case 'ddm-adapter':
-      case 'zendro-webservice-adapter':
-      case 'generic-adapter':
-        adapters[adapter.adapterName] = adapter;
-        break;
-
-      case 'sql-adapter':
-        adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
-        break;
-
-      case 'default':
-        throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
-    }
-
-    let patches_patch = path.join(__dirname,'..','..','patches', file);
-    if(fs.existsSync(patches_patch)){
-        adapter = require(\`\${patches_patch}\`).logic_patch(adapter);
-    }
-
-  });
-
-  `
-  try {
-    let file_name = dir_write + '/adapters/' +  'index.js';
-
-    fs.writeFileSync(file_name, index);
-    //success
-    console.log('@@@ File:', colors.dim(file_name), colors.green('written successfully!'));
-
-  } catch(e) {
-    //error
-    console.log('@@@ Error:', colors.dim(file_name), colors.red('error'));
-    console.log(e);
-    throw e;
-  }
-}
-
 writeIndexResolvers = async function(dir_write, models){
   //set file name
   let file_name = dir_write + '/resolvers/index.js';
@@ -497,6 +501,42 @@ convertToType = function(many, model_name){
 };
 
 /**
+ * getIndefiniteArticle - Generate the (uncapitalized) indefinite article that belongs to a given name.
+ * 
+ * @param {string} name - The name that this article is to be used with
+ * @return {string} The indefinite article
+ */
+getIndefiniteArticle = function(name) {
+  let vowelRegex = '^[aeiouAEIOU].*';
+  if (name.match(vowelRegex)) {
+    return 'an';
+  } else {
+    return 'a';
+  }
+}
+
+/**
+ * getStringAttributesInCassandraSchema - Get all String attributes in a model regardless of capitalization.
+ * @param {object} attributes - The attributes of the schema
+ * @return {Array<string>} The string attributes in an array
+ */
+getStringAttributesInCassandraSchema = function(attributes) {
+  let res = [];
+  for (key in attributes) {
+    let attr = attributes[key];
+    if (typeof attr != 'string') { //assume a description object
+      if (attr['type'].toUpperCase() === 'STRING') {
+          res.push(`'${key}'`);
+      }
+    }
+    else if (attr.toUpperCase() === 'STRING') {
+      res.push(`'${key}'`);
+    }
+  }
+  return res;
+}
+
+/**
  * getOptions - Creates object with all extra info and with all data model info.
  *
  * @param  {object} dataModel object created from a json file containing data model info.
@@ -514,6 +554,7 @@ module.exports.getOptions = function(dataModel){
     namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
     namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
     attributes: getOnlyTypeAttributes(dataModel.attributes),
+    cassandraAttributes: getOnlyCassandraTypeAttributes(dataModel.attributes, getIdAttribute(dataModel)),
     jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
     associationsArguments: module.exports.parseAssociations(dataModel),
     arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
@@ -525,12 +566,17 @@ module.exports.getOptions = function(dataModel){
     regex: dataModel.regex || "",
     adapterName: dataModel.adapterName || "",
     registry: dataModel.registry || [],
-    idAttribute: getIdAttribute(dataModel)
+    idAttribute: getIdAttribute(dataModel),
+    indefiniteArticle: getIndefiniteArticle(dataModel.model),
+    indefiniteArticleCp: capitalizeString(getIndefiniteArticle(dataModel.model)),
+    cassandraRestrictions: dataModel.cassandraRestrictions,
+    cassandraStringAttributes: getStringAttributesInCassandraSchema(dataModel.attributes)
   };
 
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
   opts['editableAttributes'] = getEditableAttributes(opts.attributes,  getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel));
   opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
+  opts['cassandraIdAttributeType'] = getCassandraType(dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute]);
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
   dataModel['id'] = {
     name: opts.idAttribute,
@@ -801,23 +847,28 @@ generateSections = async function(sections, opts, dir_write) {
       //schemas
       case 'schemas':
       case 'schemas-ddm':
+      case 'schemas-cassandra':
       //resolvers
       case 'resolvers':
       case 'resolvers-ddm':
       case 'resolvers-generic':
+      case 'resolvers-cassandra':
       //models
       case 'models':
       case 'models-zendro':
       case 'distributed-model':
       case 'models-generic':
+      case 'models-cassandra':
       //adapters
       case 'sql-adapter':
       case 'zendro-adapters':
       case 'generic-adapter':
+      case 'cassandra-adapter':
         file_name = dir_write + '/'+ section.dir +'/' + section.fileName + '.js';
         break;
       //migrations
       case 'migrations':
+      case 'migrations-cassandra':
         file_name = createNameMigration(dir_write, section.dir, section.fileName);
         break;
       //validations & patches
@@ -896,11 +947,13 @@ getStorageType = function(dataModel) {
         case 'distributed-data-model':
         case 'zendro-server':
         case 'generic':
+        case 'cassandra':
         //adapters
         case 'sql-adapter':
         case 'ddm-adapter':
         case 'zendro-webservice-adapter':
         case 'generic-adapter':
+        case 'cassandra-adapter':
           //ok
           break;
 
@@ -932,7 +985,7 @@ getStorageType = function(dataModel) {
  */
 module.exports.generateCode = async function(json_dir, dir_write, options){
   let sectionsDirsA = ['schemas', 'resolvers', 'models', 'migrations', 'validations', 'patches'];
-  let sectionsDirsB = ['models/sql','models/zendro-server', 'models/adapters', 'models/distributed', 'models/generic'];
+  let sectionsDirsB = ['models/sql','models/zendro-server', 'models/adapters', 'models/distributed', 'models/generic', 'models/cassandra'];
   let models = [];
   let adapters = [];
   let attributes_schema = {};
@@ -1102,6 +1155,18 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         ]
         break;
 
+      case 'cassandra':
+        sections = [
+          {dir: 'schemas', template: 'schemas-cassandra', fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers-cassandra', fileName: opts.nameLc},
+          {dir: 'models/cassandra', template: 'models-cassandra', fileName: opts.nameLc},
+        ]
+        if (migrations){
+          sections.push({dir: migrationsDir, template: 'migrations-cassandra',  fileName: opts.nameLc})
+        }
+          
+        break;
+
       case 'zendro-webservice-adapter':
         sections = [
           {dir: 'models/adapters', template: 'zendro-adapters', fileName: opts.adapterName},
@@ -1128,6 +1193,13 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'models/adapters', template: 'generic-adapter', fileName: opts.adapterName},
           {dir: 'patches',    template: 'patches',    fileName:opts.adapterName},
+        ]
+        break;
+      
+      case 'cassandra-adapter':
+        sections = [
+          {dir: 'models/adapters', template: 'cassandra-adapter',    fileName: opts.adapterName},
+          {dir: migrationsDir,     template: 'migrations-cassandra', fileName: opts.nameLc}
         ]
         break;
 
