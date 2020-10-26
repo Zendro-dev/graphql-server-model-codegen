@@ -1,0 +1,50 @@
+'use strict';
+const { cassandraDriver } = require('../models/index');
+const dict = require('../utils/graphql-sequelize-types');
+
+/**
+ * @module - Migrations to create and to undo a table correpondant to a sequelize model.
+ */
+module.exports = {
+
+  /**
+   * up - Creates a table with the fields specified in the the createTable function.
+   *
+   * @param  {object} queryInterface Used to modify the table in the database.
+   * @param  {object} Sequelize      Sequelize instance with data types included
+   * @return {promise}                Resolved if the table was created successfully, rejected otherwise.
+   */
+  up: async function(){
+    let createString = "CREATE TABLE <%-namePl-%>(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY";
+    let indexCreationStrings = [];
+
+    <% let keys = Object.keys(cassandraAttributes) -%>
+      <%for (let i=0; i< keys.length; i++) {-%>
+        <% let type_seq =  cassandraAttributes[ keys[i] ] -%>
+          createString += ", <%=  keys[i] %> <%= type_seq %>";
+          indexCreationStrings.push("<%= keys[i] %>");
+       <%}-%>
+    
+    createString += ");";
+
+    await cassandraDriver.execute(createString);
+
+    let indexCreationPromises = indexCreationStrings.map(async i =>  
+      await cassandraDriver.execute('CREATE INDEX IF NOT EXISTS ' + i + '_index ON <%-namePl-%> (' + i + ');'));
+
+    await Promise.allSettled(indexCreationPromises);
+
+  },
+
+  /**
+   * down - Deletes a table.
+   *
+   * @param  {object} queryInterface Used to modify the table in the database.
+   * @param  {object} Sequelize      Sequelize instance with data types included
+   * @return {promise}                Resolved if the table was deleted successfully, rejected otherwise.
+   */
+  down: async function(){
+    await cassandraDriver.execute('DROP TABLE IF EXISTS <%-namePl-%>');
+  }
+
+};
