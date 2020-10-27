@@ -2964,6 +2964,7 @@ describe(
         "data": {sq_booksConnection: {"edges": [{"node": {"id": "local_b1","author_ids": []}},{"node": {"id": "local_b2","author_ids": []}},{"node": {"id": "remote_b1","author_ids": []}},{"node": {"id": "remote_b2","author_ids": []}}] }}
       });
     });
+  });
 
   describe('generic readAllCursor', function() {
 
