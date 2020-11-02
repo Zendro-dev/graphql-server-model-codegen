@@ -638,6 +638,7 @@ module.exports = {
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized, benignErrorReporter);
+            inputSanitized = <%- nameLc -%>.preWriteCast(inputSanitized)
             await created<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
             return created<%- nameCp -%>;
         } else {

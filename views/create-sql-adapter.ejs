@@ -43,10 +43,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
         <%=  keys[i] %>: {
-          type: <%if(type_seq[0]==='['){-%>
-            Sequelize.ARRAY(Sequelize[ dict['<%= type_seq.slice(1, -1) %>'] ])
-            <% } else {-%>
-            Sequelize[ dict['<%= type_seq %>'] ]<%}-%><% if(type_seq === 'Time' ){-%>,
+          type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
           get(){
               let <%=  keys[i] %> = this.getDataValue('<%=  keys[i] %>');
               if(<%=  keys[i] %> !== null ){
@@ -85,6 +82,38 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   get storageHandler() {
     return this.sequelize;
   }
+
+
+  /**
+    * Cast array to JSON string for the storage.
+    * @param  {object} record  Original data record.
+    * @return {object}         Record with JSON string if necessary.
+    */
+  static preWriteCast(record){
+    for(let attr in definition.attributes){
+      let type = definition.attributes[ attr ].replace(/\s+/g, '');
+      if(type[0]==='[' && record[ attr ]!== undefined && record[ attr ]!== null){
+        record[ attr ] = JSON.stringify(record[attr]);
+      }
+    }
+    return record;
+  }
+
+  /**
+  * Cast JSON string to array for the validation.
+  * @param  {object} record  Record with JSON string if necessary.
+  * @return {object}         Parsed data record.
+  */
+  static postReadCast(record){
+      for(let attr in definition.attributes){
+          let type = definition.attributes[ attr ].replace(/\s+/g, '');
+          if(type[0]==='[' && record[attr] !== undefined && record[ attr ]!== null){
+              record[ attr ] = JSON.parse(record[attr]);
+          }
+      }
+      return record;
+  }
+  
   
   static recognizeId(iri){
     return iriRegex.test(iri);
@@ -95,6 +124,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
+    item = <%- name -%>.postReadCast(item)
     return item;
   }
 
@@ -122,6 +152,8 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
+    records = records.map(x => <%- name -%>.postReadCast(x))
+
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
@@ -136,12 +168,14 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static async addOne(input){
-
+    input = <%- name -%>.preWriteCast(input)
     try{
       const result = await this.sequelize.transaction( async(t) =>{
         let item = await super.create(input, {transaction:t});
         return item;
       });
+      <%- name -%>.postReadCast(result.dataValues)
+      <%- name -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
@@ -159,6 +193,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static async updateOne(input){
+    input = <%- name -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
         let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
@@ -166,7 +201,9 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       });
       if(result[0] === 0){
         throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
-      }
+      }      
+      <%- name -%>.postReadCast(result[1][0].dataValues)
+      <%- name -%>.postReadCast(result[1][0]._previousDataValues)
       return result[1][0];
     }catch(error){
       throw error;

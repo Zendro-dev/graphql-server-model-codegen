@@ -43,27 +43,26 @@ static init(sequelize, DataTypes) {
             type: Sequelize[dict['String']]
         },
         arrStr: {
-            type: Sequelize.ARRAY(Sequelize[dict['String']])
+            type: Sequelize[dict['[String]']]
         },
         arrInt: {
-            type: Sequelize.ARRAY(Sequelize[dict['Int']])
+            type: Sequelize[dict['[Int]']]
         },
         arrFloat: {
-            type: Sequelize.ARRAY(Sequelize[dict['Float']])
+            type: Sequelize[dict['[Float]']]
         },
         arrBool: {
-            type: Sequelize.ARRAY(Sequelize[dict['Boolean']])
+            type: Sequelize[dict['[Boolean]']]
         },
         arrDate: {
-            type: Sequelize.ARRAY(Sequelize[dict['Date']])
+            type: Sequelize[dict['[Date]']]
         },
         arrTime: {
-            type: Sequelize.ARRAY(Sequelize[dict['Time']])
+            type: Sequelize[dict['[Time]']]
         },
         arrDateTime: {
-            type: Sequelize.ARRAY(Sequelize[dict['DateTime']])
+            type: Sequelize[dict['[DateTime]']]
         }
-  
   
     }, {
         modelName: "arr",
@@ -94,6 +93,7 @@ static async readById(id) {
     if (item === null) {
         throw new Error(\`Record with ID = "\${id}" does not exist\`);
     }
+    item = Person.postReadCast(item)
     return item;
 }
 `
@@ -101,6 +101,7 @@ static async readById(id) {
 
 module.exports.addOne = `
 static async addOne(input) {
+      input = Person.preWriteCast(input)
       try {
           const result = await this.sequelize.transaction(async (t) => {
               let item = await super.create(input, {
@@ -108,6 +109,8 @@ static async addOne(input) {
               });
               return item;
           });
+          Person.postReadCast(result.dataValues)
+          Person.postReadCast(result._previousDataValues)
           return result;
       } catch (error) {
           throw error;
@@ -140,6 +143,9 @@ static async readAllCursor(search, order, pagination){
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
+
+    records = records.map(x => Person.postReadCast(x))
+
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
@@ -167,6 +173,7 @@ module.exports.deleteOne = `
 
 module.exports.updateOne = `
     static async updateOne(input) {
+      input = Person.preWriteCast(input)
       try {
         let result = await this.sequelize.transaction( async (t) =>{
           let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
@@ -175,6 +182,8 @@ module.exports.updateOne = `
           if(result[0] === 0){
             throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
           }
+          Person.postReadCast(result[1][0].dataValues)
+          Person.postReadCast(result[1][0]._previousDataValues)   
           return result[1][0];
       } catch (error) {
           throw error;

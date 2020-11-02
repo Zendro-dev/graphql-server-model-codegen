@@ -475,6 +475,7 @@ module.exports.add_one_resolver = `
             //construct benignErrors reporter with context
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
            let createdRecord = await accession.addOne(inputSanitized, benignErrorReporter);
+           inputSanitized = accession.preWriteCast(inputSanitized)
            await createdRecord.handleAssociations(inputSanitized, benignErrorReporter);
            return createdRecord;
          } else { //adapter not auth

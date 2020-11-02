@@ -56,25 +56,25 @@ return queryInterface.createTable('arrs', {
         type: Sequelize[dict['String']]
     },
     arrStr: {
-        type: Sequelize.ARRAY(Sequelize[dict['String']])
+        type: Sequelize[dict['[String]']]
     },
     arrInt: {
-        type: Sequelize.ARRAY(Sequelize[dict['Int']])
+        type: Sequelize[dict['[Int]']]
     },
     arrFloat: {
-        type: Sequelize.ARRAY(Sequelize[dict['Float']])
+        type: Sequelize[dict['[Float]']]
     },
     arrBool: {
-        type: Sequelize.ARRAY(Sequelize[dict['Boolean']])
+        type: Sequelize[dict['[Boolean]']]
     },
     arrDate: {
-        type: Sequelize.ARRAY(Sequelize[dict['Date']])
+        type: Sequelize[dict['[Date]']]
     },
     arrTime: {
-        type: Sequelize.ARRAY(Sequelize[dict['Time']])
+        type: Sequelize[dict['[Time]']]
     },
     arrDateTime: {
-        type: Sequelize.ARRAY(Sequelize[dict['DateTime']])
+        type: Sequelize[dict['[DateTime]']]
     }
 
 });

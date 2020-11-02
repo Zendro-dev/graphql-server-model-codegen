@@ -22,6 +22,9 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
+
+    records = records.map(x => Book.postReadCast(x))
+
     // validationCheck after read
     records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
     // get the first record (if exists) in the opposite direction to determine pageInfo.

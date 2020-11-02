@@ -43,10 +43,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
         <%=  keys[i] %>: {
-            type: <%if(type_seq[0]==='['){-%>
-              Sequelize.ARRAY(Sequelize[ dict['<%= type_seq.slice(1, -1) %>'] ])
-              <% } else {-%>
-              Sequelize[ dict['<%= type_seq %>'] ]<%}-%><% if(type_seq === 'Time' ){-%>,
+            type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
             get(){
               let <%=  keys[i] %> = this.getDataValue('<%=  keys[i] %>');
               if(<%=  keys[i] %> !== null ){
@@ -76,6 +73,36 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     */
   get storageHandler() {
     return this.sequelize;
+  }
+
+  /**
+    * Cast array to JSON string for the storage.
+    * @param  {object} record  Original data record.
+    * @return {object}         Record with JSON string if necessary.
+    */
+  static preWriteCast(record){
+    for(let attr in definition.attributes){
+      let type = definition.attributes[ attr ].replace(/\s+/g, '');
+      if(type[0]==='[' && record[ attr ]!== undefined && record[ attr ]!== null){
+        record[ attr ] = JSON.stringify(record[attr]);
+      }
+    }
+    return record;
+  }
+
+  /**
+  * Cast JSON string to array for the validation.
+  * @param  {object} record  Record with JSON string if necessary.
+  * @return {object}         Parsed data record.
+  */
+  static postReadCast(record){
+      for(let attr in definition.attributes){
+          let type = definition.attributes[ attr ].replace(/\s+/g, '');
+          if(type[0]==='[' && record[attr] !== undefined && record[ attr ]!== null){
+              record[ attr ] = JSON.parse(record[attr]);
+          }
+      }
+      return record;
   }
   
   static associate(models){
@@ -112,6 +139,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
+    item = <%- name -%>.postReadCast(item)
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
@@ -127,6 +155,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     // build the sequelize options object for limit-offset-based pagination
     let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());  
     let records = await super.findAll(options);
+    records = records.map(x => <%- name -%>.postReadCast(x))
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
   }
@@ -138,6 +167,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
+
+    records = records.map(x => <%- name -%>.postReadCast(x))
+
     // validationCheck after read
     records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
     // get the first record (if exists) in the opposite direction to determine pageInfo.
@@ -156,11 +188,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async addOne(input){
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
+    input = <%- name -%>.preWriteCast(input)
     try{
       const result = await this.sequelize.transaction( async(t) =>{
         let item = await super.create(input, {transaction:t});
         return item;
       });
+      <%- name -%>.postReadCast(result.dataValues)
+      <%- name -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
@@ -182,6 +217,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async updateOne(input){
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
+    input = <%- name -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
         let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
@@ -190,6 +226,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       if(result[0] === 0){
         throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
       }
+      <%- name -%>.postReadCast(result[1][0].dataValues)
+      <%- name -%>.postReadCast(result[1][0]._previousDataValues)      
       return result[1][0];
     }catch(error){
       throw error;

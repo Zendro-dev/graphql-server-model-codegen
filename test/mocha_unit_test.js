@@ -572,11 +572,7 @@ describe('Model Layer', function(){
   it('Read all model - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_model =await funks.generateJs('create-models', opts);
-    // console.log(generated_model);
-    // testCompare(generated_model,  data_test.read_all)
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.read_all.replace(/\s/g, '');
-    expect(g_model, 'No read all method found').to.have.string(test_model);
+    testCompare(generated_model,data_test.read_all);
   })
 
   it('Read all resolver - dog', async function(){
