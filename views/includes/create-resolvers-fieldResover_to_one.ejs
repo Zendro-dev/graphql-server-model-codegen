@@ -1,0 +1,52 @@
+
+<%let associations_one = associationsArguments["to_one"]-%>
+<% for(let i=0; i < associations_one.length; i++){ -%>
+  /**
+   * <%- nameLc -%>.prototype.<%=associations_one[i].name%> - Return associated record
+   *
+   * @param  {object} search       Search argument to match the associated record
+   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+   * @return {type}         Associated record
+   */
+  <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
+    <% if (associations_one[i].holdsForeignKey) { %>
+    if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
+        if (search === undefined || search === null) {
+          return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
+        } else {
+          //build new search filter
+          let nsearch = helper.addSearchField({
+            "search": search,
+            "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
+            "value": this.<%= associations_one[i].targetKey -%>,
+            "operator": "eq"
+          });
+          let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch,  pagination: {first:1}}, context);
+          if (found) {
+            return found[0]
+          }
+          return found;
+        }
+    }
+    <%}else{-%>
+        //build new search filter
+        let nsearch = helper.addSearchField({
+          "search": search,
+          "field": "<%=associations_one[i].targetKey%>",
+          "value": this.getIdValue(),
+          "operator": "eq"
+        });
+
+        let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch, pagination: {first:2}}, context)).edges;
+        if(found.length > 0) {
+          if(found.length > 1){
+            context.benignErrors.push(new Error(
+              `Not unique "to_one" association Error: Found > 1 <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>.`
+            ));
+          }
+          return found[0].node;
+        }
+        return null;
+    <%}-%>
+  }
+<%}-%>
