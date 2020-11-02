@@ -33,6 +33,7 @@ module.exports = class <%- adapterName -%>{
               {
                 <%- idAttribute -%> <%for(var key in attributes){ %>
                 <%= key %> <%}%>
+                <% if (cassandraRestrictions) { %> toke<% } %>
               }
             }`;
 
@@ -87,10 +88,16 @@ module.exports = class <%- adapterName -%>{
   }
 
   static async readAllCursor(search, order, pagination, benignErrorReporter){
+    <% if (!cassandraRestrictions) {%>
     let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination: paginationCursorInput! $order: [order<%- nameCp -%>Input]){
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
         <%}-%>} } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }`
-
+    <%# if cassandra Restrictions are set it is necessary to also request the token. This is needed to for example post-process-order records from multiple cassandra-adapters %> 
+    <%} else {%>
+    let query = `query <%- namePl -%>Connection($search: search<%- nameCp -%>Input $pagination:paginationCursorCassandraInput!){
+      <%- namePl -%>Connection(search:$search pagination:$pagination){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
+        <%}-%> toke }} pageInfo{ endCursor hasNextPage } } }`
+    <%}%>
         try {
           // Send an HTTP request to the remote server
           let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});

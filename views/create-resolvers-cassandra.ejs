@@ -100,7 +100,6 @@ const associationArgsDef = {
         });
 
         let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch, pagination: {first:2}}, context)).edges;
-
         if(found.length > 0) {
           if(found.length > 1){
             context.benignErrors.push(new Error(
