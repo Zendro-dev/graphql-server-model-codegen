@@ -97,7 +97,8 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
 
    let record = await super.findByPk(id);
    if(record!==null){
-     let updated_ids = helper.unionIds(record.book_ids, book_ids);
+     let updated_ids = helper.unionIds(JSON.parse(record.book_ids), book_ids);
+     updated_ids = JSON.stringify(updated_ids);
      await record.update( {book_ids: updated_ids} );
    }
  }
@@ -116,7 +117,8 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
 
    let record = await super.findByPk(id);
    if(record!==null){
-     let updated_ids = helper.differenceIds(record.book_ids, book_ids);
+     let updated_ids = helper.differenceIds(JSON.parse(record.book_ids), book_ids);
+     updated_ids = JSON.stringify(updated_ids);
      await record.update( {book_ids: updated_ids} );
    }
  }
@@ -225,7 +227,8 @@ static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = tr
 
     let record = await super.findByPk(id);
     if(record!==null){
-      let updated_ids = helper.unionIds(record.book_ids, book_ids);
+      let updated_ids = helper.unionIds(JSON.parse(record.book_ids), book_ids);
+      updated_ids = JSON.stringify(updated_ids);
       await record.update({
           book_ids: updated_ids
       });

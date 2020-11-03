@@ -54,7 +54,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
               }
             }
           <%}-%> <% if(type_seq === '[String]' || type_seq === '[Int]'  ){-%>,
-          defaultValue: []
+          defaultValue: '[]'
           <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>
@@ -124,7 +124,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
-    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());  
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
@@ -133,7 +133,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
@@ -270,7 +270,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
     async <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       // build the sequelize options object for limit-offset-based pagination
-      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());  
+      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());
       return this.get<%- associations_temp[i].name_cp%>(options);
     }
 
