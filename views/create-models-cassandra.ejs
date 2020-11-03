@@ -14,7 +14,7 @@ const definition = <%- definition -%>;
 /**
  * module - Creates a class to administer Cassandra model types
  */
-class <%- name -%> {
+module.exports = class <%- name -%> {
   constructor(input) {
     for (let key of Object.keys(input)) {
       this[key] = input[key];
@@ -350,13 +350,4 @@ class <%- name -%> {
     }
   }
 
-}
-
-module.exports.getAndConnectDataModelClass = function ( cassandraDriver ) {
-  return Object.defineProperty(<%- name -%>, 'storageHandler', {
-    value: cassandraDriver,
-    writable: false, // cannot be changed in the future
-    enumerable: true,
-    configurable: false
-  })
 }
