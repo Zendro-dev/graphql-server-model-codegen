@@ -157,7 +157,7 @@ module.exports = class <%- name -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
+  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
     let authAdapters = [];
     /**
      * Differentiated cases:
