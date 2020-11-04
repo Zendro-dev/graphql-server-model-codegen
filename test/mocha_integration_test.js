@@ -2863,7 +2863,7 @@ describe(
   
   
       it('02. Arr update', function() {
-          res = itHelpers.request_graph_ql_post(`mutation { updateArr(arrId: 1, arrDate: ["2001-11-15", "2020-10-05"]) {arrId arrDate} }`);
+          res = itHelpers.request_graph_ql_post(`mutation { updateArr(arrId: 1, arrDateTime: ["2007-12-03T10:15:30Z", "2007-12-13T10:15:30Z"]) {arrId arrDateTime} }`);
           resBody = JSON.parse(res.body.toString('utf8'));
   
           expect(res.statusCode).to.equal(200);
@@ -2871,7 +2871,7 @@ describe(
               data: {
                   updateArr: {
                       arrId: "1",
-                      arrDate: ["2001-11-15", "2020-10-05"]
+                      arrDateTime: ["2007-12-03T10:15:30.000Z", "2007-12-13T10:15:30.000Z"]
                   }
               }
           })
@@ -2879,7 +2879,7 @@ describe(
   
   
       it('03. Arr read', function() {  
-          res = itHelpers.request_graph_ql_post('{ readOneArr(arrId : 1) { arrId country arrInt arrBool arrDate } }');
+          res = itHelpers.request_graph_ql_post('{ readOneArr(arrId : 1) { arrId country arrInt arrBool arrDateTime } }');
           resBody = JSON.parse(res.body.toString('utf8'));
   
           expect(res.statusCode).to.equal(200);
@@ -2890,69 +2890,26 @@ describe(
                       country: "Germany", 
                       arrInt: [1, 2, 3], 
                       arrBool: [true, false],
-                      arrDate: ["2001-11-15", "2020-10-05"]
+                      arrDateTime: ["2007-12-03T10:15:30.000Z", "2007-12-13T10:15:30.000Z"]
                   }
               }
           })
       });
 
-      it('04. Arr search with contains', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:contains, field:arrInt, value:"1,3",'+ 
-        'valueType: Array}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
+      // it('07. Arr search with eq', function() {
+      //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:eq, field:arrInt, value:"1,2,3",'+ 
+      //   'valueType: Array}, pagination:{limit:3}) {arrId}}');
+      //   let resBody = JSON.parse(res.body.toString('utf8'));
+      //   expect(res.statusCode).to.equal(200);
+      //   expect(resBody.data.arrs.length).equal(1);
+      // });
 
-      it('05. Arr search with contained', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:contained, field:arrInt, value:"1,2,3,4",'+ 
-        'valueType: Array}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
-
-
-      it('06. Arr search with not contains', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search: {operator: not, search:{operator:contains,'+
-        ' field:arrInt, value:"5,6,7", valueType: Array}}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
-
-      it('07. Arr search with eq', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:eq, field:arrInt, value:"1,2,3",'+ 
-        'valueType: Array}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
-
-      it('08. Arr search with ne', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:ne, field:arrInt, value:"1,2,3,4",'+ 
-        'valueType: Array}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
-
-      it('09. Arr search with and', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search: {operator: and, search:['+
-        '{operator:eq, field:arrId, value:"1"}, {operator:eq, field:country, value:"Germany"}'+
-        '{operator:contains, field:arrInt, value:"1,2", valueType: Array}]}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
-
-      it('10. Arr search with or', function() {
-        let res = itHelpers.request_graph_ql_post('{arrs(search: {operator: or, search:['+
-        '{operator:eq, field:arrId, value:"1"}, {operator:eq, field:country, value:"China"}'+
-        '{operator:contains, field:arrInt, value:"5,6", valueType: Array}]}, pagination:{limit:3}) {arrId}}');
-        let resBody = JSON.parse(res.body.toString('utf8'));
-        expect(res.statusCode).to.equal(200);
-        expect(resBody.data.arrs.length).equal(1);
-      });
+      // it('08. Arr search with ne', function() {
+      //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:ne, field:arrInt, value:"1,2,3,4",'+ 
+      //   'valueType: Array}, pagination:{limit:3}) {arrId}}');
+      //   let resBody = JSON.parse(res.body.toString('utf8'));
+      //   expect(res.statusCode).to.equal(200);
+      //   expect(resBody.data.arrs.length).equal(1);
+      // });
 
     })  

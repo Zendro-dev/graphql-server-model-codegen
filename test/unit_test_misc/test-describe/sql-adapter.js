@@ -93,7 +93,7 @@ static async readById(id) {
     if (item === null) {
         throw new Error(\`Record with ID = "\${id}" does not exist\`);
     }
-    item = Person.postReadCast(item)
+    item = peopleLocalSql.postReadCast(item)
     return item;
 }
 `
@@ -101,7 +101,7 @@ static async readById(id) {
 
 module.exports.addOne = `
 static async addOne(input) {
-      input = Person.preWriteCast(input)
+      input = peopleLocalSql.preWriteCast(input)
       try {
           const result = await this.sequelize.transaction(async (t) => {
               let item = await super.create(input, {
@@ -109,8 +109,8 @@ static async addOne(input) {
               });
               return item;
           });
-          Person.postReadCast(result.dataValues)
-          Person.postReadCast(result._previousDataValues)
+          peopleLocalSql.postReadCast(result.dataValues)
+          peopleLocalSql.postReadCast(result._previousDataValues)
           return result;
       } catch (error) {
           throw error;
@@ -144,7 +144,7 @@ static async readAllCursor(search, order, pagination){
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
 
-    records = records.map(x => Person.postReadCast(x))
+    records = records.map(x => peopleLocalSql.postReadCast(x))
 
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
@@ -173,7 +173,7 @@ module.exports.deleteOne = `
 
 module.exports.updateOne = `
     static async updateOne(input) {
-      input = Person.preWriteCast(input)
+      input = peopleLocalSql.preWriteCast(input)
       try {
         let result = await this.sequelize.transaction( async (t) =>{
           let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
@@ -182,8 +182,8 @@ module.exports.updateOne = `
           if(result[0] === 0){
             throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
           }
-          Person.postReadCast(result[1][0].dataValues)
-          Person.postReadCast(result[1][0]._previousDataValues)   
+          peopleLocalSql.postReadCast(result[1][0].dataValues)
+          peopleLocalSql.postReadCast(result[1][0]._previousDataValues)   
           return result[1][0];
       } catch (error) {
           throw error;
