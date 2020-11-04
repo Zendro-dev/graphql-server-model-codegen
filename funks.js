@@ -133,6 +133,7 @@ attributesToString = function(attributes){
  */
 attributesToJsonSchemaProperties = function(attributes) {
   let jsonSchemaProps = Object.assign({}, attributes)
+  let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']
 
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
@@ -172,7 +173,7 @@ attributesToJsonSchemaProperties = function(attributes) {
           { "type": "null" }
         ]
       }
-    }else if(jsonSchemaProps[key] === "[String]" || jsonSchemaProps[key] === "[Int]" ){
+    } else if (arrayType.includes(jsonSchemaProps[key])){
       jsonSchemaProps[key] = {
         "type": ["array", "null"]
       }
@@ -295,6 +296,9 @@ writeSchemaCommons = function(dir_write){
     ne
     regexp
     notRegexp
+    contains
+    contained
+    not
   }
 
   enum Order{
@@ -1086,7 +1090,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',     template: 'schemas',     fileName: opts.nameLc},
           {dir: 'resolvers',   template: 'resolvers',   fileName: opts.nameLc},
-          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},          
+          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',     template: 'patches',     fileName: opts.nameLc},
         ]

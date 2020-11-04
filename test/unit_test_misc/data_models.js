@@ -768,3 +768,22 @@ module.exports.author_zendro_adapter_array_fk ={
     },
     "internalId": "id"
   }
+
+module.exports.arr = {
+  "model": "Arr",
+  "storageType": "sql",
+  "attributes" : {
+    "arrId": "String",
+    "country": "String",
+    "arrStr": "[String]",
+    "arrInt": "[Int]",
+    "arrFloat": "[Float]",
+    "arrBool": "[Boolean]",
+    "arrDate": "[Date]",
+    "arrTime": "[Time]",
+    "arrDateTime": "[DateTime]"
+  },
+
+  "internalId" : "arrId"
+
+}
