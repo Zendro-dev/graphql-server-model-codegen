@@ -462,7 +462,6 @@ module.exports = {
          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
 
           let createdRecord = await <%- nameLc _%>.addOne(inputSanitized, benignErrorReporter);
-          inputSanitized = <%- nameLc -%>.preWriteCast(inputSanitized)
           await createdRecord.handleAssociations(inputSanitized, benignErrorReporter);
           return createdRecord;
       } else {//adapter not auth

@@ -124,7 +124,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    item = <%- name -%>.postReadCast(item)
+    item = <%- adapterName -%>.postReadCast(item)
     return item;
   }
 
@@ -152,7 +152,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
-    records = records.map(x => <%- name -%>.postReadCast(x))
+    records = records.map(x => <%- adapterName -%>.postReadCast(x))
 
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
@@ -168,14 +168,14 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static async addOne(input){
-    input = <%- name -%>.preWriteCast(input)
+    input = <%- adapterName -%>.preWriteCast(input)
     try{
       const result = await this.sequelize.transaction( async(t) =>{
         let item = await super.create(input, {transaction:t});
         return item;
       });
-      <%- name -%>.postReadCast(result.dataValues)
-      <%- name -%>.postReadCast(result._previousDataValues)
+      <%- adapterName -%>.postReadCast(result.dataValues)
+      <%- adapterName -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
@@ -193,7 +193,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static async updateOne(input){
-    input = <%- name -%>.preWriteCast(input)
+    input = <%- adapterName -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
         let to_update = await super.findByPk(input[this.idAttribute()]);
@@ -204,8 +204,8 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
         let updated = await to_update.update( input, { transaction: t } );
         return updated;
       });
-      <%- name -%>.postReadCast(result.dataValues)
-      <%- name -%>.postReadCast(result._previousDataValues)
+      <%- adapterName -%>.postReadCast(result.dataValues)
+      <%- adapterName -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;

@@ -117,7 +117,6 @@ module.exports.add_one_resolver = `
             }
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
-            inputSanitized = book.preWriteCast(inputSanitized)
             await createdBook.handleAssociations(inputSanitized, benignErrorReporter);
             return createdBook;
         } else {
