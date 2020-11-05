@@ -137,7 +137,7 @@ individual.prototype.transcript_countsFilter = function({
 module.exports.countAssociated_model = `
 static async countRecords(search) {
     let options = {}
-    options['where'] = helper.searchConditionsToSequelize(search);
+    options['where'] = helper.searchConditionsToSequelize(search, individual.definition.attributes);
     return super.count(options);
 }
 `
@@ -174,7 +174,7 @@ AuthorsFilterImpl({
         pagination
     }) {
       // build the sequelize options object for limit-offset-based pagination
-      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.person.idAttribute());  
+      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.person.idAttribute(), models.person.definition.attributes);  
       return this.getAuthors(options);
     }
 `

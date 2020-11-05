@@ -548,9 +548,7 @@ describe('Model Layer', function(){
   it('Count method in sequelize model - individual', async function(){
     let opts = funks.getOptions(models.individual);
     let generated_model =await funks.generateJs('create-models', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.count_in_sequelize_model.replace(/\s/g, '');
-    expect(g_model, 'No count method found').to.have.string(test_model);
+    testCompare(generated_model, data_test.count_in_sequelize_model);
   });
 
   it('Model - publisher', async function(){

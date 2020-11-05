@@ -132,7 +132,7 @@ static countRecords(search) {
             }
 
             let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
+            let arg_sequelize = arg.toSequelize(peopleLocalSql.definition.attributes);
             options['where'] = arg_sequelize;
         }
         return super.count(options);
@@ -141,7 +141,7 @@ static countRecords(search) {
 module.exports.readAllCursor = `
 static async readAllCursor(search, order, pagination){
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), peopleLocalSql.definition.attributes);
     let records = await super.findAll(options);
 
     records = records.map(x => peopleLocalSql.postReadCast(x))
@@ -150,7 +150,7 @@ static async readAllCursor(search, order, pagination){
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), peopleLocalSql.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object

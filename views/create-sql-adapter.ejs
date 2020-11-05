@@ -142,7 +142,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       }
 
       let arg = new searchArg(search);
-      let arg_sequelize = arg.toSequelize();
+      let arg_sequelize = arg.toSequelize(<%- adapterName -%>.definition.attributes);
       options['where'] = arg_sequelize;
     }
     return super.count(options);
@@ -150,7 +150,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
 
   static async readAllCursor(search, order, pagination){
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- adapterName -%>.definition.attributes);
     let records = await super.findAll(options);
     records = records.map(x => <%- adapterName -%>.postReadCast(x))
 
@@ -158,7 +158,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), <%- adapterName -%>.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object

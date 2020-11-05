@@ -145,7 +145,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
   static async countRecords(search){
     let options = {}
-    options['where'] = helper.searchConditionsToSequelize(search);
+    options['where'] = helper.searchConditionsToSequelize(search, <%- name -%>.definition.attributes);
     return super.count(options);
   }
 
@@ -153,7 +153,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
-    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());  
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), <%- name -%>.definition.attributes);  
     let records = await super.findAll(options);
     records = records.map(x => <%- name -%>.postReadCast(x))
     // validationCheck after read
@@ -165,7 +165,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- name -%>.definition.attributes);
     let records = await super.findAll(options);
 
     records = records.map(x => <%- name -%>.postReadCast(x))
@@ -176,7 +176,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), <%- name -%>.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
@@ -307,20 +307,20 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
     async <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       // build the sequelize options object for limit-offset-based pagination
-      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());  
+      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute(), models.<%=associations_temp[i].target_lc-%>.definition.attributes);  
       return this.get<%- associations_temp[i].name_cp%>(options);
     }
 
 
     async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
       // build the sequelize options object for cursor-based pagination
-      let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+      let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute(), models.<%=associations_temp[i].target_lc-%>.definition.attributes);
       let records = await this.get<%- associations_temp[i].name_cp%>(options);
       // get the first record (if exists) in the opposite direction to determine pageInfo.
       // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
       let oppRecords = [];
       if (pagination && (pagination.after || pagination.before)) {
-        let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+        let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, models.<%=associations_temp[i].target_lc-%>.idAttribute(), models.<%=associations_temp[i].target_lc-%>.definition.attributes);
         oppRecords = await this.get<%- associations_temp[i].name_cp%>(oppOptions);
       }
       // build the graphql Connection Object
