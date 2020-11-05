@@ -52,19 +52,24 @@ static init(sequelize, DataTypes) {
             defaultValue: '[]'
         },
         arrFloat: {
-            type: Sequelize[dict['[Float]']]
+            type: Sequelize[dict['[Float]']],
+            defaultValue: '[]'
         },
         arrBool: {
-            type: Sequelize[dict['[Boolean]']]
+            type: Sequelize[dict['[Boolean]']],
+            defaultValue: '[]'
         },
         arrDate: {
-            type: Sequelize[dict['[Date]']]
+            type: Sequelize[dict['[Date]']],
+            defaultValue: '[]'
         },
         arrTime: {
-            type: Sequelize[dict['[Time]']]
+            type: Sequelize[dict['[Time]']],
+            defaultValue: '[]'
         },
         arrDateTime: {
-            type: Sequelize[dict['[DateTime]']]
+            type: Sequelize[dict['[DateTime]']],
+            defaultValue: '[]'
         }
 
     }, {
