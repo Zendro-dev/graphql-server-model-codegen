@@ -1,0 +1,27 @@
+{
+    "model" : "sq_book",
+    "storageType" : "sql-adapter",
+    "adapterName": "book_local",
+    "regex": "local",
+    "attributes" : {
+        "id": "String",
+        "title": "String",
+        "genre": "String",
+        "ISBN": "String",
+        "author_ids": "[ String]"
+    },
+
+    "associations":{
+      "authors":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_author",
+        "targetKey": "book_ids",
+        "sourceKey": "author_ids",
+        "keyIn": "sq_book",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+
+    "internalId": "id"
+  }

@@ -634,3 +634,156 @@ module.exports.book_extendedIds = {
   "internalId": "internalBookId"
 }
 
+module.exports.author_foreignKeyArray = {
+    "model" : "author",
+    "storageType" : "sql",
+    "database": "default-sql",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "author",
+        "targetStorageType": "sql"
+      }
+    },
+
+    "internalId": "id"
+  }
+
+module.exports.author_zendro_remote = {
+    "model" : "post_author",
+    "storageType" : "zendro-server",
+    "url": "http://server1-graphql-container:3000/graphql",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "post_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "post_author",
+        "targetStorageType": "zendro-server"
+      }
+    },
+    "internalId": "id"
+  }
+
+module.exports.author_ddm_array_fk ={
+    "model" : "sq_author",
+    "storageType" : "distributed-data-model",
+    "registry": ["author_remote","author_local"],
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "sq_author",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+    "internalId": "id"
+  }
+
+module.exports.author_sql_adapter_array_fk ={
+    "model" : "sq_author",
+    "storageType" : "sql-adapter",
+    "adapterName": "author_local",
+    "regex": "local",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "sq_author",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+    "internalId": "id"
+  }
+
+
+module.exports.author_zendro_adapter_array_fk ={
+    "model" : "sq_author",
+    "storageType" : "zendro-webservice-adapter",
+    "adapterName": "author_remote",
+    "regex": "remote",
+    "url": "http://server1-graphql-container:3000/graphql",
+    "attributes" : {
+        "id": "String",
+        "name": "String",
+        "lastname": "String",
+        "email": "String",
+        "book_ids": "[ String ]"
+    },
+
+    "associations":{
+      "books":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "sq_book",
+        "targetKey": "author_ids",
+        "sourceKey": "book_ids",
+        "keyIn": "sq_author",
+        "targetStorageType": "distributed-data-model"
+      }
+    },
+    "internalId": "id"
+  }
+
+module.exports.arr = {
+  "model": "Arr",
+  "storageType": "sql",
+  "attributes" : {
+    "arrId": "String",
+    "country": "String",
+    "arrStr": "[String]",
+    "arrInt": "[Int]",
+    "arrFloat": "[Float]",
+    "arrBool": "[Boolean]",
+    "arrDate": "[Date]",
+    "arrTime": "[Time]",
+    "arrDateTime": "[DateTime]"
+  },
+
+  "internalId" : "arrId"
+
+}

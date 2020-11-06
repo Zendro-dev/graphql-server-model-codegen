@@ -164,7 +164,26 @@ module.exports.dog_ddm =  {
       "internalId": "internalPersonId"
   }
 
-
+  module.exports.array_adapter_sql = {
+      "model": "Arr",
+      "storageType": "sql-adapter",
+      "adapterName": "arrayLocalSql",
+      "regex": "arrayLocal",
+      "url": "http://localhost:3030/graphql",
+      "attributes" : {
+        "arrId": "String",
+        "country": "String",
+        "arrStr": "[String]",
+        "arrInt": "[Int]",
+        "arrFloat": "[Float]",
+        "arrBool": "[Boolean]",
+        "arrDate": "[Date]",
+        "arrTime": "[Time]",
+        "arrDateTime": "[DateTime]"
+      },
+      "internalId" : "arrId"
+  }
+  
   module.exports.book_ddm_association = {
     "model": "Book",
     "storageType": "distributed-data-model",

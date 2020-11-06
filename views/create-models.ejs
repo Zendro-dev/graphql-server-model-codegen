@@ -42,6 +42,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       <% let keys = Object.keys(attributes) -%>
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
+        <% let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']-%>
         <%=  keys[i] %>: {
             type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
             get(){
@@ -53,7 +54,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 }
               }
             }
-            <%}-%>
+          <%}-%> <% if( arrayType.includes(type_seq)){-%>,
+          defaultValue: '[]'
+          <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>
       <%}-%>
@@ -74,12 +77,42 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   get storageHandler() {
     return this.sequelize;
   }
-  
+
+  /**
+    * Cast array to JSON string for the storage.
+    * @param  {object} record  Original data record.
+    * @return {object}         Record with JSON string if necessary.
+    */
+  static preWriteCast(record){
+    for(let attr in definition.attributes){
+      let type = definition.attributes[ attr ].replace(/\s+/g, '');
+      if(type[0]==='[' && record[ attr ]!== undefined && record[ attr ]!== null){
+        record[ attr ] = JSON.stringify(record[attr]);
+      }
+    }
+    return record;
+  }
+
+  /**
+  * Cast JSON string to array for the validation.
+  * @param  {object} record  Record with JSON string if necessary.
+  * @return {object}         Parsed data record.
+  */
+  static postReadCast(record){
+      for(let attr in definition.attributes){
+          let type = definition.attributes[ attr ].replace(/\s+/g, '');
+          if(type[0]==='[' && record[attr] !== undefined && record[ attr ]!== null){
+              record[ attr ] = JSON.parse(record[attr]);
+          }
+      }
+      return record;
+  }
+
   static associate(models){
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>
         <%if (key !== 'associations'){-%>
-          <%if(associationsArguments[key][i].targetStorageType === 'sql'){-%>
+          <%if(associationsArguments[key][i].targetStorageType === 'sql' && !associationsArguments[key][i].assocThroughArray){-%>
             <%if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
               <%- name -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
@@ -109,6 +142,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
+    item = <%- name -%>.postReadCast(item)
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
@@ -122,8 +156,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
-    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());  
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
+    records = records.map(x => <%- name -%>.postReadCast(x))
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
   }
@@ -131,10 +166,13 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
+
+    records = records.map(x => <%- name -%>.postReadCast(x))
+
     // validationCheck after read
     records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
     // get the first record (if exists) in the opposite direction to determine pageInfo.
@@ -153,11 +191,14 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async addOne(input){
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
+    input = <%- name -%>.preWriteCast(input)
     try{
       const result = await this.sequelize.transaction( async(t) =>{
         let item = await super.create(input, {transaction:t});
         return item;
       });
+      <%- name -%>.postReadCast(result.dataValues)
+      <%- name -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
@@ -179,19 +220,23 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async updateOne(input){
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
+    input = <%- name -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
-        let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+        let to_update = await super.findByPk(input[this.idAttribute()]);
+        if(to_update === null ){
+          throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
+        }
+
+        let updated = await to_update.update(input, {transaction : t});
         return updated;
       });
-      if(result[0] === 0){
-        throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
-      }
-      return result[1][0];
+      <%- name -%>.postReadCast(result.dataValues)
+      <%- name -%>.postReadCast(result._previousDataValues)
+      return result;
     }catch(error){
       throw error;
     }
-
   }
 
   static bulkAddCsv(context){
@@ -266,7 +311,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
 
     async <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       // build the sequelize options object for limit-offset-based pagination
-      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());  
+      let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute());
       return this.get<%- associations_temp[i].name_cp%>(options);
     }
 
