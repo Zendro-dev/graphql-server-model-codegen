@@ -2778,6 +2778,194 @@ describe(
 
   });
 
+  describe('Foreign-key array', function() {
+    //set up the environment
+    before(async function(){
+      //measurements for sql and zendro-server tests
+      let res = itHelpers.request_graph_ql_post('mutation{addBook(id:"remote_b1" title:"t1"){id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addBook(id:"remote_b2" title:"t2"){id } }');
+      expect(res.statusCode).to.equal(200);
+
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"remote_b1" title:"t1"){id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"remote_b2" title:"t2"){id } }');
+      expect(res.statusCode).to.equal(200);
+
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"local_b1" title:"t1"){id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"local_b2" title:"t2"){id } }');
+      expect(res.statusCode).to.equal(200);
+
+    });
+
+    //clean up records
+    after(async function() {
+      itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b2")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a2")}');
+
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"remote_b1")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"remote_b2")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_author(id:"remote_a1")}');
+
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"local_b1")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"local_b2")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_author(id:"local_a1")}');
+    });
+
+    it('01. Create record and add association - sql', function() {
+      let res = itHelpers.request_graph_ql_post('mutation{addAuthor(id:"remote_a1" name:"n1" addBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been created correctly
+      expect(resBody.data).to.deep.equal({addAuthor: { id: 'remote_a1', book_ids: [ 'remote_b1', 'remote_b2' ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post('{books(pagination:{limit: 2}){id author_ids}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {"books": [  {"id": "remote_b1","author_ids": ["remote_a1"]},{"id": "remote_b2","author_ids": ["remote_a1"]}]}
+      });
+    });
+
+    it('02. Query associated records - sql', function() {
+      let res = itHelpers.request_graph_ql_post('{readOneBook(id:"remote_b1"){id authorsFilter(pagination: {limit: 2}){id}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({readOneBook: {"id": "remote_b1", "authorsFilter": [{"id": "remote_a1"}]}});
+    });
+
+
+    it('03. Update record and remove association - sql', function() {
+      let res = itHelpers.request_graph_ql_post('mutation{updateAuthor(id:"remote_a1" name:"n1" removeBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been updated correctly
+      expect(resBody.data).to.deep.equal({updateAuthor: { id: 'remote_a1', book_ids: [ ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post('{books(pagination:{limit: 2}){id author_ids}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {"books": [{"id": "remote_b1","author_ids": []},{"id": "remote_b2","author_ids": []}]}
+      });
+    });
+
+    it('04. Create record and add association - remote zendro server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addAuthor(id:"remote_a2" name:"n2" addBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been created correctly
+      expect(resBody.data).to.deep.equal({addAuthor: { id: 'remote_a2', book_ids: [ 'remote_b1', 'remote_b2' ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{books(pagination:{limit: 2}){id author_ids}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {"books": [  {"id": "remote_b1","author_ids": ["remote_a2"]},{"id": "remote_b2","author_ids": ["remote_a2"]}]}
+      });
+    });
+
+    it('05. Query associated records - remote zendro server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('{readOneBook(id:"remote_b1"){id authorsFilter(pagination: {limit: 2}){id}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({readOneBook: {"id": "remote_b1", "authorsFilter": [{"id": "remote_a2"}]}});
+    });
+
+    it('06. Update record and remove association - remote zendro server', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateAuthor(id:"remote_a2" name:"n1" removeBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been updated correctly
+      expect(resBody.data).to.deep.equal({updateAuthor: { id: 'remote_a2', book_ids: [ ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{books(pagination:{limit: 2}){id author_ids}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {"books": [{"id": "remote_b1","author_ids": []},{"id": "remote_b2","author_ids": []}]}
+      });
+    });
+
+    it('07. Create record and add association - ddm zendro adapter', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"remote_a1" name:"n1" addBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been created correctly
+      expect(resBody.data).to.deep.equal({addSq_author: { id: 'remote_a1', book_ids: [ 'remote_b1', 'remote_b2' ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{sq_booksConnection(pagination:{first: 4}){ edges { node {id author_ids} }}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data).to.deep.equal({
+       sq_booksConnection: {"edges": [{"node": {"id": "local_b1","author_ids": []}},{"node": {"id": "local_b2","author_ids": []}},{"node": {"id": "remote_b1","author_ids": ["remote_a1"]}},{"node": {"id": "remote_b2","author_ids": ["remote_a1"]}}] }
+      });
+    });
+
+    it('08. Query associated records - ddm zendro adapter', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('{readOneSq_book(id:"remote_b1"){id authorsConnection(pagination: {first: 2}){ edges{ node{id}}}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({
+        readOneSq_book: {"id": "remote_b1","authorsConnection": {"edges": [{"node": {"id": "remote_a1"}}]}}
+      });
+    });
+
+    it('09. Update record and remove association - ddm zendro adapter', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateSq_author(id:"remote_a1" name:"n1" removeBooks:["remote_b1","remote_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been updated correctly
+      expect(resBody.data).to.deep.equal({updateSq_author: { id: 'remote_a1', book_ids: [ ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{sq_booksConnection(pagination:{first: 4}){ edges { node {id author_ids} }}}')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {sq_booksConnection: {"edges": [{"node": {"id": "local_b1","author_ids": []}},{"node": {"id": "local_b2","author_ids": []}},{"node": {"id": "remote_b1","author_ids": []}},{"node": {"id": "remote_b2","author_ids": []}}] }}
+      });
+    });
+
+
+    it('10. Create record and add association - ddm sql adapter', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"local_a1" name:"n1" addBooks:["local_b1","local_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been created correctly
+      expect(resBody.data).to.deep.equal({addSq_author: { id: 'local_a1', book_ids: [ 'local_b1', 'local_b2' ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{sq_booksConnection(pagination:{first: 4}){ edges { node {id author_ids} }}} ')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody.data).to.deep.equal({
+       sq_booksConnection: {"edges": [{"node": {"id": "local_b1","author_ids": ["local_a1"]}},{"node": {"id": "local_b2","author_ids": ["local_a1"]}},{"node": {"id": "remote_b1","author_ids": []}},{"node": {"id": "remote_b2","author_ids": []}} ] }
+      });
+    });
+
+    it('11. Query associated records - ddm sql adapter', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('{readOneSq_book(id:"local_b1"){id authorsConnection(pagination: {first: 2}){ edges{ node{id}}}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({
+        readOneSq_book: {"id": "local_b1","authorsConnection": {"edges": [{"node": {"id": "local_a1"}}]}}
+      });
+    });
+
+    it('12. Update record and remove association - ddm sql adapter', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('mutation{updateSq_author(id:"local_a1" name:"n1" removeBooks:["local_b1","local_b2"]){id book_ids}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check it has been updated correctly
+      expect(resBody.data).to.deep.equal({updateSq_author: { id: 'local_a1', book_ids: [ ] }});
+      //check inverse association
+      res = itHelpers.request_graph_ql_post_instance2('{sq_booksConnection(pagination:{first: 4}){ edges { node {id author_ids} }}}')
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(resBody).to.deep.equal({
+        "data": {sq_booksConnection: {"edges": [{"node": {"id": "local_b1","author_ids": []}},{"node": {"id": "local_b2","author_ids": []}},{"node": {"id": "remote_b1","author_ids": []}},{"node": {"id": "remote_b2","author_ids": []}}] }}
+      });
+    });
+  });
+
   describe('generic readAllCursor', function() {
 
     before(async function(){

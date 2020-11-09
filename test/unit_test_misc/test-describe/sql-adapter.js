@@ -34,7 +34,7 @@ static init(sequelize, DataTypes) {
 module.exports.array_constructor = `
 static init(sequelize, DataTypes) {
     return super.init({
-  
+
         arrId: {
             type: Sequelize[dict['String']],
             primaryKey: true
@@ -43,27 +43,35 @@ static init(sequelize, DataTypes) {
             type: Sequelize[dict['String']]
         },
         arrStr: {
-            type: Sequelize[dict['[String]']]
+            type: Sequelize[dict['[String]']],
+            defaultValue: '[]'
+
         },
         arrInt: {
-            type: Sequelize[dict['[Int]']]
+            type: Sequelize[dict['[Int]']],
+            defaultValue: '[]'
         },
         arrFloat: {
-            type: Sequelize[dict['[Float]']]
+            type: Sequelize[dict['[Float]']],
+            defaultValue: '[]'
         },
         arrBool: {
-            type: Sequelize[dict['[Boolean]']]
+            type: Sequelize[dict['[Boolean]']],
+            defaultValue: '[]'
         },
         arrDate: {
-            type: Sequelize[dict['[Date]']]
+            type: Sequelize[dict['[Date]']],
+            defaultValue: '[]'
         },
         arrTime: {
-            type: Sequelize[dict['[Time]']]
+            type: Sequelize[dict['[Time]']],
+            defaultValue: '[]'
         },
         arrDateTime: {
-            type: Sequelize[dict['[DateTime]']]
+            type: Sequelize[dict['[DateTime]']],
+            defaultValue: '[]'
         }
-  
+
     }, {
         modelName: "arr",
         tableName: "arrs",
@@ -176,15 +184,16 @@ module.exports.updateOne = `
       input = peopleLocalSql.preWriteCast(input)
       try {
         let result = await this.sequelize.transaction( async (t) =>{
-          let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
-          return updated;
+            let to_update = await super.findByPk(input[this.idAttribute()]);
+            if(to_update === null){
+              throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+            }
+            let updated = await to_update.update( input, { transaction: t  } );
+            return updated;
           });
-          if(result[0] === 0){
-            throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
-          }
-          peopleLocalSql.postReadCast(result[1][0].dataValues)
-          peopleLocalSql.postReadCast(result[1][0]._previousDataValues)   
-          return result[1][0];
+          peopleLocalSql.postReadCast(result.dataValues)
+          peopleLocalSql.postReadCast(result._previousDataValues)
+          return result;
       } catch (error) {
           throw error;
       }

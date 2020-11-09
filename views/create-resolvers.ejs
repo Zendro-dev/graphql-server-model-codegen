@@ -219,6 +219,20 @@ const associationArgsDef = {
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
+
+    <%if(associations_temp[i].assocThroughArray){%>
+      if(this.<%=associations_temp[i].sourceKey%>.length !== 0){
+        let nsearch = helper.addSearchField({
+          "search": search,
+          "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+          "valueType": "Array",
+          "operator": "in"
+        });
+        return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
+      }
+    <%}else{-%>
+
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -226,9 +240,9 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
       return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
-  }
+    <%}-%>
+      }
 
   /**
    * <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> - Count number of associated records that holds the conditions specified in the search argument
@@ -239,6 +253,16 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
 
+    <%if(associations_temp[i].assocThroughArray){%>
+        if(this.<%=associations_temp[i].sourceKey%>.length === 0) return 0;
+        let nsearch = helper.addSearchField({
+          "search": search,
+          "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+          "valueType": "Array",
+          "operator": "in"
+        });
+    <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -246,8 +270,8 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
-      return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
+    <%}-%>
+    return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
   }
 
   /**
@@ -263,6 +287,19 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
 
+    <%if(associations_temp[i].assocThroughArray){%>
+      if(this.<%=associations_temp[i].sourceKey%>.length !== 0){
+        let nsearch = helper.addSearchField({
+          "search": search,
+          "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+          "valueType": "Array",
+          "operator": "in"
+        });
+          return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
+      }
+    <%}else{-%>
+
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -270,8 +307,9 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
+        return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
+    <%}-%>
 
-      return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
   }
 <%}-%>
 
@@ -707,7 +745,7 @@ module.exports = {
 
   <%- include('./includes/bulkAssociations-resolvers', {op: "add"}); -%>
   <%- include('./includes/bulkAssociations-resolvers', {op: "remove"}); -%>
-  
+
   /**
    * csvTableTemplate<%- nameCp-%> - Returns table's template
    *

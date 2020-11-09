@@ -42,6 +42,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       <% let keys = Object.keys(attributes) -%>
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
+        <% let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']-%>
         <%=  keys[i] %>: {
             type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
             get(){
@@ -53,7 +54,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
                 }
               }
             }
-            <%}-%>
+          <%}-%> <% if( arrayType.includes(type_seq)){-%>,
+          defaultValue: '[]'
+          <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>
       <%}-%>
@@ -104,12 +107,12 @@ module.exports = class <%- name -%> extends Sequelize.Model{
       }
       return record;
   }
-  
+
   static associate(models){
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>
         <%if (key !== 'associations'){-%>
-          <%if(associationsArguments[key][i].targetStorageType === 'sql'){-%>
+          <%if(associationsArguments[key][i].targetStorageType === 'sql' && !associationsArguments[key][i].assocThroughArray){-%>
             <%if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
               <%- name -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
@@ -163,7 +166,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- name -%>.definition.attributes);
     let records = await super.findAll(options);
@@ -220,19 +223,20 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     input = <%- name -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
-        let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+        let to_update = await super.findByPk(input[this.idAttribute()]);
+        if(to_update === null ){
+          throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
+        }
+
+        let updated = await to_update.update(input, {transaction : t});
         return updated;
       });
-      if(result[0] === 0){
-        throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
-      }
-      <%- name -%>.postReadCast(result[1][0].dataValues)
-      <%- name -%>.postReadCast(result[1][0]._previousDataValues)      
-      return result[1][0];
+      <%- name -%>.postReadCast(result.dataValues)
+      <%- name -%>.postReadCast(result._previousDataValues)
+      return result;
     }catch(error){
       throw error;
     }
-
   }
 
   static bulkAddCsv(context){

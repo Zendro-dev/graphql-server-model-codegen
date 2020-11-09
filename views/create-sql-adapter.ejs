@@ -42,6 +42,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       <% let keys = Object.keys(attributes) -%>
       <%for (let i=0; i< keys.length; i++) {-%>
         <% let type_seq =  attributes[ keys[i] ] -%>
+        <% let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']-%>
         <%=  keys[i] %>: {
           type: Sequelize[ dict['<%= type_seq %>'] ]<% if(type_seq === 'Time' ){-%>,
           get(){
@@ -53,6 +54,8 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
                 }
               }
             }
+            <%}-%> <% if( arrayType.includes(type_seq)){-%>,
+            defaultValue: '[]'
             <%}-%>
         }
         <%if(i !== (keys.length -1) ){ -%>,<%}-%>
@@ -83,7 +86,6 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return this.sequelize;
   }
 
-
   /**
     * Cast array to JSON string for the storage.
     * @param  {object} record  Original data record.
@@ -113,8 +115,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
       }
       return record;
   }
-  
-  
+
   static recognizeId(iri){
     return iriRegex.test(iri);
   }
@@ -196,15 +197,17 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     input = <%- adapterName -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
-        let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
+        let to_update = await super.findByPk(input[this.idAttribute()]);
+        if(to_update === null){
+          throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
+        }
+
+        let updated = await to_update.update( input, { transaction: t } );
         return updated;
       });
-      if(result[0] === 0){
-        throw new Error(`Record with ID = ${input[this.idAttribute()]} does not exist`);
-      }      
-      <%- adapterName -%>.postReadCast(result[1][0].dataValues)
-      <%- adapterName -%>.postReadCast(result[1][0]._previousDataValues)
-      return result[1][0];
+      <%- adapterName -%>.postReadCast(result.dataValues)
+      <%- adapterName -%>.postReadCast(result._previousDataValues)
+      return result;
     }catch(error){
       throw error;
     }
