@@ -163,22 +163,23 @@ module.exports.update_one_model = `
 static async updateOne(input) {
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
-    input = Book.preWriteCast(input)
-    try {
-        let result = await this.sequelize.transaction(async (t) => {
-            let updated = await super.update(input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
-            return updated;
-        });
-        if(result[0] === 0){
-            throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
-        }
-        Book.postReadCast(result[1][0].dataValues)
-        Book.postReadCast(result[1][0]._previousDataValues)
-        return result[1][0];
-    } catch (error) {
-        throw error;
-    }
+        input = Book.preWriteCast(input)
+            try {
+                let result = await this.sequelize.transaction(async (t) => {
+                    let to_update = await super.findByPk(input[this.idAttribute()]);
+                    if(to_update === null){
+                        throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+                    }
 
+                    let updated = await to_update.update(input, {transaction: t  } );
+                    return updated;
+                });
+                Book.postReadCast(result.dataValues)
+                Book.postReadCast(result._previousDataValues)
+                return result;
+            } catch (error) {
+                throw error;
+            }
 }
 `
 

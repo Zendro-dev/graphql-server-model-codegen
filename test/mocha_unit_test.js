@@ -12,6 +12,7 @@ const requireFromString = require('require-from-string');
 const helpers = require('./unit_test_misc/helpers/reporting_helpers');
 const { test } = require('mocha');
 //const components_code = require('./unit_test_misc/components_code');
+var colors = require('colors');
 
 const testCompare = function(actual, expected, errorMessage = 'Generated output differs from expected') {
   let act = actual.replace(/\s/g, '');
@@ -1325,7 +1326,8 @@ describe('Parse associations', function() {
             "target_cp": "Individual",
             "target_cp_pl": "Individuals",
             "keyIn_lc": "transcript_count",
-            "holdsForeignKey": true
+            "holdsForeignKey": true,
+            "assocThroughArray": false
           }
         ],
         "to_many": [],
@@ -1382,7 +1384,8 @@ describe('Parse associations', function() {
           "target_cp": "Transcript_count",
           "target_cp_pl": "Transcript_counts",
           "keyIn_lc": "transcript_count",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "to_many_through_sql_cross_table": [],
@@ -1443,7 +1446,8 @@ describe('Parse associations', function() {
           "name": "assoc",
           "name_lc": "assoc",
           "name_cp": "Assoc",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "generic_to_one": [],
@@ -1512,7 +1516,8 @@ describe('Parse associations', function() {
           "target_cp": "Dog",
           "target_cp_pl": "Dogs",
           "keyIn_lc": "dog",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "to_many_through_sql_cross_table": [
@@ -1532,7 +1537,8 @@ describe('Parse associations', function() {
           "target_pl": "Books",
           "target_cp": "Book",
           "target_cp_pl": "Books",
-          "holdsForeignKey": false
+          "holdsForeignKey": false,
+          "assocThroughArray": false
         }
       ],
       "generic_to_one": [],
@@ -1602,7 +1608,8 @@ describe('Parse associations', function() {
           "target_cp": "Person",
           "target_cp_pl": "People",
           "keyIn_lc": "dog",
-          "holdsForeignKey": true
+          "holdsForeignKey": true,
+          "assocThroughArray": false
         },
         {
           "type": "to_one",
@@ -1621,7 +1628,8 @@ describe('Parse associations', function() {
           "target_cp": "Researcher",
           "target_cp_pl": "Researchers",
           "keyIn_lc": "dog",
-          "holdsForeignKey": true
+          "holdsForeignKey": true,
+          "assocThroughArray": false
         }
       ],
       "to_many": [],
@@ -2459,5 +2467,94 @@ describe('bulkAssociation', function(){
     let generated_model = await funks.generateJs('create-distributed-model', opts);
     testCompare(generated_model, data_test.bulkAssociation_mapBulkAssociationInputToAdapters);
   });
+
+});
+
+
+describe('Foreign-key array', function(){
+  let data_test = require('./unit_test_misc/test-describe/foreign-key-array');
+
+  it('schema - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_schema = await funks.generateJs('create-schemas', opts);
+    testCompare(generated_schema, data_test.add_and_update);
+
+  });
+
+  it('resolver filter association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    //console.log(generated_resolver.green)
+    testCompare(generated_resolver, data_test.resolver_filter_association);
+  });
+
+  it('resolver connection association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_connection_association);
+  });
+
+  it('resolver count association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_count_association);
+  });
+
+  it('resolver add association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_add_association);
+  });
+
+  it('resolver remove association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.resolver_remove_association);
+  });
+
+  it('model add association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_model = await funks.generateJs('create-models', opts);
+    //console.log(generated_model.green)
+    testCompare(generated_model, data_test.model_add_association);
+  });
+
+  it('model remove association - author', async function(){
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_model = await funks.generateJs('create-models', opts);
+    testCompare(generated_model, data_test.model_remove_association);
+  });
+
+  it('model remote server, add association - author', async function(){
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_model = await funks.generateJs('create-models-zendro', opts);
+    testCompare(generated_model, data_test.remote_model_add_association);
+  });
+
+  it('model remote server, remove association - author', async function(){
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_model = await funks.generateJs('create-models-zendro', opts);
+    testCompare(generated_model, data_test.remote_model_remove_association);
+  });
+
+
+  it('ddm model add association - author', async function(){
+    let opts = funks.getOptions(models.author_ddm_array_fk);
+    let generated_model = await funks.generateJs('create-distributed-model', opts);
+    testCompare(generated_model, data_test.ddm_model_add);
+  });
+
+  it('model remote server, add association - author', async function(){
+    let opts = funks.getOptions(models.author_sql_adapter_array_fk);
+    let generated_model = await funks.generateJs('create-sql-adapter', opts);
+    testCompare(generated_model, data_test.sql_adapter_add);
+  });
+
+  it('model remote server, remove association - author', async function(){
+    let opts = funks.getOptions(models.author_zendro_adapter_array_fk);
+    let generated_model = await funks.generateJs('create-zendro-adapters', opts);
+    testCompare(generated_model, data_test.zendro_adapter_remove);
+  });
+
 
 });
