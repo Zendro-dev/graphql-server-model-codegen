@@ -11,7 +11,6 @@ author.prototype.booksFilter = function({
     pagination
 }, context){
 
-  if(this.book_ids.length !== 0){
     let nsearch = helper.addSearchField({
           "search": search,
           "field": models.book.idAttribute(),
@@ -25,7 +24,6 @@ author.prototype.booksFilter = function({
         order: order,
         pagination: pagination
     }, context);
-  }
 }
 
 `
@@ -36,7 +34,6 @@ author.prototype.booksConnection = function({
     order,
     pagination
 }, context){
-  if(this.book_ids.length !== 0){
   let nsearch = helper.addSearchField({
         "search": search,
         "field": models.book.idAttribute(),
@@ -50,14 +47,12 @@ author.prototype.booksConnection = function({
         order: order,
         pagination: pagination
     }, context);
-  }
 }
 `
 
 module.exports.resolver_count_association = `
 author.prototype.countFilteredBooks = function({search}, context){
 
-  if(this.book_ids.length === 0) return 0;
   let nsearch = helper.addSearchField({
         "search": search,
         "field":models.book.idAttribute(),
