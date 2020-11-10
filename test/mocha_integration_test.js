@@ -3084,20 +3084,37 @@ describe(
           })
       });
 
-      // it('07. Arr search with eq', function() {
-      //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:eq, field:arrInt, value:"1,2,3",'+ 
-      //   'valueType: Array}, pagination:{limit:3}) {arrId}}');
-      //   let resBody = JSON.parse(res.body.toString('utf8'));
-      //   expect(res.statusCode).to.equal(200);
-      //   expect(resBody.data.arrs.length).equal(1);
-      // });
+      it('04. Arr search with eq', function() {
+        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:eq, field:arrInt, value:"[1,2,3]"},'+ 
+        'pagination:{limit:3}) {arrId}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.arrs.length).equal(1);
+      });
 
-      // it('08. Arr search with ne', function() {
-      //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:ne, field:arrInt, value:"1,2,3,4",'+ 
-      //   'valueType: Array}, pagination:{limit:3}) {arrId}}');
-      //   let resBody = JSON.parse(res.body.toString('utf8'));
-      //   expect(res.statusCode).to.equal(200);
-      //   expect(resBody.data.arrs.length).equal(1);
-      // });
+      it('05. Arr search with ne', function() {
+        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:ne, field:arrInt, value:"[1,2,3,4]"},'+ 
+        'pagination:{limit:3}) {arrId}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.arrs.length).equal(1);
+      });
+
+      it('06. Arr search with in', function() {
+        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:in, field:arrInt, value:"3"},'+ 
+        'pagination:{limit:3}) {arrId}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.arrs.length).equal(1);
+      });
+
+
+      it('07. Arr search with notIn', function() {
+        let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:notIn, field:arrInt, value:"5"},'+
+        'pagination:{limit:3}) {arrId}}');
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        expect(res.statusCode).to.equal(200);
+        expect(resBody.data.arrs.length).equal(1);
+      });
 
     })  
