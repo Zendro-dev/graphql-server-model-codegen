@@ -2829,3 +2829,15 @@ describe(
       })
     });
   });
+  
+  describe('cassandra local', function() {
+    after(async function(){
+
+    });
+
+    
+  });
+
+  describe('cassandra distributed', function() {
+
+  });
