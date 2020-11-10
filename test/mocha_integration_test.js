@@ -2912,7 +2912,7 @@ describe(
         expect(resBody.data.arrs.length).equal(1);
       });
 
-      it('04. Arr search with in', function() {
+      it('06. Arr search with in', function() {
         let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:in, field:arrInt, value:"3"},'+ 
         'pagination:{limit:3}) {arrId}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
@@ -2921,7 +2921,7 @@ describe(
       });
 
 
-      it('06. Arr search with notIn', function() {
+      it('07. Arr search with notIn', function() {
         let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:notIn, field:arrInt, value:"5"},'+
         'pagination:{limit:3}) {arrId}}');
         let resBody = JSON.parse(res.body.toString('utf8'));
