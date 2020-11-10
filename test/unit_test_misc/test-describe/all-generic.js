@@ -6,10 +6,10 @@
 
 /**
  * 1. generic with no associations - person
- * 
- * Schema model with <no associations> should NOT match any of the 
+ *
+ * Schema model with <no associations> should NOT match any of the
  * following firms.
- * 
+ *
  * (Assumed input with no whitespaces).
  */
 //to_many firms
@@ -88,8 +88,8 @@ module.exports.test7_1 = /.+constassociationArgsDef={'addDogs':'dog'}/;
 module.exports.test7_2 = /person\.prototype\.dogsFilter=function\({/;
 module.exports.test7_3 = /person\.prototype\.countFilteredDogs=function\({/;
 module.exports.test7_4 = /person\.prototype\.dogsConnection=function\({/;
-module.exports.test7_5 = /promises\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
-module.exports.test7_6 = /promises\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test7_5 = /promises_add\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test7_6 = /promises_remove\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
 module.exports.test7_7 = /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){/;
 module.exports.test7_8 = /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter\){/;
 
@@ -171,7 +171,7 @@ module.exports.test13_10 = /staticasyncremove_.+\(.+,.+,benignErrorReporter\){/;
 
 
 /**
- * PART II: Generic associations 
+ * PART II: Generic associations
  */
 
 /* Schema */
@@ -209,8 +209,8 @@ module.exports.test16_1 = /.+constassociationArgsDef={'addDogs':'dog'}/;
 module.exports.test16_2 = /person\.prototype\.dogsFilter=asyncfunction\({.+this\.dogsFilterImpl\({/;
 module.exports.test16_3 = /person\.prototype\.countFilteredDogs=asyncfunction\({.+this\.countFilteredDogsImpl\({/;
 module.exports.test16_4 = /person\.prototype\.dogsConnection=asyncfunction\({.+this\.dogsConnectionImpl\({/;
-module.exports.test16_5 = /promises\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
-module.exports.test16_6 = /promises\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test16_5 = /promises_add\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
+module.exports.test16_6 = /promises_remove\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
 module.exports.test16_7 = /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.add_dogsImpl\(input,benignErrorReporter\);/;
 module.exports.test16_8 = /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.remove_dogsImpl\(input,benignErrorReporter\);/;
 module.exports.test16_9 = /countAllAssociatedRecords.+{.+letpromises_generic_to_many=\[\];/;
@@ -226,8 +226,8 @@ module.exports.test16_13 = /countAllAssociatedRecords.+returnget_to_one_associat
 //to_one firms (particular firms)
 module.exports.test17_1 = /constassociationArgsDef={'addOwner':'person'}/;
 module.exports.test17_2 = /dog\.prototype\.owner=asyncfunction\({.+this\.ownerImpl\({/;
-module.exports.test17_3 = /promises\.push\(this\.add_owner\(input,benignErrorReporter\)\);/;
-module.exports.test17_4 = /promises\.push\(this\.remove_owner\(input,benignErrorReporter\)\);/;
+module.exports.test17_3 = /promises_add\.push\(this\.add_owner\(input,benignErrorReporter\)\);/;
+module.exports.test17_4 = /promises_remove\.push\(this\.remove_owner\(input,benignErrorReporter\)\);/;
 module.exports.test17_5 = /dog\.prototype\.add_owner=asyncfunction\(input,benignErrorReporter\){.+dog\.add_ownerImpl\(input,benignErrorReporter\);/;
 module.exports.test17_6 = /dog\.prototype\.remove_owner=asyncfunction\(input,benignErrorReporter\){.+dog\.remove_ownerImpl\(input,benignErrorReporter\);/;
 module.exports.test17_7 = /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;
@@ -235,7 +235,7 @@ module.exports.test17_8 = /countAllAssociatedRecords.+promises_generic_to_one\.p
 module.exports.test17_9 = /countAllAssociatedRecords.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;
 module.exports.test17_10 = /countAllAssociatedRecords.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
 module.exports.test17_11 = /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_one_associated;/;
-   
+
 /* Models */
 
 /**
@@ -280,6 +280,3 @@ module.exports.test20_11 = /staticrecognizeId\(iri\){returniriRegex\.test\(iri\)
 module.exports.test20_12 = /staticidAttribute\(\){returnperson_a\.definition\.id\.name;}/;
 module.exports.test20_13 = /staticidAttributeType\(\){returnperson_a\.definition\.id\.type;}/;
 module.exports.test20_14 = /getIdValue\(\){returnthis\[person_a\.idAttribute\(\)\]}/;
-
-
-

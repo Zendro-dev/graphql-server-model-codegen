@@ -1,4 +1,4 @@
-<%# handleAssociations() template include%> 
+<%# handleAssociations() template include%>
 /**
 * handleAssociations - handles the given associations in the create and update case.
 *
@@ -6,20 +6,23 @@
 * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
 */
 <%- nameLc -%>.prototype.handleAssociations = async function(input, benignErrorReporter){
-    let promises = [];
+
     <% ['add','remove'].forEach(op => { -%>
+      let promises_<%-op%> = [];
       <% to_manyAssociations = associationsArguments["to_many"].concat(associationsArguments["to_many_through_sql_cross_table"]).concat(associationsArguments["generic_to_many"])-%>
       <%for(let i=0; i < to_manyAssociations.length; i++){-%>
         if (helper.isNonEmptyArray(input.<%-op%><%=to_manyAssociations[i].name_cp-%>)) {
-          promises.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, benignErrorReporter));
+          promises_<%-op%>.push(this.<%-op%>_<%=to_manyAssociations[i].name_lc-%>(input, benignErrorReporter));
         }<%}-%>
-      
+
       <% to_oneAssociations = associationsArguments["to_one"].concat(associationsArguments["generic_to_one"])-%>
       <%for(let i=0; i < to_oneAssociations.length; i++){-%>
         if (helper.isNotUndefinedAndNotNull(input.<%-op%><%=to_oneAssociations[i].name_cp-%>)) {
-          promises.push(this.<%-op%>_<%=to_oneAssociations[i].name_lc-%>(input, benignErrorReporter));
+          promises_<%-op%>.push(this.<%-op%>_<%=to_oneAssociations[i].name_lc-%>(input, benignErrorReporter));
         }
       <%}-%>
-    <%}) -%>  
-    await Promise.all(promises);
+
+      await Promise.all(promises_<%-op%>);
+    <%}) -%>
+
 }
