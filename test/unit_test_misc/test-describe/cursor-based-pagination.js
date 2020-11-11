@@ -1,6 +1,7 @@
 module.exports.connection_book_schema = `
 type BookConnection{
   edges: [BookEdge]
+  books: [Book]
   pageInfo: pageInfo!
 }
 
@@ -18,7 +19,7 @@ module.exports.model_read_all_connection = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
     let records = await super.findAll(options);
@@ -37,7 +38,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, books: records};
 }
 `
 
@@ -116,7 +117,7 @@ booksConnectionImpl({
   order,
   pagination
 }) {
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.book.idAttribute());
     let records = await this.getBooks(options);
