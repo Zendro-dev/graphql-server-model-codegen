@@ -163,7 +163,7 @@ module.exports = class <%- name -%>{
           }
         })
 
-        return { edges, pageInfo };
+        return { edges, pageInfo, <%- namePl -%>: valid_nodes };
       } else {
         throw new Error(`Remote server (${remoteZendroURL}) did not respond with data.`);
       }
