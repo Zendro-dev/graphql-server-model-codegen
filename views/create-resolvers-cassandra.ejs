@@ -430,7 +430,6 @@ module.exports = {
  * modelsConnection()
  * readOneModel()
  * countModels()
- * vueTableAccession()
  */
 -%>
 
@@ -489,20 +488,6 @@ module.exports = {
       }
   },
 
-  /**
-   * vueTable<%- nameCp-%> - Return table of records as needed for displaying a vuejs table
-   *
-   * @param  {string} _       First parameter is not used
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {object}         Records with format as needed for displaying a vuejs table
-   */
-  vueTable<%- nameCp-%>: async function(_,context){
-      if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-        return helper.vueTable(context.request, <%- nameLc -%>, <%-  JSON.stringify(arrayAttributeString) -%>  );
-      } else {
-        throw new Error("You don't have authorization to perform this action");
-      }
-  },
 
 <%#
 /**

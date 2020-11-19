@@ -3119,13 +3119,18 @@ describe(
     })
 
     describe('cassandra local', function() {
-      after(async function(){
-  
+      it('01. Add a walrus', function(){
+        let res = itHelpers.request_graph_ql_post('mutation {addWalrus(walrus_id: "cassandra-walrus-1", name: "Manfred", age: 187){walrus_id}}');
+        expect(res.statusCode).to.equal(200);
       });
+
+      // after(async function(){
+  
+      // });
   
       
     });
   
-    describe('cassandra distributed', function() {
+    // describe('cassandra distributed', function() {
   
-    });
+    // });

@@ -1,0 +1,29 @@
+{
+  "model" : "toy",
+  "storageType" : "cassandra",
+  "attributes" : {
+    "toy_id": "uuid",
+    "name": "String",
+    "rating": "Int",
+
+    "cat_id": "String",
+    "parrot_id": "String"
+  },
+  "associations": {
+    "walrus": {
+      "type" : "to_one",
+      "target" : "walrus",
+      "targetKey" : "walrus_id",
+      "keyIn": "toy",
+      "targetStorageType" : "cassandra"
+    },
+    "parrot": {
+      "type" : "to_one",
+      "target": "parrot",
+      "targetKey": "parrot_id",
+      "keyIn": "toy",
+      "targetStorageType": "sql"
+    }
+  },
+  "internalId": "toy_id"
+}

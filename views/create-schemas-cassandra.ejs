@@ -171,7 +171,6 @@ type <%- nameCp -%>Edge{
   type Query {
     readOne<%- nameCp -%>(<%- idAttribute -%>: ID!): <%- name %>
     count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
-    vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
     csvTableTemplate<%- nameCp -%>: [String]
     <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorCassandraInput! ): <%- nameCp -%>Connection
   }
