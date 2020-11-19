@@ -21,6 +21,53 @@ static init(sequelize, DataTypes){
 }
 `
 
+module.exports.array_model_init = `
+static init(sequelize, DataTypes) {
+  return super.init({
+
+      arrId: {
+          type: Sequelize[dict['String']],
+          primaryKey: true
+      },
+      country: {
+          type: Sequelize[dict['String']]
+      },
+      arrStr: {
+          type: Sequelize[dict['[String]']],
+          defaultValue: '[]'
+      },
+      arrInt: {
+          type: Sequelize[dict['[Int]']],
+          defaultValue: '[]'
+      },
+      arrFloat: {
+          type: Sequelize[dict['[Float]']],
+          defaultValue: '[]'
+      },
+      arrBool: {
+          type: Sequelize[dict['[Boolean]']],
+          defaultValue: '[]'
+      },
+      arrDate: {
+          type: Sequelize[dict['[Date]']],
+          defaultValue: '[]'
+      },
+      arrTime: {
+          type: Sequelize[dict['[Time]']],
+          defaultValue: '[]'
+      },
+      arrDateTime: {
+          type: Sequelize[dict['[DateTime]']],
+          defaultValue: '[]'
+      }
+
+  }, {
+      modelName: "arr",
+      tableName: "arrs",
+      sequelize
+  });
+}
+`
 module.exports.book_model_storage_handler = `
 /**
  * Get the storage handler, which is a static property of the data model class.
@@ -48,6 +95,7 @@ static async readById(id) {
   if (item === null) {
       throw new Error(\`Record with ID = "\${id}" does not exist\`);
   }
+  item = Book.postReadCast(item)
 return validatorUtil.validateData('validateAfterRead', this, item);
 }
 `

@@ -133,6 +133,7 @@ attributesToString = function(attributes){
  */
 attributesToJsonSchemaProperties = function(attributes) {
   let jsonSchemaProps = Object.assign({}, attributes)
+  let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']
 
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
@@ -176,6 +177,10 @@ attributesToJsonSchemaProperties = function(attributes) {
       jsonSchemaProps[key] = {
         "type": ["uuid", "null"]
       }
+    } else if (arrayType.includes(jsonSchemaProps[key])){
+      jsonSchemaProps[key] = {
+        "type": ["array", "null"]
+      }
     } else {
       throw new Error(`Unsupported attribute type: ${jsonSchemaProps[key]}`);
     }
@@ -207,7 +212,8 @@ attributesArrayString = function(attributes){
 
 
 /**
- * getOnlyTypeAttributes - Creates an object which keys are the attributes and the value its type
+ * getOnlyTypeAttributes - Creates an object which keys are the attributes and the value its type and also removes all spaces from both,
+ *                          the type and the attribute itself
  *
  * @param  {object} attributes Object containing the attributes to parse
  * @return {object}            Object simplified, all values are strings indicating the attribute's type.
@@ -217,10 +223,12 @@ getOnlyTypeAttributes = function(attributes){
 
     for(key in attributes){
 
+      let key_no_spaces = key.replace(/\s+/g, '');
+
       if(attributes[key] && typeof attributes[key]==='object' && attributes[key].constructor === Object ){
-        only_type[ key ] = attributes[key].type;
+        only_type[ key_no_spaces ] = attributes[key].type.replace(/\s+/g, '');
       }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
-        only_type[key] =  attributes[key];
+        only_type[key_no_spaces] =  attributes[key].replace(/\s+/g, '');
       }
 
     }
@@ -241,10 +249,12 @@ getOnlyDescriptionAttributes = function(attributes){
 
     for(key in attributes){
 
+      let key_no_spaces = key.replace(/\s+/g, '');
+
       if(attributes[key] && typeof attributes[key]==='object' && attributes[key].constructor === Object ){
-        only_description[ key ] = attributes[key].description || "";
+        only_description[ key_no_spaces ] = attributes[key].description || "";
       }else if(typeof attributes[key] === 'string' || attributes[key] instanceof String){
-        only_description[key] = "";
+        only_description[key_no_spaces] = "";
       }
 
     }
@@ -322,6 +332,9 @@ writeSchemaCommons = function(dir_write){
     ne
     regexp
     notRegexp
+    contains
+    contained
+    not
   }
   
   enum CassandraOperator{
@@ -631,12 +644,20 @@ getEditableAssociations = function(associations) {
       editableAssociations.push(association);
     }
   })
+
+  //for cases many to many through foreignKey array
+  associations['to_many'].forEach(association => {
+    if (association.keyIn !== association.target){
+      editableAssociations.push(association);
+    }
+  })
+
   return editableAssociations;
 }
 
 getEditableAttributes = function(attributes, parsedAssocForeignKeys, idAttribute){
   let editable_attributes = {};
-  let target_keys = parsedAssocForeignKeys.map( assoc => assoc.targetKey );
+  let target_keys = parsedAssocForeignKeys.map( assoc => { if(assoc.reverseAssociationType) return assoc.sourceKey; return assoc.targetKey; });
   for(let attrib in attributes ){
     if(!target_keys.includes(attrib) && attrib !== idAttribute){
       editable_attributes[ attrib ] = attributes[attrib];
@@ -675,6 +696,7 @@ module.exports.parseAssociations = function(dataModel){
     Object.entries(associations).forEach(([name, association]) => {
       let type = association.type;
       let holdsTheForeignKey = false;
+      let assocThroughArray = false;
       let isStandardAssociation = (association.type !== 'generic_to_many' && association.type !== 'generic_to_one');
 
       //push association
@@ -692,6 +714,9 @@ module.exports.parseAssociations = function(dataModel){
       if(association.type === 'to_many') {
         //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
         associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target) ,capitalizeString(name)];
+        if(association.reverseAssociationType === 'to_many'){
+          assocThroughArray = true;
+        }
       //}else if(associations_type["one"].includes(association.type))
       } else if(association.type === 'to_one') {
         associations_info.schema_attributes["one"][name] = [association.target, capitalizeString(association.target), capitalizeString(name) ];
@@ -729,6 +754,7 @@ module.exports.parseAssociations = function(dataModel){
             assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
         }
         assoc["holdsForeignKey"] = holdsTheForeignKey;
+        assoc["assocThroughArray"] = assocThroughArray;
       } else {
         //generic
         assoc["name"] = name;
@@ -1117,7 +1143,7 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
         sections = [
           {dir: 'schemas',     template: 'schemas',     fileName: opts.nameLc},
           {dir: 'resolvers',   template: 'resolvers',   fileName: opts.nameLc},
-          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},          
+          {dir: 'models/sql',  template: 'models',      fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',     template: 'patches',     fileName: opts.nameLc},
         ]

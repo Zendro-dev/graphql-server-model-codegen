@@ -31,6 +31,55 @@ static init(sequelize, DataTypes) {
     });
 }
 `
+module.exports.array_constructor = `
+static init(sequelize, DataTypes) {
+    return super.init({
+
+        arrId: {
+            type: Sequelize[dict['String']],
+            primaryKey: true
+        },
+        country: {
+            type: Sequelize[dict['String']]
+        },
+        arrStr: {
+            type: Sequelize[dict['[String]']],
+            defaultValue: '[]'
+
+        },
+        arrInt: {
+            type: Sequelize[dict['[Int]']],
+            defaultValue: '[]'
+        },
+        arrFloat: {
+            type: Sequelize[dict['[Float]']],
+            defaultValue: '[]'
+        },
+        arrBool: {
+            type: Sequelize[dict['[Boolean]']],
+            defaultValue: '[]'
+        },
+        arrDate: {
+            type: Sequelize[dict['[Date]']],
+            defaultValue: '[]'
+        },
+        arrTime: {
+            type: Sequelize[dict['[Time]']],
+            defaultValue: '[]'
+        },
+        arrDateTime: {
+            type: Sequelize[dict['[DateTime]']],
+            defaultValue: '[]'
+        }
+
+    }, {
+        modelName: "arr",
+        tableName: "arrs",
+        sequelize
+    });
+}
+`
+
 module.exports.storageHandler = `
 /**
  * Get the storage handler, which is a static property of the data model class.
@@ -52,6 +101,7 @@ static async readById(id) {
     if (item === null) {
         throw new Error(\`Record with ID = "\${id}" does not exist\`);
     }
+    item = peopleLocalSql.postReadCast(item)
     return item;
 }
 `
@@ -59,6 +109,7 @@ static async readById(id) {
 
 module.exports.addOne = `
 static async addOne(input) {
+      input = peopleLocalSql.preWriteCast(input)
       try {
           const result = await this.sequelize.transaction(async (t) => {
               let item = await super.create(input, {
@@ -66,6 +117,8 @@ static async addOne(input) {
               });
               return item;
           });
+          peopleLocalSql.postReadCast(result.dataValues)
+          peopleLocalSql.postReadCast(result._previousDataValues)
           return result;
       } catch (error) {
           throw error;
@@ -87,7 +140,7 @@ static countRecords(search) {
             }
 
             let arg = new searchArg(search);
-            let arg_sequelize = arg.toSequelize();
+            let arg_sequelize = arg.toSequelize(peopleLocalSql.definition.attributes);
             options['where'] = arg_sequelize;
         }
         return super.count(options);
@@ -96,13 +149,16 @@ static countRecords(search) {
 module.exports.readAllCursor = `
 static async readAllCursor(search, order, pagination){
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), peopleLocalSql.definition.attributes);
     let records = await super.findAll(options);
+
+    records = records.map(x => peopleLocalSql.postReadCast(x))
+
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), peopleLocalSql.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
@@ -125,15 +181,19 @@ module.exports.deleteOne = `
 
 module.exports.updateOne = `
     static async updateOne(input) {
+      input = peopleLocalSql.preWriteCast(input)
       try {
         let result = await this.sequelize.transaction( async (t) =>{
-          let updated = await super.update( input, { where:{ [this.idAttribute()] : input[this.idAttribute()] }, returning: true, transaction: t  } );
-          return updated;
+            let to_update = await super.findByPk(input[this.idAttribute()]);
+            if(to_update === null){
+              throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
+            }
+            let updated = await to_update.update( input, { transaction: t  } );
+            return updated;
           });
-          if(result[0] === 0){
-            throw new Error(\`Record with ID = \${input[this.idAttribute()]} does not exist\`);
-          }
-          return result[1][0];
+          peopleLocalSql.postReadCast(result.dataValues)
+          peopleLocalSql.postReadCast(result._previousDataValues)
+          return result;
       } catch (error) {
           throw error;
       }
