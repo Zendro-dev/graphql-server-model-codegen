@@ -1,9 +1,9 @@
 --- individual.js.orig	2020-06-29 18:51:36.275316065 -0500
 +++ individual.js	2020-06-29 18:51:45.375659525 -0500
 @@ -4,6 +4,8 @@
- const ajv = validatorUtil.addDateTimeAjvKeywords(new Ajv({
+ const ajv = validatorUtil.addValidatorFunc(validatorUtil.addDateTimeAjvKeywords(new Ajv({
      allErrors: true
- }))
+ })))
 +const path = require('path');
 +const individual_model =  require(path.join(__dirname, '..', 'models', 'sql' ,'individual.js'));
  
