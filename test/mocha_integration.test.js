@@ -3119,10 +3119,20 @@ describe(
     })
 
     describe('cassandra local', function() {
+
+      // before(async function() {
+      //   // Add 10 walrusses
+      //   for (let i = 0; i < 10; i++) {
+      //     let res = itHelpers.request_graph_ql_post(`mutation {addWalrus(walrus_id: "cassandra-walrus-${i}", name: "Manfred", age: ${i + 10}){walrus_id}}`);
+      //     expect(res.statusCode).to.equal(200);       
+      //   }
+      // });
+
       it('01. Add a walrus', function(){
         let res = itHelpers.request_graph_ql_post('mutation {addWalrus(walrus_id: "cassandra-walrus-1", name: "Manfred", age: 187){walrus_id}}');
         expect(res.statusCode).to.equal(200);
       });
+
 
       // after(async function(){
   
@@ -3130,6 +3140,11 @@ describe(
   
       
     });
+
+
+
+    
+
   
     // describe('cassandra distributed', function() {
   

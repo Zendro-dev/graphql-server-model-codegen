@@ -11,7 +11,7 @@
   "scripts": {
     "test-env": "zenv",
     "test-unit": "mocha ./test/mocha_unit_test.js",
-    "test-integration": "zenv integration"
+    "test-integration": "zenv integration cassandra-integration"
   },
   "author": "Science-DB team",
   "license": "GPL-3.0",

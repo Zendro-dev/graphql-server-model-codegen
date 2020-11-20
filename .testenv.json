@@ -7,15 +7,15 @@
   "services": [
     {
       "name": "gql_science_db_graphql_server1",
-      "template": "https://github.com/Zendro-dev/graphql-server.git",
-      "branch": "master",
-      "url": "http://localhost:3000/graphql"
+      "template": "../../../graphql-server",
+      "url": "http://localhost:3000/graphql",
+      "source": true
     },
     {
       "name": "gql_science_db_graphql_server2",
-      "template": "https://github.com/Zendro-dev/graphql-server.git",
-      "branch": "master",
-      "url": "http://localhost:3030/graphql"
+      "template": "../../../graphql-server",
+      "url": "http://localhost:3030/graphql",
+      "source": true
     }
   ],
   "models": [
@@ -58,12 +58,17 @@
     {
       "name": "integration",
       "runner": "mocha",
-      "target": "../mocha_integration_test.js"
+      "target": "../mocha_integration.test.js"
+    },
+    {
+      "name": "cassandra-integration",
+      "runner": "mocha",
+      "target": "../mocha_integration_cassandra.test.js"
     },
     {
       "name": "unit",
       "runner": "mocha",
-      "target": "../mocha_unit_test.js"
+      "target": "../mocha_unit.test.js"
     }
   ]
 }
