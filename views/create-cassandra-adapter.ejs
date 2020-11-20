@@ -78,7 +78,7 @@ module.exports = class <%- adapterName -%> {
   */
   static async countRecords(search, allowFiltering){
     let whereOptions = cassandraHelper.searchConditionsToCassandra(search, allowFiltering) 
-    const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + arg_cassandra;
+    const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + whereOptions;
     let queryResult = await this.storageHandler.execute(query);
     let item = queryResult.first();
     return parseInt(item['count']);
@@ -105,7 +105,7 @@ module.exports = class <%- adapterName -%> {
   static async readAllCursor(search, pagination, allowFiltering){
 
     let offsetCursor = pagination ? pagination.after : null;    
-    let cassandraSearch = cassandraHelper.cursorPaginationArgumentsToCassandra(search, offsetCursor,'<%- idAttribute -%>'); 
+    let cassandraSearch = offsetCursor ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, offsetCursor,'<%- idAttribute -%>') : null;
     let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, allowFiltering);
 
     <% columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
