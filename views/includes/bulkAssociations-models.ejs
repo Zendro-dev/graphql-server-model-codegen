@@ -71,7 +71,7 @@
         throw new Error('bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>() is not implemented for model <%- name -%>');
       }
     <%}_%>
-    <% if(storageType === 'cassandra'){_%>
+    <% if(storageType === 'cassandra' || storageType === 'cassandra-adapter'){_%>
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
         let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
         let promises = [];

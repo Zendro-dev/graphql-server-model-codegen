@@ -448,7 +448,7 @@ module.exports = {
           helper.checkCountAndReduceRecordsLimit(pagination.first, context, "<%- namePl -%>Connection");
           let allowFiltering = await checkAuthorization(context, '<%- name -%>', 'search')
           let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-          return await <%- nameLc -%>.readAllCursor(search, order, pagination, allowFiltering, benignErrorReporter);
+          return await <%- nameLc -%>.readAllCursor(search, pagination, allowFiltering, benignErrorReporter);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }

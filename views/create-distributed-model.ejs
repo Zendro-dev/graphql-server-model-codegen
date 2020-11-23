@@ -3,6 +3,7 @@ const path = require('path');
 const adapters = require('../adapters/index');
 const globals = require('../../config/globals');
 const helper = require('../../utils/helper');
+const cassandraHelper = require('../../utils/cassandra_helpers');
 const models = require(path.join(__dirname, '..', 'index.js'));
 const validatorUtil = require('../../utils/validatorUtil');
 const errorHelper = require('../../utils/errors');
@@ -241,10 +242,10 @@ module.exports = class <%- name -%>{
       if(pagination === undefined ){ pagination = { <% if (cassandraRestrictions) { %>limit<% } else { %>first<% } %> : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
       <% if (cassandraRestrictions) { %>
-      let ordered_records = helper.orderRecordsWithCassandra(nodes, '<%- idAttribute -%>');
+      let ordered_records = cassandraHelper.orderCassandraRecords(nodes);
       let paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.limit);
-      let hasNextPage = ordered_records.length > pagination.limit || someHasNextPage;
-      let graphQLConnection = helper.toGraphQLCassandraConnectionObject(paginated_records, this, hasNextPage);
+      let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage);
       return graphQLConnection;
       <% } else { %>
       let ordered_records = helper.orderRecords(nodes, order);

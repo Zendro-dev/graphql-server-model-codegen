@@ -28,10 +28,10 @@ module.exports = class <%- adapterName -%> {
   }
  
   /**
-  * name - Getter for the name attribute
+  * adapterName - Getter for the name attribute
   *
   * This attribute is needed by the models' index
-  * @return {string} The name of the model
+  * @return {string} The adapterName of the model
   */
   static get adapterName(){
     return "<%- adapterName -%>";
@@ -50,7 +50,7 @@ module.exports = class <%- adapterName -%> {
   *
   * This method is the implementation for reading a single record for the Cassandra storage type, based on CQL.
   * @param {string} id - The ID of the requested record
-  * @return {object} The requested record as an object with the type <%- name -%>, or an error object if the validation after reading fails
+  * @return {object} The requested record as an object with the type <%- adapterName -%>, or an error object if the validation after reading fails
   * @throws {Error} If the requested record does not exist
   */
   static async readById(id){
@@ -62,7 +62,7 @@ module.exports = class <%- adapterName -%> {
     if (firstResult === null) {
       throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    let item = new <%- name -%>(firstResult);
+    let item = new <%- adapterName -%>(firstResult);
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
@@ -77,7 +77,7 @@ module.exports = class <%- adapterName -%> {
   * @return {number} The number of records that fulfill the condition, or of all records in the table
   */
   static async countRecords(search, allowFiltering){
-    let whereOptions = cassandraHelper.searchConditionsToCassandra(search, allowFiltering) 
+    let whereOptions = cassandraHelper.searchConditionsToCassandra(search, definition, allowFiltering) 
     const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + whereOptions;
     let queryResult = await this.storageHandler.execute(query);
     let item = queryResult.first();
@@ -105,11 +105,11 @@ module.exports = class <%- adapterName -%> {
   static async readAllCursor(search, pagination, allowFiltering){
 
     let offsetCursor = pagination ? pagination.after : null;    
-    let cassandraSearch = offsetCursor ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, offsetCursor,'<%- idAttribute -%>') : null;
-    let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, allowFiltering);
+    let cassandraSearch = offsetCursor ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, offsetCursor,'<%- idAttribute -%>') : search;
+    let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, definition, allowFiltering);
 
     <% columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
-    let query = 'SELECT <%- columns -%>, token(<%- idAttribute -%>) as toke FROM <%- namePl -%>' + arg_cassandra;
+    let query = 'SELECT <%- columns -%>, token(<%- idAttribute -%>) as toke FROM <%- namePl -%>' + whereOptions;
 
     // Set page size if needed
     let options = {};
@@ -123,7 +123,7 @@ module.exports = class <%- adapterName -%> {
     // Construct return object
     const rows = result.rows.map(row => {
       let edge = {};
-      let rowAs<%- name -%> = new <%- name -%>(row);
+      let rowAs<%- name -%> = new <%- adapterName -%>(row);
       edge.node = rowAs<%- name -%>;
       edge.cursor = rowAs<%- name -%>.base64Enconde();
       return edge;
@@ -162,7 +162,7 @@ module.exports = class <%- adapterName -%> {
   *
   * @param {object} input_object - The input object with informations about the record to be added, destructured into
   * the attribute components, but whithout associations or other information like *skipAssociationsExistenceChecks*.
-  * @return {object} The created record as <%- indefiniteArticle -%> <%- name -%> object
+  * @return {object} The created record as <%- indefiniteArticle -%> <%- adapterName -%> object
   * @throw {Error} If the process fails, an error is thrown
   */
   static async addOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
@@ -205,7 +205,7 @@ module.exports = class <%- adapterName -%> {
   *
   * @param {object} input_object - The input object with informations about the record to be updated, destructured into
   * the attribute components, but whithout associations or other information like *skipAssociationsExistenceChecks*.
-  * @returns {object} A new object of the type <%- name -%>, which represents the updated record
+  * @returns {object} A new object of the type <%- adapterName -%>, which represents the updated record
   * @throw {Error} If this method fails, an error is thrown
   */
   static async updateOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
@@ -238,6 +238,8 @@ module.exports = class <%- adapterName -%> {
   -%>
   <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
   <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
   
   static async bulkAddCsv(context){
     throw new Error('Bulk Adding from a CSV file is currently not implemented!');
@@ -256,6 +258,7 @@ module.exports = class <%- adapterName -%> {
       return helper.csvTableTemplate(definition);
   }
 
+
   /**
    * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
    *
@@ -263,7 +266,7 @@ module.exports = class <%- adapterName -%> {
    */
 
   static idAttribute() {
-    return <%- name -%>.definition.id.name;
+    return <%- adapterName -%>.definition.id.name;
   }
 
   /**
@@ -273,17 +276,17 @@ module.exports = class <%- adapterName -%> {
    */
 
   static idAttributeType() {
-    return <%- name -%>.definition.id.type;
+    return <%- adapterName -%>.definition.id.type;
   }
 
   /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- adapterName -%>.
    *
    * @return {type} id value
    */
 
   getIdValue() {
-    return this[<%- name -%>.idAttribute()]
+    return this[<%- adapterName -%>.idAttribute()]
   }
 
   /**
@@ -304,30 +307,30 @@ module.exports = class <%- adapterName -%> {
   }
 
   /**
-  * base64Enconde - Encode <%- indefiniteArticle -%> <%- name -%> to a base 64 String
+  * base64Enconde - Encode <%- indefiniteArticle -%> <%- adapterName -%> to a base 64 String
   *
-  * @return {string} The <%- name -%> object, encoded in a base 64 String
+  * @return {string} The <%- adapterName -%> object, encoded in a base 64 String
   */
     base64Enconde(){
     return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
   }
 
   /**
-  * stripAssociations - Instant method for getting all attributes of <%- indefiniteArticle -%> <%- name -%>.
+  * stripAssociations - Instant method for getting all attributes of <%- indefiniteArticle -%> <%- adapterName -%>.
   *
-  * @return {object} The attributes of <%- indefiniteArticle -%> <%- name -%> in object form
+  * @return {object} The attributes of <%- indefiniteArticle -%> <%- adapterName -%> in object form
   */
   stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    let attributes = Object.keys(<%- adapterName -%>.definition.attributes);
   <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
     let data_values = _.pick(this, attributes);
     return data_values;
   }
 
   /**
-  * externalIdsArray - Get all attributes of <%- indefiniteArticle -%> <%- name -%> that are marked as external IDs.
+  * externalIdsArray - Get all attributes of <%- indefiniteArticle -%> <%- adapterName -%> that are marked as external IDs.
   *
-  * @return {Array<String>} An array of all attributes of <%- indefiniteArticle -%> <%- name -%> that are marked as external IDs
+  * @return {Array<String>} An array of all attributes of <%- indefiniteArticle -%> <%- adapterName -%> that are marked as external IDs
   */
   static externalIdsArray(){
     let externalIds = [];
@@ -339,7 +342,7 @@ module.exports = class <%- adapterName -%> {
   }
 
   /**
-  * externalIdsObject - Get all external IDs of <%- indefiniteArticle -%> <%- name -%>.
+  * externalIdsObject - Get all external IDs of <%- indefiniteArticle -%> <%- adapterName -%>.
   *
   * @return {object} An object that has the names of the external IDs as keys and their types as values
   */
@@ -352,7 +355,7 @@ module.exports = class <%- adapterName -%> {
   /**
   * encloseStringAttributesInApostrophes - Cassandra expects String values to be 
   * enclosed in apostrophes (see https://docs.datastax.com/en/cql-oss/3.x/cql/cql_reference/valid_literal_r.html). This method checks
-  * all string attributes of <%- name -%>, and if the value does not start with an apostrophe (index 0), the value is enclosed
+  * all string attributes of <%- adapterName -%>, and if the value does not start with an apostrophe (index 0), the value is enclosed
   * in apostrophes.
   * @param {Object} obj - The object to be examined
   */
