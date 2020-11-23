@@ -2,9 +2,10 @@
     "model": "Incident",
     "storageType": "cassandra",
     "attributes": {
-      "incident_id": "uuid",
+      "incident_id": "String",
       "incident_description": "String",
-      "incident_number": "Int"
+      "incident_number": "Int",
+      "capital_id": "String"
     },
   
     "associations": {
@@ -15,6 +16,13 @@
         "targetKey": "incident_assoc_id",
         "keyIn" : "Instant",
         "targetStorageType": "cassandra"
+      },
+      "town": {
+        "type": "to_one",
+        "target": "capital",
+        "targetKey": "capital_id",
+        "keyIn" : "Incident",
+        "targetStorageType": "sql"
       }
   
     },

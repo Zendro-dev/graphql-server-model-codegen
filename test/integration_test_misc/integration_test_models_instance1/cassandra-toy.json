@@ -6,7 +6,7 @@
     "name": "String",
     "rating": "Int",
 
-    "cat_id": "String",
+    "walrus_id": "String",
     "parrot_id": "String"
   },
   "associations": {

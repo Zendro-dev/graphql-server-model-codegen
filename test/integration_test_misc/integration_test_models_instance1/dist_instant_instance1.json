@@ -1,6 +1,8 @@
 {
-    "model": "Instant",
-    "storageType": "cassandra",
+    "model": "Dist_instant",
+    "storageType" : "cassandra-adapter",
+    "adapterName": "dist_instant_instance1",
+    "regex": "instance1",
     "attributes": {
       "instant_id": "String",
       "incident_assoc_id": "String",
@@ -13,12 +15,12 @@
   
     "associations": {
   
-      "incident": {
+      "dist_incident": {
         "type": "to_one",
-        "target": "Incident",
+        "target": "Dist_incident",
         "targetKey": "incident_assoc_id",
-        "keyIn" : "Instant",
-        "targetStorageType": "cassandra"
+        "keyIn" : "Dist_instant",
+        "targetStorageType": "distributed-data-model"
       }
   
     },

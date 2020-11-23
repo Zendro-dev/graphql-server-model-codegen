@@ -13,6 +13,13 @@
         "targetKey" : "country_id",
         "keyIn": "capital",
         "targetStorageType" : "sql"
+      },
+      "incidents": {
+        "type": "to_many",
+        "target": "Incident",
+        "targetKey": "capital_id",
+        "keyIn": "Incident",
+        "targetStorageType": "cassandra"
       }
     },
     "internalId": "capital_id"
