@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const itHelpers = require('./integration_test_misc/integration_test_helpers');
 
-describe('Cassandra', function() {
+describe('Cassandra Local', function() {
   after(async function() {
     let res = itHelpers.request_graph_ql_post(`{incidentsConnection(pagination:{first:20}) {edges {node {incident_id}}}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
@@ -60,13 +60,13 @@ describe('Cassandra', function() {
   })
 
   it('02. Add an incident', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db", incident_description: "An event" ) {incident_id incident_description}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_1", incident_description: "An event" ) {incident_id incident_description}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+              incident_id: "incident_1",
               incident_description: "An event"
           }
       }
@@ -74,13 +74,13 @@ describe('Cassandra', function() {
   })
 
   it('03. Read an incident', function() {
-    let res = itHelpers.request_graph_ql_post('{readOneIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db") {incident_id incident_description}}');
+    let res = itHelpers.request_graph_ql_post('{readOneIncident(incident_id: "incident_1") {incident_id incident_description}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           readOneIncident: {
-              incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+              incident_id: "incident_1",
               incident_description: "An event"
           }
       }
@@ -88,13 +88,13 @@ describe('Cassandra', function() {
   })
 
   it('04. Update an incident', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { updateIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db", incident_description: "Another event" ) {incident_id incident_description}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { updateIncident(incident_id: "incident_1", incident_description: "Another event" ) {incident_id incident_description}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           updateIncident: {
-              incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+              incident_id: "incident_1",
               incident_description: "Another event"
           }
       }
@@ -125,7 +125,7 @@ describe('Cassandra', function() {
                   {
                     cursor: `${cursor}`,
                     node: {
-                      incident_id: "590785b2-062a-4325-8607-9df8e107a7db",
+                      incident_id: "incident_1",
                       incident_description: "Another event"
                     }
                   }
@@ -141,7 +141,7 @@ describe('Cassandra', function() {
   });
 
   it('06. Delete an incident', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "590785b2-062a-4325-8607-9df8e107a7db")}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { deleteIncident(incident_id: "incident_1")}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
@@ -152,57 +152,57 @@ describe('Cassandra', function() {
   })
 
   it('07. Create 5 incidents, test pagination and delete the incidents in a loop', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1", incident_description: "First incident", incident_number: 1 ) {incident_id incident_description}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_2", incident_description: "First incident", incident_number: 1 ) {incident_id incident_description}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "aef7cbbc-3f9c-452c-a95a-0eccd51e02e1",
+              incident_id: "incident_2",
               incident_description: "First incident"
           }
       }
     });
-    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "0a853fac-1bb2-4adf-bbf9-9371f7db97b6", incident_description: "Second incident", incident_number: 2 ) {incident_id incident_description}}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_3", incident_description: "Second incident", incident_number: 2 ) {incident_id incident_description}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "0a853fac-1bb2-4adf-bbf9-9371f7db97b6",
+              incident_id: "incident_3",
               incident_description: "Second incident"
           }
       }
     });
-    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "8f455707-f7aa-4925-9efc-df18f2f9cd55", incident_description: "Third incident", incident_number: 3 ) {incident_id incident_description}}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_4", incident_description: "Third incident", incident_number: 3 ) {incident_id incident_description}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "8f455707-f7aa-4925-9efc-df18f2f9cd55",
+              incident_id: "incident_4",
               incident_description: "Third incident"
           }
       }
     });
-    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "a1e30fde-2bc0-466b-84f4-1d4fee68af44", incident_description: "Fourth incident", incident_number: 4 ) {incident_id incident_description}}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_5", incident_description: "Fourth incident", incident_number: 4 ) {incident_id incident_description}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "a1e30fde-2bc0-466b-84f4-1d4fee68af44",
+              incident_id: "incident_5",
               incident_description: "Fourth incident"
           }
       }
     });
-    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "1f458011-49a3-4833-90f0-d084e227c376", incident_description: "Fifth incident", incident_number: 5 ) {incident_id incident_description}}`);
+    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_6", incident_description: "Fifth incident", incident_number: 5 ) {incident_id incident_description}}`);
     resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "1f458011-49a3-4833-90f0-d084e227c376",
+              incident_id: "incident_6",
               incident_description: "Fifth incident"
           }
       }
@@ -339,13 +339,13 @@ describe('Cassandra', function() {
   })
 
   it('09. Add an instant', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { addInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45", year: 2020, month: 6, day: 18, hour: 10, minute: 52 ) {instant_id year month day hour minute}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { addInstant(instant_id: "instant_1", year: 2020, month: 6, day: 18, hour: 10, minute: 52 ) {instant_id year month day hour minute}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addInstant: {
-              instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+              instant_id: "instant_1",
               year: 2020,
               month: 6,
               day: 18,
@@ -357,13 +357,13 @@ describe('Cassandra', function() {
   })
 
   it('10. Read an instant', function() {
-    let res = itHelpers.request_graph_ql_post('{readOneInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45") {instant_id year month day hour minute}}');
+    let res = itHelpers.request_graph_ql_post('{readOneInstant(instant_id: "instant_1") {instant_id year month day hour minute}}');
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           readOneInstant: {
-              instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+              instant_id: "instant_1",
               year: 2020,
               month: 6,
               day: 18,
@@ -375,13 +375,13 @@ describe('Cassandra', function() {
   })
 
   it('11. Update an instant', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { updateInstant(instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45", minute: 57 ) {instant_id year month day hour minute}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { updateInstant(instant_id: "instant_1", minute: 57 ) {instant_id year month day hour minute}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           updateInstant: {
-              instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+              instant_id: "instant_1",
               year: 2020,
               month: 6,
               day: 18,
@@ -412,7 +412,7 @@ describe('Cassandra', function() {
                   {
                     cursor: `${cursor}`,
                     node: {
-                      instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
+                      instant_id: "instant_1",
                       year: 2020,
                       month: 6,
                       day: 18,
@@ -432,13 +432,13 @@ describe('Cassandra', function() {
   });
 
   it('13. Generate an incident and associate it to the instant', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a", incident_description: "Associations test incident", addInstants: "c28ffcb7-6f55-4577-8359-9d8a46382a45") {incident_id incident_description}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_7", incident_description: "Associations test incident", addInstants: "instant_1") {incident_id incident_description}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addIncident: {
-              incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a",
+              incident_id: "incident_7",
               incident_description: "Associations test incident"
           }
       }
@@ -446,7 +446,7 @@ describe('Cassandra', function() {
   })
 
   it('14. Read the instant and its connection to the incident', function() {
-    let res = itHelpers.request_graph_ql_post(`{instantsConnection(pagination:{first:20}, search:{field: instant_id, operator: eq,   : "c28ffcb7-6f55-4577-8359-9d8a46382a45"}}) {edges {node {instant_id incident_assoc_id incident {incident_id}}}}}`);
+    let res = itHelpers.request_graph_ql_post(`{instantsConnection(pagination:{first:20}, search:{field: instant_id, operator: eq, value: "instant_1"}) {edges {node {instant_id incident_assoc_id incident {incident_id}}}}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
@@ -455,10 +455,10 @@ describe('Cassandra', function() {
               edges: [
                   {
                       node: {
-                          instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45",
-                          incident_assoc_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a",
+                          instant_id: "instant_1",
+                          incident_assoc_id: "incident_7",
                           incident: {
-                              incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a"
+                              incident_id: "incident_7"
                           }
                       }
                   }
@@ -469,42 +469,42 @@ describe('Cassandra', function() {
   })
 
   it('15. Generate a new instant and associate it to the incident', function() {
-    let res = itHelpers.request_graph_ql_post(`mutation { addInstant(instant_id: "36c29673-0cc3-4d50-9172-b0cf885a481c", year: 2020, month: 6, day: 22, hour: 18, minute: 47, addIncident: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {instant_id year month day hour minute incident_assoc_id}}`);
+    let res = itHelpers.request_graph_ql_post(`mutation { addInstant(instant_id: "instant_2", year: 2020, month: 6, day: 22, hour: 18, minute: 47, addIncident: "incident_7") {instant_id year month day hour minute incident_assoc_id}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           addInstant: {
-              instant_id: "36c29673-0cc3-4d50-9172-b0cf885a481c",
+              instant_id: "instant_2",
               year: 2020,
               month: 6,
               day: 22,
               hour: 18,
               minute: 47,
-              incident_assoc_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a"
+              incident_assoc_id: "incident_7"
           }
       }
     });
   })
 
   it('16. Read the incident and its connection to the instants', function() {
-    let res = itHelpers.request_graph_ql_post(`{readOneIncident(incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {incident_id instantsConnection {edges {node{ instant_id}}} }}`);
+    let res = itHelpers.request_graph_ql_post(`{readOneIncident(incident_id: "incident_7") {incident_id instantsConnection(pagination:{first:5}) {edges {node{ instant_id}}} }}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       data: {
           readOneIncident: {
-              incident_id: "0d2569b6-c890-4e26-a081-9eff27f70b8a",
+              incident_id: "incident_7",
               instantsConnection: {
                   edges: [
                       {
                           node: {
-                              instant_id: "36c29673-0cc3-4d50-9172-b0cf885a481c"
+                              instant_id: "instant_2"
                           }
                       },
                       {
                           node: {
-                              instant_id: "c28ffcb7-6f55-4577-8359-9d8a46382a45"
+                              instant_id: "instant_1"
                           }
                       }
                   ]
@@ -515,14 +515,14 @@ describe('Cassandra', function() {
   })
 
   it('17. Delete the associations', function() {
-    let res = itHelpers.request_graph_ql_post(`{instantsConnection(pagination:{first:20}, search:{field: incident_assoc_id, operator: eq, value:0d2569b6-c890-4e26-a081-9eff27f70b8a"}) {edges {node{ instant_id}}}}`);
+    let res = itHelpers.request_graph_ql_post(`{instantsConnection(pagination:{first:20}, search:{field: incident_assoc_id, operator: eq, value:"incident_7"}) {edges {node{ instant_id}}}}`);
     let resBody = JSON.parse(res.body.toString('utf8'));
     expect(res.statusCode).to.equal(200);
     let edges = resBody.data.instantsConnection.edges;
     expect(edges.length).to.equal(2);
     for (let edge of edges) {
       let id = edge.node.instant_id;
-      res = itHelpers.request_graph_ql_post(`mutation{updateInstant(instant_id: "${id}", removeIncident: "0d2569b6-c890-4e26-a081-9eff27f70b8a") {instant_id incident_assoc_id}}`);
+      res = itHelpers.request_graph_ql_post(`mutation{updateInstant(instant_id: "${id}", removeIncident: "incident_7") {instant_id incident_assoc_id}}`);
       resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
@@ -543,30 +543,391 @@ describe('Cassandra', function() {
     expect(resBody).to.deep.equal({
       data: {
           csvTableTemplateIncident: [
-              "incident_id,incident_description,incident_number",
-              "uuid,String,Int"
+              "incident_id,incident_description,incident_number,capital_id",
+              "String,String,Int,String"
           ]
+      }
+    });
+  });
+
+  it('19. Associate cassandra to sql model', function() {
+    // create sql-capital
+    let res = itHelpers.request_graph_ql_post(`mutation { addCapital(capital_id: "cass_assoc_capital_1", name: "London") {capital_id}}`);
+    expect(res.statusCode).to.equal(200);
+
+    // create and associate a cassandra incident
+    res = itHelpers.request_graph_ql_post(`mutation { addIncident(incident_id: "incident_8", incident_description: "Associations to sql test incident", addTown:"cass_assoc_capital_1") {incident_id incident_description}}`);
+    expect(res.statusCode).to.equal(200);
+
+    // check if the association is set correctly
+    res = itHelpers.request_graph_ql_post(`{readOneIncident(incident_id: "incident_8") {incident_id town{capital_id name}}}`)
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      "data": {
+        "readOneIncident": {
+          "incident_id": "incident_8",
+          "town": {
+            "capital_id": "cass_assoc_capital_1",
+            "name": "London"
+          }
+        }
+      }
+    });
+
+    // cleanup
+    res = itHelpers.request_graph_ql_post(`mutation{ updateIncident(incident_id:"incident_8",removeTown:"cass_assoc_capital_1"){incident_id}}`)
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`mutation{deleteCapital(capital_id:"cass_assoc_capital_1")}`);
+    res = itHelpers.request_graph_ql_post(`mutation{deleteIncident(incident_id:"incident_8")}`);
+  });
+});
+
+describe('Cassandra DDM', function() {
+
+  after(async function() {
+    let res = itHelpers.request_graph_ql_post(`{dist_incidentsConnection(pagination:{first:20}) {edges {node {incident_id}}}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    let edges = resBody.data.dist_incidentsConnection.edges;
+    for (let edge of edges) {
+      let id = edge.node.incident_id;
+      res = itHelpers.request_graph_ql_post(`mutation { deleteDist_incident(incident_id: "${id}")}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          deleteDist_incident: "Item successfully deleted"
+        }
+      });
+    }
+    res = itHelpers.request_graph_ql_post(`{countDist_incidents}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        countDist_incidents: 0
+      }
+    });
+    res = itHelpers.request_graph_ql_post(`{dist_instantsConnection(pagination:{first:20}) {edges {node {instant_id}}}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+     edges = resBody.data.dist_instantsConnection.edges;
+    for (let edge of edges) {
+      let id = edge.node.instant_id;
+      res = itHelpers.request_graph_ql_post(`mutation { deleteDist_instant(instant_id: "${id}")}`);
+      resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          deleteDist_instant: "Item successfully deleted"
+        }
+      });
+    }
+    res = itHelpers.request_graph_ql_post(`{countDist_instants}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        countDist_instants: 0
+      }
+    });
+  });
+
+  it('01. Create an incident and 2 instants', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", incident_description: "First incident on server 1") {incident_id incident_description}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_incident: {
+          incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+          incident_description: "First incident on server 1"
+        }
+      }
+    })
+    res = itHelpers.request_graph_ql_post(`mutation {addDist_instant(instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791", year: 2020, month: 6, day: 29, hour: 15, minute: 27) {instant_id year month day hour minute}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_instant: {
+          instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791",
+          year: 2020,
+          month: 6,
+          day: 29,
+          hour: 15,
+          minute: 27
+        }
+      }
+    })
+    res = itHelpers.request_graph_ql_post(`mutation {addDist_instant(instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89", year: 2020, month: 6, day: 29, hour: 15, minute: 32) {instant_id year month day hour minute}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_instant: {
+          instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89",
+          year: 2020,
+          month: 6,
+          day: 29,
+          hour: 15,
+          minute: 32
+        }
+      }
+    })
+  })
+
+  it('02. Update the incident to associate with an instant', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {updateDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", addDist_instants: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791") {incident_id countFilteredDist_instants dist_instantsConnection(pagination:{first:2}) {edges {node {instant_id}}}}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          updateDist_incident: {
+              incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+              countFilteredDist_instants: 1,
+              dist_instantsConnection: {
+                  edges: [
+                      {
+                          node: {
+                              instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791"
+                          }
+                      }
+                  ]
+              }
+          }
       }
     });
   })
 
-  /*xit('19. CSV incident batch upload', async function () {
+  it('03. Update the other instant to associate with the incident', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {updateDist_instant(instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89", addDist_incident: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136") {instant_id year month day hour minute dist_incident {incident_id}}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          updateDist_instant: {
+              instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89",
+              year: 2020,
+              month: 6,
+              day: 29,
+              hour: 15,
+              minute: 32,
+              dist_incident: {
+                  incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136"
+              }
+          }
+      }
+    });
+  })
 
-    let csvPath = path.join(__dirname, 'integration_test_misc', 'incident.csv');
+  it('04. Update the incident to remove the second instant', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {updateDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", removeDist_instants: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89") {incident_id countFilteredDist_instants dist_instantsConnection(pagination: {first:2}) {edges {node {instant_id}}}}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          updateDist_incident: {
+              incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+              countFilteredDist_instants: 1,
+              dist_instantsConnection: {
+                  edges: [
+                      {
+                          node: {
+                              instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791"
+                          }
+                      }
+                  ]
+              }
+          }
+      }
+    });
+  })
 
-    // count records before upload
-    let cnt1 = await itHelpers.count_all_records('countIncidents');
+  it('05. Update the first instant to remove the incident', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {updateDist_instant(instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791", removeDist_incident: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136") {instant_id year month day hour minute dist_incident {incident_id}}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          updateDist_instant: {
+              instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791",
+              year: 2020,
+              month: 6,
+              day: 29,
+              hour: 15,
+              minute: 27,
+              dist_incident: null
+          }
+      }
+    });
+  })
 
-    // batch_upload_csv start new background, there is no way to test the actual result
-    // without explicit delay. The test may fail if delay is too small, just check the
-    // resulting DB table to be sure that all records from file incident.csv were added.
-    let success = await itHelpers.batch_upload_csv(csvPath, 'mutation {bulkAddIncidentCsv}');
-    expect(success).equal(true);
-    await delay(1500);
+  it('06. Add another incident and read all', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance1-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35", incident_description: "First incident on server 2") {incident_id incident_description}}`)
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          addDist_incident: {
+              incident_id: "instance1-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+              incident_description: "First incident on server 2"
+          }
+      }
+    });
+    res = itHelpers.request_graph_ql_post(`{dist_incidentsConnection(pagination: {first: 2}) {edges {node {incident_id incident_description dist_instantsConnection(pagination:{first:2}) {edges {node {instant_id}}}}}}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      data: {
+          dist_incidentsConnection: {
+              edges: [
+                  {
+                      node: {
+                          incident_id: "instance1-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+                          incident_description: "First incident on server 2",
+                          dist_instantsConnection: {
+                              edges: []
+                          }
+                      }
+                  },
+                  {
+                      node: {
+                        incident_description: "First incident on server 1",
+                        incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",                        
+                          dist_instantsConnection: {
+                              edges: []
+                          }
+                      }
+                  }
+              ]
+          }
+      }
+    });
+  })
 
-    // count records before upload
-    let cnt2 = await itHelpers.count_all_records('countIncidents');
-    expect(cnt2 - cnt1).to.equal(2);
-  });*/
-  
+  it('07. Search and pagination', function() {
+    let res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance1-2a389803-68e7-4090-9ef5-c24df84693c9", incident_description: "Second incident on server 1") {incident_id incident_description countFilteredDist_instants dist_instantsConnection(pagination: {first:2}) {edges {node {instant_id}}}}}`);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          addDist_incident: {
+              incident_id: "instance1-2a389803-68e7-4090-9ef5-c24df84693c9",
+              incident_description: "Second incident on server 1",
+              countFilteredDist_instants: 0,
+              dist_instantsConnection: {
+                  edges: []
+              }
+          }
+      }
+    });
+    res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance1-45d70035-6e95-4e03-9d78-ae69bd0158a6", incident_description: "Second incident on server 2") {incident_id incident_description countFilteredDist_instants dist_instantsConnection(pagination: {first:2}) {edges {node {instant_id}}}}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          addDist_incident: {
+              incident_id: "instance1-45d70035-6e95-4e03-9d78-ae69bd0158a6",
+              incident_description: "Second incident on server 2",
+              countFilteredDist_instants: 0,
+              dist_instantsConnection: {
+                  edges: []
+              }
+          }
+      }
+    });
+    res = itHelpers.request_graph_ql_post(`mutation {addDist_incident(incident_id: "instance1-711cda30-608a-4703-a309-20ba0fbc376b", incident_description: "Third incident on server 1", addDist_instants: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791") {incident_id incident_description countFilteredDist_instants dist_instantsConnection(pagination:{first:2}) {edges {node {instant_id}}}}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          addDist_incident: {
+              incident_id: "instance1-711cda30-608a-4703-a309-20ba0fbc376b",
+              incident_description: "Third incident on server 1",
+              countFilteredDist_instants: 1,
+              dist_instantsConnection: {
+                  edges: [
+                    {
+                      node: {
+                        instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791"
+                      }
+                    }
+                  ]
+              }
+          }
+      }
+    });
+    
+    res = itHelpers.request_graph_ql_post(`{dist_incidentsConnection(pagination:{first: 4}) {edges {node {incident_id incident_description countFilteredDist_instants dist_instantsConnection(pagination:{first:5}) {edges {node {instant_id year month day hour minute}}}}}}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          dist_incidentsConnection: {
+              edges: [
+                  {
+                    node: {
+                        incident_id: "instance1-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35",
+                        incident_description: "First incident on server 2",
+                        countFilteredDist_instants: 0,
+                        dist_instantsConnection: {
+                            edges: []
+                        }
+                    }
+                  },
+                  {
+                      node: {
+                          incident_id: "instance1-711cda30-608a-4703-a309-20ba0fbc376b",
+                          incident_description: "Third incident on server 1",
+                          countFilteredDist_instants: 1,
+                          dist_instantsConnection: {
+                              edges: [
+                                  {
+                                      node: {
+                                          instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791",
+                                          year: 2020,
+                                          month: 6,
+                                          day: 29,
+                                          hour: 15,
+                                          minute: 27
+                                      }
+                                  }
+                              ]
+                          }
+                      }
+                  },
+                  {
+                      node: {
+                          incident_id: "instance1-2a389803-68e7-4090-9ef5-c24df84693c9",
+                          incident_description: "Second incident on server 1",
+                          countFilteredDist_instants: 0,
+                          dist_instantsConnection: {
+                              edges: []
+                          }
+                      }
+                  },
+                  {
+                      node: {
+                          incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+                          incident_description: "First incident on server 1",
+                          countFilteredDist_instants: 0,
+                          dist_instantsConnection: {
+                              edges: []
+                          }
+                      }
+                  }
+              ]
+          }
+      }
+    });
+    res = itHelpers.request_graph_ql_post(`mutation{updateDist_instant(instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791", removeDist_incident: "instance1-711cda30-608a-4703-a309-20ba0fbc376b") {instant_id dist_incident {incident_id}}}`);
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+          updateDist_instant: {
+              instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791",
+              dist_incident: null
+          }
+      }
+    });
+  });
 });
