@@ -18,19 +18,18 @@ module.exports = {
     let createString = "CREATE TABLE <%-namePl-%>(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY";
     let indexCreationStrings = [];
 
-    <% let keys = Object.keys(cassandraAttributes) -%>
+    <% let keys = Object.keys(cassandraAttributesWithConvertedTypes) -%>
       <%for (let i=0; i< keys.length; i++) {-%>
-        <% let type_seq =  cassandraAttributes[ keys[i] ] -%>
-          createString += ", <%=  keys[i] %> <%= type_seq %>";
+        <% let type_seq =  cassandraAttributesWithConvertedTypes[ keys[i] ] -%>
+          createString += ", <%=  keys[i] %> <%- type_seq -%>";
           indexCreationStrings.push("<%= keys[i] %>");
        <%}-%>
-    
     createString += ");";
 
     await cassandraClient.execute(createString);
 
     let indexCreationPromises = indexCreationStrings.map(async i =>  
-      await cassandraClient.execute('CREATE INDEX IF NOT EXISTS ' + i + '_index ON <%-namePl-%> (' + i + ');'));
+      await cassandraClient.execute('CREATE INDEX IF NOT EXISTS <%-namePl-%>_' + i + '_index ON <%-namePl-%> (' + i + ');'));
 
     await Promise.allSettled(indexCreationPromises);
 

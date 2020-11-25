@@ -294,6 +294,26 @@ getOnlyCassandraTypeAttributes = function(attributes, idAttribute) {
     return only_type;
 }
 
+getCassandraAttributesType = function(attributes, idAttribute, editableAttributes) {
+  let only_type = {};
+  for (key in attributes) {
+    if (key == idAttribute) {
+      continue;
+    }
+    if(attributes[key].includes('[')) {
+      let arrType = attributes[key].replace(/\[|\]/gi, '');
+      if (editableAttributes[key]) {
+        only_type[key] = `list <${getCassandraType(arrType)}>`;
+      } else {
+        only_type[key] = `set <${getCassandraType(arrType)}>`;
+      }
+    } else {
+      only_type[key] =  getCassandraType(attributes[key]);
+    }
+  }
+  return only_type;
+}
+
 /**
  * writeSchemaCommons - Writes a 'commons.js' file into the given directory. This file contains
  * general parts of the graphql schema that are common for all models.
@@ -567,7 +587,7 @@ module.exports.getOptions = function(dataModel){
     namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
     namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
     attributes: getOnlyTypeAttributes(dataModel.attributes),
-    cassandraAttributes: getOnlyCassandraTypeAttributes(dataModel.attributes, getIdAttribute(dataModel)),
+    cassandraAttributes: getOnlyCassandraTypeAttributes(getOnlyTypeAttributes(dataModel.attributes), getIdAttribute(dataModel)),
     jsonSchemaProperties: attributesToJsonSchemaProperties(getOnlyTypeAttributes(dataModel.attributes)),
     associationsArguments: module.exports.parseAssociations(dataModel),
     arrayAttributeString: attributesArrayString( getOnlyTypeAttributes(dataModel.attributes) ),
@@ -585,9 +605,10 @@ module.exports.getOptions = function(dataModel){
     cassandraRestrictions: dataModel.cassandraRestrictions,
     cassandraStringAttributes: getStringAttributesInCassandraSchema(dataModel.attributes)
   };
-
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
   opts['editableAttributes'] = getEditableAttributes(opts.attributes,  getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel));
+  opts['editableCassandraAttributes'] = getEditableAttributes(opts.cassandraAttributes,  getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel));
+  opts['cassandraAttributesWithConvertedTypes'] = getCassandraAttributesType(opts.attributes, opts['idAttributes'],opts['editableAttributes']);
   opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
   opts['cassandraIdAttributeType'] = getCassandraType(dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute]);
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
@@ -598,7 +619,6 @@ module.exports.getOptions = function(dataModel){
 
   opts['definition'] = stringify_obj(dataModel);
   delete opts.attributes[opts.idAttribute];
-
   return opts;
 };
 
