@@ -152,8 +152,8 @@ module.exports = class <%- name -%> {
   * @return {object} The created record as <%- indefiniteArticle -%> <%- name -%> object
   * @throw {Error} If the process fails, an error is thrown
   */
-  static async addOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
-    let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
+  static async addOne({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> }){
+    let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> });
     await validatorUtil.validateData('validateForCreate', this, input);
     try{
       this.encloseStringAttributesInApostrophes(input);
@@ -195,8 +195,8 @@ module.exports = class <%- name -%> {
   * @returns {object} A new object of the type <%- name -%>, which represents the updated record
   * @throw {Error} If this method fails, an error is thrown
   */
-  static async updateOne({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> }){
-      let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(cassandraAttributes).join(", ") -%> });
+  static async updateOne({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> }){
+      let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> });
       await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
       try{
         this.encloseStringAttributesInApostrophes(input);
