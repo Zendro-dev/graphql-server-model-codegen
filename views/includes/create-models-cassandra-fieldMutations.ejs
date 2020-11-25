@@ -15,3 +15,29 @@
     }
   <%} -%>
 <%}-%>
+
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+  <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+    */
+    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      //handle inverse association
+      if(handle_inverse){
+        let promises = [];
+        <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+        });
+        await Promise.all(promises);
+      }
+
+      let mutation = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> - ? WHERE <%- idAttribute-%> = ?`
+      await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>,, <%- idAttribute-%>],{
+          prepare: true
+      });
+    }
+  <%} -%>
+<%}-%>
