@@ -141,13 +141,26 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
       //build new search filter
+    <%if(associations_temp[i].assocThroughArray){%>
+      //return an empty response if the foreignKey Array is empty, no need to query the database
+      if (this.<%=associations_temp[i].sourceKey%>.length === 0) {
+        return [];
+      }
+      let nsearch = helper.addSearchField({
+        "search": search,
+        "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+        "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+        "valueType": "Array",
+        "operator": "in"
+      });
+    <%}else{-%>
       let nsearch = helper.addSearchField({
         "search": search,
         "field": "<%=associations_temp[i].targetKey%>",
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
+    <%}-%>
       return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
   }
 
@@ -159,7 +172,19 @@ const associationArgsDef = {
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-
+    <%if(associations_temp[i].assocThroughArray){%>
+      //return 0 if the foreignKey Array is empty, no need to query the database
+      if (this.<%=associations_temp[i].sourceKey%>.length === 0) {
+        return 0;
+      }
+      let nsearch = helper.addSearchField({
+        "search": search,
+        "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+        "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+        "valueType": "Array",
+        "operator": "in"
+      });
+    <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -167,7 +192,7 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
+    <%}-%>
       return resolvers.count<%=associations_temp[i].target_cp_pl%>({search: nsearch},context);
   }
 
@@ -183,7 +208,19 @@ const associationArgsDef = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
-
+    <%if(associations_temp[i].assocThroughArray){%>
+      //return an empty response if the foreignKey Array is empty, no need to query the database
+      if (this.<%=associations_temp[i].sourceKey%>.length === 0) {
+        return {edges: []};
+      }
+      let nsearch = helper.addSearchField({
+        "search": search,
+        "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+        "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+        "valueType": "Array",
+        "operator": "in"
+      });
+    <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -191,7 +228,7 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
+    <%}-%>
       return resolvers.<%=associations_temp[i].target_lc_pl%>Connection({search: nsearch,order: order,pagination: pagination},context);
   }
 <%}-%>
