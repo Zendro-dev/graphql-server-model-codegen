@@ -34,8 +34,8 @@
         await Promise.all(promises);
       }
 
-      let mutation = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> - ? WHERE <%- idAttribute-%> = ?`
-      await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>,, <%- idAttribute-%>],{
+      let mutation = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
+      await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>, <%- idAttribute-%>],{
           prepare: true
       });
     }

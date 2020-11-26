@@ -608,7 +608,7 @@ module.exports.getOptions = function(dataModel){
   opts['editableAttributesStr'] = attributesToString(getEditableAttributes(opts.attributes, getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel)));
   opts['editableAttributes'] = getEditableAttributes(opts.attributes,  getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel));
   opts['editableCassandraAttributes'] = getEditableAttributes(opts.cassandraAttributes,  getEditableAssociations(opts.associationsArguments), getIdAttribute(dataModel));
-  opts['cassandraAttributesWithConvertedTypes'] = getCassandraAttributesType(opts.attributes, opts['idAttributes'],opts['editableAttributes']);
+  opts['cassandraAttributesWithConvertedTypes'] = getCassandraAttributesType(opts.attributes, opts['idAttribute'], opts['editableAttributes']);
   opts['idAttributeType'] = dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute];
   opts['cassandraIdAttributeType'] = getCassandraType(dataModel.internalId === undefined ? 'Int' :  opts.attributes[opts.idAttribute]);
   opts['defaultId'] = dataModel.internalId === undefined ? true :  false;
