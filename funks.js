@@ -271,6 +271,8 @@ getCassandraType = function(type) {
       return 'int';
     case 'id':
       return 'uuid';
+    case 'datetime':
+      return 'timestamp'
     default:
       return type;
   }
@@ -1206,6 +1208,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
           {dir: 'schemas', template: 'schemas-cassandra', fileName: opts.nameLc},
           {dir: 'resolvers', template: 'resolvers-cassandra', fileName: opts.nameLc},
           {dir: 'models/cassandra', template: 'models-cassandra', fileName: opts.nameLc},
+          {dir: 'validations', template: 'validations', fileName: opts.nameLc},
+          {dir: 'patches',     template: 'patches',     fileName: opts.nameLc},
         ]
         if (migrations){
           sections.push({dir: migrationsDir, template: 'migrations-cassandra',  fileName: opts.nameLc})
@@ -1245,7 +1249,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
       case 'cassandra-adapter':
         sections = [
           {dir: 'models/adapters', template: 'cassandra-adapter',    fileName: opts.adapterName},
-          {dir: migrationsDir,     template: 'migrations-cassandra', fileName: opts.nameLc}
+          {dir: migrationsDir,     template: 'migrations-cassandra', fileName: opts.nameLc},
+          {dir: 'patches',         template: 'patches',     fileName: opts.adapterName},
         ]
         break;
 
