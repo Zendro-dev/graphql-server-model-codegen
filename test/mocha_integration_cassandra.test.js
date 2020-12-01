@@ -931,3 +931,184 @@ describe('Cassandra DDM', function() {
     });
   });
 });
+
+describe('cassandra Foreign-key arrays', function() {
+  //set up the environment
+  before(async function(){
+    //measurements for sql and zendro-server tests
+    let res = itHelpers.request_graph_ql_post('mutation{addCity(city_id:"cassandra_city_1" name:"cologne"){city_id} }');
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post('mutation{addCity(city_id:"cassandra_city_2" name:"duesseldorf"){city_id } }');
+    expect(res.statusCode).to.equal(200);
+  });
+
+  //clean up records
+  after(async function() {
+    itHelpers.request_graph_ql_post('mutation{deleteCity(city_id:"cassandra_city_1")}');
+    itHelpers.request_graph_ql_post('mutation{deleteCity(city_id:"cassandra_city_2")}');
+    itHelpers.request_graph_ql_post('mutation{deleteRiver(river_id:"fkA_river_1")}');
+  });
+
+  it('01. Create record and add association - cassandra', function() {
+    let res = itHelpers.request_graph_ql_post('mutation{addRiver(river_id:"fkA_river_1" name:"rhine" addCities:["cassandra_city_1","cassandra_city_2"]){river_id city_ids}}');
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    //check it has been created correctly
+    expect(resBody.data).to.deep.equal({addRiver: { river_id: 'fkA_river_1', city_ids: [ 'cassandra_city_1', 'cassandra_city_2' ] }});
+    //check inverse association
+    res = itHelpers.request_graph_ql_post('{citiesConnection(pagination:{first: 2}){edges{node{city_id river_ids}}}} ')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      "data": { "citiesConnection": { "edges": [ { "node": { "city_id": "cassandra_city_2", "river_ids": [ "fkA_river_1" ] } }, { "node": { "city_id": "cassandra_city_1", "river_ids": [ "fkA_river_1" ] } } ] } }
+    });
+  });
+
+  it('02. Query associated records - cassandra', function() {
+    let res = itHelpers.request_graph_ql_post('{readOneCity(city_id:"cassandra_city_1"){city_id riversFilter(pagination: {limit: 2}){river_id}}}');
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    //check associated records
+    expect(resBody.data).to.deep.equal({readOneCity: {"city_id": "cassandra_city_1", "riversFilter": [{"river_id": "fkA_river_1"}]}});
+  });
+
+  it('03. Update record and remove one association - cassandra', function() {
+    let res = itHelpers.request_graph_ql_post('mutation{updateCity(city_id:"cassandra_city_1" removeRivers:["fkA_river_1"]){city_id river_ids}}');
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    //check it has been updated correctly
+    expect(resBody.data).to.deep.equal({updateCity: { city_id: 'cassandra_city_1', river_ids: [ ] }});
+    //check inverse association
+    res = itHelpers.request_graph_ql_post('{rivers(pagination:{limit: 2}){river_id city_ids}}')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      "data": {"rivers": [{"river_id": "fkA_river_1","city_ids": ["cassandra_city_2"]}]}});
+  });
+
+  it('04. Update record and add one association - cassandra', function() {
+    let res = itHelpers.request_graph_ql_post('mutation{updateRiver(river_id:"fkA_river_1" addCities:["cassandra_city_1"]){river_id city_ids}}');
+    // let res = itHelpers.request_graph_ql_post('mutation{updateCity(city_id:"cassandra_city_1" addRivers:["fkA_river_1"]){city_id river_ids}}');
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    //check it has been updated correctly
+    expect(resBody.data).to.deep.equal({updateRiver: { river_id: 'fkA_river_1', city_ids: [ "cassandra_city_2","cassandra_city_1" ] }});
+    //check inverse association
+    res = itHelpers.request_graph_ql_post('{citiesConnection(pagination:{first: 2}){edges{node{city_id river_ids}}}} ')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      "data": {"citiesConnection": {"edges": [{"node": {"city_id": "cassandra_city_2","river_ids": ["fkA_river_1"]}},{"node": {"city_id": "cassandra_city_1","river_ids": ["fkA_river_1"]}}]}}});
+  });
+
+  it('05. Update record and remove all association - cassandra', function() {
+    let res = itHelpers.request_graph_ql_post('mutation{updateRiver(river_id:"fkA_river_1" removeCities:["cassandra_city_1","cassandra_city_2"]){river_id city_ids}}');
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString('utf8'));
+    //check it has been updated correctly
+    expect(resBody.data).to.deep.equal({updateRiver: { river_id: 'fkA_river_1', city_ids: [ ] }});
+    //check inverse association
+    res = itHelpers.request_graph_ql_post('{citiesConnection(pagination:{first: 2}){edges{node{city_id river_ids}}}} ')
+    resBody = JSON.parse(res.body.toString('utf8'));
+    expect(resBody).to.deep.equal({
+      "data": {"citiesConnection": {"edges": [{"node": {"city_id": "cassandra_city_2","river_ids": null}},{"node": {"city_id": "cassandra_city_1","river_ids": null}}]}}
+    });
+  });
+
+});
+
+describe(
+  'Cassandra Array type attributes: create, update and read record for Arr table',
+  function() {
+
+    after(async function() {
+        // Delete all arrs
+        // res = itHelpers.request_graph_ql_post('{ arrs(pagination:{limit:25}) {arrId} }');
+        // let arrs = JSON.parse(res.body.toString('utf8')).data.arrs;
+
+        // for(let i = 0; i < arrs.length; i++){
+        //     res = itHelpers.request_graph_ql_post(`mutation { deleteArr (arrId: ${arrs[i].arrId}) }`);
+        //     expect(res.statusCode).to.equal(200);
+        // }
+
+        // let cnt = await itHelpers.count_all_records('countArrs');
+        // expect(cnt).to.equal(0)
+
+    })
+
+
+    it('01. Arr create', async function() {
+        let res = itHelpers.request_graph_ql_post(`mutation { addCity(city_id: "cassandra_arrs_city_1", strArr:["str1", "str2", "str3"], intArr:[1, 2, 3], floatArr:[1.1, 3.34, 453.232], boolArr:[true, false]) { city_id } }`);
+
+        expect(res.statusCode).to.equal(200);
+
+        let cnt = await itHelpers.count_all_records('countArrs');
+        expect(cnt).to.equal(1);
+    });
+
+
+    // it('02. Arr update', function() {
+    //     res = itHelpers.request_graph_ql_post(`mutation { updateArr(arrId: 1, arrDateTime: ["2007-12-03T10:15:30Z", "2007-12-13T10:15:30Z"]) {arrId arrDateTime} }`);
+    //     resBody = JSON.parse(res.body.toString('utf8'));
+
+    //     expect(res.statusCode).to.equal(200);
+    //     expect(resBody).to.deep.equal({
+    //         data: {
+    //             updateArr: {
+    //                 arrId: "1",
+    //                 arrDateTime: ["2007-12-03T10:15:30.000Z", "2007-12-13T10:15:30.000Z"]
+    //             }
+    //         }
+    //     })
+    // });
+
+
+    // it('03. Arr read', function() {  
+    //     res = itHelpers.request_graph_ql_post('{ readOneArr(arrId : 1) { arrId country arrInt arrBool arrDateTime } }');
+    //     resBody = JSON.parse(res.body.toString('utf8'));
+
+    //     expect(res.statusCode).to.equal(200);
+    //     expect(resBody).to.deep.equal({
+    //         data: {
+    //             readOneArr: {
+    //                 arrId: "1",
+    //                 country: "Germany", 
+    //                 arrInt: [1, 2, 3], 
+    //                 arrBool: [true, false],
+    //                 arrDateTime: ["2007-12-03T10:15:30.000Z", "2007-12-13T10:15:30.000Z"]
+    //             }
+    //         }
+    //     })
+    // });
+
+    // it('04. Arr search with eq', function() {
+    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:eq, field:arrInt, value:"[1,2,3]"},'+ 
+    //   'pagination:{limit:3}) {arrId}}');
+    //   let resBody = JSON.parse(res.body.toString('utf8'));
+    //   expect(res.statusCode).to.equal(200);
+    //   expect(resBody.data.arrs.length).equal(1);
+    // });
+
+    // it('05. Arr search with ne', function() {
+    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:ne, field:arrInt, value:"[1,2,3,4]"},'+ 
+    //   'pagination:{limit:3}) {arrId}}');
+    //   let resBody = JSON.parse(res.body.toString('utf8'));
+    //   expect(res.statusCode).to.equal(200);
+    //   expect(resBody.data.arrs.length).equal(1);
+    // });
+
+    // it('06. Arr search with in', function() {
+    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:in, field:arrInt, value:"3"},'+ 
+    //   'pagination:{limit:3}) {arrId}}');
+    //   let resBody = JSON.parse(res.body.toString('utf8'));
+    //   expect(res.statusCode).to.equal(200);
+    //   expect(resBody.data.arrs.length).equal(1);
+    // });
+
+
+    // it('07. Arr search with notIn', function() {
+    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:notIn, field:arrInt, value:"5"},'+
+    //   'pagination:{limit:3}) {arrId}}');
+    //   let resBody = JSON.parse(res.body.toString('utf8'));
+    //   expect(res.statusCode).to.equal(200);
+    //   expect(resBody.data.arrs.length).equal(1);
+    // });
+
+  });
