@@ -101,27 +101,30 @@ module.exports.handleAssociations = `
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  */
 accession.prototype.handleAssociations = async function(input, benignErrorReporter) {
-      let promises = [];
+      let promises_add = [];
       if (helper.isNonEmptyArray(input.addIndividuals)) {
-          promises.push(this.add_individuals(input, benignErrorReporter));
+          promises_add.push(this.add_individuals(input, benignErrorReporter));
       }
       if (helper.isNonEmptyArray(input.addMeasurements)) {
-          promises.push(this.add_measurements(input, benignErrorReporter));
+          promises_add.push(this.add_measurements(input, benignErrorReporter));
       }
       if (helper.isNotUndefinedAndNotNull(input.addLocation)) {
-          promises.push(this.add_location(input, benignErrorReporter));
+          promises_add.push(this.add_location(input, benignErrorReporter));
       }
+      await Promise.all(promises_add);
+
+      let promises_remove = [];
       if (helper.isNonEmptyArray(input.removeIndividuals)) {
-          promises.push(this.remove_individuals(input, benignErrorReporter));
+          promises_remove.push(this.remove_individuals(input, benignErrorReporter));
       }
       if (helper.isNonEmptyArray(input.removeMeasurements)) {
-          promises.push(this.remove_measurements(input, benignErrorReporter));
+          promises_remove.push(this.remove_measurements(input, benignErrorReporter));
       }
       if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {
-          promises.push(this.remove_location(input, benignErrorReporter));
+          promises_remove.push(this.remove_location(input, benignErrorReporter));
       }
+      await Promise.all(promises_remove);
 
-      await Promise.all(promises);
 }
 `
 

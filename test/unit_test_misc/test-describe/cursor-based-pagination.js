@@ -21,7 +21,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), Book.definition.attributes);
     let records = await super.findAll(options);
 
     records = records.map(x => Book.postReadCast(x))
@@ -32,7 +32,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), Book.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
@@ -119,13 +119,13 @@ booksConnectionImpl({
 }) {
 
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.book.idAttribute());
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.book.idAttribute(), models.book.definition.attributes);
     let records = await this.getBooks(options);
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, models.book.idAttribute());
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, models.book.idAttribute(), models.book.definition.attributes);
       oppRecords = await this.getBooks(oppOptions);
     }
     // build the graphql Connection Object

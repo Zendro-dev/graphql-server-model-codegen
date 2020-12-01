@@ -1,7 +1,7 @@
 module.exports.count_in_sequelize_model = `
 static async countRecords(search) {
     let options = {}
-    options['where'] = helper.searchConditionsToSequelize(search);
+    options['where'] = helper.searchConditionsToSequelize(search, individual.definition.attributes);
     return super.count(options);
 `
 
@@ -39,7 +39,7 @@ static async readAll(search, order, pagination, benignErrorReporter) {
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
-    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute());
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), Dog.definition.attributes);
     let records = await super.findAll(options);
     records = records.map(x => Dog.postReadCast(x))
     // validationCheck after read

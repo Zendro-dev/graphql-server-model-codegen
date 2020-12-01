@@ -6,6 +6,6 @@ WORKDIR /usr/src/app
 ENV JQ_PATH=/usr/bin/jq
 
 # Clone the skeleton project and install dependencies
-RUN apt-get update && apt-get install -y git procps autoconf libtool make jq
+RUN apt-get update -y && apt-get install -y git procps autoconf libtool make jq
 
 EXPOSE 3000
