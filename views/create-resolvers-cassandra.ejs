@@ -143,7 +143,7 @@ const associationArgsDef = {
       //build new search filter
     <%if(associations_temp[i].assocThroughArray){%>
       //return an empty response if the foreignKey Array is empty, no need to query the database
-      if (this.<%=associations_temp[i].sourceKey%>.length === 0) {
+      if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
         return [];
       }
       let nsearch = helper.addSearchField({
@@ -174,7 +174,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
     <%if(associations_temp[i].assocThroughArray){%>
       //return 0 if the foreignKey Array is empty, no need to query the database
-      if (this.<%=associations_temp[i].sourceKey%>.length === 0) {
+      if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
         return 0;
       }
       let nsearch = helper.addSearchField({
@@ -210,7 +210,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
     <%if(associations_temp[i].assocThroughArray){%>
       //return an empty response if the foreignKey Array is empty, no need to query the database
-      if (this.<%=associations_temp[i].sourceKey%>.length === 0) {
+      if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
         return {edges: []};
       }
       let nsearch = helper.addSearchField({
