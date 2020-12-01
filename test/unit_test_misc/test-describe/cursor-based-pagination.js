@@ -171,7 +171,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
           }
         })
 
-        return { edges, pageInfo };
+        return { edges, pageInfo, books: valid_nodes };
       } else {
         throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
       }
