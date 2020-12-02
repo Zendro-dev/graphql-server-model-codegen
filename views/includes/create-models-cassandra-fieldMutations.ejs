@@ -7,9 +7,9 @@
     * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
     */
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
-      const mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+      const mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
       await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
-      const checkCql = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute-%> = ?`;
+      const checkCql = `SELECT * FROM "<%- namePl -%>" WHERE <%- idAttribute-%> = ?`;
       let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
       return new <%- name -%>(result.first());
     }
@@ -34,7 +34,7 @@
         await Promise.all(promises);
       }
 
-      let mutation = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
+      let mutation = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
       await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>, <%- idAttribute-%>],{
           prepare: true
       });

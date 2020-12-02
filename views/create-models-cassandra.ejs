@@ -45,7 +45,7 @@ module.exports = class <%- name -%> {
   * @throws {Error} If the requested record does not exist
   */
   static async readById(id){
-    const query = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute -%> = ?`;
+    const query = `SELECT * FROM "<%- namePl -%>" WHERE <%- idAttribute -%> = ?`;
     let queryResult = await this.storageHandler.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
     let firstResult = queryResult.first();
     if (firstResult === null) {
@@ -67,7 +67,7 @@ module.exports = class <%- name -%> {
   */
   static async countRecords(search, allowFiltering){
     let whereOptions = cassandraHelper.searchConditionsToCassandra(search, definition, allowFiltering) 
-    const query = 'SELECT COUNT(*) AS count FROM <%- namePl -%>' + whereOptions;
+    const query = 'SELECT COUNT(*) AS count FROM "<%- namePl -%>"' + whereOptions;
     let queryResult = await this.storageHandler.execute(query);
     let item = queryResult.first();
     return parseInt(item['count']);
@@ -97,7 +97,7 @@ module.exports = class <%- name -%> {
     let cassandraSearch = offsetCursor ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, offsetCursor,'<%- idAttribute -%>') : search; 
     let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, definition, allowFiltering);
 
-    let query = 'SELECT * FROM <%- namePl -%>' + whereOptions;
+    let query = 'SELECT * FROM "<%- namePl -%>"' + whereOptions;
     
     // Set page size if needed
     let options = {};
@@ -157,10 +157,10 @@ module.exports = class <%- name -%> {
     let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> });
     await validatorUtil.validateData('validateForCreate', this, input);
     try{
-      const fields = Object.keys(input).join(', ');
+      const fields = '"' + Object.keys(input).join('", "') + '"';
       const inputValues = Object.values(input);
       const prepareString = new Array(Object.keys(input).length).fill('?').join(', ');
-      const mutation = 'INSERT INTO <%- namePl -%> (' + fields + ') VALUES (' + prepareString + ')';
+      const mutation = 'INSERT INTO "<%- namePl -%>" (' + fields + ') VALUES (' + prepareString + ')';
       // Call to database
       await this.storageHandler.execute(mutation, inputValues, {prepare: true});
       // return the newly created record by reading it
@@ -179,7 +179,7 @@ module.exports = class <%- name -%> {
   */
   static async deleteOne(id){
     await validatorUtil.validateData('validateForDelete', this, id);
-    const mutation = `DELETE FROM <%- namePl -%> WHERE <%- idAttribute -%> = ? IF EXISTS`;
+    const mutation = `DELETE FROM "<%- namePl -%>" WHERE <%- idAttribute -%> = ? IF EXISTS`;
     let mutationResponse = await this.storageHandler.execute(mutation, [id]);
     if(mutationResponse){
       return 'Item successfully deleted';
@@ -207,8 +207,8 @@ module.exports = class <%- name -%> {
         inputValues.push(idValue);
         // An update that does not change the attributes must not execute the following CQL statement
         if (inputKeys.length > 0) {
-          let mutation = `UPDATE <%- namePl -%> SET `;
-          mutation += inputKeys.map(key => `${key} = ?`).join(', ');
+          let mutation = `UPDATE "<%- namePl -%>" SET `;
+          mutation += inputKeys.map(key => `"${key}" = ?`).join(', ');
           mutation += ` WHERE <%- idAttribute -%> = ?;`;
           await this.storageHandler.execute(mutation, inputValues, {prepare: true});
         }
