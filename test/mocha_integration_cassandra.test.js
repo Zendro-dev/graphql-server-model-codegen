@@ -1019,96 +1019,80 @@ describe(
   function() {
 
     after(async function() {
-        // Delete all arrs
-        // res = itHelpers.request_graph_ql_post('{ arrs(pagination:{limit:25}) {arrId} }');
-        // let arrs = JSON.parse(res.body.toString('utf8')).data.arrs;
 
-        // for(let i = 0; i < arrs.length; i++){
-        //     res = itHelpers.request_graph_ql_post(`mutation { deleteArr (arrId: ${arrs[i].arrId}) }`);
-        //     expect(res.statusCode).to.equal(200);
-        // }
+      let res = itHelpers.request_graph_ql_post(`mutation { deleteCity (city_id: "cassandra_arrs_city_1") }`);
+      expect(res.statusCode).to.equal(200);
 
-        // let cnt = await itHelpers.count_all_records('countArrs');
-        // expect(cnt).to.equal(0)
-
+      // check count
+      let cnt = await itHelpers.count_all_records('countCities');
+      expect(cnt).to.equal(0);
     })
 
 
     it('01. Arr create', async function() {
-        let res = itHelpers.request_graph_ql_post(`mutation { addCity(city_id: "cassandra_arrs_city_1", strArr:["str1", "str2", "str3"], intArr:[1, 2, 3], floatArr:[1.1, 3.34, 453.232], boolArr:[true, false]) { city_id } }`);
+        let res = itHelpers.request_graph_ql_post(`mutation { addCity(city_id: "cassandra_arrs_city_1", strArr:["str1", "str2", "str3"], intArr:[1, 2, 3], floatArr:[1.1, 3.34, 453.232], boolArr:[true, false]) { city_id strArr intArr floatArr boolArr} }`);
 
         expect(res.statusCode).to.equal(200);
-
-        let cnt = await itHelpers.count_all_records('countArrs');
-        expect(cnt).to.equal(1);
+        let resBody = JSON.parse(res.body.toString('utf8'));
+        //check it has been updated correctly
+        expect(resBody.data).to.deep.equal({
+        "addCity": {"city_id": "cassandra_arrs_city_1","strArr": ["str1","str2","str3"],"intArr": [1,2,3],"floatArr": [1.100000023841858,3.3399999141693115,453.23199462890625],"boolArr": [true,false]}});
     });
 
 
-    // it('02. Arr update', function() {
-    //     res = itHelpers.request_graph_ql_post(`mutation { updateArr(arrId: 1, arrDateTime: ["2007-12-03T10:15:30Z", "2007-12-13T10:15:30Z"]) {arrId arrDateTime} }`);
-    //     resBody = JSON.parse(res.body.toString('utf8'));
+    it('02. Arr update', function() {
+        res = itHelpers.request_graph_ql_post(`mutation { updateCity(city_id: "cassandra_arrs_city_1", dateTimeArr: ["2007-12-03T10:15:30Z", "2007-12-13T10:15:30Z"]) {city_id dateTimeArr} }`);
+        resBody = JSON.parse(res.body.toString('utf8'));
 
-    //     expect(res.statusCode).to.equal(200);
-    //     expect(resBody).to.deep.equal({
-    //         data: {
-    //             updateArr: {
-    //                 arrId: "1",
-    //                 arrDateTime: ["2007-12-03T10:15:30.000Z", "2007-12-13T10:15:30.000Z"]
-    //             }
-    //         }
-    //     })
-    // });
-
-
-    // it('03. Arr read', function() {  
-    //     res = itHelpers.request_graph_ql_post('{ readOneArr(arrId : 1) { arrId country arrInt arrBool arrDateTime } }');
-    //     resBody = JSON.parse(res.body.toString('utf8'));
-
-    //     expect(res.statusCode).to.equal(200);
-    //     expect(resBody).to.deep.equal({
-    //         data: {
-    //             readOneArr: {
-    //                 arrId: "1",
-    //                 country: "Germany", 
-    //                 arrInt: [1, 2, 3], 
-    //                 arrBool: [true, false],
-    //                 arrDateTime: ["2007-12-03T10:15:30.000Z", "2007-12-13T10:15:30.000Z"]
-    //             }
-    //         }
-    //     })
-    // });
-
-    // it('04. Arr search with eq', function() {
-    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:eq, field:arrInt, value:"[1,2,3]"},'+ 
-    //   'pagination:{limit:3}) {arrId}}');
-    //   let resBody = JSON.parse(res.body.toString('utf8'));
-    //   expect(res.statusCode).to.equal(200);
-    //   expect(resBody.data.arrs.length).equal(1);
-    // });
-
-    // it('05. Arr search with ne', function() {
-    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:ne, field:arrInt, value:"[1,2,3,4]"},'+ 
-    //   'pagination:{limit:3}) {arrId}}');
-    //   let resBody = JSON.parse(res.body.toString('utf8'));
-    //   expect(res.statusCode).to.equal(200);
-    //   expect(resBody.data.arrs.length).equal(1);
-    // });
-
-    // it('06. Arr search with in', function() {
-    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:in, field:arrInt, value:"3"},'+ 
-    //   'pagination:{limit:3}) {arrId}}');
-    //   let resBody = JSON.parse(res.body.toString('utf8'));
-    //   expect(res.statusCode).to.equal(200);
-    //   expect(resBody.data.arrs.length).equal(1);
-    // });
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "updateCity": {
+              "city_id": "cassandra_arrs_city_1",
+              "dateTimeArr": [
+                "2007-12-03T10:15:30.000Z",
+                "2007-12-13T10:15:30.000Z"
+              ]
+            }
+          }
+        })
+    });
 
 
-    // it('07. Arr search with notIn', function() {
-    //   let res = itHelpers.request_graph_ql_post('{arrs(search:{operator:notIn, field:arrInt, value:"5"},'+
-    //   'pagination:{limit:3}) {arrId}}');
-    //   let resBody = JSON.parse(res.body.toString('utf8'));
-    //   expect(res.statusCode).to.equal(200);
-    //   expect(resBody.data.arrs.length).equal(1);
-    // });
+    it('03. Arr read', function() {  
+        res = itHelpers.request_graph_ql_post('{ readOneCity(city_id : "cassandra_arrs_city_1") { city_id strArr intArr floatArr boolArr dateTimeArr } }');
+        resBody = JSON.parse(res.body.toString('utf8'));
 
+        expect(res.statusCode).to.equal(200);
+        expect(resBody).to.deep.equal({
+          "data": {
+            "readOneCity": {
+              "city_id": "cassandra_arrs_city_1",
+              "strArr": ["str1","str2","str3"],
+              "intArr": [1,2,3],
+               "floatArr": [1.100000023841858,3.3399999141693115,453.23199462890625],
+              "boolArr": [true,false],
+              "dateTimeArr": ["2007-12-03T10:15:30.000Z","2007-12-13T10:15:30.000Z"]
+            }
+          }
+        })
+    });
+
+    it('04. Arr complex search with CONTAINS', function() {
+      let res = itHelpers.request_graph_ql_post('{citiesConnection(pagination:{first:2}search:{operator:and, search:[{operator:cont, field:intArr, value:"2"}{operator:cont, field:strArr, value:"str3"}]} ){edges{node{city_id intArr strArr}}}}');
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        "data": {
+          "citiesConnection": {
+            "edges": [{"node": { 
+              "city_id": "cassandra_arrs_city_1",
+               "intArr": [1,2,3],
+               "strArr": ["str1","str2","str3"]
+              }}
+            ]
+          }
+        }
+      });
+    });
   });
