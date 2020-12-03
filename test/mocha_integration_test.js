@@ -3118,3 +3118,72 @@ describe(
       });
 
     })  
+
+  describe('Helper connection for direct acces to nodes', function() {
+    //set up the environment
+    before(async function(){
+      //measurements for sql and zendro-server tests
+      let res = itHelpers.request_graph_ql_post('mutation{addBook(id:"remote_b1" title:"t1"){id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addBook(id:"remote_b2" title:"t2"){id } }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addAuthor(id:"remote_a1" name:"n1" addBooks:["remote_b1","remote_b2"]){id }}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addAuthor(id:"remote_a2" name:"n2" addBooks:["remote_b1"]){id}}');
+      expect(res.statusCode).to.equal(200);
+
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"remote_b1" title:"t1"){id} }');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"local_b1" title:"t1"){id} }');
+      expect(res.statusCode).to.equal(200);
+
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"remote_a2" name:"n2" addBooks:["remote_b1"]){id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"local_a2" name:"n2" addBooks:[ "local_b1"]){id}}');
+      expect(res.statusCode).to.equal(200);
+
+    });
+
+    //clean up records
+    after(async function() {
+      itHelpers.request_graph_ql_post('mutation{updateAuthor(id:"remote_a1" removeBooks:["remote_b1","remote_b2"]){id }}');
+      itHelpers.request_graph_ql_post('mutation{updateAuthor(id:"remote_a2" removeBooks:["remote_b1"]){id}}');
+      itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b2")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a1")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a2")}');
+
+      itHelpers.request_graph_ql_post_instance2('mutation{updateSq_author(id:"remote_a2" removeBooks:["remote_b1"]){id }}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"remote_b1")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_author(id:"remote_a2")}');
+
+      itHelpers.request_graph_ql_post_instance2('mutation{updateSq_author(id:"local_a2" removeBooks:["local_b1"]){id }}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"local_b1")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_author(id:"local_a2")}');
+    });
+
+    it('01. Basic zendro instance', function() {
+      let res = itHelpers.request_graph_ql_post('{authorsConnection(pagination:{first:5}){authors{id booksConnection(pagination:{first:3}){books{id}}}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({"authorsConnection":{"authors":[{"id":"remote_a1","booksConnection":{"books":[{"id":"remote_b1"},{"id":"remote_b2"}]}},{"id":"remote_a2","booksConnection":{"books":[{"id":"remote_b1"}]}}]}});
+    });
+
+    it('02. Distributed models instace', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('{sq_authorsConnection(pagination:{first:5}){sq_authors{id booksConnection(pagination:{first:3}){sq_books{id}}}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({"sq_authorsConnection":{"sq_authors":[{"id":"local_a2","booksConnection":{"sq_books":[{"id":"local_b1"}]}},{"id":"remote_a2","booksConnection":{"sq_books":[{"id":"remote_b1"}]}}]}});
+    });
+
+    it('03. Remote zendro instace', function() {
+      let res = itHelpers.request_graph_ql_post_instance2('{authorsConnection(pagination:{first:5}){authors{id booksConnection(pagination:{first:3}){books{id}}}}}');
+      expect(res.statusCode).to.equal(200);
+      let resBody = JSON.parse(res.body.toString('utf8'));
+      //check associated records
+      expect(resBody.data).to.deep.equal({"authorsConnection":{"authors":[{"id":"remote_a1","booksConnection":{"books":[{"id":"remote_b1"},{"id":"remote_b2"}]}},{"id":"remote_a2","booksConnection":{"books":[{"id":"remote_b1"}]}}]}});
+    });
+
+  }); 
