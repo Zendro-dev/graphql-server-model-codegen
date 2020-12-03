@@ -7,11 +7,12 @@
     "url": "https://github.com/ScienceDb/graphql-server-model-codegen"
   },
   "main": "index.js",
-  "bin": "./index.js",
+  "bin": {
+    "graphql-server-model-codegen": "index.js"
+  },
   "scripts": {
-    "test-env": "zenv",
     "test-unit": "mocha ./test/mocha_unit_test.js",
-    "test-integration": "zenv integration"
+    "test-integration": "bash ./test/testenv_cli.sh"
   },
   "author": "Science-DB team",
   "license": "GPL-3.0",
