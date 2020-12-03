@@ -235,7 +235,7 @@ module.exports = class <%- name -%>{
       let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
       let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
 
-      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage, "<%- namePl -%>)";
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage, "<%- namePl -%>");
       return graphQLConnection;
     });
   }
