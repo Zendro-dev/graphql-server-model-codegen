@@ -2,80 +2,15 @@
 
 Command line utility to generate the structure files that Zendro [graphql-server](https://github.com/Zendro-dev/graphql-server) will use to perform CRUD operations for each model created.
 
+
 ## Set up
+
 Clone the repository and run:
 ```sh
 $ npm install -g
 ```
 If you only want to install it locally run `npm install` instead
 
-## Usage
-
-To run the unit-test case:
-```sh
-$ npm run test-unit
-```
-
-To run the integration-test case
-```sh
-$ npm run test-integration [-- OPTIONS]
-```
-Note:
-Integration-test case creates a `docker-compose` environment with three servers:
-
-```sh
-gql_postgres
-gql_science_db_graphql_server
-gql_ncbi_sim_srv
-```
-
-### Examples of use - Integration Tests
-
-This repository uses [`zendro-env`](https://github.com/Zendro-dev/zendro-integration-tests) to create the integration-tests environment and launch the `mocha` test-runner. Find more information in its repository documentation.
-
-#### Default
-To execute a default test run:
-```bash
-$ npm run test-integration
-```
-
-To generate code and do the tests, removing all Docker images at end:
-```bash
-$ npm run test-integration -- -T
-```
-
-To generate code, do the tests, and keep the containers running at end:
-```bash
-$ npm run test-integration -- -T -k
-```
-
-To do the tests only and keep the containers running at end:
-```bash
-$ npm run test-integration -- -t -k
-```
-
-#### Environment Commands
-
-To get information about available commands and options:
-```bash
-$ npm run test-env -- --help
-```
-
-To manage docker containers:
-```bash
-$ npm run test-env -- docker        # up containers and check connections
-$ npm run test-env -- docker --down # down containers
-```
-
-To clean generated code, remove containers and volumes:
-```bash
-$ npm run test-env -- -C
-```
-
-To do a full clean up (removes containers, images and code):
-```bash
-$ npm run test-env -- -c
-```
 
 ### Examples of use - Code Generator
 
@@ -113,6 +48,24 @@ migrations/  -> create and delete table migration file
 
 To use the code generator with the [graphql-server](https://github.com/Zendro-dev/graphql-server),
 use its path in the `output-directory`.
+
+
+## Development
+
+To run the unit-test suite
+```bash
+$ npm run test-unit
+```
+
+To run the integration-test suite
+```bash
+$ npm run test-integration [-- OPTIONS]
+```
+
+To view the different integration-test commands and some examples
+```bash
+$ npm run test-integration -- -h
+```
 
 
 ## JSON files Spec
