@@ -85,7 +85,7 @@ fi
 # SHOW MANUAL
 # 1. Show the manual page for this command-line interface
 if [[ $OPT_SHOW_MANUAL == "true"  ]]; then
-  echo "man"
+  man "${TEST_DIR}/testenv_cli.man"
   exit 0
 fi
 
