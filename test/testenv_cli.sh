@@ -119,8 +119,16 @@ fi
 
 # RUN INTEGRATION TESTS
 # 1. Run the integration tests
+# 2. Perform a full cleanup (optionally disabled)
 if [[ $OPT_RUN_TESTS == "true" ]]; then
   mocha "${TEST_DIR}/mocha_integration_test.js"
+
+  # 1. Remove docker containers, images, and volumes
+  # 2. Remove the testing environment
+  if [[ -z $OPT_KEEP_RUNNING ]]; then
+    source "${TEST_DIR}/testenv_remove.sh"
+  fi
+
   exit 0
 fi
 
