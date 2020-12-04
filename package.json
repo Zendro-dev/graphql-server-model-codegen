@@ -1,6 +1,6 @@
 {
   "name": "graphql-server-model-codegen",
-  "version": "0.5.1",
+  "version": "0.5.5",
   "description": "Command line utility which auto-generates code to setup and run a Science-DB GraphQL web-server. See sciencedb.github.io.",
   "repository": {
     "type": "git",
@@ -34,7 +34,6 @@
     "eslint-plugin-ejs": "0.0.2",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^7.1.2",
-    "require-from-string": "^2.0.2",
-    "zendro-env": "https://github.com/Zendro-dev/zendro-env.git"
+    "require-from-string": "^2.0.2"
   }
 }
