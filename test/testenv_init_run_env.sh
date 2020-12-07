@@ -9,7 +9,7 @@ source "${SCRIPT_DIR}/testenv_constants.sh"
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}START CLONE GRAPHQL SERVER INSTANCES${NC}
+echo -e ${YELLOW}START ${GRAY}CLONE GRAPHQL SERVER INSTANCES${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""
 
@@ -24,8 +24,8 @@ GRAPHQL_SERVER_INSTANCES=(
 
 for GRAPHQL_SERVER in ${GRAPHQL_SERVER_INSTANCES[@]}; do
 
-  printf \
-    "Cloning ${YELLOW}%s${NC} into ${YELLOW}%s${NC} ... ${GREEN}starting${NC}\n${SINGLE_SEP}\n\n" \
+  printf -- \
+    "${SINGLE_SEP}\nCloning ${YELLOW}%s${NC} into ${YELLOW}%s${NC} ... ${GREEN}starting${NC}\n\n" \
     ${GRAPHQL_SERVER_BRANCH} \
     $(basename ${GRAPHQL_SERVER})
 
@@ -45,6 +45,6 @@ for GRAPHQL_SERVER in ${GRAPHQL_SERVER_INSTANCES[@]}; do
 done
 
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}END CLONE GRAPHQL SERVER INSTANCES${NC}
+echo -e ${YELLOW}END ${GRAY}CLONE GRAPHQL SERVER INSTANCES${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""

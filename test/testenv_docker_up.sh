@@ -38,7 +38,7 @@ checkGqlServer() {
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}START UP DOCKER CONTAINERS${NC}
+echo -e ${YELLOW}START ${GRAY}UP DOCKER CONTAINERS${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""
 
@@ -51,8 +51,7 @@ docker-compose \
 
 
 # Wait for the graphql server instances to get ready
-echo ""
-echo "Waiting for GraphQL servers to start ..."
+echo -e "\nWaiting for GraphQL servers to start ..."
 
 SERVER_URLS=(
   $GRAPHQL_SERVER_1_URL
@@ -76,6 +75,6 @@ done
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}END UP DOCKER CONTAINERS${NC}
+echo -e ${YELLOW}END ${GRAY}UP DOCKER CONTAINERS${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""

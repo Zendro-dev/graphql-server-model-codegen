@@ -9,7 +9,7 @@ source "${SCRIPT_DIR}/testenv_constants.sh"
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}START REMOVE TESTING ENVIRONMENT${NC}
+echo -e ${YELLOW}START ${GRAY}REMOVE TESTING ENVIRONMENT${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""
 
@@ -22,6 +22,6 @@ rm -rf ${ENV_DIR}
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}END REMOVE TESTING ENVIRONMENT${NC}
+echo -e ${YELLOW}END ${GRAY}REMOVE TESTING ENVIRONMENT${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""

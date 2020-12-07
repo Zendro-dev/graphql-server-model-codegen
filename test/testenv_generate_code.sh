@@ -9,7 +9,7 @@ source "${SCRIPT_DIR}/testenv_constants.sh"
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}START RUN GRAPHQL SERVER CODE GENERATOR${NC}
+echo -e ${YELLOW}START ${GRAY}RUN GRAPHQL SERVER CODE GENERATOR${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 
 # Run the code generator over each of the graphql server instances
@@ -23,8 +23,8 @@ for i in ${!GRAPHQL_SERVER_INSTANCES[@]}; do
   GRAPHQL_SERVER=${GRAPHQL_SERVER_INSTANCES[$i]}
   INDEX=$(($i + 1))
 
-  printf \
-    "\nGenerating code for ${YELLOW}%s${NC} ... ${GREEN}starting${NC}\n${SINGLE_SEP}\n\n" \
+  printf -- \
+    "${SINGLE_SEP}\nGenerating code for ${YELLOW}%s${NC} ... ${GREEN}starting${NC}\n\n" \
     $(basename ${GRAPHQL_SERVER})
 
   # Restore the graphql server repository to a clean state
@@ -40,17 +40,21 @@ for i in ${!GRAPHQL_SERVER_INSTANCES[@]}; do
     --migrations \
     -o $GRAPHQL_SERVER
 
+  printf \
+    "\nGenerating code for ${YELLOW}%s${NC} ... ${GREEN}complete${NC}\n${SINGLE_SEP}\n\n" \
+    $(basename ${GRAPHQL_SERVER})
+
 done
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}END RUN GRAPHQL SERVER CODE GENERATOR${NC}
+echo -e ${YELLOW}END ${GRAY}RUN GRAPHQL SERVER CODE GENERATOR${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}START APPLY CUSTOM PATCHES${NC}
+echo -e ${YELLOW}START ${GRAY}APPLY CUSTOM PATCHES${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""
 
@@ -74,6 +78,6 @@ patch -V never \
 
 echo ""
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${GRAY}END APPLY CUSTOM PATCHES${NC}
+echo -e ${YELLOW}END ${GRAY}APPLY CUSTOM PATCHES${NC}
 echo -e ${GRAY}${DOUBLE_SEP}${NC}
 echo ""
