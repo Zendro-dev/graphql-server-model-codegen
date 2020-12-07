@@ -7,6 +7,11 @@ set -e
 SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
 source "${SCRIPT_DIR}/testenv_constants.sh"
 
+echo ""
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo -e ${GRAY}START RUN GRAPHQL SERVER CODE GENERATOR${NC}
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+
 # Run the code generator over each of the graphql server instances
 GRAPHQL_SERVER_INSTANCES=(
   "$GRAPHQL_SERVER_1"
@@ -17,6 +22,10 @@ for i in ${!GRAPHQL_SERVER_INSTANCES[@]}; do
 
   GRAPHQL_SERVER=${GRAPHQL_SERVER_INSTANCES[$i]}
   INDEX=$(($i + 1))
+
+  printf \
+    "\nGenerating code for ${YELLOW}%s${NC} ... ${GREEN}starting${NC}\n${SINGLE_SEP}\n\n" \
+    $(basename ${GRAPHQL_SERVER})
 
   # Restore the graphql server repository to a clean state
   cd $GRAPHQL_SERVER
@@ -33,6 +42,17 @@ for i in ${!GRAPHQL_SERVER_INSTANCES[@]}; do
 
 done
 
+echo ""
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo -e ${GRAY}END RUN GRAPHQL SERVER CODE GENERATOR${NC}
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo ""
+
+echo ""
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo -e ${GRAY}START APPLY CUSTOM PATCHES${NC}
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo ""
 
 # Apply test-specific patches to the appropriate graphql server instance
 patch -V never \
@@ -50,3 +70,10 @@ patch -V never \
 patch -V never \
   "${GRAPHQL_SERVER_1}/models/sql/cat.js" \
   "${TEST_DIR}/integration_test_misc/patches/cat_readAllCursor.patch"
+
+
+echo ""
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo -e ${GRAY}END APPLY CUSTOM PATCHES${NC}
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo ""

@@ -20,7 +20,7 @@ checkGqlServer() {
     # Exit with error code 1
     if [ $elapsedTime == $max_time ]; then
 
-      echo "time limit reached while waiting for ${url}"
+      echo "${RED}${url}${NC} time limit reached"
       return 1
 
     fi
@@ -30,11 +30,17 @@ checkGqlServer() {
     elapsedTime=$(expr $elapsedTime + 2)
   done
 
-  echo $url is ready
+  echo -e ${YELLOW}$url${NC} is ${GREEN}ready${NC}
 
   return 0
 
 }
+
+echo ""
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo -e ${GRAY}START UP DOCKER CONTAINERS${NC}
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo ""
 
 # Up detached docker containers
 docker-compose \
@@ -45,7 +51,8 @@ docker-compose \
 
 
 # Wait for the graphql server instances to get ready
-echo "Waiting for GraphQL servers to start"
+echo ""
+echo "Waiting for GraphQL servers to start ..."
 
 SERVER_URLS=(
   $GRAPHQL_SERVER_1_URL
@@ -66,3 +73,9 @@ for id in ${pids[@]}; do
   wait $id || exit 0
 
 done
+
+echo ""
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo -e ${GRAY}END UP DOCKER CONTAINERS${NC}
+echo -e ${GRAY}${DOUBLE_SEP}${NC}
+echo ""
