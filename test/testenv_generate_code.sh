@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
+# Exit on error
+set -e
+
+# Load integration test constants
+SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
+source "${SCRIPT_DIR}/testenv_constants.sh"
+
+# Run the code generator over each of the graphql server instances
 GRAPHQL_SERVER_INSTANCES=(
   "$GRAPHQL_SERVER_1"
   "$GRAPHQL_SERVER_2"
 )
 
-# Run the code generator over each of the graphql server instances
 for i in ${!GRAPHQL_SERVER_INSTANCES[@]}; do
 
   GRAPHQL_SERVER=${GRAPHQL_SERVER_INSTANCES[$i]}

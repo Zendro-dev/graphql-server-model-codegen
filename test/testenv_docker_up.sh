@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
 
+# Exit on error
+set -e
+
+# Load integration test constants
+SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
+source "${SCRIPT_DIR}/testenv_constants.sh"
+
+# Function to verify that the graphql server is ready to take requests
 checkGqlServer() {
 
   url="${1}"
+  max_time="${2}"
 
   elapsedTime=0
   until curl "$url" &>/dev/null
   do
 
     # Exit with error code 1
-    if [ $elapsedTime == $SERVER_CHECK_WAIT_TIME ]; then
+    if [ $elapsedTime == $max_time ]; then
 
       echo "time limit reached while waiting for ${url}"
       return 1
@@ -20,6 +29,8 @@ checkGqlServer() {
     sleep 2
     elapsedTime=$(expr $elapsedTime + 2)
   done
+
+  echo $url is ready
 
   return 0
 
@@ -36,15 +47,15 @@ docker-compose \
 # Wait for the graphql server instances to get ready
 echo "Waiting for GraphQL servers to start"
 
-HOSTS=(
+SERVER_URLS=(
   $GRAPHQL_SERVER_1_URL
   $GRAPHQL_SERVER_2_URL
 )
 pids=( )
 
-for url in ${HOSTS[@]}; do
+for url in ${SERVER_URLS[@]}; do
 
-  checkGqlServer $url &
+  checkGqlServer $url $SERVER_CHECK_WAIT_TIME &
   pids+="$! "
 
 done
