@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
-# Exit on error
 set -e
 
-# Load integration test constants
-SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
-source "${SCRIPT_DIR}/testenv_constants.sh"
-
-# Function to verify that the graphql server is ready to take requests
-checkGqlServer() {
+isServerReadyForRequests() {
 
   url="${1}"
   max_time="${2}"
@@ -33,11 +27,12 @@ checkGqlServer() {
 
 }
 
-echo ""
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${YELLOW}START ${GRAY}UP DOCKER CONTAINERS${NC}
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo ""
+
+# Load integration test constants
+SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
+source "${SCRIPT_DIR}/testenv_constants.sh"
+
+printBlockHeader "START" "UP DOCKER CONTAINERS"
 
 # Up detached docker containers
 docker-compose \
@@ -50,28 +45,16 @@ docker-compose \
 # Wait for the graphql server instances to get ready
 echo -e "\nWaiting for GraphQL servers to start ..."
 
-SERVER_URLS=(
-  $GRAPHQL_SERVER_1_URL
-  $GRAPHQL_SERVER_2_URL
-)
+# Async check that the servers are ready to take requests
 pids=( )
+isServerReadyForRequests "$GRAPHQL_SERVER_1_URL" "$SERVER_CHECK_WAIT_TIME" &
+pids+="$! "
+isServerReadyForRequests "$GRAPHQL_SERVER_2_URL" "$SERVER_CHECK_WAIT_TIME" &
+pids+="$! "
 
-for url in ${SERVER_URLS[@]}; do
-
-  checkGqlServer $url $SERVER_CHECK_WAIT_TIME &
-  pids+="$! "
-
-done
-
-# Wait until Zendro GraphQL servers are up and running
+# Wait for the check responses
 for id in ${pids[@]}; do
-
   wait $id || exit 0
-
 done
 
-echo ""
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${YELLOW}END ${GRAY}UP DOCKER CONTAINERS${NC}
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo ""
+printBlockHeader "END" "UP DOCKER CONTAINERS"

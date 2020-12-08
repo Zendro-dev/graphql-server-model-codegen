@@ -2,49 +2,50 @@
 
 set -e
 
+printCloneTaskStart () {
+  branch=$1
+  name=$2
+  echo -e "${GRAY}${SINGLE_SEP}${NC}\n${GREEN}START${NC} ... Cloning ${YELLOW}${branch}${NC} into ${YELLOW}${name}${NC}\n"
+}
+
+printCloneTaskEnd () {
+  branch=$1
+  name=$2
+  echo -e "\n${GREEN}END${NC} ... Cloned ${YELLOW}${branch}${NC} into ${YELLOW}${name}${NC}\n${GRAY}${SINGLE_SEP}${NC}"
+}
+
+cloneAndInstallGraphqlServerRepository () {
+
+  branch=$1
+  outpath=$2
+  name=$(basename $outpath)
+
+  printCloneTaskStart "master" "$name"
+
+  # Clone graphql server instance from the upstream remote, using the appropriate branch
+  git clone --branch $branch https://github.com/Zendro-dev/graphql-server $outpath
+
+  # Install node modules
+  cd $outpath
+  NODE_JQ_SKIP_INSTALL_BINARY=true npm install
+  cd - &>/dev/null
+
+  printCloneTaskEnd "master" "$name"
+
+}
+
+
 # Load integration test constants
 SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
 source "${SCRIPT_DIR}/testenv_constants.sh"
 
-
-echo ""
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${YELLOW}START ${GRAY}CLONE GRAPHQL SERVER INSTANCES${NC}
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo ""
-
+printBlockHeader "CLONE GRAPHQL SERVER INSTANCES"
 
 # (Re-)Create the environment directory
 mkdir -p $ENV_DIR
 
-GRAPHQL_SERVER_INSTANCES=(
-  "$GRAPHQL_SERVER_1"
-  "$GRAPHQL_SERVER_2"
-)
+# Install graphql server instances
+cloneAndInstallGraphqlServerRepository $GRAPHQL_SERVER_BRANCH $GRAPHQL_SERVER_1
+cloneAndInstallGraphqlServerRepository $GRAPHQL_SERVER_BRANCH $GRAPHQL_SERVER_2
 
-for GRAPHQL_SERVER in ${GRAPHQL_SERVER_INSTANCES[@]}; do
-
-  printf -- \
-    "${SINGLE_SEP}\nCloning ${YELLOW}%s${NC} into ${YELLOW}%s${NC} ... ${GREEN}starting${NC}\n\n" \
-    ${GRAPHQL_SERVER_BRANCH} \
-    $(basename ${GRAPHQL_SERVER})
-
-  # Clone graphql server instance from the upstream remote, using the appropriate branch
-  git clone --branch $GRAPHQL_SERVER_BRANCH https://github.com/Zendro-dev/graphql-server $GRAPHQL_SERVER
-
-  # Install node modules
-  cd $GRAPHQL_SERVER
-  NODE_JQ_SKIP_INSTALL_BINARY=true npm install
-  cd - &>/dev/null
-
-  printf \
-    "\nCloning branch ${YELLOW}%s${NC} into ${YELLOW}%s${NC} ... ${GREEN}complete${NC}\n${SINGLE_SEP}\n\n" \
-    ${GRAPHQL_SERVER_BRANCH} \
-    $(basename ${GRAPHQL_SERVER})
-
-done
-
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${YELLOW}END ${GRAY}CLONE GRAPHQL SERVER INSTANCES${NC}
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo ""
+printBlockHeader "END" "CLONE GRAPHQL SERVER INSTANCES"

@@ -7,11 +7,7 @@ set -e
 SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
 source "${SCRIPT_DIR}/testenv_constants.sh"
 
-echo ""
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${YELLOW}START ${GRAY}REMOVE TESTING ENVIRONMENT${NC}
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo ""
+printBlockHeader "START" "REMOVE TESTING ENVIRONMENT"
 
 # Remove docker containers, images, and volumes
 docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v --rmi all
@@ -20,8 +16,4 @@ docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" do
 echo "Removing ${ENV_DIR}"
 rm -rf ${ENV_DIR}
 
-echo ""
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo -e ${YELLOW}END ${GRAY}REMOVE TESTING ENVIRONMENT${NC}
-echo -e ${GRAY}${DOUBLE_SEP}${NC}
-echo ""
+printBlockHeader "END" "REMOVE TESTING ENVIRONMENT"
