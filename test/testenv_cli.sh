@@ -89,6 +89,7 @@ fi
 # 1. Run the code generator and apply patches
 if [[ $OPT_GEN_CODE == "true" ]]; then
   bash "${TEST_DIR}/testenv_generate_code.sh"
+  bash "${TEST_DIR}/testenv_sync.sh"
   exit 0
 fi
 
@@ -128,6 +129,7 @@ fi
 if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
   docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
   bash "${TEST_DIR}/testenv_generate_code.sh"
+  bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
   mocha "${TEST_DIR}/mocha_integration_test.js"
 
@@ -152,6 +154,7 @@ if [[ $DEFAULT_RUN == "true" ]]; then
   bash "${TEST_DIR}/testenv_remove.sh"
   bash "${TEST_DIR}/testenv_init_run_env.sh"
   bash "${TEST_DIR}/testenv_generate_code.sh"
+  bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
   mocha "${TEST_DIR}/mocha_integration_test.js"
 

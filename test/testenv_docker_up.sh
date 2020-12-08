@@ -17,15 +17,12 @@ checkGqlServer() {
   until curl "$url" &>/dev/null
   do
 
-    # Exit with error code 1
     if [ $elapsedTime == $max_time ]; then
-
       echo "${RED}${url}${NC} time limit reached"
       return 1
-
     fi
 
-    # Wait 2s and rety
+    # Retry every two seconds
     sleep 2
     elapsedTime=$(expr $elapsedTime + 2)
   done
