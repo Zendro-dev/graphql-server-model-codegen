@@ -161,9 +161,9 @@ const associationArgsDef = {
             "value": this.<%= associations_one[i].targetKey -%>,
             "operator": "eq"
           });
-          let found = await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch,  pagination: {first:1}}, context);
-          if (found) {
-            return found[0]
+          let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch,  pagination: {first:1}}, context)).edges;
+          if (found.length > 0) {
+            return found[0].node
           }
           return found;
         }
