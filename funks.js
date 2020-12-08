@@ -366,8 +366,8 @@ writeSchemaCommons = function(dir_write){
     le
     ge
     ne
-    _in
-    cont   # CONTAINS
+    in
+    contains   # CONTAINS
     ctk    # CONTAINS KEY
     tlt    # Token < Token
     tgt    # Token > Token
