@@ -280,9 +280,7 @@ describe('Association naming', function(){
   it('Resolvers - Dog', async function(){
     let opts = funks.getOptions(models.dog_owner);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolvers = data_test.dog_owner_resolvers.replace(/\s/g, '');
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.dog_owner_resolvers);
   });
 
   it('GraphQL Schema - Dog', async function(){
@@ -385,9 +383,7 @@ describe('All webservice (generic) models', function(){
   it('Resolvers - book', async function(){
     let opts = funks.getOptions(models_generic_webservice.book);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolvers = data_test.resolvers_book.replace(/\s/g, '');
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.resolvers_book);
   });
 
   it('Model - book', async function(){
@@ -682,17 +678,13 @@ describe('Decouple association from resolvers', function(){
   it('BelongsTo implementation in resolver - dog', async function(){
     let opts = funks.getOptions(models.dog);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolver = data_test.belongsTo_resolver.replace(/\s/g, '');
-    expect(g_resolvers, 'No method found').to.have.string(test_resolver);
+    testCompare(generated_resolvers, data_test.belongsTo_resolver);
   });
 
   it('HasOne implementation in resolver - researcher', async function(){
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers =await funks.generateJs('create-resolvers', opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, '');
-    let test_resolver = data_test.hasOne_resolver.replace(/\s/g, '');
-    expect(g_resolvers, 'No method found').to.have.string(test_resolver);
+    testCompare(generated_resolvers, data_test.hasOne_resolver);
   });
 
   it('BelongsTo implementation in schema - dog', async function(){
@@ -1022,9 +1014,7 @@ describe('Distributed data models', function(){
   it('Count distributed data model- book', async function(){
     let opts = funks.getOptions(models_distributed.book_ddm);
     let generated_adapter =await funks.generateJs('create-distributed-model', opts);
-    let g_adapter = generated_adapter.replace(/\s/g, '');
-    let test_adapter = data_test.book_ddm_count.replace(/\s/g, '');
-    expect(g_adapter,'Incorrect distributed data model').to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.book_ddm_count);
   });
 
   it('Read all distributed data model- book', async function(){
@@ -2361,33 +2351,25 @@ describe('Handle Errors in DDM', function(){
   it('Count in model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_model =await funks.generateJs('create-distributed-model', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.count_dogs_model_ddm.replace(/\s/g, '');
-    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+    testCompare(generated_model, data_test.count_dogs_model_ddm);
   });
 
   it('readAllCursor in model- dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_model =await funks.generateJs('create-distributed-model', opts);
-    let g_model = generated_model.replace(/\s/g, '');
-    let test_model = data_test.readAllCursor_dogs_model_ddm.replace(/\s/g, '');
-    expect(g_model,'Incorrect distributed data model').to.have.string(test_model);
+    testCompare(generated_model, data_test.readAllCursor_dogs_model_ddm);
   });
 
   it('count in resolver - dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
-    let g_resolver = generated_resolver.replace(/\s/g, '');
-    let test_resolver = data_test.count_dogs_resolver_ddm.replace(/\s/g, '');
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.count_dogs_resolver_ddm);
   });
 
   it('connection in resolver - dog', async function(){
     let opts = funks.getOptions(models_distributed.dog_ddm_integration_test);
     let generated_resolver =await funks.generateJs('create-resolvers-ddm', opts);
-    let g_resolver = generated_resolver.replace(/\s/g, '');
-    let test_resolver = data_test.connections_dogs_resolver_ddm.replace(/\s/g, '');
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.connections_dogs_resolver_ddm);
   });
 
   it('readAllCursor in zendro-webservice-adapter - dog', async function(){
@@ -2484,7 +2466,6 @@ describe('Foreign-key array', function(){
   it('resolver filter association - author', async function(){
     let opts = funks.getOptions(models.author_foreignKeyArray);
     let generated_resolver = await funks.generateJs('create-resolvers', opts);
-    //console.log(generated_resolver.green)
     testCompare(generated_resolver, data_test.resolver_filter_association);
   });
 
@@ -2515,7 +2496,6 @@ describe('Foreign-key array', function(){
   it('model add association - author', async function(){
     let opts = funks.getOptions(models.author_foreignKeyArray);
     let generated_model = await funks.generateJs('create-models', opts);
-    //console.log(generated_model.green)
     testCompare(generated_model, data_test.model_add_association);
   });
 

@@ -10,7 +10,10 @@ author.prototype.booksFilter = function({
     order,
     pagination
 }, context){
-
+    //return an empty response if the foreignKey Array is empty, no need to query the database
+    if (!Array.isArray(this.book_ids) || this.book_ids.length === 0) {
+        return [];
+    }
     let nsearch = helper.addSearchField({
           "search": search,
           "field": models.book.idAttribute(),
@@ -34,6 +37,12 @@ author.prototype.booksConnection = function({
     order,
     pagination
 }, context){
+  //return an empty response if the foreignKey Array is empty, no need to query the database
+  if (!Array.isArray(this.book_ids) || this.book_ids.length === 0) {
+      return {
+          edges: []
+      };
+  }
   let nsearch = helper.addSearchField({
         "search": search,
         "field": models.book.idAttribute(),
@@ -52,7 +61,10 @@ author.prototype.booksConnection = function({
 
 module.exports.resolver_count_association = `
 author.prototype.countFilteredBooks = function({search}, context){
-
+  //return 0 if the foreignKey Array is empty, no need to query the database
+  if (!Array.isArray(this.book_ids) || this.book_ids.length === 0) {
+      return 0;
+  }
   let nsearch = helper.addSearchField({
         "search": search,
         "field":models.book.idAttribute(),

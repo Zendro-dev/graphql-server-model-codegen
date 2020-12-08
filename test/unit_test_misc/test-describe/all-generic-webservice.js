@@ -89,12 +89,12 @@ book.prototype.publisher = async function({
                 "value": this.publisher_id,
                 "operator": "eq"
             });
-            let found = await resolvers.publi_shers({
+            let found = (await resolvers.publi_shersConnection({
                 search: nsearch,
-                pagination: {limit: 1}
-            }, context);
-            if (found) {
-                return found[0]
+                pagination: {first: 1}
+            }, context)).edges;
+            if (found.length > 0) {
+                return found[0].node
             }
             return found;
         }
