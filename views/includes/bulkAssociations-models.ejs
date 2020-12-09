@@ -75,7 +75,7 @@
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
         let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
         let promises = [];
-        let mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%-idAttribute%> IN ?`
+        let mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%-idAttribute%> IN ?`
         mappedForeignKeys.forEach(({
             <%-associationsArguments["to_one"][i].targetKey-%>,
             <%-idAttribute%>
