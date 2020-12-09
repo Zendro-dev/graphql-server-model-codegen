@@ -363,14 +363,14 @@ writeSchemaCommons = function(dir_write){
     eq
     lt
     gt
-    le
-    ge
+    lte
+    gte
     ne
     in
     contains   # CONTAINS
     ctk    # CONTAINS KEY
-    tlt    # Token < Token
     tgt    # Token > Token
+    tget   # Token >= Token
     and
   }
 
@@ -395,6 +395,7 @@ writeSchemaCommons = function(dir_write){
   input paginationCursorCassandraInput{
     first: Int!
     after: String
+    includeCursor: Boolean
   }
 
   type pageInfo{
@@ -895,12 +896,10 @@ generateSections = async function(sections, opts, dir_write) {
       //schemas
       case 'schemas':
       case 'schemas-ddm':
-      case 'schemas-cassandra':
       //resolvers
       case 'resolvers':
       case 'resolvers-ddm':
       case 'resolvers-generic':
-      case 'resolvers-cassandra':
       //models
       case 'models':
       case 'models-zendro':
@@ -1205,8 +1204,8 @@ module.exports.generateCode = async function(json_dir, dir_write, options){
 
       case 'cassandra':
         sections = [
-          {dir: 'schemas', template: 'schemas-cassandra', fileName: opts.nameLc},
-          {dir: 'resolvers', template: 'resolvers-cassandra', fileName: opts.nameLc},
+          {dir: 'schemas', template: 'schemas', fileName: opts.nameLc},
+          {dir: 'resolvers', template: 'resolvers', fileName: opts.nameLc},
           {dir: 'models/cassandra', template: 'models-cassandra', fileName: opts.nameLc},
           {dir: 'validations', template: 'validations', fileName: opts.nameLc},
           {dir: 'patches',     template: 'patches',     fileName: opts.nameLc},

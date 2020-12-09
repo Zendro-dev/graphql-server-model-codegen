@@ -117,7 +117,7 @@ module.exports = `
 -%>
 type <%- nameCp -%>Connection{
   edges: [<%- nameCp -%>Edge]
-  pageInfo: pageInfo!
+  pageInfo:<% if(storageType === 'cassandra'){_%> pageCassandraInfo!<%} else {_%> pageInfo!<%}%>
 }
 
 type <%- nameCp -%>Edge{
@@ -158,7 +158,7 @@ type <%- nameCp -%>Edge{
     field: <%- name -%>Field
     value: String
     valueType: InputType
-    operator: Operator
+    operator: <% if(storageType === 'cassandra'){_%>CassandraOperator<%} else {_%>Operator<%}%>
     search: [search<%- nameCp-%>Input]
   }
 
@@ -183,9 +183,9 @@ type <%- nameCp -%>Edge{
     <%- namePl -%>(search: search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationInput! ): [<%- name -%>]
     readOne<%- nameCp -%>(<%- idAttribute -%>: ID!): <%- name %>
     count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
-    vueTable<%- nameCp -%> : VueTable<%- nameCp -%>
+    vueTable<%- nameCp -%> : VueTable<%- nameCp %>
     csvTableTemplate<%- nameCp -%>: [String]
-    <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput! ): <%- nameCp -%>Connection
+    <%- namePl -%>Connection(search:search<%- nameCp -%>Input<% if(storageType !== 'cassandra'){_%>, order: [ order<%- nameCp -%>Input ]<%}_%>, pagination: <% if(storageType !== 'cassandra'){_%>paginationCursorInput!<%} else {_%>paginationCursorCassandraInput!<%}_%> ): <%- nameCp -%>Connection
   }
 <%#
 /**

@@ -77,7 +77,7 @@ module.exports = class <%- adapterName -%> {
   * allowing for searches that would otherwise be forbidden. This comes at an efficiency cost.
   * @return {number} The number of records that fulfill the condition, or of all records in the table
   */
-  static async countRecords(search, allowFiltering){
+  static async countRecords(search, benignErrorReporter, allowFiltering){
     let whereOptions = cassandraHelper.searchConditionsToCassandra(search, definition, allowFiltering) 
     const query = 'SELECT COUNT(*) AS count FROM "<%- namePl -%>"' + whereOptions;
     let queryResult = await this.storageHandler.execute(query);
@@ -103,10 +103,9 @@ module.exports = class <%- adapterName -%> {
   * CQL statement, allowing for more search queries at a efficiency cost.
   * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
   */
-  static async readAllCursor(search, pagination, allowFiltering){
+  static async readAllCursor(search, pagination, benignErrorReporter, allowFiltering){
 
-    let offsetCursor = pagination ? pagination.after : null;    
-    let cassandraSearch = offsetCursor ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, offsetCursor,'<%- idAttribute -%>') : search;
+    let cassandraSearch = pagination && pagination.after ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, pagination,'<%- idAttribute -%>') : search; 
     let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, definition, allowFiltering);
 
     <% columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
