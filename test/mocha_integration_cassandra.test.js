@@ -1079,7 +1079,7 @@ describe(
     });
 
     it('04. Arr complex search with CONTAINS', function() {
-      let res = itHelpers.request_graph_ql_post('{citiesConnection(pagination:{first:2}search:{operator:and, search:[{operator:cont, field:intArr, value:"2"}{operator:cont, field:strArr, value:"str3"}]} ){edges{node{city_id intArr strArr}}}}');
+      let res = itHelpers.request_graph_ql_post('{citiesConnection(pagination:{first:2}search:{operator:and, search:[{operator:contains, field:intArr, value:"2"}{operator:contains, field:strArr, value:"str3"}]} ){edges{node{city_id intArr strArr}}}}');
       let resBody = JSON.parse(res.body.toString('utf8'));
       expect(res.statusCode).to.equal(200);
       expect(resBody).to.deep.equal({
