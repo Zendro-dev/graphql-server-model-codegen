@@ -19,8 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile.graphql_server
     volumes:
-      - ../integration_test_env/node_modules:/usr/node_modules
-      - ../integration_test_env/services/gql_science_db_graphql_server1:/usr/src/app
+      - ../integration_test_env/gql_science_db_graphql_server1:/usr/src/app
       - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
     ports:
       - "3000:3000"
@@ -80,8 +79,7 @@ services:
       context: .
       dockerfile: Dockerfile.graphql_server
     volumes:
-      - ../integration_test_env/node_modules:/usr/node_modules
-      - ../integration_test_env/services/gql_science_db_graphql_server2:/usr/src/app
+      - ../integration_test_env/gql_science_db_graphql_server2:/usr/src/app
       - ./data_models_storage_config2.json:/usr/src/app/config/data_models_storage_config.json
     ports:
       - "3030:3030"
