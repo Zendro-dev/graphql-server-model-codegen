@@ -8,6 +8,7 @@ const models_zendro = require('./unit_test_misc/data_models_zendro');
 const models_distributed = require('./unit_test_misc/data_models_distributed');
 const models_refactoring = require('./unit_test_misc/data_models_refactoring');
 const models_generic = require('./unit_test_misc/data_models_generic');
+const models_cassandra = require('./unit_test_misc/data_models_cassandra');
 const requireFromString = require('require-from-string');
 const helpers = require('./unit_test_misc/helpers/reporting_helpers');
 const { test } = require('mocha');
@@ -2534,6 +2535,85 @@ describe('Foreign-key array', function(){
     let opts = funks.getOptions(models.author_zendro_adapter_array_fk);
     let generated_model = await funks.generateJs('create-zendro-adapters', opts);
     testCompare(generated_model, data_test.zendro_adapter_remove);
+  });
+
+
+});
+
+
+describe('Cassandra storagetype', function(){
+  let data_test = require('./unit_test_misc/test-describe/cassandra-storagetype');
+
+  it('cassandra schema - city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_schema = await funks.generateJs('create-schemas', opts);
+    testCompare(generated_schema, data_test.cassandra_schema);
+  });
+
+  it('cassandra resolver - cityConnection', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.cassandra_resolver_Connection);
+  });
+
+  it('cassandra resolver - countCities', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_resolver = await funks.generateJs('create-resolvers', opts);
+    testCompare(generated_resolver, data_test.cassandra_resolver_Count);
+  });
+
+  it('cassandra models - constructor', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_constructor);
+  });
+
+  it('cassandra models - readById city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_readById);
+  });
+
+  it('cassandra models - countRecords city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_countRecords);
+  });
+
+  it('cassandra models - readAllCursor city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_readAllCursor);
+  });
+
+  it('cassandra models - addOne city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_addOne);
+  });
+
+  it('cassandra models - deleteOne city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_deleteOne);
+  });
+
+  it('cassandra models - updateOne city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_updateOne);
+  });
+
+  it('cassandra models - updateOne city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_updateOne);
+  });
+
+  it('cassandra models - updateOne city', async function(){
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_updateOne);
   });
 
 
