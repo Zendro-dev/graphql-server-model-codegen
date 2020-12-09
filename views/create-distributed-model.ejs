@@ -239,7 +239,7 @@ module.exports = class <%- name -%>{
     .then( async nodes => {
       nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
       <%if (!cassandraRestrictions) { %>if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }<% } %>
-      if(pagination === undefined ){ pagination = { <% if (cassandraRestrictions) { %>limit<% } else { %>first<% } %> : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
+      if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
       <% if (cassandraRestrictions) { %>
       let ordered_records = cassandraHelper.orderCassandraRecords(nodes);
