@@ -20,7 +20,7 @@ cloneAndInstallGraphqlServerRepository () {
   outpath=$2
   name=$(basename $outpath)
 
-  printCloneTaskStart "master" "$name"
+  printCloneTaskStart "$branch" "$name"
 
   # Clone graphql server instance from the upstream remote, using the appropriate branch
   git clone --branch $branch https://github.com/Zendro-dev/graphql-server $outpath
@@ -30,7 +30,7 @@ cloneAndInstallGraphqlServerRepository () {
   NODE_JQ_SKIP_INSTALL_BINARY=true npm install
   cd - &>/dev/null
 
-  printCloneTaskEnd "master" "$name"
+  printCloneTaskEnd "$branch" "$name"
 
 }
 

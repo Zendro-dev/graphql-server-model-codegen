@@ -108,7 +108,8 @@ fi
 # 1. Run the integration tests
 # 2. Perform a full cleanup (optionally disabled)
 if [[ $OPT_RUN_TESTS == "true" ]]; then
-  mocha "${TEST_DIR}/mocha_integration_test.js"
+  mocha "${TEST_DIR}/mocha_integration.test.js"
+  mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
 
   # 1. Remove docker containers, images, and volumes
   # 2. Remove the testing environment
@@ -131,7 +132,8 @@ if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
   bash "${TEST_DIR}/testenv_generate_code.sh"
   bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
-  mocha "${TEST_DIR}/mocha_integration_test.js"
+  mocha "${TEST_DIR}/mocha_integration.test.js"
+  mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
 
   # 1. Remove docker containers, images, and volumes
   # 2. Remove the testing environment
@@ -156,7 +158,8 @@ if [[ $DEFAULT_RUN == "true" ]]; then
   bash "${TEST_DIR}/testenv_generate_code.sh"
   bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
-  mocha "${TEST_DIR}/mocha_integration_test.js"
+  mocha "${TEST_DIR}/mocha_integration.test.js"
+  mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
 
   # 1. Remove docker containers, images, and volumes
   # 2. Remove the testing environment
