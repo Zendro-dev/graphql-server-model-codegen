@@ -1,7 +1,7 @@
 // Delete this file, if you do not want or need any validations.
 const validatorUtil = require('../utils/validatorUtil')
 const Ajv = require('ajv')
-const ajv = validatorUtil.addDateTimeAjvKeywords(new Ajv({allErrors:true}))
+const ajv = validatorUtil.addValidatorFunc(validatorUtil.addDateTimeAjvKeywords(new Ajv({allErrors:true})))
 
 // Dear user, edit the schema to adjust it to your model
 module.exports.validator_patch = function(<%- nameLc -%>){

@@ -1,28 +1,22 @@
---- cat.js	2020-10-06 18:42:36.570510305 -0500
-+++ cat_update.js	2020-10-06 18:49:45.965601657 -0500
-@@ -100,21 +100,14 @@
-     static async readAllCursor(search, order, pagination, benignErrorReporter) {
-         //use default BenignErrorReporter if no BenignErrorReporter defined
-         benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
--
--        // build the sequelize options object for cursor-based pagination
--        let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute());
--        let records = await super.findAll(options);
--        // validationCheck after read
--        records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
-+        let options = helper.buildCursorBasedGenericOptions(search, order, pagination, this.idAttribute());
-+        let records = await Cat.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
-         // get the first record (if exists) in the opposite direction to determine pageInfo.
-         // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
-         let oppRecords = [];
-         if (pagination && (pagination.after || pagination.before)) {
--            let oppOptions = helper.buildOppositeSearchSequelize(search, order, {
--                ...pagination,
--                includeCursor: false
--            }, this.idAttribute());
--            oppRecords = await super.findAll(oppOptions);
-+            let oppOptions = helper.buildOppositeSearchGeneric(search, order, {...pagination, includeCursor: false}, this.idAttribute());
-+            oppRecords = await Cat.readAll(oppOptions['search'], oppOptions['order'], oppOptions['pagination'], benignErrorReporter);
-         }
-         // build the graphql Connection Object
-         let edges = helper.buildEdgeObject(records);
+137,139c137,139
+<         let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), Cat.definition.attributes);
+<         let records = await super.findAll(options);
+< 
+---
+>         let options = helper.buildCursorBasedGenericOptions(search, order, pagination, this.idAttribute());
+>         let records = await Cat.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
+>         
+142,143d141
+<         // validationCheck after read
+<         records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
+147,152c145,147
+<         if (pagination && (pagination.after || pagination.before)) {
+<             let oppOptions = helper.buildOppositeSearchSequelize(search, order, {
+<                 ...pagination,
+<                 includeCursor: false
+<             }, this.idAttribute(), Cat.definition.attributes);
+<             oppRecords = await super.findAll(oppOptions);
+---
+>         if (pagination && (pagination.after || pagination.before)) {           
+>             let oppOptions = helper.buildOppositeSearchGeneric(search, order, {...pagination, includeCursor: false}, this.idAttribute());
+>             oppRecords = await Cat.readAll(oppOptions['search'], oppOptions['order'], oppOptions['pagination'], benignErrorReporter);
