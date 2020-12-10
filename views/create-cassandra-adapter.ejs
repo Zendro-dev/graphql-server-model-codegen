@@ -73,7 +73,8 @@ module.exports = class <%- adapterName -%> {
   * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
   * for the Cassandra storage type, based on CQL.
   * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
-  * @param {boolean} filtering - If the user has the 'search' right, the term 'ALLOW FILTERING' will be appended to the CQL string, possibly
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @param {boolean} allowFiltering - If the user has the 'search' right, the term 'ALLOW FILTERING' will be appended to the CQL string, possibly
   * allowing for searches that would otherwise be forbidden. This comes at an efficiency cost.
   * @return {number} The number of records that fulfill the condition, or of all records in the table
   */
@@ -99,6 +100,7 @@ module.exports = class <%- adapterName -%> {
   *
   * @param {object} search - The search condition for which records shall be fetched
   * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
   * @param {boolean} allowFiltering - If the user has the right 'search', the term "ALLOW FILTERING" will be added to the
   * CQL statement, allowing for more search queries at a efficiency cost.
   * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
@@ -169,7 +171,7 @@ module.exports = class <%- adapterName -%> {
     let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> });
     await validatorUtil.validateData('validateForCreate', this, input);
     try{
-      const fields = Object.keys(input).join(', ');
+      const fields = '"' + Object.keys(input).join('", "') + '"';
       const inputValues = Object.values(input);
       const prepareString = new Array(Object.keys(input).length).fill('?').join(', ');
       const mutation = 'INSERT INTO "<%- namePl -%>" (' + fields + ') VALUES (' + prepareString + ')';
@@ -220,7 +222,7 @@ module.exports = class <%- adapterName -%> {
       // An update that does not change the attributes must not execute the following CQL statement
       if (inputKeys.length > 0) {
         let mutation = `UPDATE "<%- namePl -%>" SET `;
-        mutation += inputKeys.map(key => `${key} = ?`).join(', ');
+        mutation += inputKeys.map(key => `"${key}" = ?`).join(', ');
         mutation += ` WHERE <%- idAttribute -%> = ?;`;
         await this.storageHandler.execute(mutation, inputValues, {prepare: true});
       }
@@ -352,20 +354,4 @@ module.exports = class <%- adapterName -%> {
       <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
     };
   }
-
-  /**
-  * encloseStringAttributesInApostrophes - Cassandra expects String values to be 
-  * enclosed in apostrophes (see https://docs.datastax.com/en/cql-oss/3.x/cql/cql_reference/valid_literal_r.html). This method checks
-  * all string attributes of <%- adapterName -%>, and if the value does not start with an apostrophe (index 0), the value is enclosed
-  * in apostrophes.
-  * @param {Object} obj - The object to be examined
-  */
-  static encloseStringAttributesInApostrophes(obj) {
-    for (let key of Object.keys(obj)) {
-      if (definition.attributes[key] === 'String' && obj[key].indexOf("'") !== 0) {
-        obj[key] = `'${obj[key]}'`;
-      }
-    }
-  }
-
 }

@@ -61,7 +61,8 @@ module.exports = class <%- name -%> {
   * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
   * for the Cassandra storage type, based on CQL.
   * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
-  * @param {boolean} filtering - If the user has the 'search' right, the term 'ALLOW FILTERING' will be appended to the CQL string, possibly
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @param {boolean} allowFiltering - If the user has the 'search' right, the term 'ALLOW FILTERING' will be appended to the CQL string, possibly
   * allowing for searches that would otherwise be forbidden. This comes at an efficiency cost.
   * @return {number} The number of records that fulfill the condition, or of all records in the table
   */
@@ -87,6 +88,7 @@ module.exports = class <%- name -%> {
   *
   * @param {object} search - The search condition for which records shall be fetched
   * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
   * @param {boolean} allowFiltering - If the user has the right 'search', the term "ALLOW FILTERING" will be added to the
   * CQL statement, allowing for more search queries at a efficiency cost.
   * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
