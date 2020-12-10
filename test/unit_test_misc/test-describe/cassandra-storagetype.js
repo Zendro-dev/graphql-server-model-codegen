@@ -1,5 +1,3 @@
-const models = require("../../integration_test_env/services/gql_science_db_graphql_server1/models")
-
 module.exports.cassandra_schema = `
 module.exports = \`
   type city{
@@ -338,49 +336,31 @@ static async updateOne({
 }
 `
 
-module.exports.cassandra_model_fieldMutation = `
-/**
- * add_capital_id - field Mutation (model-layer) for to_one associationsArguments to add 
- *
- * @param {Id}   incident_id   IdAttribute of the root model to be updated
- * @param {Id}   capital_id Foreign Key (stored in "Me") of the Association to be updated. 
- */
+module.exports.cassandra_model_fieldMutation_add = `
 static async add_capital_id(incident_id, capital_id) {
-    const mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id = ?\`;
-    await this.storageHandler.execute(mutationCql, [capital_id, incident_id], {
-        prepare: true
-    });
-    const checkCql = \`SELECT * FROM "incidents" WHERE incident_id = ?\`;
-    let result = await this.storageHandler.execute(checkCql, [incident_id]);
-    return new Incident(result.first());
+  const mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id = ?\`;
+  await this.storageHandler.execute(mutationCql, [capital_id, incident_id], {
+    prepare: true
+  });
+  const checkCql = \`SELECT * FROM "incidents" WHERE incident_id = ?\`;
+  let result = await this.storageHandler.execute(checkCql, [incident_id]);
+  return new Incident(result.first());
 }
 
-
-/**
- * remove_capital_id - field Mutation (model-layer) for to_one associationsArguments to remove 
- *
- * @param {Id}   incident_id   IdAttribute of the root model to be updated
- * @param {Id}   capital_id Foreign Key (stored in "Me") of the Association to be updated. 
- */
+`
+module.exports.cassandra_model_fieldMutation_remove = `
 static async remove_capital_id(incident_id, capital_id) {
-    const mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id = ?\`;
-    await this.storageHandler.execute(mutationCql, [null, incident_id], {
-        prepare: true
-    });
-    const checkCql = \`SELECT * FROM "incidents" WHERE incident_id = ?\`;
-    let result = await this.storageHandler.execute(checkCql, [incident_id]);
-    return new Incident(result.first());
+  const mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id = ?\`;
+  await this.storageHandler.execute(mutationCql, [null, incident_id], {
+    prepare: true
+  });
+  const checkCql = \`SELECT * FROM "incidents" WHERE incident_id = ?\`;
+  let result = await this.storageHandler.execute(checkCql, [incident_id]);
+  return new Incident(result.first());
 }
 `
 
-module.exports.cassandra_model_fieldMutation_bulkAssociate = `
-/**
- * bulkAssociateIncidentWithCapital_id - bulkAssociaton of given ids
- *
- * @param  {array} bulkAssociationInput Array of associations to add
- * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
- * @return {string} returns message on success
- */
+module.exports.cassandra_model_fieldMutation_bulkAssociate_add = `
 static async bulkAssociateIncidentWithCapital_id(bulkAssociationInput, benignErrorReporter) {
     let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "incident_id", "capital_id");
     let promises = [];
@@ -398,30 +378,188 @@ static async bulkAssociateIncidentWithCapital_id(bulkAssociationInput, benignErr
     await Promise.all(promises);
     return "Records successfully updated!"
 }
+`
 
-
-/**
- * bulkDisAssociateIncidentWithCapital_id - bulkDisAssociaton of given ids
- *
- * @param  {array} bulkAssociationInput Array of associations to remove
- * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
- * @return {string} returns message on success
- */
+module.exports.cassandra_model_fieldMutation_bulkAssociate_remove = `
 static async bulkDisAssociateIncidentWithCapital_id(bulkAssociationInput, benignErrorReporter) {
-    let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "incident_id", "capital_id");
-    let promises = [];
-    let mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id IN ?\`
-    mappedForeignKeys.forEach(({
-        capital_id,
-        incident_id
-    }) => {
-        promises.push(this.storageHandler.execute(mutationCql, [null, incident_id], {
-            prepare: true
-        }))
+  let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "incident_id", "capital_id");
+  let promises = [];
+  let mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id IN ?\`
+  mappedForeignKeys.forEach(({
+      capital_id,
+      incident_id
+  }) => {
+      promises.push(this.storageHandler.execute(mutationCql, [null, incident_id], {
+          prepare: true
+      }))
+  });
+
+
+  await Promise.all(promises);
+  return "Records successfully updated!"
+}
+`
+
+module.exports.cassandra_ddm_model_readAllCursor = `
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+  let authAdapters = [];
+  /**
+   * Differentiated cases:
+   *    if authorizedAdapters is defined:
+   *      - called from resolver.
+   *      - authorizedAdapters will no be modified.
+   *
+   *    if authorizedAdapters is not defined:
+   *      - called internally
+   *      - authorizedAdapters will be set to registered adapters.
+   */
+  if (authorizedAdapters === undefined) {
+    authAdapters = Object.values(this.registeredAdapters);
+  } else {
+    authAdapters = Array.from(authorizedAdapters)
+  }
+
+  // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+  let searchAuthAdapters = [];
+  if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+    searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+  }
+
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+
+
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
+  let promises = authAdapters.map(adapter => {
+    /**
+     * Differentiated cases:
+     *   sql-adapter:
+     *      resolve with current parameters.
+     *
+     *   ddm-adapter:
+     *   zendro-webservice-adapter:
+     *   generic-adapter:
+     *      add exclusions to search.excludeAdapterNames parameter.
+     */
+    switch (adapter.adapterType) {
+      case 'ddm-adapter':
+        let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
+        return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
+
+      case 'generic-adapter':
+      case 'sql-adapter':
+      case 'zendro-webservice-adapter':
+        return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+      case 'cassandra-adapter':
+        return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
+
+      default:
+        throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
+    }
+  });
+  let someHasNextPage = false;
+
+  return Promise.allSettled(promises)
+    //phase 1: reduce
+    .then(results => {
+      return results.reduce((total, current) => {
+        //check if current is Error
+        if (current.status === 'rejected') {
+          benignErrorReporter.reportError(current.reason);
+        }
+        //check current
+        else if (current.status === 'fulfilled') {
+          if (current.value && current.value.pageInfo && current.value.edges) {
+            someHasNextPage |= current.value.pageInfo.hasNextPage;
+
+            total = total.concat(current.value.edges.map(e => e.node));
+          }
+        }
+        return total;
+      }, []);
+    })
+    //phase 2: validate & order & paginate
+    .then(async nodes => {
+      nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
+
+      if (pagination === undefined) {
+        pagination = {
+          first: Math.min(globals.LIMIT_RECORDS, nodes.length)
+        }
+      }
+
+
+      let ordered_records = cassandraHelper.orderCassandraRecords(nodes);
+      let paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.limit);
+      let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage);
+      return graphQLConnection;
+
     });
+}
+`
 
+module.exports.cassandra_ddm_cassandra_adapter_readById = `
+static async readById(id) {
+  const query = \`SELECT incident_id, incident_description, incident_number, token(incident_id) as toke FROM "dist_incidents" WHERE incident_id = ?\`;
+  let queryResult = await this.storageHandler.execute(query, [id], {
+    prepare: true
+  });
+  let firstResult = queryResult.first();
+  if (firstResult === null) {
+    throw new Error(\`Record with ID = "\${id}" does not exist\`);
+  }
+  let item = new dist_incident_instance1(firstResult);
+  return validatorUtil.validateData('validateAfterRead', this, item);
+}
+`
 
-    await Promise.all(promises);
-    return "Records successfully updated!"
+module.exports.cassandra_ddm_cassandra_adapter_readAllCursor = `
+static async readAllCursor(search, pagination, benignErrorReporter, allowFiltering) {
+
+  let cassandraSearch = pagination && pagination.after ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, pagination, 'incident_id') : search;
+  let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, definition, allowFiltering);
+
+  let query = 'SELECT incident_id, incident_description, incident_number, token(incident_id) as toke FROM "dist_incidents"' + whereOptions;
+
+  // Set page size if needed
+  let options = {};
+  if (pagination && pagination.first) {
+    options.fetchSize = parseInt(pagination.first);
+  }
+
+  // Call to database 
+  const result = await this.storageHandler.execute(query, [], options);
+
+  // Construct return object
+  const rows = result.rows.map(row => {
+    let edge = {};
+    let rowAsDist_incident = new dist_incident_instance1(row);
+    edge.node = rowAsDist_incident;
+    edge.cursor = rowAsDist_incident.base64Enconde();
+    return edge;
+  });
+
+  let nextCursor = null;
+  let hasNextCursor = false;
+
+  /*
+   * The pageState attribute is where Cassandra stores its own version of a cursor.
+   * We cannot use it directly, because Cassandra uses different conventions. 
+   * But its presence shows that there is a following page.
+   */
+  if (helper.isNotUndefinedAndNotNull(result.pageState)) {
+    nextCursor = rows[rows.length - 1].cursor;
+    hasNextCursor = true;
+  }
+
+  let pageInfo = {
+    endCursor: nextCursor,
+    hasNextPage: hasNextCursor
+  }
+  return {
+    edges: rows,
+    pageInfo: pageInfo
+  };
 }
 `

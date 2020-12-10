@@ -1,29 +1,29 @@
 {
-    "model": "Dist_instant",
-    "storageType" : "cassandra-adapter",
-    "adapterName": "dist_instant_instance1",
-    "regex": "instance1",
-    "attributes": {
-      "instant_id": "String",
-      "incident_assoc_id": "String",
-      "year": "Int",
-      "month": "Int",
-      "day": "Int",
-      "hour": "Int",
-      "minute": "Int"
-    },
-  
-    "associations": {
-  
-      "dist_incident": {
-        "type": "to_one",
-        "target": "Dist_incident",
-        "targetKey": "incident_assoc_id",
-        "keyIn" : "Dist_instant",
-        "targetStorageType": "distributed-data-model"
-      }
-  
-    },
-  
-    "internalId" : "instant_id"
-  }
+  "model": "Dist_instant",
+  "storageType": "cassandra-adapter",
+  "adapterName": "dist_instant_instance1",
+  "regex": "instance1",
+  "attributes": {
+    "instant_id": "String",
+    "incident_assoc_id": "String",
+    "year": "Int",
+    "month": "Int",
+    "day": "Int",
+    "hour": "Int",
+    "minute": "Int"
+  },
+
+  "associations": {
+
+    "dist_incident": {
+      "type": "to_one",
+      "target": "Dist_incident",
+      "targetKey": "incident_assoc_id",
+      "keyIn": "Dist_instant",
+      "targetStorageType": "distributed-data-model"
+    }
+
+  },
+
+  "internalId": "instant_id"
+}

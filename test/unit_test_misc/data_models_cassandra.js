@@ -58,3 +58,56 @@ module.exports.incident = {
 
   "internalId" : "incident_id"
 }
+
+module.exports.dist_incident = {
+  "model": "Dist_incident",
+  "storageType" : "distributed-data-model",
+  "registry": ["dist_incident_instance1"],
+  "cassandraRestrictions": true,
+  "attributes": {
+    "incident_id": "String",
+    "incident_description": "String",
+    "incident_number": "Int"
+  },
+
+  "associations": {
+
+    "dist_instants": {
+      "type": "to_many",
+      "target": "Dist_instant",
+      "targetKey": "incident_assoc_id",
+      "keyIn" : "Dist_instant",
+      "targetStorageType": "distributed-data-model"
+    }
+
+  },
+
+  "internalId" : "incident_id"
+}
+
+module.exports.dist_instant_instance1 = {
+  "model": "Dist_incident",
+  "storageType": "cassandra-adapter",
+  "adapterName": "dist_incident_instance1",
+  "regex": "instance1",
+  "attributes": {
+    "incident_id": "String",
+    "incident_description": "String",
+    "incident_number": "Int"
+  },
+
+  "associations": {
+
+    "dist_instants": {
+      "type": "to_many",
+      "target": "Dist_instant",
+      "targetKey": "incident_assoc_id",
+      "keyIn": "Dist_instant",
+      "targetStorageType": "distributed-data-model"
+    }
+
+  },
+
+  "internalId": "incident_id"
+}
+

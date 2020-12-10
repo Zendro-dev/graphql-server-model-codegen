@@ -2604,17 +2604,46 @@ describe('Cassandra storagetype', function(){
     testCompare(generated_model, data_test.cassandra_model_updateOne);
   });
 
-  it('cassandra models - updateOne city', async function(){
-    let opts = funks.getOptions(models_cassandra.city);
+  it('cassandra models - fieldMutations add city', async function(){
+    let opts = funks.getOptions(models_cassandra.incident);
     let generated_model = await funks.generateJs('create-models-cassandra', opts);
-    testCompare(generated_model, data_test.cassandra_model_updateOne);
+    testCompare(generated_model, data_test.cassandra_model_fieldMutation_add);
   });
 
-  it('cassandra models - updateOne city', async function(){
-    let opts = funks.getOptions(models_cassandra.city);
+  it('cassandra models - fieldMutations remove city', async function(){
+    let opts = funks.getOptions(models_cassandra.incident);
     let generated_model = await funks.generateJs('create-models-cassandra', opts);
-    testCompare(generated_model, data_test.cassandra_model_updateOne);
+    testCompare(generated_model, data_test.cassandra_model_fieldMutation_remove);
   });
 
+  it('cassandra models - fieldMutations bulkAssociation add city', async function(){
+    let opts = funks.getOptions(models_cassandra.incident);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_fieldMutation_bulkAssociate_add);
+  });
+
+  it('cassandra models - fieldMutations bulkAssociation remove city', async function(){
+    let opts = funks.getOptions(models_cassandra.incident);
+    let generated_model = await funks.generateJs('create-models-cassandra', opts);
+    testCompare(generated_model, data_test.cassandra_model_fieldMutation_bulkAssociate_remove);
+  });
+
+  it('cassandra ddm model - readAllCursor dist_incident', async function(){
+    let opts = funks.getOptions(models_cassandra.dist_incident);
+    let generated_model = await funks.generateJs('create-distributed-model', opts);
+    testCompare(generated_model, data_test.cassandra_ddm_model_readAllCursor);
+  });
+
+  it('cassandra ddm cassandra-adapter - readById dist_incident', async function(){
+    let opts = funks.getOptions(models_cassandra.dist_instant_instance1);
+    let generated_model = await funks.generateJs('create-cassandra-adapter', opts);
+    testCompare(generated_model, data_test.cassandra_ddm_cassandra_adapter_readById);
+  });
+
+  it('cassandra ddm cassandra-adapter - readAllCursor dist_incident', async function(){
+    let opts = funks.getOptions(models_cassandra.dist_instant_instance1);
+    let generated_model = await funks.generateJs('create-cassandra-adapter', opts);
+    testCompare(generated_model, data_test.cassandra_ddm_cassandra_adapter_readAllCursor);
+  });
 
 });
