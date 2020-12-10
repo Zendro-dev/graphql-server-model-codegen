@@ -1,6 +1,6 @@
 {
   "name": "graphql-server-model-codegen",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Command line utility which auto-generates code to setup and run a Science-DB GraphQL web-server. See sciencedb.github.io.",
   "repository": {
     "type": "git",
