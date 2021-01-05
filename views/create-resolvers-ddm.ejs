@@ -129,7 +129,15 @@ const associationArgsDef = {
      <%if(associations_temp[i].assocThroughArray){%>
         //return an empty response if the foreignKey Array is empty, no need to query the database
         if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
-          return {edges: []};
+          return {
+            edges: [],
+            pageInfo: {
+                startCursor: null,
+                endCursor: null,
+                hasPreviousPage: false,
+                hasNextPage: false
+            }
+          };
         }
          let nsearch = helper.addSearchField({
            "search": search,
