@@ -360,8 +360,7 @@ describe(
                         {name: "Zazaniza"}
                     ]
                 }
-            ],
-            errors: []
+            ]
         });
 
 
@@ -410,8 +409,7 @@ describe(
                       }
                   ]
               }
-          ],
-          errors: []
+          ]
         });
 
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {names}}`,
@@ -505,8 +503,7 @@ describe(
                       }
                   ]
               }
-          ],
-          errors: []
+          ]
         });
 
         res = await itHelpers.request_metaquery_post([`{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
