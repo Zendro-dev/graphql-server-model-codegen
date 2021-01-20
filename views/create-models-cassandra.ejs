@@ -118,6 +118,7 @@ module.exports = class <%- name -%> {
       return edge;
     });
 
+    let startCursor = null;
     let nextCursor = null;
     let hasNextCursor = false;
 
@@ -127,13 +128,16 @@ module.exports = class <%- name -%> {
     * But its presence shows that there is a following page.
     */
     if (helper.isNotUndefinedAndNotNull(result.pageState)) {
+      startCursor = rows[0].cursor;
       nextCursor = rows[rows.length - 1].cursor;
       hasNextCursor = true;
     }
 
     let pageInfo = {
+      startCursor: startCursor,
       endCursor: nextCursor,
-      hasNextPage: hasNextCursor
+      hasNextPage: hasNextCursor,
+      hasPreviousPage: false, // since cassandra does not support backward-pagination this will default false
     }
     return {edges: rows, pageInfo: pageInfo};
   }

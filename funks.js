@@ -365,7 +365,6 @@ writeSchemaCommons = function(dir_write){
     gt
     lte
     gte
-    ne
     in
     contains   # CONTAINS
     ctk    # CONTAINS KEY
@@ -392,21 +391,10 @@ writeSchemaCommons = function(dir_write){
     includeCursor: Boolean
   }
 
-  input paginationCursorCassandraInput{
-    first: Int!
-    after: String
-    includeCursor: Boolean
-  }
-
   type pageInfo{
     startCursor: String
     endCursor: String
     hasPreviousPage: Boolean!
-    hasNextPage: Boolean!
-  }
-
-  type pageCassandraInfo{
-    endCursor: String
     hasNextPage: Boolean!
   }
 
