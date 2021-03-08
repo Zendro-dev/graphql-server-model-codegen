@@ -1,0 +1,60 @@
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+    <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+      /**
+      * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+      *
+      * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+      * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+      */
+      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+        try {
+            const db = await this.storageHandler
+            const collection = await db.collection("<%- nameLc -%>")
+            const updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <% if (op === 'remove') 
+            { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>}
+            const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
+            {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
+            if (response.result.ok !== 1){
+                throw new Error(`Record with ID = ${<%- idAttribute-%>} has not been updated`);
+            }
+            const document = await this.readById(<%- idAttribute-%>);
+            return document
+        } catch (error) {
+            throw error;
+        }
+      }
+    <%} -%>
+<%}-%>
+  
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+    <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
+        /**
+        * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+        *
+        * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+        * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+        */
+        static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+            //handle inverse association
+            if(handle_inverse){
+                let promises = [];
+                <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+                    promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+                });
+                await Promise.all(promises);
+            }
+
+            try {
+                const db = await this.storageHandler
+                const collection = await db.collection("<%- nameLc -%>")
+                let record = = await this.readById(<%- idAttribute-%>);
+                if (record!==null){
+                    let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%>, <%-associationsArguments["to_many"][i].sourceKey-%>);
+                    await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%>}, {$set:{<%-associationsArguments["to_many"][i].sourceKey-%> :updated_ids}})
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+    <%} -%>
+<%}-%>
