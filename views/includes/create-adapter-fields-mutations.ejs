@@ -67,6 +67,32 @@
   <%}-%>
   <%#  /*** End of the the sql-adapter case */ -%>
 
+  <%#
+  /**
+   * check the type of adapter and handle mongodb-adapter
+   */
+  -%>
+  <%if(storageType === 'mongodb-adapter'){-%>
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      try {
+        const db = await this.storageHandler
+        const collection = await db.collection("<%- adapterName -%>")
+        const updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <% if (op === 'remove') 
+        { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>}
+        const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
+        {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
+        if (response.result.ok !== 1){
+          throw new Error(`Record with ID = ${<%- idAttribute-%>} has not been updated`);
+        }
+        const document = await this.readById(<%- idAttribute-%>);
+        return document
+      } catch (error) {
+        throw error;
+      }
+    }
+  <%}-%>
+   <%#  /*** End of the the mongodb-adapter case */ -%>
+
  <%}-%>
 <%} -%>
 

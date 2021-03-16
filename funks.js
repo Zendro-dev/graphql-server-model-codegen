@@ -304,6 +304,7 @@ writeSchemaCommons = function (dir_write) {
     contains
     contained
     not
+    all
   }
 
   enum Order{
@@ -340,117 +341,6 @@ writeSchemaCommons = function (dir_write) {
     let file_name = dir_write + "/schemas/" + "commons.js";
 
     fs.writeFileSync(file_name, commons);
-    //success
-    console.log(
-      "@@@ File:",
-      colors.dim(file_name),
-      colors.green("written successfully!")
-    );
-  } catch (e) {
-    //error
-    console.log("@@@ Error:", colors.dim(file_name), colors.red("error"));
-    console.log(e);
-    throw e;
-  }
-};
-
-/**
- * writeIndexModelsCommons - Writes a 'index.js' file of all models stored inside the given directory. This file
- * will allow to import all sequelize models before creating associations between models.
- *
- * @param  {string} dir_write Path of the directory where to create the index.js file
- */
-writeIndexModelsCommons = function (dir_write) {
-  let index = `
-  const fs = require('fs');
-  const path = require('path')
-  sequelize = require('../connection');
-
-  var models = {};
-
-  //grabs all the models in your models folder, adds them to the models object
-  fs.readdirSync(__dirname)
-  .filter(function(file) {
-    return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
-  })
-  .forEach(function(file) {
-    var model = sequelize['import'](path.join(__dirname, file));
-
-    let validator_patch = path.join(__dirname,'../','validations', file);
-    if(fs.existsSync(validator_patch)){
-        model = require(validator_patch).validator_patch(model);
-    }
-
-    let patches_patch = path.join(__dirname,'../','patches', file);
-    if(fs.existsSync(patches_patch)){
-        model = require(patches_patch).logic_patch(model);
-    }
-
-    models[model.name] = model;
-  });
-  //Important: creates associations based on associations defined in associate function in the model files
-  Object.keys(models).forEach(function(modelName) {
-    if (models[modelName].associate) {
-      models[modelName].associate(models);
-    }
-  });
-  //update tables with association (temporary, just for testing purposes)
-  //this part is suppose to be done in the migration file
-  //sequelize.sync({force: true});
-  module.exports = models;
-  `;
-
-  fs.writeFile(dir_write + "/models/" + "index.js", index, function (err) {
-    if (err) return console.log(err);
-  });
-};
-
-writeIndexAdapters = function (dir_write) {
-  let index = `
-  const fs = require('fs');
-  const path = require('path');
-  const Sequelize = require('sequelize');
-  sequelize = require('../../connection');
-
-  let adapters = {};
-  module.exports = adapters;
-
-  fs.readdirSync(__dirname)
-    .filter( file =>{ return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
-  }).forEach( file =>{
-
-    let adapter = require(path.join(__dirname, file));
-    if( adapters[adapter.adapterName] ){
-      throw new Error(\`Duplicated adapter name \${adapter.adapterName}\`);
-    }
-
-    switch(adapter.adapterType) {
-      case 'ddm-adapter':
-      case 'zendro-webservice-adapter':
-      case 'generic-adapter':
-        adapters[adapter.adapterName] = adapter;
-        break;
-
-      case 'sql-adapter':
-        adapters[adapter.adapterName] = adapter.init(sequelize, Sequelize);
-        break;
-
-      case 'default':
-        throw new Error(\`Adapter storageType '\${adapter.storageType}' is not supported\`);
-    }
-
-    let patches_patch = path.join(__dirname,'..','..','patches', file);
-    if(fs.existsSync(patches_patch)){
-        adapter = require(\`\${patches_patch}\`).logic_patch(adapter);
-    }
-
-  });
-
-  `;
-  try {
-    let file_name = dir_write + "/adapters/" + "index.js";
-
-    fs.writeFileSync(file_name, index);
     //success
     console.log(
       "@@@ File:",
@@ -937,15 +827,18 @@ generateSections = async function (sections, opts, dir_write) {
       case "resolvers":
       case "resolvers-ddm":
       case "resolvers-generic":
+      case "resolvers-mongodb":
       //models
       case "models":
       case "models-zendro":
       case "distributed-model":
       case "models-generic":
+      case "models-mongodb":
       //adapters
       case "sql-adapter":
       case "zendro-adapters":
       case "generic-adapter":
+      case "mongodb-adapter":
         file_name =
           dir_write + "/" + section.dir + "/" + section.fileName + ".js";
         break;
@@ -1008,12 +901,8 @@ generateSections = async function (sections, opts, dir_write) {
 writeCommons = async function (dir_write, models, adapters) {
   writeSchemaCommons(dir_write);
   console.log(path.join(dir_write, "models"));
-  //deprecated due to static adapters index, to be removed
-  // writeIndexAdapters(path.join(dir_write,'models'));
   await writeIndexResolvers(dir_write, models);
   await writeAcls(dir_write, models, adapters);
-  //deprecated due to static global index, to be removed
-  //writeIndexModelsCommons(dir_write);
 };
 
 getIdAttribute = function (dataModel) {
@@ -1049,11 +938,13 @@ getStorageType = function (dataModel) {
         case "distributed-data-model":
         case "zendro-server":
         case "generic":
+        case "mongodb":
         //adapters
         case "sql-adapter":
         case "ddm-adapter":
         case "zendro-webservice-adapter":
         case "generic-adapter":
+        case "mongodb-adapter":
           //ok
           break;
 
@@ -1110,6 +1001,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     "models/adapters",
     "models/distributed",
     "models/generic",
+    "models/mongodb",
   ];
   let models = [];
   let adapters = [];
@@ -1352,6 +1244,24 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         ];
         break;
 
+      case "mongodb":
+        sections = [
+          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+          {
+            dir: "models/mongodb",
+            template: "models-mongodb",
+            fileName: opts.nameLc,
+          },
+          {
+            dir: "validations",
+            template: "validations",
+            fileName: opts.nameLc,
+          },
+          { dir: "patches", template: "patches", fileName: opts.nameLc },
+        ];
+        break;
+
       case "zendro-webservice-adapter":
         sections = [
           {
@@ -1391,6 +1301,17 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
           {
             dir: "models/adapters",
             template: "generic-adapter",
+            fileName: opts.adapterName,
+          },
+          { dir: "patches", template: "patches", fileName: opts.adapterName },
+        ];
+        break;
+
+      case "mongodb-adapter":
+        sections = [
+          {
+            dir: "models/adapters",
+            template: "mongodb-adapter",
             fileName: opts.adapterName,
           },
           { dir: "patches", template: "patches", fileName: opts.adapterName },

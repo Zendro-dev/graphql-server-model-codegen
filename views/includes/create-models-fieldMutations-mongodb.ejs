@@ -47,7 +47,7 @@
             try {
                 const db = await this.storageHandler
                 const collection = await db.collection("<%- nameLc -%>")
-                let record = = await this.readById(<%- idAttribute-%>);
+                let record = await this.readById(<%- idAttribute-%>);
                 if (record!==null){
                     let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%>, <%-associationsArguments["to_many"][i].sourceKey-%>);
                     await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%>}, {$set:{<%-associationsArguments["to_many"][i].sourceKey-%> :updated_ids}})

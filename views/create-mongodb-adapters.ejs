@@ -1,18 +1,19 @@
-'use strict';
-
 const _ = require('lodash');
 const validatorUtil = require('../../utils/validatorUtil');
-const path = require('path');
-const uuidv4 = require('uuidv4').uuid;
 const helper = require('../../utils/helper');
-const mongoDbHelper = require('../../utils/mongodb_helper')
-const errorHelper = require('../../utils/errors');
-const os = require('os');
-const helpersAcl = require('../../utils/helpers-acl');
+const path = require('path');
 const fileTools = require('../../utils/file-tools');
+const helpersAcl = require('../../utils/helpers-acl');
 const email = require('../../utils/email');
 const fs = require('fs');
+const os = require('os');
+const uuidv4 = require('uuidv4').uuid;
+const mongoDbHelper = require('../../utils/mongodb_helper')
+const errorHelper = require('../../utils/errors');
 const models = require(path.join(__dirname, '..', 'index.js'));
+
+const remoteZendroURL = "<%- url -%>";
+const iriRegex = new RegExp('<%- regex -%>');
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
@@ -22,72 +23,55 @@ const definition = <%- definition -%>;
  *
  */
 
-module.exports = class <%- name -%> {
+module.exports = class <%- adapterName -%> {
 
   constructor(input){
     for (let key of Object.keys(input)) {
-        this[key] = input[key];
+      this[key] = input[key];
     }
   }
-
+    
   /**
     * Get the storage handler, which is a static property of the data model class.
     * @returns connected mongodb client
     */
   get storageHandler() {
-    return <%- name -%>.storageHandler
+    return <%- adapterName-%>.storageHandler
+  }
+    
+  static get adapterName(){
+    return '<%- adapterName -%>';
   }
 
-  /**
-    * name - Getter for the name attribute
-    *
-    * This attribute is needed by the models' index
-    * @return {string} The name of the model
-  */
-  static get name(){
-    return "<%- nameLc -%>";
+  static get adapterType(){
+    return '<%- storageType -%>';
+  }
+
+  static recognizeId(iri){
+    return iriRegex.test(iri);
   }
 
   static async readById(id){
     const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
+    const collection = await db.collection("<%- adapterName -%>")
     const id_name = this.idAttribute();
     let item = await collection.findOne({[id_name] : id});
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    item = new <%- name -%>(item);
+    item = new <%- adapterName -%>(item);
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
-  static async countRecords(search){
+  static countRecords(search){
     let filter = mongoDbHelper.searchConditionsToMongoDb(search);
     const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
+    const collection = await db.collection("<%- adapterName -%>")
     let number = await collection.countDocuments(filter)
     return number
   }
 
-  static async readAll(search, order, pagination, benignErrorReporter){
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    // build the filter object for limit-offset-based pagination
-    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    let sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
-    
-    let limit = pagination.limit ? pagination.limit : undefined;
-    let offset = pagination.offset ? pagination.offset : 0;
-
-    const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
-    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray()
-    documents = documents.map( doc => new <%- name -%>(doc) )
-    // validationCheck after read
-    return validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
-
-  }
-
-  static async readAllCursor(search, order, pagination, benignErrorReporter){
+  static async readAllCursor(search, order, pagination){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
@@ -104,7 +88,7 @@ module.exports = class <%- name -%> {
     let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first + 1 : helper.isNotUndefinedAndNotNull(pagination.last) ? pagination.last + 1 : undefined;
     
     const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
+    const collection = await db.collection("<%- adapterName -%>")
     let documents = await collection.find(filter).limit(limit).sort(sort).toArray()
 
     // validationCheck after read
@@ -133,7 +117,7 @@ module.exports = class <%- name -%> {
     // build the graphql Connection Object
     let edges = documents.map( doc => {
         let edge = {}
-        let newDoc= new <%- name -%>(doc)
+        let newDoc= new <%- adapterName -%>(doc)
         edge.node = newDoc
         edge.cursor = newDoc.base64Enconde()
         return edge
@@ -150,7 +134,7 @@ module.exports = class <%- name -%> {
     await validatorUtil.validateData('validateForCreate', this, input);
     try {
         const db = await this.storageHandler
-        const collection = await db.collection("<%- nameLc -%>")
+        const collection = await db.collection("<%- adapterName -%>")
         // remove skipAssociationsExistenceChecks
         delete input.skipAssociationsExistenceChecks
         const result =  await collection.insertOne(input);
@@ -160,15 +144,14 @@ module.exports = class <%- name -%> {
     } catch (error) {
         throw error;
     }
-
   }
 
-  static  async deleteOne(id){
+  static async deleteOne(id){
     //validate id
     await validatorUtil.validateData('validateForDelete', this, id);
     try {
         const db = await this.storageHandler
-        const collection = await db.collection("<%- nameLc -%>")
+        const collection = await db.collection("<%- adapterName -%>")
         const id_name = this.idAttribute();
         const response = await collection.deleteOne({[id_name]: id});
         if (response.result.ok !== 1){
@@ -186,7 +169,7 @@ module.exports = class <%- name -%> {
     await validatorUtil.validateData('validateForUpdate', this, input);
     try {
         const db = await this.storageHandler
-        const collection = await db.collection("<%- nameLc -%>")
+        const collection = await db.collection("<%- adapterName -%>")
         // remove skipAssociationsExistenceChecks
         delete input.skipAssociationsExistenceChecks
         const updatedContent = {}
@@ -207,6 +190,18 @@ module.exports = class <%- name -%> {
         throw error;
     }
   }
+
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   */
+  -%>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+
+
 
   static bulkAddCsv(context){
     let delim = context.request.body.delim;
@@ -262,24 +257,10 @@ module.exports = class <%- name -%> {
     return `Bulk import of user records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
   }
 
-  /**
-   * csvTableTemplate - Allows the user to download a template in CSV format with the
-   * properties and types of this model.
-   *
-   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
-   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
-   * is invoked, the server will include any so reported errors in the final response, i.e. the
-   * GraphQL response will have a non empty errors property.
-   */
-  static async csvTableTemplate(benignErrorReporter){
-      return helper.csvTableTemplate(definition);
+  static csvTableTemplate(){
+    return helper.csvTableTemplate(<%- name -%>);
   }
 
-  <%- include('./includes/create-generic-fieldResolvers'); %>
-  <%- include('./includes/create-models-fieldMutations-mongodb', {op: "add"}); %>
-  <%- include('./includes/create-models-fieldMutations-mongodb', {op: "remove"}); %>
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
-  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
@@ -288,8 +269,9 @@ module.exports = class <%- name -%> {
    *
    * @return {type} Name of the attribute that functions as an internalId
    */
+
   static idAttribute() {
-    return <%- name -%>.definition.id.name;
+    return <%- adapterName -%>.definition.id.name;
   }
 
   /**
@@ -297,8 +279,9 @@ module.exports = class <%- name -%> {
    *
    * @return {type} Type given in the JSON model
    */
+
   static idAttributeType() {
-    return <%- name -%>.definition.id.type;
+    return <%- adapterName -%>.definition.id.type;
   }
 
   /**
@@ -306,8 +289,9 @@ module.exports = class <%- name -%> {
    *
    * @return {type} id value
    */
+
   getIdValue() {
-    return this[<%- name -%>.idAttribute()]
+    return this[<%- adapterName -%>.idAttribute()]
   }
 
   static get definition(){
@@ -323,7 +307,7 @@ module.exports = class <%- name -%> {
   }
 
   stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    let attributes = Object.keys(<%- adapterName -%>.definition.attributes);
   <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
     let data_values = _.pick(this, attributes);
     return data_values;
