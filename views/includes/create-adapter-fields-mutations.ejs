@@ -126,6 +126,32 @@
       }
     <%}-%>
       <%#  /*** End of the the sql-adapter case */ -%>
+      <%if(storageType === 'mongodb-adapter'){-%>
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+
+        //handle inverse association
+        if(handle_inverse){
+          let promises = [];
+          <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+              promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+          });
+          await Promise.all(promises);
+        }
+
+        try {
+          const db = await this.storageHandler
+          const collection = await db.collection("<%- nameLc -%>")
+          let record = await this.readById(<%- idAttribute-%>);
+          if (record!==null){
+              let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%>, <%-associationsArguments["to_many"][i].sourceKey-%>);
+              await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%>}, {$set:{<%-associationsArguments["to_many"][i].sourceKey-%> :updated_ids}})
+          }
+        } catch (error) {
+          throw error;
+        }
+      }
+    <%}-%>
+      <%#  /*** End of the the mongodb-adapter case */ -%>
 
       <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
         static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {

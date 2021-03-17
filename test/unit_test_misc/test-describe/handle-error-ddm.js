@@ -62,7 +62,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
     });
 }
 
-`
+`;
 
 module.exports.readAllCursor_dogs_model_ddm = `
 static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
@@ -105,6 +105,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 
             case 'generic-adapter':
             case 'sql-adapter':
+            case 'mongodb-adapter':
             case 'zendro-webservice-adapter':
                 return adapter.readAllCursor(search, order, pagination,benignErrorReporter);
 
@@ -165,7 +166,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
     });
 }
 
-`
+`;
 
 module.exports.connections_dogs_resolver_ddm = `
 /**
@@ -224,7 +225,7 @@ dogsConnection: async function({
     }
 }
 
-`
+`;
 
 module.exports.count_dogs_resolver_ddm = `
 countDogs: async function({
@@ -263,7 +264,7 @@ countDogs: async function({
         }
     }
 }
-`
+`;
 
 module.exports.readAllCursor_dogs_adapter_ddm = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
@@ -293,4 +294,4 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
       errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;

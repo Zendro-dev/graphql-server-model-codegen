@@ -2643,64 +2643,164 @@ describe("Foreign-key array", function () {
     testCompare(generated_resolver, data_test.resolver_count_association);
   });
 
-  // it("resolver add association - author", async function () {
-  //   let opts = funks.getOptions(models.author_foreignKeyArray);
-  //   let generated_resolver = await funks.generateJs("create-resolvers", opts);
-  //   testCompare(generated_resolver, data_test.resolver_add_association);
-  // });
+  it("resolver add association - author", async function () {
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs("create-resolvers", opts);
+    testCompare(generated_resolver, data_test.resolver_add_association);
+  });
 
-  // it("resolver remove association - author", async function () {
-  //   let opts = funks.getOptions(models.author_foreignKeyArray);
-  //   let generated_resolver = await funks.generateJs("create-resolvers", opts);
-  //   testCompare(generated_resolver, data_test.resolver_remove_association);
-  // });
+  it("resolver remove association - author", async function () {
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_resolver = await funks.generateJs("create-resolvers", opts);
+    testCompare(generated_resolver, data_test.resolver_remove_association);
+  });
 
-  // it("model add association - author", async function () {
-  //   let opts = funks.getOptions(models.author_foreignKeyArray);
-  //   let generated_model = await funks.generateJs("create-models", opts);
-  //   //console.log(generated_model.green)
-  //   testCompare(generated_model, data_test.model_add_association);
-  // });
+  it("model add association - author", async function () {
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_model = await funks.generateJs("create-models", opts);
+    //console.log(generated_model.green)
+    testCompare(generated_model, data_test.model_add_association);
+  });
 
-  // it("model remove association - author", async function () {
-  //   let opts = funks.getOptions(models.author_foreignKeyArray);
-  //   let generated_model = await funks.generateJs("create-models", opts);
-  //   testCompare(generated_model, data_test.model_remove_association);
-  // });
+  it("model remove association - author", async function () {
+    let opts = funks.getOptions(models.author_foreignKeyArray);
+    let generated_model = await funks.generateJs("create-models", opts);
+    testCompare(generated_model, data_test.model_remove_association);
+  });
 
-  // it("model remote server, add association - author", async function () {
-  //   let opts = funks.getOptions(models.author_zendro_remote);
-  //   let generated_model = await funks.generateJs("create-models-zendro", opts);
-  //   testCompare(generated_model, data_test.remote_model_add_association);
-  // });
+  it("model remote server, add association - author", async function () {
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_model = await funks.generateJs("create-models-zendro", opts);
+    testCompare(generated_model, data_test.remote_model_add_association);
+  });
 
-  // it("model remote server, remove association - author", async function () {
-  //   let opts = funks.getOptions(models.author_zendro_remote);
-  //   let generated_model = await funks.generateJs("create-models-zendro", opts);
-  //   testCompare(generated_model, data_test.remote_model_remove_association);
-  // });
+  it("model remote server, remove association - author", async function () {
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_model = await funks.generateJs("create-models-zendro", opts);
+    testCompare(generated_model, data_test.remote_model_remove_association);
+  });
 
-  // it("ddm model add association - author", async function () {
-  //   let opts = funks.getOptions(models.author_ddm_array_fk);
-  //   let generated_model = await funks.generateJs(
-  //     "create-distributed-model",
-  //     opts
-  //   );
-  //   testCompare(generated_model, data_test.ddm_model_add);
-  // });
+  it("ddm model add association - author", async function () {
+    let opts = funks.getOptions(models.author_ddm_array_fk);
+    let generated_model = await funks.generateJs(
+      "create-distributed-model",
+      opts
+    );
+    testCompare(generated_model, data_test.ddm_model_add);
+  });
 
-  // it("model remote server, add association - author", async function () {
-  //   let opts = funks.getOptions(models.author_sql_adapter_array_fk);
-  //   let generated_model = await funks.generateJs("create-sql-adapter", opts);
-  //   testCompare(generated_model, data_test.sql_adapter_add);
-  // });
+  it("model remote server, add association - author", async function () {
+    let opts = funks.getOptions(models.author_sql_adapter_array_fk);
+    let generated_model = await funks.generateJs("create-sql-adapter", opts);
+    testCompare(generated_model, data_test.sql_adapter_add);
+  });
 
-  // it("model remote server, remove association - author", async function () {
-  //   let opts = funks.getOptions(models.author_zendro_adapter_array_fk);
-  //   let generated_model = await funks.generateJs(
-  //     "create-zendro-adapters",
-  //     opts
-  //   );
-  //   testCompare(generated_model, data_test.zendro_adapter_remove);
-  // });
+  it("model remote server, remove association - author", async function () {
+    let opts = funks.getOptions(models.author_zendro_adapter_array_fk);
+    let generated_model = await funks.generateJs(
+      "create-zendro-adapters",
+      opts
+    );
+    testCompare(generated_model, data_test.zendro_adapter_remove);
+  });
+});
+
+describe("MongoDb Unit Test", function () {
+  let data_test = require("./unit_test_misc/test-describe/mongodb-unittest");
+
+  it("mongodb models - animal constructor", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_constructor);
+  });
+
+  it("mongodb models - animal readById", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_readById);
+  });
+
+  it("mongodb models - animal countRecords", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_countRecords);
+  });
+
+  it("mongodb models - animal readAll", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_readAll);
+  });
+
+  it("mongodb models - animal readAllCursor", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_readAllCursor);
+  });
+
+  it("mongodb models - animal addOne", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_addOne);
+  });
+
+  it("mongodb models - animal deleteOne", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_deleteOne);
+  });
+
+  it("mongodb models - animal updateOne", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_updateOne);
+  });
+
+  it("mongodb models - animal bulkAddCsv", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_bulkAddCsv);
+  });
+
+  it("mongodb models - fieldMutations toOne - add farm to animal", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_fieldMutation_add_farm);
+  });
+
+  it("mongodb models - fieldMutations toOne - remove farm from animal", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_fieldMutation_remove_farm);
+  });
+
+  it("mongodb models - fieldMutations toMany - add food to animal", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_fieldMutation_add_food);
+  });
+
+  it("mongodb models - fieldMutations toMany - remove food from animal", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(generated_model, data_test.animal_fieldMutation_remove_food);
+  });
+
+  it("mongodb models - fieldMutations bulkAssociation - add farm to animal", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(
+      generated_model,
+      data_test.animal_fieldMutation_bulkAssociate_add
+    );
+  });
+
+  it("mongodb models - fieldMutations bulkAssociation - remove farm from animal", async function () {
+    let opts = funks.getOptions(models_mongodb.animal);
+    let generated_model = await funks.generateJs("create-models-mongodb", opts);
+    testCompare(
+      generated_model,
+      data_test.animal_fieldMutation_bulkAssociate_remove
+    );
+  });
 });

@@ -1,0 +1,419 @@
+module.exports.animal_constructor = `
+constructor(input) {
+  for (let key of Object.keys(input)) {
+      this[key] = input[key];
+  }
+}
+`;
+
+module.exports.animal_readById = `
+static async readById(id) {
+    const db = await this.storageHandler
+    const collection = await db.collection("animal")
+    const id_name = this.idAttribute();
+    let item = await collection.findOne({
+        [id_name]: id
+    });
+    if (item === null) {
+        throw new Error(\`Record with ID = "\${id}" does not exist\`);
+    }
+    item = new animal(item);
+    return validatorUtil.validateData('validateAfterRead', this, item);
+}
+`;
+
+module.exports.animal_countRecords = `
+static async countRecords(search) {
+    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const db = await this.storageHandler
+    const collection = await db.collection("animal")
+    let number = await collection.countDocuments(filter)
+    return number
+}
+`;
+
+module.exports.animal_readAll = `
+static async readAll(search, order, pagination, benignErrorReporter) {
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    // build the filter object for limit-offset-based pagination
+    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    let sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
+
+    let limit = pagination.limit ? pagination.limit : undefined;
+    let offset = pagination.offset ? pagination.offset : 0;
+
+    const db = await this.storageHandler
+    const collection = await db.collection("animal")
+    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray()
+    documents = documents.map(doc => new animal(doc))
+    // validationCheck after read
+    return validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
+
+}
+`;
+
+module.exports.animal_readAllCursor = `
+static async readAllCursor(search, order, pagination, benignErrorReporter) {
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    let isForwardPagination = helper.isForwardPagination(pagination);
+    // build the filter object.
+    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    let newOrder = isForwardPagination ? order : helper.reverseOrderConditions(order)
+    // depending on the direction build the order object
+    let sort = mongoDbHelper.orderConditionsToMongoDb(newOrder, this.idAttribute(), isForwardPagination)
+    let orderFields = newOrder ? newOrder.map(x => x.field) : []
+    // extend the filter for the given order and cursor
+    filter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(pagination, sort, filter, orderFields, this.idAttribute());
+
+    // add +1 to the LIMIT to get information about following pages.
+    let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first + 1 : helper.isNotUndefinedAndNotNull(pagination.last) ? pagination.last + 1 : undefined;
+
+    const db = await this.storageHandler
+    const collection = await db.collection("animal")
+    let documents = await collection.find(filter).limit(limit).sort(sort).toArray()
+
+    // validationCheck after read
+    documents = await validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
+    // get the first record (if exists) in the opposite direction to determine pageInfo.
+    // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
+    let oppDocuments = [];
+    if (pagination && (pagination.after || pagination.before)) {
+        // reverse the pagination Arguement. after -> before; set first/last to 0, so LIMIT 1 is executed in the reverse Search
+        let oppPagination = helper.reversePaginationArgument({
+            ...pagination,
+            includeCursor: false
+        });
+        let oppForwardPagination = helper.isForwardPagination(oppPagination);
+        // build the filter object.
+        let oppFilter = mongoDbHelper.searchConditionsToMongoDb(search);
+
+        let oppOrder = oppForwardPagination ? order : helper.reverseOrderConditions(order)
+        // depending on the direction build the order object
+        let oppSort = mongoDbHelper.orderConditionsToMongoDb(oppOrder, this.idAttribute(), oppForwardPagination)
+        let oppOrderFields = oppOrder ? oppOrder.map(x => x.field) : []
+        // extend the filter for the given order and cursor
+        oppFilter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(oppPagination, oppSort, oppFilter, oppOrderFields, this.idAttribute());
+        // add +1 to the LIMIT to get information about following pages.
+        let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ? oppPagination.first + 1 : helper.isNotUndefinedAndNotNull(oppPagination.last) ? oppPagination.last + 1 : undefined;
+        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray()
+    }
+
+    // build the graphql Connection Object
+    let edges = documents.map(doc => {
+        let edge = {}
+        let newDoc = new animal(doc)
+        edge.node = newDoc
+        edge.cursor = newDoc.base64Enconde()
+        return edge
+    })
+    let pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
+    return {
+        edges,
+        pageInfo
+    };
+}
+`;
+
+module.exports.animal_addOne = `
+static async addOne(input) {
+    // validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        // remove skipAssociationsExistenceChecks
+        delete input.skipAssociationsExistenceChecks
+        const result = await collection.insertOne(input);
+        const id_name = this.idAttribute();
+        const document = await this.readById(input[id_name]);
+        return document
+    } catch (error) {
+        throw error;
+    }
+
+}
+`;
+
+module.exports.animal_deleteOne = `
+static async deleteOne(id) {
+    //validate id
+    await validatorUtil.validateData('validateForDelete', this, id);
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        const id_name = this.idAttribute();
+        const response = await collection.deleteOne({
+            [id_name]: id
+        });
+        if (response.result.ok !== 1) {
+            throw new Error(\`Record with ID = \${id} has not been deleted!\`);
+        }
+        return 'Item successfully deleted';
+    } catch (error) {
+        console.log(\`Record with ID = \${id} does not exist or could not been deleted\`)
+        throw error;
+    }
+}
+`;
+
+module.exports.animal_updateOne = `
+static async updateOne(input) {
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        // remove skipAssociationsExistenceChecks
+        delete input.skipAssociationsExistenceChecks
+        const updatedContent = {}
+        for (let key of Object.keys(input)) {
+            if (key !== "id") {
+                updatedContent[key] = input[key];
+            }
+        }
+        const id_name = this.idAttribute();
+        const response = await collection.updateOne({
+            [id_name]: input[id_name]
+        }, {
+            $set: updatedContent
+        });
+
+        if (response.result.ok !== 1) {
+            throw new Error(\`Record with ID = \${input[id_name]} has not been updated\`);
+        }
+        const document = await this.readById(input[id_name]);
+        return document
+    } catch (error) {
+        throw error;
+    }
+}
+`;
+
+module.exports.animal_bulkAddCsv = `
+static bulkAddCsv(context) {
+    let delim = context.request.body.delim;
+    let arrayDelim = ";"
+    let cols = context.request.body.cols;
+    let tmpFile = path.join(os.tmpdir(), uuidv4() + '.csv');
+
+    context.request.files.csv_file.mv(tmpFile).then(() => {
+
+        fileTools.parseCsvStream(tmpFile, this, delim, cols, "mongodb", arrayDelim).then((addedZipFilePath) => {
+            try {
+                console.log(\`Sending \${addedZipFilePath} to the user.\`);
+
+                let attach = [];
+                attach.push({
+                    filename: path.basename("added_data.zip"),
+                    path: addedZipFilePath
+                });
+
+                email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                    'ScienceDB batch add',
+                    'Your data has been successfully added to the database.',
+                    attach).then(function(info) {
+                    fileTools.deleteIfExists(addedZipFilePath);
+                    console.log(info);
+                }).catch(function(err) {
+                    fileTools.deleteIfExists(addedZipFilePath);
+                    console.error(err);
+                });
+
+            } catch (error) {
+                console.error(error.message);
+            }
+
+            fs.unlinkSync(tmpFile);
+        }).catch((error) => {
+            email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                'ScienceDB batch add', \`\${error.message}\`).then(function(info) {
+                console.error(info);
+            }).catch(function(err) {
+                console.error(err);
+            });
+
+            fs.unlinkSync(tmpFile);
+        });
+
+
+
+    }).catch((error) => {
+        throw new Error(error);
+    });
+
+    return \`Bulk import of user records started. You will be send an email to \${helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
+}
+`;
+
+module.exports.animal_fieldMutation_add_farm = `
+static async add_farm_id(animal_id, farm_id) {
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        const updatedContent = {
+            farm_id: farm_id
+        }
+        const response = await collection.updateOne({
+            animal_id: animal_id
+        }, {
+            $set: updatedContent
+        });
+        if (response.result.ok !== 1) {
+            throw new Error(\`Record with ID = \${animal_id} has not been updated\`);
+        }
+        const document = await this.readById(animal_id);
+        return document
+    } catch (error) {
+        throw error;
+    }
+}
+`;
+
+module.exports.animal_fieldMutation_remove_farm = `
+static async remove_farm_id(animal_id, farm_id) {
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        const updatedContent = {
+            farm_id: null
+        }
+        const response = await collection.updateOne({
+            animal_id: animal_id,
+            farm_id: farm_id
+        }, {
+            $set: updatedContent
+        });
+        if (response.result.ok !== 1) {
+            throw new Error(\`Record with ID = \${animal_id} has not been updated\`);
+        }
+        const document = await this.readById(animal_id);
+        return document
+    } catch (error) {
+        throw error;
+    }
+}
+`;
+
+module.exports.animal_fieldMutation_add_food = `
+static async add_food_ids(animal_id, food_ids, benignErrorReporter, handle_inverse = true) {
+    //handle inverse association
+    if (handle_inverse) {
+        let promises = [];
+        food_ids.forEach(idx => {
+            promises.push(models.food.add_animal_ids(idx, [\`\${animal_id}\`], benignErrorReporter, false));
+        });
+        await Promise.all(promises);
+    }
+
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        let record = await this.readById(animal_id);
+        if (record !== null) {
+            let updated_ids = helper.unionIds(record.food_ids, food_ids);
+            await collection.updateOne({
+                animal_id: animal_id
+            }, {
+                $set: {
+                    food_ids: updated_ids
+                }
+            })
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+`;
+
+module.exports.animal_fieldMutation_remove_food = `
+static async remove_food_ids(animal_id, food_ids, benignErrorReporter, handle_inverse = true) {
+    //handle inverse association
+    if (handle_inverse) {
+        let promises = [];
+        food_ids.forEach(idx => {
+            promises.push(models.food.remove_animal_ids(idx, [\`\${animal_id}\`], benignErrorReporter, false));
+        });
+        await Promise.all(promises);
+    }
+
+    try {
+        const db = await this.storageHandler
+        const collection = await db.collection("animal")
+        let record = await this.readById(animal_id);
+        if (record !== null) {
+            let updated_ids = helper.differenceIds(record.food_ids, food_ids);
+            await collection.updateOne({
+                animal_id: animal_id
+            }, {
+                $set: {
+                    food_ids: updated_ids
+                }
+            })
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+`;
+
+module.exports.animal_fieldMutation_bulkAssociate_add = `
+static async bulkAssociateAnimalWithFarm_id(bulkAssociationInput, benignErrorReporter) {
+    let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "animal_id", "farm_id");
+    let collection;
+    try {
+        const db = await this.storageHandler
+        collection = await db.collection("animal")
+    } catch (error) {
+        throw error;
+    }
+    let promises = [];
+    mappedForeignKeys.forEach(({
+        farm_id,
+        animal_id
+    }) => {
+        promises.push(collection.updateMany({
+            animal_id: {
+                $in: animal_id
+            }
+        }, {
+            $set: {
+                farm_id: farm_id
+            }
+        }))
+    });
+    await Promise.all(promises);
+    return "Records successfully updated!"
+}
+`;
+module.exports.animal_fieldMutation_bulkAssociate_remove = `
+static async bulkDisAssociateAnimalWithFarm_id(bulkAssociationInput, benignErrorReporter) {
+    let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "animal_id", "farm_id");
+    let collection;
+    try {
+        const db = await this.storageHandler
+        collection = await db.collection("animal")
+    } catch (error) {
+        throw error;
+    }
+    let promises = [];
+    mappedForeignKeys.forEach(({
+        farm_id,
+        animal_id
+    }) => {
+        promises.push(collection.updateMany({
+            animal_id: {
+                $in: animal_id
+            },
+            farm_id: farm_id
+        }, {
+            $set: {
+                farm_id: null
+            }
+        }))
+    });
+    await Promise.all(promises);
+    return "Records successfully updated!"
+}
+`;

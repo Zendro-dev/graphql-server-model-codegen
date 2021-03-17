@@ -33,7 +33,7 @@ static async readById(iri, benignErrorReporter) {
               errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
             }
     }
-`
+`;
 
 module.exports.book_adapter_count = `
 static async countRecords(search, benignErrorReporter) {
@@ -63,7 +63,7 @@ static async countRecords(search, benignErrorReporter) {
         errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
       }
     }
-`
+`;
 
 module.exports.book_adapter_read_all = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
@@ -92,11 +92,11 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
           errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
         }
     }
-`
+`;
 
 module.exports.book_ddm_registry = `
   let registry = ["BooksOne", "BooksTwo"];
-`
+`;
 
 module.exports.book_ddm_readById = `
 static readById(id, benignErrorReporter) {
@@ -117,7 +117,7 @@ static readById(id, benignErrorReporter) {
    });
   }
 }
-`
+`;
 
 module.exports.book_ddm_count = `
 static countRecords(search, authorizedAdapters, benignErrorReporter) {
@@ -181,7 +181,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
             }, 0 );
         });
     }
-`
+`;
 
 module.exports.book_ddm_read_all = `
 static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
@@ -226,6 +226,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 
                 case 'generic-adapter':
                 case 'sql-adapter':
+                case 'mongodb-adapter':
                 case 'zendro-webservice-adapter':
                     return adapter.readAllCursor(search, order, pagination,benignErrorReporter );
 
@@ -285,7 +286,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
               return graphQLConnection;
           });
     }
-`
+`;
 
 module.exports.person_ddm_many_association = `
 const definition = {
@@ -337,7 +338,7 @@ const definition = {
         type: 'Int'
     }
 };
-`
+`;
 module.exports.dog_ddm_one_association = `
 const definition = {
     model: 'Dog',
@@ -365,7 +366,7 @@ const definition = {
         type: 'Int'
     }
 };
-`
+`;
 
 module.exports.person_ddm_count_association = `
 countFilteredDogsImpl ({search}){
@@ -377,7 +378,7 @@ countFilteredDogsImpl ({search}){
     return models.dog.countRecords({"operator":"and", "search":[ {"field" : "personId", "value":{"value":this.getIdValue() }, "operator": "eq"} , search] })
   }
 }
-`
+`;
 
 module.exports.person_ddm_resolver_one_to_one = `
 /**
@@ -414,4 +415,4 @@ person.prototype.parrot = async function({
         return null;
 }
 
-`
+`;

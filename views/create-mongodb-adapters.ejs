@@ -71,7 +71,7 @@ module.exports = class <%- adapterName -%> {
     return number
   }
 
-  static async readAllCursor(search, order, pagination){
+  static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
