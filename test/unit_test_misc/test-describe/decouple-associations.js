@@ -22,12 +22,12 @@ dog.prototype.researcher = async function({
                 "value": this.researcherId,
                 "operator": "eq"
             });
-            let found = await resolvers.researchers({
+            let found = (await resolvers.researchersConnection({
                 search: nsearch,
-                pagination: {limit: 1}
-            }, context);
-            if (found) {
-                return found[0]
+                pagination: {first:1}
+            }, context)).edges;
+            if (found.length > 0) {
+                return found[0].node
             }
             return found;
         }
@@ -67,19 +67,19 @@ researcher.prototype.dog = async function({
           "operator": "eq"
       });
 
-      let found = await resolvers.dogs({
+      let found = (await resolvers.dogsConnection({
           search: nsearch,
-          pagination: {limit: 2}
-      }, context);
-      if(found){
+          pagination: {first:2}
+      }, context)).edges;
+      if(found.length > 0){
           if(found.length > 1){
               context.benignErrors.push(new Error(
                 \`Not unique "to_one" association Error: Found > 1 dogs matching researcher with id \${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog.\`
               ));
           }
-          return found[0];
+          return found[0].node;
       }
-      return found;
+      return null;
 }
 `
 

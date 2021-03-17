@@ -22,12 +22,12 @@ dog.prototype.owner = async function({
                     "value": this.owner_id_test,
                     "operator": "eq"
                 });
-                let found = await resolvers.people({
+                let found = (await resolvers.peopleConnection({
                     search: nsearch,
-                    pagination: {limit:1}
-                }, context);
-                if (found) {
-                    return found[0]
+                    pagination: {first:1}
+                }, context)).edges;
+                if (found.length > 0) {
+                    return found[0].node
                 }
                 return found;
             }

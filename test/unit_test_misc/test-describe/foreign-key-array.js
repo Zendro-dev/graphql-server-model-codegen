@@ -2,7 +2,7 @@ module.exports.add_and_update = `
 addAuthor(id: ID!, name: String, lastname: String, email: String, addBooks: [ID]    , skipAssociationsExistenceChecks:Boolean = false): author!
 updateAuthor(id: ID!, name: String, lastname: String, email: String, addBooks: [ID], removeBooks: [ID]    , skipAssociationsExistenceChecks:Boolean = false): author!
 
-`
+`;
 
 module.exports.resolver_filter_association = `
 author.prototype.booksFilter = function({
@@ -11,22 +11,26 @@ author.prototype.booksFilter = function({
     pagination
 }, context){
 
-    let nsearch = helper.addSearchField({
-          "search": search,
-          "field": models.book.idAttribute(),
-          "value": this.book_ids.join(','),
-          "valueType": "Array",
-          "operator": "in"
-      });
+  //return an empty response if the foreignKey Array is empty, no need to query the database
+  if (!Array.isArray(this.book_ids) || this.book_ids.length === 0 ) {
+    return [];
+  }
+  let nsearch = helper.addSearchField({
+    "search": search,
+    "field": models.book.idAttribute(),
+    "value": this.book_ids.join(','),
+    "valueType": "Array",
+    "operator": "in"
+  });
 
-    return resolvers.books({
-        search: nsearch,
-        order: order,
-        pagination: pagination
-    }, context);
+  return resolvers.books({
+      search: nsearch,
+      order: order,
+      pagination: pagination
+  }, context);
 }
 
-`
+`;
 
 module.exports.resolver_connection_association = `
 author.prototype.booksConnection = function({
@@ -34,52 +38,68 @@ author.prototype.booksConnection = function({
     order,
     pagination
 }, context){
+  //return an empty response if the foreignKey Array is empty, no need to query the database
+  if (!Array.isArray(this.book_ids) || this.book_ids.length === 0 ) {
+    return {
+      edges: [],
+      pageInfo: {
+          startCursor: null,
+          endCursor: null,
+          hasPreviousPage: false,
+          hasNextPage: false
+      }
+    };
+  }
   let nsearch = helper.addSearchField({
         "search": search,
         "field": models.book.idAttribute(),
         "value": this.book_ids.join(','),
         "valueType": "Array",
         "operator": "in"
-    });
+  });
 
-    return resolvers.booksConnection({
-        search: nsearch,
-        order: order,
-        pagination: pagination
-    }, context);
+  return resolvers.booksConnection({
+      search: nsearch,
+      order: order,
+      pagination: pagination
+  }, context);
 }
-`
+`;
 
 module.exports.resolver_count_association = `
 author.prototype.countFilteredBooks = function({search}, context){
 
+  //return 0 if the foreignKey Array is empty, no need to query the database
+  if (!Array.isArray(this.book_ids) || this.book_ids.length === 0 ) {
+    return 0;
+  }
   let nsearch = helper.addSearchField({
-        "search": search,
-        "field":models.book.idAttribute(),
-        "value": this.book_ids.join(','),
-        "valueType": "Array",
-        "operator": "in"
-    });
-    return resolvers.countBooks({search: nsearch}, context);
+    "search": search,
+    "field":models.book.idAttribute(),
+    "value": this.book_ids.join(','),
+    "valueType": "Array",
+    "operator": "in"
+  });
+  return resolvers.countBooks({search: nsearch}, context);
 }
 
-`
+`;
 
 module.exports.resolver_add_association = `
 author.prototype.add_books = async function(input, benignErrorReporter){
   await author.add_book_ids(this.getIdValue(), input.addBooks, benignErrorReporter);
   this.book_ids =  helper.unionIds(this.book_ids, input.addBooks);
 }
-`
+`;
 
 module.exports.resolver_remove_association = `
 author.prototype.remove_books = async function(input, benignErrorReporter){
   await author.remove_book_ids(this.getIdValue(), input.removeBooks, benignErrorReporter);
   this.book_ids = helper.differenceIds(this.book_ids, input.removeBooks);
 }
-`
+`;
 
- module.exports.model_add_association = `
+module.exports.model_add_association = `
  static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true){
    //handle inverse association
    if (handle_inverse) {
@@ -97,9 +117,9 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
      await record.update( {book_ids: updated_ids} );
    }
  }
- `
+ `;
 
- module.exports.model_remove_association = `
+module.exports.model_remove_association = `
  static async remove_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true){
    //handle inverse association
    if (handle_inverse) {
@@ -117,9 +137,9 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
      await record.update( {book_ids: updated_ids} );
    }
  }
- `
+ `;
 
- module.exports.remote_model_add_association =`
+module.exports.remote_model_add_association = `
  static async add_book_ids(id, book_ids,benignErrorReporter) {
 
    let query = \`
@@ -158,9 +178,9 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
 
  }
 
- `
+ `;
 
- module.exports.remote_model_remove_association =`
+module.exports.remote_model_remove_association = `
  static async remove_book_ids(id, book_ids,benignErrorReporter) {
 
    let query = \`
@@ -198,7 +218,7 @@ author.prototype.remove_books = async function(input, benignErrorReporter){
    }
  }
 
- `
+ `;
 
 module.exports.ddm_model_add = `
 static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true) {
@@ -207,7 +227,7 @@ static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = tr
 
 }
 
-`
+`;
 module.exports.sql_adapter_add = `
 static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true) {
 
@@ -229,9 +249,7 @@ static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = tr
       });
     }
 }
-`
-
-
+`;
 
 module.exports.zendro_adapter_remove = `
 static async remove_book_ids(id, book_ids, benignErrorReporter) {
@@ -268,4 +286,4 @@ static async remove_book_ids(id, book_ids, benignErrorReporter) {
         errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;
