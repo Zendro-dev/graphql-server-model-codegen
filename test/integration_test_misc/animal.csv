@@ -1,0 +1,7 @@
+animal_id,animal_name,category,age,weight,health,birthday,personality
+1,Sally1,Dog,3,5.5,true,2017-10-03T10:15:30Z,energetic;enthusiastic
+2,Sally2,Dog,3,5.5,true,2017-10-03T10:15:30Z,energetic;enthusiastic
+3,Milka1,Cat,2,3.5,true,2017-10-03T10:15:30Z,cute;optimistic
+4,Milka2,Cat,2,3.5,true,2017-10-03T10:15:30Z,cute;optimistic
+5,Lily1,Pig,1,10.5,true,2017-10-03T10:15:30Z,forgetful;funny
+6,Lily2,Pig,1,10.5,true,2017-10-03T10:15:30Z,forgetful;funny

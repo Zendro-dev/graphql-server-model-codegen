@@ -11,10 +11,25 @@ services:
     networks:
      - instance1
 
+  gql_mongodb1:
+    image: mongo
+    container_name: mongodb1
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=sciencedb
+      - MONGO_INITDB_ROOT_PASSWORD=sciencedb
+      - MONGO_INITDB_DATABASE=sciencedb_development
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    ports:
+      - 27017:27017
+    networks:
+      - instance1
+
   gql_science_db_graphql_server1:
     container_name: server1
     depends_on:
       - gql_postgres1
+      - gql_mongodb1
     build:
       context: .
       dockerfile: Dockerfile.graphql_server

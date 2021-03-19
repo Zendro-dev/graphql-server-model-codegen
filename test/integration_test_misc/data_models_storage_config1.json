@@ -6,5 +6,13 @@
     "database": "sciencedb_development",
     "host": "gql_postgres1",
     "dialect": "postgres"
+  },
+  "default-mongodb": {
+    "storageType": "mongodb",
+    "username": "sciencedb",
+    "password": "sciencedb",
+    "database": "sciencedb_development",
+    "host": "gql_mongodb1",
+    "port": "27017"
   }
 }
