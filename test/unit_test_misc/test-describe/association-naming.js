@@ -33,18 +33,18 @@ dog.prototype.owner = async function({
             }
     }
 }
-`
+`;
 
 module.exports.dog_owner_schema = `
     owner(search: searchPersonInput): Person
-`
+`;
 
 module.exports.dog_owner_model = `
-Dog.belongsTo(models.person, {
+dog.belongsTo(models.person, {
     as: 'owner',
     foreignKey: 'owner_id_test'
 });
-`
+`;
 
 module.exports.academicTeam_resolvers = `
 /**
@@ -77,18 +77,18 @@ academicTeam.prototype.membersFilter = function({
         pagination: pagination
     }, context);
 }
-`
+`;
 
 module.exports.academicTeam_schema = `
 """
 @search-request
 """
 membersFilter(search: searchResearcherInput, order: [ orderResearcherInput ], pagination: paginationInput!): [Researcher]
-`
+`;
 
 module.exports.academicTeam_model = `
 academicTeam.hasMany(models.researcher, {
     as: 'members',
     foreignKey: 'academicTeamId'
 });
-`
+`;

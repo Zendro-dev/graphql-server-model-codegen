@@ -1,0 +1,31 @@
+{
+    "model": "dist_animal",
+    "storageType": "mongodb-adapter",
+    "adapterName": "dist_animal_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "animal_id": "String",
+        "category": "String",
+        "animal_name": "String",
+        "age": "Int",
+        "weight": "Float",
+        "health": "Boolean",
+        "birthday": "DateTime",
+        "personality": "[String]",
+        "farm_id": "String"
+    },
+  
+    "associations": {
+  
+      "dist_farm": {
+        "type": "to_one",
+        "target": "dist_farm",
+        "targetKey": "farm_id",
+        "keyIn": "dist_animal",
+        "targetStorageType": "distributed-data-model"
+      }
+  
+    },
+  
+    "internalId": "animal_id"
+  }

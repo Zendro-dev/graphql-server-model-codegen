@@ -43,7 +43,7 @@ type book{
   countFilteredAuthors(search: searchPersonInput) : Int
 }
 
-`
+`;
 module.exports.model_book = `
 /**
  * constructor - Creates an instance of the generic model book.
@@ -63,7 +63,7 @@ constructor({
     this.Price = Price;
     this.publisher_id = publisher_id;
 }
-`
+`;
 
 module.exports.resolvers_book = `
 /**
@@ -101,7 +101,7 @@ book.prototype.publisher = async function({
 
     }
 }
-`
+`;
 
 module.exports.schema_person = `
 type Query {
@@ -123,16 +123,16 @@ bulkAddPersonCsv: String!
 bulkAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String!
     bulkDisAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String! }
 
-`
+`;
 module.exports.model_person = `
 static async readById(id, benignErrorReporter) {
 
   /*
   YOUR CODE GOES HERE
    */
-  throw new Error('readById() is not implemented for model Person');
+  throw new Error('readById() is not implemented for model person');
 }
-`
+`;
 
 module.exports.resolvers_person = `
 /**
@@ -166,11 +166,11 @@ person.prototype.worksFilter = function({
         }, context);
 }
 
-`
+`;
 
 module.exports.class_name_model_person = `
 static get name(){
   return "person";
 }
 
-`
+`;

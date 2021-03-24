@@ -11,7 +11,7 @@
      * GraphQL response will have a non empty errors property.
      */
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
-      let updated = await <%- name -%>.updateOne({ 
+      let updated = await <%- nameLc -%>.updateOne({ 
         <%- idAttribute -%>: <%- idAttribute %>,
         <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>
       }, benignErrorReporter);

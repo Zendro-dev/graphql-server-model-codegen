@@ -22,7 +22,7 @@ const definition = <%- definition -%>;
  *
  */
 
-module.exports = class <%- name -%> {
+module.exports = class <%- nameLc -%> {
 
   constructor(input){
     for (let key of Object.keys(input)) {
@@ -35,7 +35,7 @@ module.exports = class <%- name -%> {
     * @returns connected mongodb client
     */
   get storageHandler() {
-    return <%- name -%>.storageHandler
+    return <%- nameLc -%>.storageHandler
   }
 
   /**
@@ -56,7 +56,7 @@ module.exports = class <%- name -%> {
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    item = new <%- name -%>(item);
+    item = new <%- nameLc -%>(item);
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
@@ -81,7 +81,7 @@ module.exports = class <%- name -%> {
     const db = await this.storageHandler
     const collection = await db.collection("<%- nameLc -%>")
     let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray()
-    documents = documents.map( doc => new <%- name -%>(doc) )
+    documents = documents.map( doc => new <%- nameLc -%>(doc) )
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
 
@@ -133,7 +133,7 @@ module.exports = class <%- name -%> {
     // build the graphql Connection Object
     let edges = documents.map( doc => {
         let edge = {}
-        let newDoc= new <%- name -%>(doc)
+        let newDoc= new <%- nameLc -%>(doc)
         edge.node = newDoc
         edge.cursor = newDoc.base64Enconde()
         return edge
@@ -289,7 +289,7 @@ module.exports = class <%- name -%> {
    * @return {type} Name of the attribute that functions as an internalId
    */
   static idAttribute() {
-    return <%- name -%>.definition.id.name;
+    return <%- nameLc -%>.definition.id.name;
   }
 
   /**
@@ -298,16 +298,16 @@ module.exports = class <%- name -%> {
    * @return {type} Type given in the JSON model
    */
   static idAttributeType() {
-    return <%- name -%>.definition.id.type;
+    return <%- nameLc -%>.definition.id.type;
   }
 
   /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- nameLc -%>.
    *
    * @return {type} id value
    */
   getIdValue() {
-    return this[<%- name -%>.idAttribute()]
+    return this[<%- nameLc -%>.idAttribute()]
   }
 
   static get definition(){
@@ -323,7 +323,7 @@ module.exports = class <%- name -%> {
   }
 
   stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    let attributes = Object.keys(<%- nameLc -%>.definition.attributes);
   <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
     let data_values = _.pick(this, attributes);
     return data_values;

@@ -111,7 +111,7 @@ static readById(id, benignErrorReporter) {
   //use default BenignErrorReporter if no BenignErrorReporter defined
   benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
   return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
-    let item  = new Book(result);
+    let item  = new book(result);
     return validatorUtil.validateData('validateAfterRead', this, item);
 
    });
@@ -159,6 +159,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
                     return adapter.countRecords(nsearch, benignErrorReporter);
 
                 case 'sql-adapter':
+                case 'mongodb-adapter':
                 case 'zendro-webservice-adapter':
                     return adapter.countRecords(search, benignErrorReporter);
 

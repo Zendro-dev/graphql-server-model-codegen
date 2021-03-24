@@ -1809,23 +1809,19 @@ describe("Refactor associations - add / update SQL models", function () {
   it("add_locationId- accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test._addAssoc_to_one_fieldMutation_sql_model.replace(
-      /\s/g,
-      ""
+    testCompare(
+      generated_resolver,
+      data_test._addAssoc_to_one_fieldMutation_sql_model
     );
-    expect(g_resolver).to.have.string(test_resolver);
   });
 
   it("remove_locationId - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(
-      /\s/g,
-      ""
+    testCompare(
+      generated_resolver,
+      data_test._removeAssoc_to_one_fieldMutation_sql_model
     );
-    expect(g_resolver).to.have.string(test_resolver);
   });
 });
 
@@ -2467,11 +2463,7 @@ describe("Handle Errors in DDM", function () {
       "create-distributed-model",
       opts
     );
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.count_dogs_model_ddm.replace(/\s/g, "");
-    expect(g_model, "Incorrect distributed data model").to.have.string(
-      test_model
-    );
+    testCompare(generated_model, data_test.count_dogs_model_ddm);
   });
 
   it("readAllCursor in model- dog", async function () {

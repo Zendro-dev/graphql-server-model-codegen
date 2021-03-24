@@ -68,7 +68,7 @@
         /*
         YOUR CODE GOES HERE
         */
-        throw new Error('bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>() is not implemented for model <%- name -%>');
+        throw new Error('bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>() is not implemented for model <%- nameLc -%>');
       }
     <%}_%>
     <% if(storageType === 'mongodb' || storageType === 'mongodb-adapter'){_%>
@@ -77,7 +77,7 @@
         let collection;
         try {
             const db = await this.storageHandler
-            collection = await db.collection("<%- nameLc -%>")
+            collection = await db.collection("<%if(storageType === 'mongodb'){%><%-nameLc-%><%} else {%><%-adapterName-%><%}-%>")
         } catch (error) {
             throw error;
         }

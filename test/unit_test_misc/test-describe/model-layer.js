@@ -3,7 +3,7 @@ static async countRecords(search) {
     let options = {}
     options['where'] = helper.searchConditionsToSequelize(search, individual.definition.attributes);
     return super.count(options);
-`
+`;
 
 module.exports.count_in_webservice_model = `
 static async countRecords(search, benignErrorReporter) {
@@ -13,7 +13,7 @@ static async countRecords(search, benignErrorReporter) {
   */
   throw new Error('countRecords() is not implemented for model publi_sher');
 }
-`
+`;
 
 module.exports.count_in_resolvers = `
 /**
@@ -33,19 +33,19 @@ module.exports.count_in_resolvers = `
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
 module.exports.read_all = `
 static async readAll(search, order, pagination, benignErrorReporter) {
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
-    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), Dog.definition.attributes);
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), dog.definition.attributes);
     let records = await super.findAll(options);
-    records = records.map(x => Dog.postReadCast(x))
+    records = records.map(x => dog.postReadCast(x))
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
 }
-`
+`;
 
 module.exports.read_all_resolver = `
 /**
@@ -72,13 +72,13 @@ module.exports.read_all_resolver = `
         }
 
     },
-`
+`;
 
 module.exports.add_one_model = `
 static async addOne(input) {
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
-    input = Book.preWriteCast(input)
+    input = book.preWriteCast(input)
     try{
       const result = await this.sequelize.transaction(async (t) => {
           let item = await super.create(input, {
@@ -86,15 +86,15 @@ static async addOne(input) {
           });
           return item;
       });
-      Book.postReadCast(result.dataValues)
-      Book.postReadCast(result._previousDataValues)
+      book.postReadCast(result.dataValues)
+      book.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
     }
 
 }
-`
+`;
 
 module.exports.add_one_resolver = `
 /**
@@ -123,7 +123,7 @@ module.exports.add_one_resolver = `
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
 
 module.exports.delete_one_model = `
 static async deleteOne(id){
@@ -137,7 +137,7 @@ static async deleteOne(id){
   }
 
 }
-`
+`;
 module.exports.delete_one_resolver = `
 /**
      * deleteBook - Check user authorization and delete a record with the specified id in the id argument.
@@ -158,12 +158,12 @@ module.exports.delete_one_resolver = `
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
 module.exports.update_one_model = `
 static async updateOne(input) {
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
-        input = Book.preWriteCast(input)
+        input = book.preWriteCast(input)
             try {
                 let result = await this.sequelize.transaction(async (t) => {
                     let to_update = await super.findByPk(input[this.idAttribute()]);
@@ -174,14 +174,14 @@ static async updateOne(input) {
                     let updated = await to_update.update(input, {transaction: t  } );
                     return updated;
                 });
-                Book.postReadCast(result.dataValues)
-                Book.postReadCast(result._previousDataValues)
+                book.postReadCast(result.dataValues)
+                book.postReadCast(result._previousDataValues)
                 return result;
             } catch (error) {
                 throw error;
             }
 }
-`
+`;
 
 module.exports.update_one_resolver = `
 /**
@@ -210,7 +210,7 @@ updateBook: async function(input, context) {
         throw new Error("You don't have authorization to perform this action");
     }
 },
-`
+`;
 
 module.exports.bulk_add_model = `
 static bulkAddCsv(context){
@@ -261,9 +261,9 @@ static bulkAddCsv(context){
     }).catch((error) => {
         throw new Error(error);
     });
-    return \`Bulk import of Book records started. You will be send an email to \$\{helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
+    return \`Bulk import of book records started. You will be send an email to \$\{helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
 }
-`
+`;
 
 module.exports.bulk_add_resolver = `
 
@@ -281,12 +281,12 @@ module.exports.bulk_add_resolver = `
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
 module.exports.table_template_model = `
 static async csvTableTemplate(benignErrorReporter){
   return helper.csvTableTemplate(definition);
 }
-`
+`;
 
 module.exports.table_template_resolver = `
 /**
@@ -306,4 +306,4 @@ module.exports.table_template_resolver = `
     }
 
 }
-`
+`;

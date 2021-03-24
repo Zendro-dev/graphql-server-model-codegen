@@ -63,7 +63,7 @@ module.exports = class <%- adapterName -%> {
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
-  static countRecords(search){
+  static async countRecords(search){
     let filter = mongoDbHelper.searchConditionsToMongoDb(search);
     const db = await this.storageHandler
     const collection = await db.collection("<%- adapterName -%>")
@@ -258,7 +258,7 @@ module.exports = class <%- adapterName -%> {
   }
 
   static csvTableTemplate(){
-    return helper.csvTableTemplate(<%- name -%>);
+    return helper.csvTableTemplate(<%- adapterName -%>);
   }
 
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
@@ -285,7 +285,7 @@ module.exports = class <%- adapterName -%> {
   }
 
   /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- adapterName -%>.
    *
    * @return {type} id value
    */

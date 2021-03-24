@@ -34,7 +34,7 @@
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
         if(response && response.data && response.data.data) {
-          return new <%- name -%>(response.data.data.update<%- nameCp -%>);
+          return new <%- nameLc -%>(response.data.data.update<%- nameCp -%>);
         } else {
           throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
         }
@@ -83,7 +83,7 @@
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
         if(response && response.data && response.data.data) {
-          return new <%- name -%>(response.data.data.update<%- nameCp -%>);
+          return new <%- nameLc -%>(response.data.data.update<%- nameCp -%>);
         } else {
           throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
         }

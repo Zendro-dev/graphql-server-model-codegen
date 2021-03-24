@@ -1,10 +1,10 @@
 137,139c137,139
-<         let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), Cat.definition.attributes);
+<         let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), cat.definition.attributes);
 <         let records = await super.findAll(options);
 < 
 ---
 >         let options = helper.buildCursorBasedGenericOptions(search, order, pagination, this.idAttribute());
->         let records = await Cat.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
+>         let records = await cat.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
 >         
 142,143d141
 <         // validationCheck after read
@@ -14,9 +14,9 @@
 <             let oppOptions = helper.buildOppositeSearchSequelize(search, order, {
 <                 ...pagination,
 <                 includeCursor: false
-<             }, this.idAttribute(), Cat.definition.attributes);
+<             }, this.idAttribute(), cat.definition.attributes);
 <             oppRecords = await super.findAll(oppOptions);
 ---
 >         if (pagination && (pagination.after || pagination.before)) {           
 >             let oppOptions = helper.buildOppositeSearchGeneric(search, order, {...pagination, includeCursor: false}, this.idAttribute());
->             oppRecords = await Cat.readAll(oppOptions['search'], oppOptions['order'], oppOptions['pagination'], benignErrorReporter);
+>             oppRecords = await cat.readAll(oppOptions['search'], oppOptions['order'], oppOptions['pagination'], benignErrorReporter);

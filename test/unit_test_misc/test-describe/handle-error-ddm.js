@@ -39,6 +39,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
                 return adapter.countRecords(nsearch, benignErrorReporter);
 
             case 'sql-adapter':
+            case 'mongodb-adapter':
             case 'zendro-webservice-adapter':
                 return adapter.countRecords(search, benignErrorReporter);
 

@@ -2977,7 +2977,7 @@ describe("Zendro Webservice Data Models", function () {
      * This test assumes that accessions from previous test are still in the DB
      * */
 
-    let res = await itHelpers.request_export("accession");
+    let res = await itHelpers.request_export("Accession");
 
     expect(res.data).to.equal(
       "accession_id,collectors_name,collectors_initials,sampling_date,locationId\n" +

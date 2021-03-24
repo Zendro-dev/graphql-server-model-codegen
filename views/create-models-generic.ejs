@@ -5,10 +5,10 @@ const helper = require('../../utils/helper');
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
 
-module.exports = class <%- name -%>{
+module.exports = class <%- nameLc -%>{
 
   /**
-   * constructor - Creates an instance of the generic model <%- name -%>.
+   * constructor - Creates an instance of the generic model <%- nameLc -%>.
    *
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
@@ -28,12 +28,12 @@ module.exports = class <%- name -%>{
   }
 
   /**
-   * readById - Search for the <%- name -%> record whose id is equal to the @id received as parameter.
-   * Returns an instance of this class (<%- name -%>), with all its properties
+   * readById - Search for the <%- nameLc -%> record whose id is equal to the @id received as parameter.
+   * Returns an instance of this class (<%- nameLc -%>), with all its properties
    * set from the values of the record fetched.
    * 
    * Returned value:
-   *    new <%- name -%>(record)
+   *    new <%- nameLc -%>(record)
    * 
    * Thrown on:
    *    * No record found.
@@ -41,25 +41,25 @@ module.exports = class <%- name -%>{
    *    * Operation failed.
    * 
    * where record is an object with all its properties set from the record fetched.
-   * @see: constructor() of the class <%- name -%>;
+   * @see: constructor() of the class <%- nameLc -%>;
    * 
    * @param  {<%- idAttributeType %>} id The id of the record that needs to be fetched.
    * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
    * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
    * is invoked, the server will include any so reported errors in the final response, i.e. the 
    * GraphQL response will have a non empty errors property.
-   * @return {<%- name -%>} Instance of <%- name -%> class.
+   * @return {<%- nameLc -%>} Instance of <%- nameLc -%> class.
    */
   static async readById( id, benignErrorReporter ){
     
     /*
     YOUR CODE GOES HERE
      */
-    throw new Error('readById() is not implemented for model <%- name -%>');
+    throw new Error('readById() is not implemented for model <%- nameLc -%>');
   }
 
   /**
-   * countRecords - Count the number of records of model <%- name -%> that match the filters provided
+   * countRecords - Count the number of records of model <%- nameLc -%> that match the filters provided
    * in the @search parameter. Returns the number of records counted.
    * @see: Zendro specifications for search object.
    * 
@@ -79,7 +79,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('countRecords() is not implemented for model <%- name -%>');
+    throw new Error('countRecords() is not implemented for model <%- nameLc -%>');
   }
 
   /**
@@ -87,19 +87,19 @@ module.exports = class <%- name -%>{
    * in the @search parameter. The final set of records is constrained by the 
    * limit/offset pagination properties received in the @pagination parameter 
    * and ordered by the specifications received in the @order parameter.
-   * Returns an array of instances of this class (<%- name -%>), where each instance
+   * Returns an array of instances of this class (<%- nameLc -%>), where each instance
    * has its properties set from the values of one of the records fetched.
    * 
    * Returned value:
    *    for each record
-   *    array.push( new <%- name -%>(record) )
+   *    array.push( new <%- nameLc -%>(record) )
    * 
    * Thrown on:
    *    * Error.
    *    * Operation failed.
    * 
    * where record is an object with all its properties set from a record fetched.
-   * @see: constructor() of the class <%- name -%>;
+   * @see: constructor() of the class <%- nameLc -%>;
    * @see: Zendro specifications for limit-offset pagination.
    * @see: Zendro specifications for search and order objects.
    * 
@@ -110,14 +110,14 @@ module.exports = class <%- name -%>{
    * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
    * is invoked, the server will include any so reported errors in the final response, i.e. the 
    * GraphQL response will have a non empty errors property.
-   * @return {[<%- name -%>]}    Array of instances of <%- name -%> class.
+   * @return {[<%- nameLc -%>]}    Array of instances of <%- nameLc -%> class.
    */
   static async readAll(search, order, pagination, benignErrorReporter){
 
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('readAll() is not implemented for model <%- name -%>');
+    throw new Error('readAll() is not implemented for model <%- nameLc -%>');
   }
 
   /**
@@ -125,7 +125,7 @@ module.exports = class <%- name -%>{
    * in the @search parameter. The final set of records is constrained by the 
    * cursor based pagination properties received in the @pagination parameter 
    * and ordered by the specifications received in the @order parameter.
-   * Returns an array of instances of this class (<%- name -%>), where each instance
+   * Returns an array of instances of this class (<%- nameLc -%>), where each instance
    * has its properties set from the values of one of the records fetched.
    * 
    * Returned value:
@@ -136,7 +136,7 @@ module.exports = class <%- name -%>{
    *    * Operation failed.
    * 
    * where record is an object with all its properties set from a record fetched.
-   * @see: constructor() of the class <%- name -%>;
+   * @see: constructor() of the class <%- nameLc -%>;
    * @see: Zendro specificatons for cursor based pagination.
    * @see: Zendro specifications for search and order objects.
    * 
@@ -153,13 +153,13 @@ module.exports = class <%- name -%>{
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let options = helper.buildCursorBasedGenericOptions(search, order, pagination, this.idAttribute());
-    let records = await <%- name -%>.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
+    let records = await <%- nameLc -%>.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
     // get the first record (if exists) in the opposite direction to determine pageInfo.
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
         let oppOptions = helper.buildOppositeSearchGeneric(search, order, pagination, this.idAttribute());
-        oppRecords = await <%- name -%>.readAll(oppOptions['search'],oppOptions['order'],oppOptions['pagination'], benignErrorReporter);
+        oppRecords = await <%- nameLc -%>.readAll(oppOptions['search'],oppOptions['order'],oppOptions['pagination'], benignErrorReporter);
     }
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
@@ -168,10 +168,10 @@ module.exports = class <%- name -%>{
   }
 
   /**
-   * addOne - Creates a new record of model <%- name -%> with the values provided
+   * addOne - Creates a new record of model <%- nameLc -%> with the values provided
    * on @input object.
    * Only if record was created successfully, returns an instance of this class 
-   * (<%- name -%>), with all its properties set from the new record created.
+   * (<%- nameLc -%>), with all its properties set from the new record created.
    * If this function fails to create the new record, should throw an error.
    * 
    * Conventions on input's attributes values.
@@ -182,35 +182,35 @@ module.exports = class <%- name -%>{
    *    3. null: attributes with value equal to null are set to null.
    * 
    * Returned value:
-   *    new <%- name -%>(newRecord)
+   *    new <%- nameLc -%>(newRecord)
    * 
    * Thrown on:
    *    * Error.
    *    * Operation failed.
    * 
    * where newRecord is an object with all its properties set from the new record created.
-   * @see: constructor() of the class <%- name -%>;
+   * @see: constructor() of the class <%- nameLc -%>;
    * 
    * @param  {<%- idAttributeType %>} id The id of the record that needs to be fetched.
    * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
    * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
    * is invoked, the server will include any so reported errors in the final response, i.e. the 
    * GraphQL response will have a non empty errors property.
-   * @return {<%- name -%>} If successfully created, returns an instance of 
-   * <%- name -%> class constructed with the new record, otherwise throws an error.
+   * @return {<%- nameLc -%>} If successfully created, returns an instance of 
+   * <%- nameLc -%> class constructed with the new record, otherwise throws an error.
    */
   static async addOne(input, benignErrorReporter){
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('addOne() is not implemented for model <%- name -%>');
+    throw new Error('addOne() is not implemented for model <%- nameLc -%>');
   }
 
   /**
-   * updateOne - Updates the <%- name -%> record whose id is equal to the value
+   * updateOne - Updates the <%- nameLc -%> record whose id is equal to the value
    * of id attribute: '<%- idAttribute -%>', which should be on received as input.
    * Only if record was updated successfully, returns an instance of this class 
-   * (<%- name -%>), with all its properties set from the record updated.
+   * (<%- nameLc -%>), with all its properties set from the record updated.
    * If this function fails to update the record, should throw an error.
    * 
    * Conventions on input's attributes values.
@@ -220,14 +220,14 @@ module.exports = class <%- name -%>{
    *    3. null: attributes with value equal to null are set to null.
    * 
    * Returned value:
-   *    new <%- name -%>(updatedRecord)
+   *    new <%- nameLc -%>(updatedRecord)
    * 
    * Thrown on:
    *    * Error.
    *    * Operation failed.
    * 
    * where updatedRecord is an object with all its properties set from the record updated.
-   * @see: constructor() of the class <%- name -%>;
+   * @see: constructor() of the class <%- nameLc -%>;
    * 
    * @param  {object} input Input with properties to be updated. The special id 
    * attribute: '<%- idAttribute -%>' should contains the id value of the record
@@ -236,14 +236,14 @@ module.exports = class <%- name -%>{
    * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
    * is invoked, the server will include any so reported errors in the final response, i.e. the 
    * GraphQL response will have a non empty errors property.
-   * @return {<%- name -%>} If successfully created, returns an instance of 
-   * <%- name -%> class constructed with the new record, otherwise throws an error.
+   * @return {<%- nameLc -%>} If successfully created, returns an instance of 
+   * <%- nameLc -%> class constructed with the new record, otherwise throws an error.
    */
   static async updateOne(input, benignErrorReporter){
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('updateOne() is not implemented for model <%- name -%>');
+    throw new Error('updateOne() is not implemented for model <%- nameLc -%>');
   }
 
   /**
@@ -266,7 +266,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('deleteOne is not implemented for model <%- name -%>');
+    throw new Error('deleteOne is not implemented for model <%- nameLc -%>');
   }
 
   /**
@@ -281,7 +281,7 @@ module.exports = class <%- name -%>{
     /*
     YOUR CODE GOES HERE
     */
-    throw new Error('bulkAddCsv() is not implemented for model <%- name -%>');
+    throw new Error('bulkAddCsv() is not implemented for model <%- nameLc -%>');
   }
 
   /**
@@ -409,7 +409,7 @@ module.exports = class <%- name -%>{
    */
 
   static idAttribute() {
-    return <%- name -%>.definition.id.name;
+    return <%- nameLc -%>.definition.id.name;
   }
 
   /**
@@ -419,17 +419,17 @@ module.exports = class <%- name -%>{
    */
 
   static idAttributeType() {
-    return <%- name -%>.definition.id.type;
+    return <%- nameLc -%>.definition.id.type;
   }
 
   /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- nameLc -%>.
    *
    * @return {type} id value
    */
 
   getIdValue() {
-    return this[<%- name -%>.idAttribute()]
+    return this[<%- nameLc -%>.idAttribute()]
   }
 
   static base64Decode(cursor){
@@ -441,7 +441,7 @@ module.exports = class <%- name -%>{
   }
 
   stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    let attributes = Object.keys(<%- nameLc -%>.definition.attributes);
     <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
     let data_values = _.pick(this, attributes);
     return data_values;
