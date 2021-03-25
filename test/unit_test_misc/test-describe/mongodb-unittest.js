@@ -417,3 +417,17 @@ static async bulkDisAssociateAnimalWithFarm_id(bulkAssociationInput, benignError
     return "Records successfully updated!"
 }
 `;
+
+module.exports.mongodb_adapter_readById = `
+static async readById(id){
+    const db = await this.storageHandler
+    const collection = await db.collection("dist_animal")
+    const id_name = this.idAttribute();
+    let item = await collection.findOne({[id_name] : id});
+    if (item === null) {
+        throw new Error(\`Record with ID = "\${id}" does not exist\`);
+    }
+    item = new dist_animal_instance1(item);
+    return validatorUtil.validateData('validateAfterRead', this, item);
+  }
+`;

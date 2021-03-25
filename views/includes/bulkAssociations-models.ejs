@@ -77,7 +77,7 @@
         let collection;
         try {
             const db = await this.storageHandler
-            collection = await db.collection("<%if(storageType === 'mongodb'){%><%-nameLc-%><%} else {%><%-adapterName-%><%}-%>")
+            collection = await db.collection("<%-nameLc-%>")
         } catch (error) {
             throw error;
         }

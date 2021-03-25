@@ -277,7 +277,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static csvTableTemplate(){
-    return helper.csvTableTemplate(<%- adapterName -%>);
+    return helper.csvTableTemplate(definition);
   }
 
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>

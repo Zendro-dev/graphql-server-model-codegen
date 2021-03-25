@@ -2700,85 +2700,85 @@ describe("Foreign-key array", function () {
 describe("MongoDb Unit Test", function () {
   let data_test = require("./unit_test_misc/test-describe/mongodb-unittest");
 
-  it("mongodb models - animal constructor", async function () {
+  it("mongodb model - animal constructor", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_constructor);
   });
 
-  it("mongodb models - animal readById", async function () {
+  it("mongodb model - animal readById", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_readById);
   });
 
-  it("mongodb models - animal countRecords", async function () {
+  it("mongodb model - animal countRecords", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_countRecords);
   });
 
-  it("mongodb models - animal readAll", async function () {
+  it("mongodb model - animal readAll", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_readAll);
   });
 
-  it("mongodb models - animal readAllCursor", async function () {
+  it("mongodb model - animal readAllCursor", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_readAllCursor);
   });
 
-  it("mongodb models - animal addOne", async function () {
+  it("mongodb model - animal addOne", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_addOne);
   });
 
-  it("mongodb models - animal deleteOne", async function () {
+  it("mongodb model - animal deleteOne", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_deleteOne);
   });
 
-  it("mongodb models - animal updateOne", async function () {
+  it("mongodb model - animal updateOne", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_updateOne);
   });
 
-  it("mongodb models - animal bulkAddCsv", async function () {
+  it("mongodb model - animal bulkAddCsv", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_bulkAddCsv);
   });
 
-  it("mongodb models - fieldMutations toOne - add farm to animal", async function () {
+  it("mongodb model - fieldMutations toOne - add farm to animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_fieldMutation_add_farm);
   });
 
-  it("mongodb models - fieldMutations toOne - remove farm from animal", async function () {
+  it("mongodb model - fieldMutations toOne - remove farm from animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_fieldMutation_remove_farm);
   });
 
-  it("mongodb models - fieldMutations toMany - add food to animal", async function () {
+  it("mongodb model - fieldMutations toMany - add food to animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_fieldMutation_add_food);
   });
 
-  it("mongodb models - fieldMutations toMany - remove food from animal", async function () {
+  it("mongodb model - fieldMutations toMany - remove food from animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(generated_model, data_test.animal_fieldMutation_remove_food);
   });
 
-  it("mongodb models - fieldMutations bulkAssociation - add farm to animal", async function () {
+  it("mongodb model - fieldMutations bulkAssociation - add farm to animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(
@@ -2787,12 +2787,21 @@ describe("MongoDb Unit Test", function () {
     );
   });
 
-  it("mongodb models - fieldMutations bulkAssociation - remove farm from animal", async function () {
+  it("mongodb model - fieldMutations bulkAssociation - remove farm from animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
     testCompare(
       generated_model,
       data_test.animal_fieldMutation_bulkAssociate_remove
     );
+  });
+
+  it("mongodb adapter - dist_animal_instance1 readById ", async function () {
+    let opts = funks.getOptions(models_mongodb.dist_animal_instance1);
+    let generated_model = await funks.generateJs(
+      "create-mongodb-adapter",
+      opts
+    );
+    testCompare(generated_model, data_test.mongodb_adapter_readById);
   });
 });
