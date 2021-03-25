@@ -39,7 +39,7 @@ cloneAndInstallGraphqlServerRepository () {
 SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
 source "${SCRIPT_DIR}/testenv_constants.sh"
 
-printBlockHeader "CLONE GRAPHQL SERVER INSTANCES"
+printBlockHeader "START" "CLONE GRAPHQL SERVER INSTANCES"
 
 # (Re-)Create the environment directory
 mkdir -p $ENV_DIR
