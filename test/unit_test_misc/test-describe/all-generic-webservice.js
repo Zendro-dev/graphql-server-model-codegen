@@ -91,7 +91,7 @@ book.prototype.publisher = async function({
             });
             let found = (await resolvers.publi_shersConnection({
                 search: nsearch,
-                pagination: {first:1}
+                pagination: {first: 1}
             }, context)).edges;
             if (found.length > 0) {
                 return found[0].node

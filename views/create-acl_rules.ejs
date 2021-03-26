@@ -26,6 +26,13 @@ module.exports = {
       }]
     },
     {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'search'
+      }]
+    },
+    {
       roles: 'reader',
       allows: [{
         resources: '<%- models[i].name _%>',
@@ -58,6 +65,13 @@ module.exports = {
       allows: [{
         resources: '<%- adapters[i] _%>',
         permissions: 'create'
+      }]
+    },
+    {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'search'
       }]
     },
     {

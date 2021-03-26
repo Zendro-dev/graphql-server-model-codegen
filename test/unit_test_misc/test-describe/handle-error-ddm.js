@@ -1,6 +1,6 @@
 module.exports.count_dogs_model_ddm = `
 
-static countRecords(search, authorizedAdapters, benignErrorReporter) {
+static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -18,8 +18,14 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
         authAdapters = Array.from(authorizedAdapters)
     }
 
+    // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+    let searchAuthAdapters = [];
+    if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+        searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+    }
+
     //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
     let promises = authAdapters.map(adapter => {
         /**
@@ -42,6 +48,8 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
             case 'mongodb-adapter':
             case 'zendro-webservice-adapter':
                 return adapter.countRecords(search, benignErrorReporter);
+            case 'cassandra-adapter':
+                return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
             case 'default':
                 throw new Error(\`Adapter type: '\${adapter.adapterType}' is not supported\`);
@@ -59,14 +67,14 @@ static countRecords(search, authorizedAdapters, benignErrorReporter) {
                 total += current.value;
             }
             return total;
-        }, 0 );
+        }, 0);
     });
 }
 
 `;
 
 module.exports.readAllCursor_dogs_model_ddm = `
-static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -84,8 +92,15 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
         authAdapters = Array.from(authorizedAdapters)
     }
 
+    // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+    let searchAuthAdapters = [];
+    if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+        searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+    }
+
     //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+
 
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authAdapters.map(adapter => {
@@ -102,13 +117,15 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
         switch (adapter.adapterType) {
             case 'ddm-adapter':
                 let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                return adapter.readAllCursor(nsearch, order, pagination,benignErrorReporter);
+                return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
 
             case 'generic-adapter':
             case 'sql-adapter':
             case 'mongodb-adapter':
             case 'zendro-webservice-adapter':
-                return adapter.readAllCursor(search, order, pagination,benignErrorReporter);
+                return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+            case 'cassandra-adapter':
+                return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
             default:
                 throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
@@ -126,14 +143,14 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
             }
             //check current
             else if (current.status === 'fulfilled') {
-              if (current.value && current.value.pageInfo && current.value.edges) {
-                  someHasNextPage |= current.value.pageInfo.hasNextPage;
-                  someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
-                  total = total.concat(current.value.edges.map(e => e.node));
-              }
+                if (current.value && current.value.pageInfo && current.value.edges) {
+                     someHasNextPage |= current.value.pageInfo.hasNextPage;
+                    someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+                    total = total.concat(current.value.edges.map(e => e.node));
+                }
             }
             return total;
-        },[]);
+        }, []);
     })
     //phase 2: validate & order & paginate
     .then(async nodes => {
@@ -193,7 +210,6 @@ dogsConnection: async function({
 
   //construct benignErrors reporter with context
   let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-
     //check: adapters
     let registeredAdapters = Object.values(dog.registeredAdapters);
     if (registeredAdapters.length === 0) {
@@ -206,7 +222,6 @@ dogsConnection: async function({
         throw new Error('All adapters was excluded for data model "dog"');
     } //else
 
-
     //check: auth adapters
     let authorizationCheck = await helper.authorizedAdapters(context, adapters, 'read');
     if (authorizationCheck.authorizedAdapters.length > 0) {
@@ -214,8 +229,8 @@ dogsConnection: async function({
         if (authorizationCheck.authorizationErrors.length > 0) {
             context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
         }
-
-        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter);
+        let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
+        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter, searchAuthorizationCheck.authorizedAdapters);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -254,8 +269,8 @@ countDogs: async function({
         if (authorizationCheck.authorizationErrors.length > 0) {
             context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
         }
-
-        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter);
+        let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
+        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter, searchAuthorizationCheck.authorizedAdapters);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {

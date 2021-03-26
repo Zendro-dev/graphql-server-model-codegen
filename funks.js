@@ -175,6 +175,10 @@ attributesToJsonSchemaProperties = function (attributes) {
       jsonSchemaProps[key] = {
         anyOf: [{ isoDateTime: true }, { type: "null" }],
       };
+    } else if (jsonSchemaProps[key] === "uuid") {
+      jsonSchemaProps[key] = {
+        type: ["uuid", "null"],
+      };
     } else if (arrayType.includes(jsonSchemaProps[key])) {
       jsonSchemaProps[key] = {
         type: ["array", "null"],
@@ -264,6 +268,70 @@ getOnlyDescriptionAttributes = function (attributes) {
   return only_description;
 };
 
+getCassandraType = function (type) {
+  switch (type.toLowerCase()) {
+    case "string":
+      return "text";
+    case "integer":
+    case "int":
+      return "int";
+    case "id":
+      return "uuid";
+    case "datetime":
+      return "timestamp";
+    default:
+      return type;
+  }
+};
+
+getOnlyCassandraTypeAttributes = function (attributes, idAttribute) {
+  let only_type = {};
+
+  for (key in attributes) {
+    if (key == idAttribute) {
+      continue;
+    }
+    if (
+      attributes[key] &&
+      typeof attributes[key] === "object" &&
+      attributes[key].constructor === Object
+    ) {
+      only_type[key] = attributes[key].type;
+    } else if (
+      typeof attributes[key] === "string" ||
+      attributes[key] instanceof String
+    ) {
+      only_type[key] = getCassandraType(attributes[key]);
+    }
+  }
+
+  return only_type;
+};
+
+getCassandraAttributesType = function (
+  attributes,
+  idAttribute,
+  editableAttributes
+) {
+  let only_type = {};
+  for (key in attributes) {
+    if (key == idAttribute) {
+      continue;
+    }
+    if (attributes[key].includes("[")) {
+      let arrType = attributes[key].replace(/\[|\]/gi, "");
+      if (editableAttributes[key]) {
+        only_type[key] = `list <${getCassandraType(arrType)}>`;
+      } else {
+        only_type[key] = `set <${getCassandraType(arrType)}>`;
+      }
+    } else {
+      only_type[key] = getCassandraType(attributes[key]);
+    }
+  }
+  return only_type;
+};
+
 /**
  * writeSchemaCommons - Writes a 'commons.js' file into the given directory. This file contains
  * general parts of the graphql schema that are common for all models.
@@ -305,6 +373,20 @@ writeSchemaCommons = function (dir_write) {
     contained
     not
     all
+  }
+  
+  enum CassandraOperator{
+    eq
+    lt
+    gt
+    lte
+    gte
+    in
+    contains   # CONTAINS
+    ctk    # CONTAINS KEY
+    tgt    # Token > Token
+    tget   # Token >= Token
+    and
   }
 
   enum Order{
@@ -422,6 +504,42 @@ convertToType = function (many, model_name) {
 };
 
 /**
+ * getIndefiniteArticle - Generate the (uncapitalized) indefinite article that belongs to a given name.
+ *
+ * @param {string} name - The name that this article is to be used with
+ * @return {string} The indefinite article
+ */
+getIndefiniteArticle = function (name) {
+  let vowelRegex = "^[aeiouAEIOU].*";
+  if (name.match(vowelRegex)) {
+    return "an";
+  } else {
+    return "a";
+  }
+};
+
+/**
+ * getStringAttributesInCassandraSchema - Get all String attributes in a model regardless of capitalization.
+ * @param {object} attributes - The attributes of the schema
+ * @return {Array<string>} The string attributes in an array
+ */
+getStringAttributesInCassandraSchema = function (attributes) {
+  let res = [];
+  for (key in attributes) {
+    let attr = attributes[key];
+    if (typeof attr != "string") {
+      //assume a description object
+      if (attr["type"].toUpperCase() === "STRING") {
+        res.push(`'${key}'`);
+      }
+    } else if (attr.toUpperCase() === "STRING") {
+      res.push(`'${key}'`);
+    }
+  }
+  return res;
+};
+
+/**
  * getOptions - Creates object with all extra info and with all data model info.
  *
  * @param  {object} dataModel object created from a json file containing data model info.
@@ -438,6 +556,10 @@ module.exports.getOptions = function (dataModel) {
     namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
     namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
     attributes: getOnlyTypeAttributes(dataModel.attributes),
+    cassandraAttributes: getOnlyCassandraTypeAttributes(
+      getOnlyTypeAttributes(dataModel.attributes),
+      getIdAttribute(dataModel)
+    ),
     jsonSchemaProperties: attributesToJsonSchemaProperties(
       getOnlyTypeAttributes(dataModel.attributes)
     ),
@@ -451,11 +573,18 @@ module.exports.getOptions = function (dataModel) {
     url: dataModel.url || "",
     externalIds: dataModel.externalIds || [],
     regex: dataModel.regex || "",
-    adapterName: dataModel.adapterName || "",
+    adapterName: uncapitalizeString(dataModel.adapterName || ""),
     registry: dataModel.registry || [],
     idAttribute: getIdAttribute(dataModel),
+    indefiniteArticle: getIndefiniteArticle(dataModel.model),
+    indefiniteArticleCp: capitalizeString(
+      getIndefiniteArticle(dataModel.model)
+    ),
+    cassandraRestrictions: dataModel.cassandraRestrictions,
+    cassandraStringAttributes: getStringAttributesInCassandraSchema(
+      dataModel.attributes
+    ),
   };
-
   opts["editableAttributesStr"] = attributesToString(
     getEditableAttributes(
       opts.attributes,
@@ -468,10 +597,25 @@ module.exports.getOptions = function (dataModel) {
     getEditableAssociations(opts.associationsArguments),
     getIdAttribute(dataModel)
   );
+  opts["editableCassandraAttributes"] = getEditableAttributes(
+    opts.cassandraAttributes,
+    getEditableAssociations(opts.associationsArguments),
+    getIdAttribute(dataModel)
+  );
+  opts["cassandraAttributesWithConvertedTypes"] = getCassandraAttributesType(
+    opts.attributes,
+    opts["idAttribute"],
+    opts["editableAttributes"]
+  );
   opts["idAttributeType"] =
     dataModel.internalId === undefined
       ? "Int"
       : opts.attributes[opts.idAttribute];
+  opts["cassandraIdAttributeType"] = getCassandraType(
+    dataModel.internalId === undefined
+      ? "Int"
+      : opts.attributes[opts.idAttribute]
+  );
   opts["defaultId"] = dataModel.internalId === undefined ? true : false;
   dataModel["id"] = {
     name: opts.idAttribute,
@@ -480,7 +624,6 @@ module.exports.getOptions = function (dataModel) {
 
   opts["definition"] = stringify_obj(dataModel);
   delete opts.attributes[opts.idAttribute];
-
   return opts;
 };
 
@@ -833,17 +976,20 @@ generateSections = async function (sections, opts, dir_write) {
       case "models-zendro":
       case "distributed-model":
       case "models-generic":
+      case "models-cassandra":
       case "models-mongodb":
       //adapters
       case "sql-adapter":
       case "zendro-adapters":
       case "generic-adapter":
+      case "cassandra-adapter":
       case "mongodb-adapter":
         file_name =
           dir_write + "/" + section.dir + "/" + section.fileName + ".js";
         break;
       //migrations
       case "migrations":
+      case "migrations-cassandra":
         file_name = createNameMigration(
           dir_write,
           section.dir,
@@ -938,12 +1084,14 @@ getStorageType = function (dataModel) {
         case "distributed-data-model":
         case "zendro-server":
         case "generic":
+        case "cassandra":
         case "mongodb":
         //adapters
         case "sql-adapter":
         case "ddm-adapter":
         case "zendro-webservice-adapter":
         case "generic-adapter":
+        case "cassandra-adapter":
         case "mongodb-adapter":
           //ok
           break;
@@ -1001,6 +1149,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     "models/adapters",
     "models/distributed",
     "models/generic",
+    "models/cassandra",
     "models/mongodb",
   ];
   let models = [];
@@ -1262,6 +1411,32 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         ];
         break;
 
+      case "cassandra":
+        sections = [
+          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+          {
+            dir: "models/cassandra",
+            template: "models-cassandra",
+            fileName: opts.nameLc,
+          },
+          {
+            dir: "validations",
+            template: "validations",
+            fileName: opts.nameLc,
+          },
+          { dir: "patches", template: "patches", fileName: opts.nameLc },
+        ];
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-cassandra",
+            fileName: opts.nameLc,
+          });
+        }
+
+        break;
+
       case "zendro-webservice-adapter":
         sections = [
           {
@@ -1313,6 +1488,22 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
             dir: "models/adapters",
             template: "mongodb-adapter",
             fileName: opts.adapterName,
+          },
+          { dir: "patches", template: "patches", fileName: opts.adapterName },
+        ];
+        break;
+
+      case "cassandra-adapter":
+        sections = [
+          {
+            dir: "models/adapters",
+            template: "cassandra-adapter",
+            fileName: opts.adapterName,
+          },
+          {
+            dir: migrationsDir,
+            template: "migrations-cassandra",
+            fileName: opts.nameLc,
           },
           { dir: "patches", template: "patches", fileName: opts.adapterName },
         ];

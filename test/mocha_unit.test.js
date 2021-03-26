@@ -8,6 +8,7 @@ const models_zendro = require("./unit_test_misc/data_models_zendro");
 const models_distributed = require("./unit_test_misc/data_models_distributed");
 const models_refactoring = require("./unit_test_misc/data_models_refactoring");
 const models_generic = require("./unit_test_misc/data_models_generic");
+const models_cassandra = require("./unit_test_misc/data_models_cassandra");
 const models_mongodb = require("./unit_test_misc/data_models_mongodb");
 const requireFromString = require("require-from-string");
 const helpers = require("./unit_test_misc/helpers/reporting_helpers");
@@ -449,33 +450,33 @@ describe("All webservice (generic) models", function () {
 });
 
 // describe('Model definition', function(){
-
+//
 //   it('Access local model definition property', async function(){
 //     let opts = funks.getOptions(models.individual);
 //     let generated_model =await funks.generateJs('create-models', opts);
-
+//
 //     // replace real Sequelize import with a plain object
 //     let str = "const Sequelize = require('sequelize');";
 //     generated_model = generated_model.replace(str, 'let Sequelize = {}; Sequelize.STRING = "";');
-
+//
 //     // pass fake connection into the module and get the model defined
 //     let fake_sequelize = {};
 //     fake_sequelize.define = function(a, b){ return b; };
 //     let model = requireFromString(generated_model)(fake_sequelize);
-
+//
 //     // check any existing property of the 'individual' definition
 //     expect(model.definition.associations.transcript_counts.type === "hasMany");
 //   });
-
+//
 //   it('Access web-service model definition property', async function(){
 //     let opts = funks.getOptions(models_generic_webservice.publisher);
 //     let generated_model =await funks.generateJs('create-models-generic', opts);
 //     let model = requireFromString(generated_model);
-
+//
 //     // check any existing property of the 'publisher' definition
 //     expect(model.definition.associations.publications.target === 'book');
 //   });
-
+//
 // });
 
 describe("Implement date/time types", function () {
@@ -1058,11 +1059,7 @@ describe("Distributed data models", function () {
       "create-distributed-model",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.book_ddm_count.replace(/\s/g, "");
-    expect(g_adapter, "Incorrect distributed data model").to.have.string(
-      test_adapter
-    );
+    testCompare(generated_adapter, data_test.book_ddm_count);
   });
 
   it("Read all distributed data model- book", async function () {
@@ -1809,19 +1806,23 @@ describe("Refactor associations - add / update SQL models", function () {
   it("add_locationId- accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
-    testCompare(
-      generated_resolver,
-      data_test._addAssoc_to_one_fieldMutation_sql_model
+    let g_resolver = generated_resolver.replace(/\s/g, "");
+    let test_resolver = data_test._addAssoc_to_one_fieldMutation_sql_model.replace(
+      /\s/g,
+      ""
     );
+    expect(g_resolver).to.have.string(test_resolver);
   });
 
   it("remove_locationId - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
-    testCompare(
-      generated_resolver,
-      data_test._removeAssoc_to_one_fieldMutation_sql_model
+    let g_resolver = generated_resolver.replace(/\s/g, "");
+    let test_resolver = data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(
+      /\s/g,
+      ""
     );
+    expect(g_resolver).to.have.string(test_resolver);
   });
 });
 
@@ -2472,11 +2473,7 @@ describe("Handle Errors in DDM", function () {
       "create-distributed-model",
       opts
     );
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.readAllCursor_dogs_model_ddm.replace(/\s/g, "");
-    expect(g_model, "Incorrect distributed data model").to.have.string(
-      test_model
-    );
+    testCompare(generated_model, data_test.readAllCursor_dogs_model_ddm);
   });
 
   it("count in resolver - dog", async function () {
@@ -2485,9 +2482,7 @@ describe("Handle Errors in DDM", function () {
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.count_dogs_resolver_ddm.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.count_dogs_resolver_ddm);
   });
 
   it("connection in resolver - dog", async function () {
@@ -2496,12 +2491,7 @@ describe("Handle Errors in DDM", function () {
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.connections_dogs_resolver_ddm.replace(
-      /\s/g,
-      ""
-    );
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.connections_dogs_resolver_ddm);
   });
 
   it("readAllCursor in zendro-webservice-adapter - dog", async function () {
@@ -2650,7 +2640,6 @@ describe("Foreign-key array", function () {
   it("model add association - author", async function () {
     let opts = funks.getOptions(models.author_foreignKeyArray);
     let generated_model = await funks.generateJs("create-models", opts);
-    //console.log(generated_model.green)
     testCompare(generated_model, data_test.model_add_association);
   });
 
@@ -2694,6 +2683,169 @@ describe("Foreign-key array", function () {
       opts
     );
     testCompare(generated_model, data_test.zendro_adapter_remove);
+  });
+});
+
+describe("Cassandra storagetype", function () {
+  let data_test = require("./unit_test_misc/test-describe/cassandra-storagetype");
+
+  it("cassandra schema - city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_schema = await funks.generateJs("create-schemas", opts);
+    testCompare(generated_schema, data_test.cassandra_schema);
+  });
+
+  it("cassandra resolver - cityConnection", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_resolver = await funks.generateJs("create-resolvers", opts);
+    testCompare(generated_resolver, data_test.cassandra_resolver_Connection);
+  });
+
+  it("cassandra resolver - countCities", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_resolver = await funks.generateJs("create-resolvers", opts);
+    testCompare(generated_resolver, data_test.cassandra_resolver_Count);
+  });
+
+  it("cassandra models - constructor", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_constructor);
+  });
+
+  it("cassandra models - readById city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_readById);
+  });
+
+  it("cassandra models - countRecords city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_countRecords);
+  });
+
+  it("cassandra models - readAllCursor city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_readAllCursor);
+  });
+
+  it("cassandra models - addOne city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_addOne);
+  });
+
+  it("cassandra models - deleteOne city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_deleteOne);
+  });
+
+  it("cassandra models - updateOne city", async function () {
+    let opts = funks.getOptions(models_cassandra.city);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_updateOne);
+  });
+
+  it("cassandra models - fieldMutations add city", async function () {
+    let opts = funks.getOptions(models_cassandra.incident);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_model_fieldMutation_add);
+  });
+
+  it("cassandra models - fieldMutations remove city", async function () {
+    let opts = funks.getOptions(models_cassandra.incident);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(
+      generated_model,
+      data_test.cassandra_model_fieldMutation_remove
+    );
+  });
+
+  it("cassandra models - fieldMutations bulkAssociation add city", async function () {
+    let opts = funks.getOptions(models_cassandra.incident);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(
+      generated_model,
+      data_test.cassandra_model_fieldMutation_bulkAssociate_add
+    );
+  });
+
+  it("cassandra models - fieldMutations bulkAssociation remove city", async function () {
+    let opts = funks.getOptions(models_cassandra.incident);
+    let generated_model = await funks.generateJs(
+      "create-models-cassandra",
+      opts
+    );
+    testCompare(
+      generated_model,
+      data_test.cassandra_model_fieldMutation_bulkAssociate_remove
+    );
+  });
+
+  it("cassandra ddm model - readAllCursor dist_incident", async function () {
+    let opts = funks.getOptions(models_cassandra.dist_incident);
+    let generated_model = await funks.generateJs(
+      "create-distributed-model",
+      opts
+    );
+    testCompare(generated_model, data_test.cassandra_ddm_model_readAllCursor);
+  });
+
+  it("cassandra ddm cassandra-adapter - readById dist_incident", async function () {
+    let opts = funks.getOptions(models_cassandra.dist_instant_instance1);
+    let generated_model = await funks.generateJs(
+      "create-cassandra-adapter",
+      opts
+    );
+    testCompare(
+      generated_model,
+      data_test.cassandra_ddm_cassandra_adapter_readById
+    );
+  });
+
+  it("cassandra ddm cassandra-adapter - readAllCursor dist_incident", async function () {
+    let opts = funks.getOptions(models_cassandra.dist_instant_instance1);
+    let generated_model = await funks.generateJs(
+      "create-cassandra-adapter",
+      opts
+    );
+    testCompare(
+      generated_model,
+      data_test.cassandra_ddm_cassandra_adapter_readAllCursor
+    );
   });
 });
 

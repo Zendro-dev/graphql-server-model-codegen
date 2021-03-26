@@ -91,7 +91,23 @@
       }
     }
   <%}-%>
-   <%#  /*** End of the the mongodb-adapter case */ -%>
+  <%#  /*** End of the the mongodb-adapter case */ -%>
+  
+  <%#
+  /**
+   * check the type of adapter and handle cassandra-adapter
+   */
+  -%>
+  <%if(storageType === 'cassandra-adapter'){-%>
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      const mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+      await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
+      const checkCql = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute-%> = ?`;
+      let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
+      return new <%- adapterName -%>(result.first());
+    }
+  <%}-%>
+   <%#  /*** End of the the cassandra-adapter case */ -%>
 
  <%}-%>
 <%} -%>

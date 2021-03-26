@@ -4,7 +4,9 @@
   "attributes" : {
     "name" : "String",
     "length" : "Int",
-    "river_id": "String"
+    "river_id": "String",
+    
+    "city_ids": "[String]"
   },
   "associations": {
     "countries": {
@@ -14,6 +16,15 @@
       "targetKey": "country_id",
       "keysIn": "country_to_river",
       "targetStorageType" : "sql"
+    },
+    "cities": {
+      "type": "to_many",
+      "target": "city",
+      "targetStorageType": "cassandra",
+      "sourceKey": "city_ids",
+      "targetKey": "river_ids",
+      "keyIn": "river",
+      "reverseAssociationType":"to_many"
     }
   },
   "internalId": "river_id"

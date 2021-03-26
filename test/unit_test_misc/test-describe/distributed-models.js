@@ -120,173 +120,190 @@ static readById(id, benignErrorReporter) {
 `;
 
 module.exports.book_ddm_count = `
-static countRecords(search, authorizedAdapters, benignErrorReporter) {
-        let authAdapters = [];
-        /**
-         * Differentiated cases:
-         *    if authorizedAdapters is defined:
-         *      - called from resolver.
-         *      - authorizedAdapters will no be modified.
-         *
-         *    if authorizedAdapters is not defined:
-         *      - called internally
-         *      - authorizedAdapters will be set to registered adapters.
-         */
-        if (authorizedAdapters === undefined) {
-            authAdapters = Object.values(this.registeredAdapters);
-        } else {
-            authAdapters = Array.from(authorizedAdapters)
-        }
+static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+  let authAdapters = [];
+  /**
+   * Differentiated cases:
+   *    if authorizedAdapters is defined:
+   *      - called from resolver.
+   *      - authorizedAdapters will no be modified.
+   *
+   *    if authorizedAdapters is not defined:
+   *      - called internally
+   *      - authorizedAdapters will be set to registered adapters.
+   */
+  if (authorizedAdapters === undefined) {
+      authAdapters = Object.values(this.registeredAdapters);
+  } else {
+      authAdapters = Array.from(authorizedAdapters)
+  }
 
-        //use default BenignErrorReporter if no BenignErrorReporter defined
-        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+  // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+  let searchAuthAdapters = [];
+  if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+      searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+  }
 
-        let promises = authAdapters.map(adapter => {
-            /**
-             * Differentiated cases:
-             *   sql-adapter:
-             *      resolve with current parameters.
-             *
-             *   ddm-adapter:
-             *   zendro-webservice-adapter:
-             *   generic-adapter:
-             *      add exclusions to search.excludeAdapterNames parameter.
-             */
-            switch (adapter.adapterType) {
-                case 'ddm-adapter':
-                case 'generic-adapter':
-                    let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                    return adapter.countRecords(nsearch, benignErrorReporter);
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
-                case 'sql-adapter':
-                case 'mongodb-adapter':
-                case 'zendro-webservice-adapter':
-                    return adapter.countRecords(search, benignErrorReporter);
+  let promises = authAdapters.map(adapter => {
+      /**
+       * Differentiated cases:
+       *   sql-adapter:
+       *      resolve with current parameters.
+       *
+       *   ddm-adapter:
+       *   zendro-webservice-adapter:
+       *   generic-adapter:
+       *      add exclusions to search.excludeAdapterNames parameter.
+       */
+      switch (adapter.adapterType) {
+          case 'ddm-adapter':
+          case 'generic-adapter':
+              let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
+              return adapter.countRecords(nsearch, benignErrorReporter);
 
-                case 'default':
-                    throw new Error(\`Adapter type: '\${adapter.adapterType}' is not supported\`);
-            }
-        });
+          case 'sql-adapter':
+          case 'mongodb-adapter':
+          case 'zendro-webservice-adapter':
+              return adapter.countRecords(search, benignErrorReporter);
+          case 'cassandra-adapter':
+              return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
-        return Promise.allSettled(promises).then(results => {
-            return results.reduce((total, current) => {
-                //check if current is Error
-                if (current.status === 'rejected') {
-                    benignErrorReporter.reportError(current.reason);
-                }
-                //check current result
-                else if (current.status === 'fulfilled') {
-                    total += current.value;
-                }
-                return total;
-            }, 0 );
-        });
-    }
+          case 'default':
+              throw new Error(\`Adapter type: '\${adapter.adapterType}' is not supported\`);
+      }
+  });
+
+  return Promise.allSettled(promises).then(results => {
+      return results.reduce((total, current) => {
+          //check if current is Error
+          if (current.status === 'rejected') {
+              benignErrorReporter.reportError(current.reason);
+          }
+          //check current result
+          else if (current.status === 'fulfilled') {
+              total += current.value;
+          }
+          return total;
+      }, 0);
+  });
+}
 `;
 
 module.exports.book_ddm_read_all = `
-static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
-        let authAdapters = [];
-        /**
-         * Differentiated cases:
-         *    if authorizedAdapters is defined:
-         *      - called from resolver.
-         *      - authorizedAdapters will no be modified.
-         *
-         *    if authorizedAdapters is not defined:
-         *      - called internally
-         *      - authorizedAdapters will be set to registered adapters.
-         */
-        if (authorizedAdapters === undefined) {
-            authAdapters = Object.values(this.registeredAdapters);
-        } else {
-            authAdapters = Array.from(authorizedAdapters)
-        }
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+  let authAdapters = [];
+  /**
+   * Differentiated cases:
+   *    if authorizedAdapters is defined:
+   *      - called from resolver.
+   *      - authorizedAdapters will no be modified.
+   *
+   *    if authorizedAdapters is not defined:
+   *      - called internally
+   *      - authorizedAdapters will be set to registered adapters.
+   */
+  if (authorizedAdapters === undefined) {
+      authAdapters = Object.values(this.registeredAdapters);
+  } else {
+      authAdapters = Array.from(authorizedAdapters)
+  }
 
-        //use default BenignErrorReporter if no BenignErrorReporter defined
-        benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
+  // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+  let searchAuthAdapters = [];
+  if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+      searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
+  }
+
+  //use default BenignErrorReporter if no BenignErrorReporter defined
+  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
 
+  let isForwardPagination = !pagination || !(pagination.last != undefined);
+  let promises = authAdapters.map(adapter => {
+      /**
+       * Differentiated cases:
+       *   sql-adapter:
+       *      resolve with current parameters.
+       *
+       *   ddm-adapter:
+       *   zendro-webservice-adapter:
+       *   generic-adapter:
+       *      add exclusions to search.excludeAdapterNames parameter.
+       */
+      switch (adapter.adapterType) {
+          case 'ddm-adapter':
+              let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
+              return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
 
-        let isForwardPagination = !pagination || !(pagination.last != undefined);
-        let promises = authAdapters.map(adapter => {
-            /**
-             * Differentiated cases:
-             *   sql-adapter:
-             *      resolve with current parameters.
-             *
-             *   ddm-adapter:
-             *   zendro-webservice-adapter:
-             *   generic-adapter:
-             *      add exclusions to search.excludeAdapterNames parameter.
-             */
-            switch (adapter.adapterType) {
-                case 'ddm-adapter':
-                    let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                    return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
+          case 'generic-adapter':
+          case 'sql-adapter':
+          case 'mongodb-adapter':
+          case 'zendro-webservice-adapter':
+              return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+          case 'cassandra-adapter':
+              return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
-                case 'generic-adapter':
-                case 'sql-adapter':
-                case 'mongodb-adapter':
-                case 'zendro-webservice-adapter':
-                    return adapter.readAllCursor(search, order, pagination,benignErrorReporter );
-
-                default:
-                    throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
-            }
-        });
-        let someHasNextPage = false;
-        let someHasPreviousPage = false;
-        return Promise.allSettled(promises)
-        //phase 1: reduce
-        .then( results => {
-            return results.reduce( (total, current)=> {
+          default:
+              throw new Error(\`Adapter type '\${adapter.adapterType}' is not supported\`);
+      }
+  });
+  let someHasNextPage = false;
+  let someHasPreviousPage = false;
+  return Promise.allSettled(promises)
+      //phase 1: reduce
+      .then(results => {
+          return results.reduce((total, current) => {
               //check if current is Error
               if (current.status === 'rejected') {
                   benignErrorReporter.reportError(current.reason);
               }
               //check current
               else if (current.status === 'fulfilled') {
-                if (current.value && current.value.pageInfo && current.value.edges) {
-                    someHasNextPage |= current.value.pageInfo.hasNextPage;
-                    someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
-                    total = total.concat(current.value.edges.map(e => e.node));
-                }
-              }
-              return total;
-            }, []);
-          })
-          //phase 2: validate & order & paginate
-          .then(async nodes => {
-              nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
-              if (order === undefined) {
-                  order = [{
-                      field: "id",
-                      order: 'ASC'
-                  }];
-              }
-              if (pagination === undefined) {
-                  pagination = {
-                      first: Math.min(globals.LIMIT_RECORDS, nodes.length)
+                  if (current.value && current.value.pageInfo && current.value.edges) {
+                      someHasNextPage |= current.value.pageInfo.hasNextPage;
+                      someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+                      total = total.concat(current.value.edges.map(e => e.node));
                   }
               }
-
-              let ordered_records = helper.orderRecords(nodes, order);
-              let paginated_records = [];
-
-              if (isForwardPagination) {
-                  paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
-              } else {
-                  paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
+              return total;
+          }, []);
+      })
+      //phase 2: validate & order & paginate
+      .then(async nodes => {
+          nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
+          if (order === undefined) {
+              order = [{
+                  field: "id",
+                  order: 'ASC'
+              }];
+          }
+          if (pagination === undefined) {
+              pagination = {
+                  first: Math.min(globals.LIMIT_RECORDS, nodes.length)
               }
+          }
 
-              let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-              let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
 
-              let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
-              return graphQLConnection;
-          });
-    }
+          let ordered_records = helper.orderRecords(nodes, order);
+          let paginated_records = [];
+
+          if (isForwardPagination) {
+              paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.first);
+          } else {
+              paginated_records = helper.paginateRecordsBefore(ordered_records, pagination.last);
+          }
+
+          let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+          let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
+
+          let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
+          return graphQLConnection;
+
+      });
+}
 `;
 
 module.exports.person_ddm_many_association = `

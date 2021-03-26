@@ -117,7 +117,7 @@ module.exports = `
 -%>
 type <%- nameCp -%>Connection{
   edges: [<%- nameCp -%>Edge]
-  pageInfo:pageInfo!
+  pageInfo: pageCassandraInfo!
 }
 
 type <%- nameCp -%>Edge{
@@ -125,17 +125,6 @@ type <%- nameCp -%>Edge{
   node: <%- name -%>!
 }
 
-  type VueTable<%- nameCp -%>{
-    data : [<%- name -%>]
-    total: Int
-    per_page: Int
-    current_page: Int
-    last_page: Int
-    prev_page_url: String
-    next_page_url: String
-    from: Int
-    to: Int
-  }
 <%#
 /**
  * Section 3
@@ -158,7 +147,7 @@ type <%- nameCp -%>Edge{
     field: <%- name -%>Field
     value: String
     valueType: InputType
-    operator: <% if(storageType === 'cassandra'){_%>CassandraOperator<%} else {_%>Operator<%}%>
+    operator: CassandraOperator
     search: [search<%- nameCp-%>Input]
   }
 
@@ -180,12 +169,10 @@ type <%- nameCp -%>Edge{
  */
 -%>
   type Query {
-    <%- namePl -%>(search: search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationInput! ): [<%- name -%>]
     readOne<%- nameCp -%>(<%- idAttribute -%>: ID!): <%- name %>
     count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
-    vueTable<%- nameCp -%> : VueTable<%- nameCp %>
     csvTableTemplate<%- nameCp -%>: [String]
-    <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput! ): <%- nameCp -%>Connection
+    <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorCassandraInput! ): <%- nameCp -%>Connection
   }
 <%#
 /**

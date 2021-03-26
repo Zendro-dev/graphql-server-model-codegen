@@ -56,7 +56,13 @@ describe("Mongodb - Basic CRUD Operations", () => {
     let animal = resBody.data.animals[0].animal_id;
 
     res = itHelpers.request_graph_ql_post(
-      `mutation { updateAnimal(animal_id: ${animal}, animal_name: "Lily2") {animal_id animal_name} }`
+      `mutation { updateAnimal(animal_id: ${animal}, animal_name: "Lily2", 
+        personality: ["energetic", "enthusiastic", "active"]) {
+          animal_id 
+          animal_name 
+          personality
+        } 
+      }`
     );
     resBody = JSON.parse(res.body.toString("utf8"));
 
@@ -66,6 +72,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
         updateAnimal: {
           animal_id: `${animal}`,
           animal_name: "Lily2",
+          personality: ["energetic", "enthusiastic", "active"],
         },
       },
     });
@@ -79,7 +86,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
     let animal = resBody.data.animals[0].animal_id;
 
     res = itHelpers.request_graph_ql_post(
-      `{ readOneAnimal(animal_id : ${animal}) { animal_id animal_name } }`
+      `{ readOneAnimal(animal_id : ${animal}) { animal_id animal_name personality} }`
     );
     resBody = JSON.parse(res.body.toString("utf8"));
 
@@ -89,6 +96,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
         readOneAnimal: {
           animal_id: `${animal}`,
           animal_name: "Lily2",
+          personality: ["energetic", "enthusiastic", "active"],
         },
       },
     });

@@ -1,0 +1,361 @@
+'use strict';
+
+const _ = require('lodash');
+const searchArg = require('../../utils/search-argument');
+const validatorUtil = require('../../utils/validatorUtil');
+const path = require('path');
+const helper = require('../../utils/helper');
+const cassandraHelper = require('../../utils/cassandra_helpers');
+const Uuid = require('cassandra-driver').types.Uuid;
+const models = require(path.join(__dirname, '..', 'index.js'));
+
+const iriRegex = new RegExp('<%- regex -%>');
+
+// An exact copy of the the model definition that comes from the .json file
+const definition = <%- definition -%>;
+
+/**
+ * module - Creates a class to administer Cassandra model types
+ */
+module.exports = class <%- adapterName -%> {
+  constructor(input) {
+    for (let key of Object.keys(input)) {
+      this[key] = input[key];
+    }
+  }
+
+  get storageHandler() {
+    return <%- adapterName-%>.storageHandler
+  }
+ 
+  /**
+  * adapterName - Getter for the name attribute
+  *
+  * This attribute is needed by the models' index
+  * @return {string} The adapterName of the model
+  */
+  static get adapterName(){
+    return "<%- adapterName -%>";
+  }
+
+  static get adapterType(){
+    return '<%- storageType -%>';
+  }
+
+  static recognizeId(iri){
+    return iriRegex.test(iri);
+  }
+
+  /**
+  * readById - The model implementation for reading a single record given by its ID
+  *
+  * This method is the implementation for reading a single record for the Cassandra storage type, based on CQL.
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- adapterName -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
+  static async readById(id){
+    
+    <% let columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
+    const query = `SELECT <%- columns -%>, token(<%- idAttribute -%>) as toke FROM "<%- namePl -%>" WHERE <%- idAttribute -%> = ?`;
+    let queryResult = await this.storageHandler.execute(query, [ <% if (idAttributeType.toLowerCase() === 'uuid') { -%>Uuid.fromString(id)<% } else { %>id<%}-%> ], { prepare: true });
+    let firstResult = queryResult.first();
+    if (firstResult === null) {
+      throw new Error(`Record with ID = "${id}" does not exist`);
+    }
+    let item = new <%- adapterName -%>(firstResult);
+    return validatorUtil.validateData('validateAfterRead', this, item);
+  }
+
+  /**
+  * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
+  * for the Cassandra storage type, based on CQL.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @param {boolean} allowFiltering - If the user has the 'search' right, the term 'ALLOW FILTERING' will be appended to the CQL string, possibly
+  * allowing for searches that would otherwise be forbidden. This comes at an efficiency cost.
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
+  static async countRecords(search, benignErrorReporter, allowFiltering){
+    let whereOptions = cassandraHelper.searchConditionsToCassandra(search, definition, allowFiltering) 
+    const query = 'SELECT COUNT(*) AS count FROM "<%- namePl -%>"' + whereOptions;
+    let queryResult = await this.storageHandler.execute(query);
+    let item = queryResult.first();
+    return parseInt(item['count']);
+  }
+
+  /**
+  * readAll - Limit-offset based pagination is not offered by Cassandra, and this method is left here only as information
+  * to the user / developer. Use *readAllCursor* instead, which relies on cursor based pagination.
+  * @throw {Error} If this method is used at all, an Error is thrown
+  */
+  static readAll(search, order, pagination){
+    throw new Error('Limit-offset based pagination is not supported by Cassandra');
+  }
+
+  /**
+  * readAllCursor - The model implementation for searching for records in Cassandra. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @param {boolean} allowFiltering - If the user has the right 'search', the term "ALLOW FILTERING" will be added to the
+  * CQL statement, allowing for more search queries at a efficiency cost.
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
+  static async readAllCursor(search, pagination, benignErrorReporter, allowFiltering){
+
+    let cassandraSearch = pagination && pagination.after ? cassandraHelper.cursorPaginationArgumentsToCassandra(search, pagination,'<%- idAttribute -%>') : search; 
+    let whereOptions = cassandraHelper.searchConditionsToCassandra(cassandraSearch, definition, allowFiltering);
+
+    <% columns = [`${idAttribute}`].concat(Object.keys(cassandraAttributes)).join(', ') -%>
+    let query = 'SELECT <%- columns -%>, token(<%- idAttribute -%>) as toke FROM "<%- namePl -%>"' + whereOptions;
+
+    // Set page size if needed
+    let options = {};
+    if (pagination && pagination.first) {
+      options.fetchSize = parseInt(pagination.first);
+    }
+
+    // Call to database 
+    const result = await this.storageHandler.execute(query, [], options);
+
+    // Construct return object
+    const rows = result.rows.map(row => {
+      let edge = {};
+      let rowAs<%- name -%> = new <%- adapterName -%>(row);
+      edge.node = rowAs<%- name -%>;
+      edge.cursor = rowAs<%- name -%>.base64Enconde();
+      return edge;
+    });
+
+    let startCursor = null;
+    let nextCursor = null;
+    let hasNextCursor = false;
+
+    /*
+    * The pageState attribute is where Cassandra stores its own version of a cursor.
+    * We cannot use it directly, because Cassandra uses different conventions. 
+    * But its presence shows that there is a following page.
+    */
+    if (helper.isNotUndefinedAndNotNull(result.pageState)) {
+      startCursor = rows[0].cursor;
+      nextCursor = rows[rows.length - 1].cursor;
+      hasNextCursor = true;
+    }
+
+    let pageInfo = {
+      startCursor: startCursor,
+      endCursor: nextCursor,
+      hasNextPage: hasNextCursor,
+      hasPreviousPage: false, // since cassandra does not support backward-pagination this will default false
+    }
+    return {edges: rows, pageInfo: pageInfo};
+  }
+
+  
+
+  <%# For a proper response at the end of the add-function, a SELECT query is performed to get the information from the database.
+      Usually, this would be a bad idea, because Cassandra is said to be quick at writing, but slow at querying.
+      However, this is only true for queries over *several partitions* (see https://www.scnsoft.com/blog/cassandra-performance), 
+      but we are using only one node here (no DDM).
+      Furthermore, we query for a single ID, so even in a distributed case, we wouldn't query over more than one partition. %>
+
+  /**
+  * addOne - The model implementation method for adding a record in Cassandra, based on CQL.
+  *
+  * @param {object} input_object - The input object with informations about the record to be added, destructured into
+  * the attribute components, but whithout associations or other information like *skipAssociationsExistenceChecks*.
+  * @return {object} The created record as <%- indefiniteArticle -%> <%- adapterName -%> object
+  * @throw {Error} If the process fails, an error is thrown
+  */
+  static async addOne({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> }){
+    let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> });
+    await validatorUtil.validateData('validateForCreate', this, input);
+    try{
+      const fields = '"' + Object.keys(input).join('", "') + '"';
+      const inputValues = Object.values(input);
+      const prepareString = new Array(Object.keys(input).length).fill('?').join(', ');
+      const mutation = 'INSERT INTO "<%- namePl -%>" (' + fields + ') VALUES (' + prepareString + ')';
+      // Call to database
+      await this.storageHandler.execute(mutation, inputValues, {prepare: true});
+      // return the newly created record by reading it
+      return await this.readById(<%- idAttribute -%>);
+    }catch(error){
+      throw error;
+    }  
+  }
+
+  /**
+  * deleteOne - The model implementation for deleting a single record, given by its ID, in Cassandra, based on CQL.
+  *
+  * @param {string} id - The ID of the record to be deleted
+  * @returns {string} A success message is returned
+  * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+  */
+  static async deleteOne(id){
+    await validatorUtil.validateData('validateForDelete', this, id);
+    const mutation = `DELETE FROM "<%- namePl -%>" WHERE <%- idAttribute -%> = ? IF EXISTS`;
+    let mutationResponse = await this.storageHandler.execute(mutation, [id]);
+    if(mutationResponse){
+      return 'Item successfully deleted';
+    } else {
+      throw new Error(`Record with ID = ${id} does not exist or could not been deleted`)
+    }
+  }
+
+  /**
+  * updateOne - The model implementation for updating a single record in Cassandra, based on CQL.
+  *
+  * @param {object} input_object - The input object with informations about the record to be updated, destructured into
+  * the attribute components, but whithout associations or other information like *skipAssociationsExistenceChecks*.
+  * @returns {object} A new object of the type <%- adapterName -%>, which represents the updated record
+  * @throw {Error} If this method fails, an error is thrown
+  */
+  static async updateOne({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> }){
+    let input = helper.copyWithoutUnsetAttributes({ <%- idAttribute -%>, <%- Object.keys(editableCassandraAttributes).join(", ") -%> });
+    await validatorUtil.ifHasValidatorFunctionInvoke('validateForUpdate', this, input);
+    try{
+      let idValue = input[this.idAttribute()];
+      delete input[this.idAttribute()];
+      let inputKeys = Object.keys(input);
+      let inputValues = Object.values(input);
+      inputValues.push(idValue);
+      // An update that does not change the attributes must not execute the following CQL statement
+      if (inputKeys.length > 0) {
+        let mutation = `UPDATE "<%- namePl -%>" SET `;
+        mutation += inputKeys.map(key => `"${key}" = ?`).join(', ');
+        mutation += ` WHERE <%- idAttribute -%> = ?;`;
+        await this.storageHandler.execute(mutation, inputValues, {prepare: true});
+      }
+      // return the newly created record by reading it
+      return await this.readById(<%- idAttribute -%>);
+    }catch(error){
+      throw error;
+    }
+  }
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   */
+  -%>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
+  
+  static async bulkAddCsv(context){
+    throw new Error('Bulk Adding from a CSV file is currently not implemented!');
+  }
+
+  /**
+   * csvTableTemplate - Allows the user to download a template in CSV format with the
+   * properties and types of this model.
+   *
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the
+   * GraphQL response will have a non empty errors property.
+   */
+  static async csvTableTemplate(benignErrorReporter){
+      return helper.csvTableTemplate(definition);
+  }
+
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
+  static idAttribute() {
+    return <%- adapterName -%>.definition.id.name;
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model
+   */
+
+  static idAttributeType() {
+    return <%- adapterName -%>.definition.id.type;
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- adapterName -%>.
+   *
+   * @return {type} id value
+   */
+
+  getIdValue() {
+    return this[<%- adapterName -%>.idAttribute()]
+  }
+
+  /**
+  * definition - Getter for the attribute 'definition'
+  * @return {string} the definition string
+  */
+  static get definition(){
+    return definition;
+  }
+
+  /**
+  * base64Decode - Decode a base 64 String to UTF-8.
+  * @param {string} cursor - The cursor to be decoded into the record, given in base 64
+  * @return {string} The stringified object in UTF-8 format
+  */
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  /**
+  * base64Enconde - Encode <%- indefiniteArticle -%> <%- adapterName -%> to a base 64 String
+  *
+  * @return {string} The <%- adapterName -%> object, encoded in a base 64 String
+  */
+    base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  /**
+  * stripAssociations - Instant method for getting all attributes of <%- indefiniteArticle -%> <%- adapterName -%>.
+  *
+  * @return {object} The attributes of <%- indefiniteArticle -%> <%- adapterName -%> in object form
+  */
+  stripAssociations(){
+    let attributes = Object.keys(<%- adapterName -%>.definition.attributes);
+  <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  /**
+  * externalIdsArray - Get all attributes of <%- indefiniteArticle -%> <%- adapterName -%> that are marked as external IDs.
+  *
+  * @return {Array<String>} An array of all attributes of <%- indefiniteArticle -%> <%- adapterName -%> that are marked as external IDs
+  */
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
+  /**
+  * externalIdsObject - Get all external IDs of <%- indefiniteArticle -%> <%- adapterName -%>.
+  *
+  * @return {object} An object that has the names of the external IDs as keys and their types as values
+  */
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
+  }
+}

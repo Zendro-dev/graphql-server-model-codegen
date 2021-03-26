@@ -14,5 +14,13 @@
     "database": "sciencedb_development",
     "host": "gql_mongodb1",
     "port": "27017"
+  },
+  "default-cassandra": {
+    "storageType": "cassandra",
+    "username": "cassandra",
+    "password": "cassandra",
+    "keyspace": "sciencedb",
+    "host": "cassandra1",
+    "port": "9042"
   }
 }

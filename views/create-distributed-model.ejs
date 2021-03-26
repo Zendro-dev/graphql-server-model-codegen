@@ -3,6 +3,7 @@ const path = require('path');
 const adapters = require('../adapters/index');
 const globals = require('../../config/globals');
 const helper = require('../../utils/helper');
+const cassandraHelper = require('../../utils/cassandra_helpers');
 const models = require(path.join(__dirname, '..', 'index.js'));
 const validatorUtil = require('../../utils/validatorUtil');
 const errorHelper = require('../../utils/errors');
@@ -20,11 +21,12 @@ module.exports = class <%- nameLc -%>{
    * @param  {obejct} input    Data for the new instances. Input for each field of the model.
    */
 
-  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%>}){
+  constructor({<%- idAttribute -%> <%for(var key in attributes){-%>,<%=key-%><%}-%><% if (cassandraRestrictions) { -%>, toke<% } %>}){
       this.<%- idAttribute -%> = <%- idAttribute -%>;
        <%for(var key in attributes){-%>
          this.<%=key-%> =<%=key-%>;
         <%}-%>
+        <% if (cassandraRestrictions) { %>this.toke = toke;<% } -%>
   }
 
   static get name(){
@@ -86,7 +88,7 @@ module.exports = class <%- nameLc -%>{
     }
   }
 
-  static countRecords(search, authorizedAdapters, benignErrorReporter){
+  static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters){
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -102,6 +104,12 @@ module.exports = class <%- nameLc -%>{
       authAdapters = Object.values(this.registeredAdapters);
     } else {
       authAdapters = Array.from(authorizedAdapters)
+    }
+
+    // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+    let searchAuthAdapters = [];
+    if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+      searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
@@ -128,6 +136,8 @@ module.exports = class <%- nameLc -%>{
         case 'mongodb-adapter':
         case 'zendro-webservice-adapter':
           return adapter.countRecords(search, benignErrorReporter);
+        case 'cassandra-adapter':
+          return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
         case 'default':
           throw new Error(`Adapter type: '${adapter.adapterType}' is not supported`);
@@ -149,7 +159,7 @@ module.exports = class <%- nameLc -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter) {
+  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -165,6 +175,12 @@ module.exports = class <%- nameLc -%>{
       authAdapters = Object.values(this.registeredAdapters);
     } else {
       authAdapters = Array.from(authorizedAdapters)
+    }
+
+    // map the adapters authorized for 'search' to cassandra-adapters. This is needed to pass the 'allowFiltering' parameter to the cassandra-adapter
+    let searchAuthAdapters = [];
+    if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
+      searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
 
     //use default BenignErrorReporter if no BenignErrorReporter defined
@@ -193,13 +209,15 @@ module.exports = class <%- nameLc -%>{
         case 'mongodb-adapter':
         case 'zendro-webservice-adapter':
           return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+        case 'cassandra-adapter':
+          return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
         default:
           throw new Error(`Adapter type '${adapter.adapterType}' is not supported`);
       }
     });
     let someHasNextPage = false;
-    let someHasPreviousPage = false;
+    <% if (!cassandraRestrictions) { %>let someHasPreviousPage = false;<% } %>
     return Promise.allSettled(promises)
     //phase 1: reduce
     .then( results => {
@@ -212,7 +230,7 @@ module.exports = class <%- nameLc -%>{
         else if (current.status === 'fulfilled') {
           if (current.value && current.value.pageInfo && current.value.edges) {
               someHasNextPage |= current.value.pageInfo.hasNextPage;
-              someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;
+              <% if (!cassandraRestrictions) { %>someHasPreviousPage |= current.value.pageInfo.hasPreviousPage;<% } %>
               total = total.concat(current.value.edges.map(e => e.node));
           }
         }
@@ -222,9 +240,16 @@ module.exports = class <%- nameLc -%>{
     //phase 2: validate & order & paginate
     .then( async nodes => {
       nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
-      if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }
+      <%if (!cassandraRestrictions) { %>if(order === undefined ){ order = [{field:"<%- idAttribute -%>", order:'ASC'}]; }<% } %>
       if(pagination === undefined ){ pagination = { first : Math.min(globals.LIMIT_RECORDS, nodes.length)  }}
 
+      <% if (cassandraRestrictions) { %>
+      let ordered_records = cassandraHelper.orderCassandraRecords(nodes);
+      let paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.limit);
+      let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage);
+      return graphQLConnection;
+      <% } else { %>
       let ordered_records = helper.orderRecords(nodes, order);
       let paginated_records = [];
 
@@ -239,6 +264,7 @@ module.exports = class <%- nameLc -%>{
 
       let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage);
       return graphQLConnection;
+      <% } %>
     });
   }
 

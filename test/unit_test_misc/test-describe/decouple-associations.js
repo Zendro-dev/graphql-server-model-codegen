@@ -24,7 +24,7 @@ dog.prototype.researcher = async function({
             });
             let found = (await resolvers.researchersConnection({
                 search: nsearch,
-                pagination: {first:1}
+                pagination: {first: 1}
             }, context)).edges;
             if (found.length > 0) {
                 return found[0].node
@@ -69,7 +69,7 @@ researcher.prototype.dog = async function({
 
       let found = (await resolvers.dogsConnection({
           search: nsearch,
-          pagination: {first:2}
+          pagination: {first: 2}
       }, context)).edges;
       if(found.length > 0){
           if(found.length > 1){
