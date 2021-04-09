@@ -134,6 +134,7 @@ module.exports = class <%- nameLc -%>{
 
         case 'sql-adapter':
         case 'mongodb-adapter':
+        case 'amazon-s3-adapter':
         case 'zendro-webservice-adapter':
           return adapter.countRecords(search, benignErrorReporter);
         case 'cassandra-adapter':
@@ -207,6 +208,7 @@ module.exports = class <%- nameLc -%>{
         case 'generic-adapter':
         case 'sql-adapter':
         case 'mongodb-adapter':
+        case 'amazon-s3-adapter':
         case 'zendro-webservice-adapter':
           return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
         case 'cassandra-adapter':
@@ -356,7 +358,13 @@ module.exports = class <%- nameLc -%>{
   }
 
   static bulkAddCsv(context) {
-    throw new Error("<%- nameLc -%>.bulkAddCsv is not implemented.")
+    let responsibleAdapter = registry.filter(adapter => adapters[adapter].adapterType!=="ddm-adapter");
+    if (responsibleAdapter.length > 1) {
+      throw new Error("match more than one adapter");
+    } else if (responsibleAdapter.length === 0) {
+      throw new Error("doesn't match an adapter");
+    }
+    return adapters[responsibleAdapter[0]].bulkAddCsv(context);
   }
 
   /**

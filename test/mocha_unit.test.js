@@ -10,6 +10,7 @@ const models_refactoring = require("./unit_test_misc/data_models_refactoring");
 const models_generic = require("./unit_test_misc/data_models_generic");
 const models_cassandra = require("./unit_test_misc/data_models_cassandra");
 const models_mongodb = require("./unit_test_misc/data_models_mongodb");
+const models_amazonS3 = require("./unit_test_misc/data_models_amazonS3");
 const requireFromString = require("require-from-string");
 const helpers = require("./unit_test_misc/helpers/reporting_helpers");
 const { test } = require("mocha");
@@ -2955,5 +2956,63 @@ describe("MongoDb Unit Test", function () {
       opts
     );
     testCompare(generated_model, data_test.mongodb_adapter_readById);
+  });
+});
+
+describe("Amazon S3/ Minio Unit Test", function () {
+  let data_test = require("./unit_test_misc/test-describe/amazonS3-unittest");
+
+  it("Amazon S3 model - reader constructor", async function () {
+    let opts = funks.getOptions(models_amazonS3.reader);
+    let generated_model = await funks.generateJs(
+      "create-models-amazonS3",
+      opts
+    );
+    testCompare(generated_model, data_test.reader_constructor);
+  });
+
+  it("Amazon S3 model - reader readById", async function () {
+    let opts = funks.getOptions(models_amazonS3.reader);
+    let generated_model = await funks.generateJs(
+      "create-models-amazonS3",
+      opts
+    );
+    testCompare(generated_model, data_test.reader_readById);
+  });
+
+  it("Amazon S3 model - reader countRecords", async function () {
+    let opts = funks.getOptions(models_amazonS3.reader);
+    let generated_model = await funks.generateJs(
+      "create-models-amazonS3",
+      opts
+    );
+    testCompare(generated_model, data_test.reader_countRecords);
+  });
+
+  it("Amazon S3 model - reader readAllCursor", async function () {
+    let opts = funks.getOptions(models_amazonS3.reader);
+    let generated_model = await funks.generateJs(
+      "create-models-amazonS3",
+      opts
+    );
+    testCompare(generated_model, data_test.reader_readAllCursor);
+  });
+
+  it("Amazon S3 model - reader bulkAddCsv", async function () {
+    let opts = funks.getOptions(models_amazonS3.reader);
+    let generated_model = await funks.generateJs(
+      "create-models-amazonS3",
+      opts
+    );
+    testCompare(generated_model, data_test.reader_bulkAddCsv);
+  });
+
+  it("Amazon S3 adapter - dist_reader_instance1 readById ", async function () {
+    let opts = funks.getOptions(models_amazonS3.dist_reader_instance1);
+    let generated_model = await funks.generateJs(
+      "create-amazonS3-adapter",
+      opts
+    );
+    testCompare(generated_model, data_test.amazonS3_adapter_readById);
   });
 });

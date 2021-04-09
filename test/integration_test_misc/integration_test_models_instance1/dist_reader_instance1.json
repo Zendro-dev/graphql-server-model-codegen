@@ -1,0 +1,16 @@
+{
+    "model": "dist_reader",
+    "storageType": "amazon-s3-adapter",
+    "adapterName": "dist_reader_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "reader_id": "String",
+        "reader_name": "String",
+        "age": "Float",
+        "student": "Boolean",
+        "lastSeen": "DateTime",
+        "history": "[String]"
+    },
+  
+    "internalId": "reader_id"
+}

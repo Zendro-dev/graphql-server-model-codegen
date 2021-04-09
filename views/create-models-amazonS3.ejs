@@ -1,0 +1,429 @@
+'use strict';
+
+const _ = require("lodash");
+const validatorUtil = require("../../utils/validatorUtil");
+const helper = require("../../utils/helper");
+const errorHelper = require("../../utils/errors");
+const fs = require("fs");
+const config = require("../../config/data_models_storage_config.json")[
+  "default-amazonS3"
+];
+const amazonS3Helper = require("../../utils/amazonS3_helper");
+const path = require("path");
+const uuidv4 = require("uuidv4").uuid;
+const os = require("os");
+
+// An exact copy of the the model definition that comes from the .json file
+const definition = <%- definition -%>;
+const params = {
+    Bucket: config.bucket,
+    Key: "<%- nameLc -%>.csv",
+    ExpressionType: "SQL",
+    InputSerialization: {
+      CSV: {
+        FileHeaderInfo: config.fileHeaderInfo,
+        RecordDelimiter: config.recordDelimiter,
+        FieldDelimiter: config.fieldDelimiter,
+      },
+      CompressionType: "NONE",
+    },
+    OutputSerialization: {
+      JSON: {
+        RecordDelimiter: ",",
+      },
+    },
+};
+/**
+ * module - Creates a class to administer model
+ */
+module.exports = class <%- nameLc -%> {
+  constructor(input) {
+    for (let key of Object.keys(input)) {
+      this[key] = input[key];
+    }
+  }
+
+  get storageHandler() {
+    return <%- nameLc -%>.storageHandler
+  }
+ 
+  /**
+  * name - Getter for the name attribute
+  *
+  * This attribute is needed by the models' index
+  * @return {string} The name of the model
+  */
+  static get name(){
+    return "<%- nameLc -%>";
+  }
+
+  /**
+   * Split string to array for the validation.
+   * @param  {object} record  Input Record.
+   * @return {object}         Parsed data record.
+   */
+  static postReadCast(record) {
+    for (let attr in definition.attributes) {
+      let type = definition.attributes[attr].replace(/\s+/g, "");
+      if (type[0] === "[") {
+        record[attr] = record[attr]
+          .split(config.arrayDelimiter)
+          .map((field) =>
+          this.typeConversion(field, type.slice(1, type.length - 1))
+          );
+        if (record[attr].length===1 && record[attr][0]===null){
+          record[attr] = null;
+        }
+      } else {
+        record[attr] = this.typeConversion(record[attr], type);
+      }
+    }
+    return record;
+  }
+
+
+  static typeConversion(field, type) {
+    let stringType = ["String", "Date", "Time", "DateTime"];
+    if (stringType.includes(type)) {
+      return field.replace(/\s+/g, "") === "" || field.toLowerCase() === "null"
+      ? null
+      : field;
+    } else if (type === "Int") {
+      return parseInt(field);
+    } else if (type === "Float") {
+      return parseFloat(field);
+    } else if (type === "Boolean") {
+      return field === "true";
+    } else {
+      console.log("No support for current type. Please check your input.");
+      return null;
+    }
+  }
+
+  /**
+  * readById - The model implementation for reading a single record given by its ID
+  *
+  * This method is the implementation for reading a single record for the Amazon S3 storage type, based on SQL.
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
+  static async readById(id){
+    const query = {
+      ...params,
+      Expression: `SELECT * FROM S3Object WHERE ${this.idAttribute()} = '${id}'`,
+    };
+    let item = null;
+    try {
+      const s3 = await this.storageHandler;
+      const result = await s3.selectObjectContent(query).promise();
+      const events = result.Payload;
+      for await (const event of events) {
+        // Check the top-level field to determine which event this is.
+        if (event.Records) {
+         // handle Records event
+          item = event.Records.Payload.toString();
+          item = JSON.parse(item.slice(0, item.length - 1));
+        }
+    }
+    if (!item) {
+      throw new Error(`Record with ID = "${id}" does not exist`);
+    }
+    } catch (e) {
+      throw new Error(e);
+    }
+    item = new <%- nameLc -%>(<%- nameLc -%>.postReadCast(item));
+    return validatorUtil.validateData("validateAfterRead", this, item);
+  }
+
+  /**
+  * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
+  * for the Amazon S3 storage type, based on SQL.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
+  static async countRecords(search, benignErrorReporter){
+    const whereOptions = amazonS3Helper.searchConditionsToAmazonS3(
+      search,
+      definition,
+      config.arrayDelimiter
+    );
+    const query = {
+      ...params,
+      Expression: `SELECT COUNT(*) AS num FROM S3Object ${whereOptions}`,
+    };
+    let num = null;
+    try {
+      const s3 = await this.storageHandler;
+      const result = await s3.selectObjectContent(query).promise();
+      const events = result.Payload;
+      for await (const event of events) {
+        // Check the top-level field to determine which event this is.
+        if (event.Records) {
+          // handle Records event
+          num = event.Records.Payload.toString();
+          num = JSON.parse(num.slice(0, num.length - 1)).num;
+        }
+      }
+    } catch (e) {
+      throw new Error(e);
+    }
+    return num;
+  }
+
+  /**
+  * readAll - Limit-offset based pagination is not offered by Amazon S3, and this method is left here only as information
+  * to the user / developer. Use *readAllCursor* instead, which relies on cursor based pagination.
+  * @throw {Error} If this method is used at all, an Error is thrown
+  */
+  static readAll(search, order, pagination, benignErrorReporter){
+    throw new Error('Limit-offset based pagination is not supported by Amazon S3');
+  }
+
+  /**
+  * readAllCursor - The model implementation for searching for records in Amazon S3. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
+  static async readAllCursor(search, order, pagination, benignErrorReporter){
+    if (order) {
+      console.log(`order would be ignored because S3 doesn't support sorting`);
+    }
+    let amazonS3Search =
+     pagination && pagination.after
+      ? amazonS3Helper.cursorPaginationArgumentsToAmazonS3(
+        search,
+        pagination,
+        this.idAttribute()
+        )
+        : search;
+    let whereOptions = amazonS3Helper.searchConditionsToAmazonS3(
+      amazonS3Search,
+      definition,
+      config.arrayDelimiter
+    );
+    let query = `SELECT * FROM S3Object ${whereOptions} `;
+  
+    if (pagination && pagination.first) {
+      query += ` LIMIT ${pagination.first}`;
+    }
+  
+    let records = null;
+    let num = 0;
+    try {
+      const s3 = await this.storageHandler;
+      let result = await s3
+        .selectObjectContent({
+          ...params,
+          Expression: query,
+          })
+        .promise();
+      let events = result.Payload;
+      for await (const event of events) {
+        // Check the top-level field to determine which event this is.
+        if (event.Records) {
+          // handle Records event
+          records = event.Records.Payload.toString();
+          records = JSON.parse("[" + records.slice(0, records.length - 1) + "]");
+        }
+      }
+      query = `SELECT COUNT(*) AS num FROM S3Object ${whereOptions}`;
+      result = await s3
+        .selectObjectContent({
+          ...params,
+          Expression: query,
+          })
+        .promise();
+        events = result.Payload;
+        for await (const event of events) {
+          // Check the top-level field to determine which event this is.
+          if (event.Records) {
+            // handle Records event
+            num = event.Records.Payload.toString();
+            num = JSON.parse(num.slice(0, num.length - 1)).num;
+          }
+        }
+    } catch (e) {
+      throw new Error(e);
+    }
+  
+    // Construct return object
+    const rows = records.map((row) => {
+      let edge = {};
+      let rowObject = new <%- nameLc -%>(<%- nameLc -%>.postReadCast(row));
+      edge.node = rowObject;
+      edge.cursor = rowObject.base64Enconde();
+      return edge;
+    });
+  
+    let startCursor = null;
+    let nextCursor = null;
+    let hasNextCursor = false;
+  
+    if (pagination && pagination.first && num > pagination.first) {
+      startCursor = rows[0].cursor;
+      nextCursor = rows[rows.length - 1].cursor;
+      hasNextCursor = true;
+    }
+  
+    let pageInfo = {
+      startCursor: startCursor,
+      endCursor: nextCursor,
+      hasNextPage: hasNextCursor,
+      hasPreviousPage: false,
+    };
+    return { edges: rows, pageInfo: pageInfo };
+  }
+
+  /**
+  * addOne - Not implemented for AmazonS3.
+  */
+  static async addOne(input){
+    throw new Error('Not supported by Amazon S3');
+  }
+
+  /**
+  * deleteOne - Delete the whole file.
+  */
+  static async deleteOne(id){
+    throw new Error('Not supported by Amazon S3');
+  }
+
+  /**
+  * updateOne - Not implemented for AmazonS3.
+  */
+  static async updateOne(input){
+    throw new Error('Not supported by Amazon S3');
+  }
+
+  static async bulkAddCsv(context) {
+    let tmpFile = path.join(os.tmpdir(), uuidv4() + ".csv");
+    try {
+      await context.request.files.csv_file.mv(tmpFile);
+      let file_param = {
+        Bucket: config.bucket,
+        Key: "<%- nameLc -%>.csv",
+        Body: fs.createReadStream(tmpFile),
+      };
+      const s3 = await this.storageHandler;
+      await s3.upload(file_param).promise();
+      fs.unlinkSync(tmpFile);
+    } catch (e) {
+      fs.unlinkSync(tmpFile);
+      throw new Error(e);
+    }
+    return `Successfully upload file`;
+  }
+  /**
+   * csvTableTemplate - Allows the user to download a template in CSV format with the
+   * properties and types of this model.
+   *
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the
+   * GraphQL response will have a non empty errors property.
+   */
+  static async csvTableTemplate(benignErrorReporter){
+      return helper.csvTableTemplate(definition);
+  }
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
+  static idAttribute() {
+    return <%- nameLc -%>.definition.id.name;
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model
+   */
+
+  static idAttributeType() {
+    return <%- nameLc -%>.definition.id.type;
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- nameLc -%>.
+   *
+   * @return {type} id value
+   */
+
+  getIdValue() {
+    return this[<%- nameLc -%>.idAttribute()]
+  }
+
+  /**
+  * definition - Getter for the attribute 'definition'
+  * @return {string} the definition string
+  */
+  static get definition(){
+    return definition;
+  }
+
+  /**
+  * base64Decode - Decode a base 64 String to UTF-8.
+  * @param {string} cursor - The cursor to be decoded into the record, given in base 64
+  * @return {string} The stringified object in UTF-8 format
+  */
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  /**
+  * base64Enconde - Encode  <%- nameLc -%> to a base 64 String
+  *
+  * @return {string} The <%- nameLc -%> object, encoded in a base 64 String
+  */
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  /**
+  * stripAssociations - Instant method for getting all attributes of <%- nameLc -%>.
+  *
+  * @return {object} The attributes of <%- nameLc -%> in object form
+  */
+  stripAssociations(){
+    let attributes = Object.keys(<%- nameLc -%>.definition.attributes);
+  <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  /**
+  * externalIdsArray - Get all attributes of <%- nameLc -%> that are marked as external IDs.
+  *
+  * @return {Array<String>} An array of all attributes of <%- nameLc -%> that are marked as external IDs
+  */
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
+  /**
+  * externalIdsObject - Get all external IDs of <%- nameLc -%>.
+  *
+  * @return {object} An object that has the names of the external IDs as keys and their types as values
+  */
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
+  }
+
+}

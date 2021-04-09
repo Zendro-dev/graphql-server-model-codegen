@@ -41,6 +41,18 @@ services:
     networks: 
       - instance1
       
+  gql_minio1:
+    image: minio/minio
+    container_name: minio1
+    environment:
+      MINIO_ROOT_USER: sciencedb
+      MINIO_ROOT_PASSWORD: sciencedb
+    ports:
+      - 9000:9000
+    command: server /data
+    networks:
+      - instance1
+
   gql_science_db_graphql_server1:
     container_name: server1
     depends_on:

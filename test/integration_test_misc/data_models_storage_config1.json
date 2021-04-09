@@ -22,5 +22,17 @@
     "keyspace": "sciencedb",
     "host": "cassandra1",
     "port": "9042"
+  },
+  "default-amazonS3": {
+    "storageType": "amazon-s3",
+    "username": "sciencedb",
+    "password": "sciencedb",
+    "bucket": "sciencedb-development",
+    "host": "gql_minio1",
+    "port": "9000",
+    "fileHeaderInfo": "USE",
+    "recordDelimiter": "\n",
+    "fieldDelimiter": ",",
+    "arrayDelimiter": ";"
   }
 }

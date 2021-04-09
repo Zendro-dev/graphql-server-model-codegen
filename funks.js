@@ -978,12 +978,14 @@ generateSections = async function (sections, opts, dir_write) {
       case "models-generic":
       case "models-cassandra":
       case "models-mongodb":
+      case "models-amazonS3":
       //adapters
       case "sql-adapter":
       case "zendro-adapters":
       case "generic-adapter":
       case "cassandra-adapter":
       case "mongodb-adapter":
+      case "amazonS3-adapter":
         file_name =
           dir_write + "/" + section.dir + "/" + section.fileName + ".js";
         break;
@@ -1086,6 +1088,7 @@ getStorageType = function (dataModel) {
         case "generic":
         case "cassandra":
         case "mongodb":
+        case "amazon-s3":
         //adapters
         case "sql-adapter":
         case "ddm-adapter":
@@ -1093,6 +1096,7 @@ getStorageType = function (dataModel) {
         case "generic-adapter":
         case "cassandra-adapter":
         case "mongodb-adapter":
+        case "amazon-s3-adapter":
           //ok
           break;
 
@@ -1151,6 +1155,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     "models/generic",
     "models/cassandra",
     "models/mongodb",
+    "models/amazonS3",
   ];
   let models = [];
   let adapters = [];
@@ -1437,6 +1442,24 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
 
         break;
 
+      case "amazon-s3":
+        sections = [
+          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+          {
+            dir: "models/amazonS3",
+            template: "models-amazonS3",
+            fileName: opts.nameLc,
+          },
+          {
+            dir: "validations",
+            template: "validations",
+            fileName: opts.nameLc,
+          },
+          { dir: "patches", template: "patches", fileName: opts.nameLc },
+        ];
+        break;
+
       case "zendro-webservice-adapter":
         sections = [
           {
@@ -1509,6 +1532,16 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         ];
         break;
 
+      case "amazon-s3-adapter":
+        sections = [
+          {
+            dir: "models/adapters",
+            template: "amazonS3-adapter",
+            fileName: opts.adapterName,
+          },
+          { dir: "patches", template: "patches", fileName: opts.adapterName },
+        ];
+        break;
       default:
         break;
     }
@@ -1537,6 +1570,9 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         "ddm-adapter",
         "sql-adapter",
         "generic-adapter",
+        "mongodb-adapter",
+        "cassandra-adapter",
+        "amazon-s3-adapter",
       ].includes(opts.storageType)
     ) {
       adapters.push(opts.adapterName);
