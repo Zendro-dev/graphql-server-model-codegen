@@ -163,15 +163,16 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
         let nodes = data_edges.map(e => e.node);
         let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
 
-        let edges = valid_nodes.map( e =>{
-          let temp_node = new Book(e);
+        let nodes_model = valid_nodes.map(e => new Book(e));
+
+        let edges = nodes_model.map( temp_node =>{
           return {
             node: temp_node,
             cursor: temp_node.base64Enconde()
           }
         })
 
-        return { edges, pageInfo, books: valid_nodes };
+        return { edges, pageInfo, books: nodes_model };
       } else {
         throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
       }

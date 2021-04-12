@@ -281,7 +281,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
               let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
               let hasPreviousPage = ordered_records.length > pagination.last || someHasPreviousPage;
 
-              let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage, books);
+              let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, hasPreviousPage, "books");
               return graphQLConnection;
           });
     }
