@@ -3131,6 +3131,8 @@ describe(
       expect(res.statusCode).to.equal(200);
       res = itHelpers.request_graph_ql_post('mutation{addAuthor(id:"remote_a2" name:"n2" addBooks:["remote_b1"]){id}}');
       expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post('mutation{addAuthor(id:"remote_a3" name:"n2"){id}}');
+      expect(res.statusCode).to.equal(200);
 
       res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_book(id:"remote_b1" title:"t1"){id} }');
       expect(res.statusCode).to.equal(200);
@@ -3138,6 +3140,8 @@ describe(
       expect(res.statusCode).to.equal(200);
 
       res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"remote_a2" name:"n2" addBooks:["remote_b1"]){id}}');
+      expect(res.statusCode).to.equal(200);
+      res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"remote_a3" name:"n3"){id}}');
       expect(res.statusCode).to.equal(200);
       res = itHelpers.request_graph_ql_post_instance2('mutation{addSq_author(id:"local_a2" name:"n2" addBooks:[ "local_b1"]){id}}');
       expect(res.statusCode).to.equal(200);
@@ -3152,10 +3156,12 @@ describe(
       itHelpers.request_graph_ql_post('mutation{deleteBook(id:"remote_b2")}');
       itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a1")}');
       itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a2")}');
+      itHelpers.request_graph_ql_post('mutation{deleteAuthor(id:"remote_a3")}');
 
       itHelpers.request_graph_ql_post_instance2('mutation{updateSq_author(id:"remote_a2" removeBooks:["remote_b1"]){id }}');
       itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"remote_b1")}');
       itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_author(id:"remote_a2")}');
+      itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_author(id:"remote_a3")}');
 
       itHelpers.request_graph_ql_post_instance2('mutation{updateSq_author(id:"local_a2" removeBooks:["local_b1"]){id }}');
       itHelpers.request_graph_ql_post_instance2('mutation{deleteSq_book(id:"local_b1")}');
@@ -3167,7 +3173,7 @@ describe(
       expect(res.statusCode).to.equal(200);
       let resBody = JSON.parse(res.body.toString('utf8'));
       //check associated records
-      expect(resBody.data).to.deep.equal({"authorsConnection":{"authors":[{"id":"remote_a1","booksConnection":{"books":[{"id":"remote_b1"},{"id":"remote_b2"}]}},{"id":"remote_a2","booksConnection":{"books":[{"id":"remote_b1"}]}}]}});
+      expect(resBody.data).to.deep.equal({"authorsConnection":{"authors":[{"id":"remote_a1","booksConnection":{"books":[{"id":"remote_b1"},{"id":"remote_b2"}]}},{"id":"remote_a2","booksConnection":{"books":[{"id":"remote_b1"}]}},{"id":"remote_a3","booksConnection":{"books":[]}}]}});
     });
 
     it('02. Distributed models instace', function() {
@@ -3175,7 +3181,7 @@ describe(
       expect(res.statusCode).to.equal(200);
       let resBody = JSON.parse(res.body.toString('utf8'));
       //check associated records
-      expect(resBody.data).to.deep.equal({"sq_authorsConnection":{"sq_authors":[{"id":"local_a2","booksConnection":{"sq_books":[{"id":"local_b1"}]}},{"id":"remote_a2","booksConnection":{"sq_books":[{"id":"remote_b1"}]}}]}});
+      expect(resBody.data).to.deep.equal({"sq_authorsConnection":{"sq_authors":[{"id":"local_a2","booksConnection":{"sq_books":[{"id":"local_b1"}]}},{"id":"remote_a2","booksConnection":{"sq_books":[{"id":"remote_b1"}]}},{"id":"remote_a3","booksConnection":{"sq_books":[]}}]}});
     });
 
     it('03. Remote zendro instace', function() {
@@ -3183,7 +3189,7 @@ describe(
       expect(res.statusCode).to.equal(200);
       let resBody = JSON.parse(res.body.toString('utf8'));
       //check associated records
-      expect(resBody.data).to.deep.equal({"authorsConnection":{"authors":[{"id":"remote_a1","booksConnection":{"books":[{"id":"remote_b1"},{"id":"remote_b2"}]}},{"id":"remote_a2","booksConnection":{"books":[{"id":"remote_b1"}]}}]}});
+      expect(resBody.data).to.deep.equal({"authorsConnection":{"authors":[{"id":"remote_a1","booksConnection":{"books":[{"id":"remote_b1"},{"id":"remote_b2"}]}},{"id":"remote_a2","booksConnection":{"books":[{"id":"remote_b1"}]}},{"id":"remote_a3","booksConnection":{"books":[]}}]}});
     });
 
   }); 

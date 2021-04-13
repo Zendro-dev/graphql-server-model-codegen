@@ -8,13 +8,13 @@
     {
       "name": "gql_science_db_graphql_server1",
       "template": "https://github.com/Zendro-dev/graphql-server.git",
-      "branch": "issue-148-connection-helper",
+      "branch": "master",
       "url": "http://localhost:3000/graphql"
     },
     {
       "name": "gql_science_db_graphql_server2",
       "template": "https://github.com/Zendro-dev/graphql-server.git",
-      "branch": "issue-148-connection-helper",
+      "branch": "master",
       "url": "http://localhost:3030/graphql"
     }
   ],
