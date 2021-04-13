@@ -38,7 +38,8 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo, books: records};
+    let nodes = edges.map(edge => edge.node); 
+    return {edges, pageInfo, books: nodes};
 }
 `
 
