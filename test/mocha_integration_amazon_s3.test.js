@@ -355,6 +355,9 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
               reader_id
             }
           }
+          readers{
+            reader_name
+          }
           pageInfo{
             endCursor
             hasNextPage
@@ -381,6 +384,14 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
               },
             },
           ],
+          readers: [
+            {
+              reader_name: "Dom",
+            },
+            {
+              reader_name: "Fecility",
+            },
+          ],
           pageInfo: {
             endCursor: cursorArray[3],
             hasNextPage: true,
@@ -398,7 +409,7 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
       data: {
         csvTableTemplateReader: [
           "reader_id,reader_name,age,student,lastSeen,history",
-          "Int,String,Float,Boolean,DateTime,[String]",
+          "String,String,Float,Boolean,DateTime,[String]",
         ],
       },
     });
@@ -511,9 +522,11 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
           edges {
             node {
               reader_id
-              reader_name
             }
             cursor
+          }
+          dist_readers{
+            reader_name
           }
           pageInfo {
             startCursor
@@ -536,7 +549,6 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
                 "eyJyZWFkZXJfaWQiOiJpbnN0YW5jZTEtMiIsInJlYWRlcl9uYW1lIjoiZGlzdF9MaWx5IiwiYWdlIjoyMC42LCJzdHVkZW50Ijp0cnVlLCJsYXN0U2VlbiI6IjIwMTctMTAtMDNUMTA6MTU6MzBaIiwiaGlzdG9yeSI6bnVsbH0=",
               node: {
                 reader_id: "instance1-2",
-                reader_name: "dist_Lily",
               },
             },
             {
@@ -544,9 +556,12 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
                 "eyJyZWFkZXJfaWQiOiJpbnN0YW5jZTEtMyIsInJlYWRlcl9uYW1lIjoiZGlzdF9Eb20iLCJhZ2UiOjcuNSwic3R1ZGVudCI6dHJ1ZSwibGFzdFNlZW4iOiIyMDIxLTAzLTAzVDEwOjE1OjMwWiIsImhpc3RvcnkiOm51bGx9",
               node: {
                 reader_id: "instance1-3",
-                reader_name: "dist_Dom",
               },
             },
+          ],
+          dist_readers: [
+            { reader_name: "dist_Lily" },
+            { reader_name: "dist_Dom" },
           ],
           pageInfo: {
             startCursor:

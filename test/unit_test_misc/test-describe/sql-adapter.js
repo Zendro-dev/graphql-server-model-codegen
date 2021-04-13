@@ -1,6 +1,6 @@
 module.exports.url_regex = `
 const iriRegex = new RegExp('peopleLocal');
-`
+`;
 
 module.exports.constructor = `
 static init(sequelize, DataTypes) {
@@ -30,7 +30,7 @@ static init(sequelize, DataTypes) {
         sequelize
     });
 }
-`
+`;
 module.exports.array_constructor = `
 static init(sequelize, DataTypes) {
     return super.init({
@@ -78,7 +78,7 @@ static init(sequelize, DataTypes) {
         sequelize
     });
 }
-`
+`;
 
 module.exports.storageHandler = `
 /**
@@ -88,12 +88,12 @@ module.exports.storageHandler = `
 get storageHandler() {
  return this.sequelize;
 }
-`
+`;
 module.exports.recognizeId = `
 static recognizeId(iri) {
     return iriRegex.test(iri);
 }
-`
+`;
 
 module.exports.readById = `
 static async readById(id) {
@@ -104,8 +104,7 @@ static async readById(id) {
     item = peopleLocalSql.postReadCast(item)
     return item;
 }
-`
-
+`;
 
 module.exports.addOne = `
 static async addOne(input) {
@@ -123,7 +122,7 @@ static async addOne(input) {
       } catch (error) {
           throw error;
       }
-    }`
+    }`;
 
 module.exports.count = `
 static countRecords(search) {
@@ -145,7 +144,7 @@ static countRecords(search) {
         }
         return super.count(options);
     }
-`
+`;
 module.exports.readAllCursor = `
 static async readAllCursor(search, order, pagination){
     // build the sequelize options object for cursor-based pagination
@@ -164,10 +163,9 @@ static async readAllCursor(search, order, pagination){
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, people: edges.map((edge) => edge.node)};
 }
-`
-
+`;
 
 module.exports.deleteOne = `
     static async deleteOne(id) {
@@ -177,7 +175,7 @@ module.exports.deleteOne = `
       }else{
         throw new Error(\`Record with ID = \${id} does not exist or could not been deleted\`);
       }
-    }`
+    }`;
 
 module.exports.updateOne = `
     static async updateOne(input) {
@@ -197,9 +195,7 @@ module.exports.updateOne = `
       } catch (error) {
           throw error;
       }
-    }`
-
-
+    }`;
 
 module.exports.removeWorks = `
   async _removeWorks(ids) {
@@ -208,7 +204,7 @@ module.exports.removeWorks = `
           await record.set_internalPersonId(null);
       });
   }
-`
+`;
 
 module.exports.addWorks = `
   async _addWorks(ids) {
@@ -217,7 +213,7 @@ module.exports.addWorks = `
           await record.set_internalPersonId(this.getIdValue());
       });
   }
-`
+`;
 
 module.exports.stripAssociations = `
 stripAssociations() {
@@ -225,33 +221,33 @@ stripAssociations() {
     let data_values = _.pick(this, attributes);
     return data_values;
 }
-`
+`;
 
 module.exports.getIdValue = `
 getIdValue() {
     return this[peopleLocalSql.idAttribute()]
 }
-`
+`;
 
 module.exports.idAttribute = `
 static idAttribute() {
     return peopleLocalSql.definition.id.name;
 }
-`
+`;
 
 module.exports.name = `
 static get name() {
     return "peopleLocalSql";
 }
-`
+`;
 
 module.exports.type = `
 static get adapterType() {
         return 'sql-adapter';
     }
-`
+`;
 
-module.exports.targetKey_ddm =`
+module.exports.targetKey_ddm = `
 async set_internalPersonId(value) {
   let input = {
     [Book.idAttribute()] : this.getIdValue(),
@@ -259,4 +255,4 @@ async set_internalPersonId(value) {
   };
   return await Book.updateOne( input);
 }
-`
+`;

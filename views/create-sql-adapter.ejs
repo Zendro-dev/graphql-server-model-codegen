@@ -165,7 +165,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
   static async addOne(input){

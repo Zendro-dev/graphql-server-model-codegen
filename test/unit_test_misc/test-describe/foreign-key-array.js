@@ -41,6 +41,7 @@ author.prototype.booksConnection = function({
   if (!Array.isArray(this.book_ids) || this.book_ids.length === 0 ) {
     return {
       edges: [],
+      books: [],
       pageInfo: {
           startCursor: null,
           endCursor: null,

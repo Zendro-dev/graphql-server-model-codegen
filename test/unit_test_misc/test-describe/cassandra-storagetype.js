@@ -67,6 +67,7 @@ module.exports = \`
     }
 type CityConnection{
   edges: [CityEdge]
+  cities: [city]
   pageInfo:pageInfo!
 }
 

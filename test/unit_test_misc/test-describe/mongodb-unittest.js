@@ -101,18 +101,15 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     }
 
     // build the graphql Connection Object
-    let edges = documents.map(doc => {
-        let edge = {}
-        let newDoc = new animal(doc)
-        edge.node = newDoc
-        edge.cursor = newDoc.base64Enconde()
-        return edge
+    let docs = documents.map( doc => { return new animal(doc)})
+    let edges = docs.map( doc => {
+      return {
+        node: doc,
+        cursor: doc.base64Enconde(),
+      }
     })
     let pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
-    return {
-        edges,
-        pageInfo
-    };
+    return {edges, pageInfo, animals: edges.map((edge) => edge.node)};
 }
 `;
 

@@ -131,13 +131,13 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     }
   
     // Construct return object
-    const rows = records.map((row) => {
-      let edge = {};
-      let rowObject = new reader(reader.postReadCast(row));
-      edge.node = rowObject;
-      edge.cursor = rowObject.base64Enconde();
-      return edge;
-    });
+    records = records.map( row => { return new reader(reader.postReadCast(row))})
+    let rows = records.map( row => {
+        return {
+          node: row,
+          cursor: row.base64Enconde(),
+        }
+    })
   
     let startCursor = null;
     let nextCursor = null;
@@ -155,7 +155,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       hasNextPage: hasNextCursor,
       hasPreviousPage: false,
     };
-    return { edges: rows, pageInfo: pageInfo };
+    return { edges: rows, pageInfo: pageInfo, readers: rows.map((edge) => edge.node) };
   }
 `;
 

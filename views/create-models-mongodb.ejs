@@ -131,18 +131,15 @@ module.exports = class <%- nameLc -%> {
     }
 
     // build the graphql Connection Object
-    let edges = documents.map( doc => {
-        let edge = {}
-        let newDoc= new <%- nameLc -%>(doc)
-        edge.node = newDoc
-        edge.cursor = newDoc.base64Enconde()
-        return edge
+    let docs = documents.map( doc => { return new <%- nameLc -%>(doc)})
+    let edges = docs.map( doc => {
+        return {
+          node: doc,
+          cursor: doc.base64Enconde(),
+        }
     })
     let pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
-    return {
-        edges,
-        pageInfo
-    };
+    return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
   static async addOne(input){

@@ -176,6 +176,9 @@ describe("Mongodb - Basic CRUD Operations", () => {
     res = itHelpers.request_graph_ql_post(
       `{
           animalsConnection(pagination:{first: 2, after: "${cursorArray[1]}"}) {
+              animals{
+                animal_name
+              }
               edges{
                   cursor
                   node{
@@ -194,6 +197,14 @@ describe("Mongodb - Basic CRUD Operations", () => {
     expect(resBody).to.deep.equal({
       data: {
         animalsConnection: {
+          animals: [
+            {
+              animal_name: "Milka1",
+            },
+            {
+              animal_name: "Milka2",
+            },
+          ],
           edges: [
             {
               cursor: cursorArray[2],
@@ -411,11 +422,17 @@ describe("Mongodb - Association", () => {
       `mutation{updateFarm(farm_id: 1, removeAnimals: [1, 2]) {
           farm_name
           animalsFilter(pagination:{limit:10}){
-              animal_name
+            animal_name
+          }
+          animalsConnection(pagination:{first:5}){
+            animals{
+              animal_id
+            }
           }
         }
       }`
     );
+
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
@@ -423,6 +440,9 @@ describe("Mongodb - Association", () => {
         updateFarm: {
           animalsFilter: [],
           farm_name: "Dogs' Home",
+          animalsConnection: {
+            animals: [],
+          },
         },
       },
     });
@@ -702,6 +722,9 @@ describe("Mongodb - Distributed Data Models", () => {
                 animal_name
               }
             }
+            dist_animals{
+              animal_id
+            }
           }
         }
       }
@@ -726,6 +749,10 @@ describe("Mongodb - Distributed Data Models", () => {
                   animal_name: "Sally",
                 },
               },
+            ],
+            dist_animals: [
+              { animal_id: "instance1-02" },
+              { animal_id: "instance1-03" },
             ],
           },
         },
@@ -908,8 +935,22 @@ describe("Mongodb - Distributed Data Models", () => {
 
   it("05. Animal DDM: update the farm to remove associations", () => {
     let res = itHelpers.request_graph_ql_post(
-      `mutation {updateDist_farm(farm_id:"instance1-01" removeDist_animals:["instance1-02", "instance1-03"]) {
-            farm_name countFilteredDist_animals dist_animalsConnection(pagination:{first:5}){edges {node {animal_name}}}}}`
+      `mutation {
+        updateDist_farm(farm_id:"instance1-01" removeDist_animals:["instance1-02", "instance1-03"]) {
+          farm_name
+          countFilteredDist_animals
+          dist_animalsConnection(pagination:{first:5}){
+            edges {
+              node {
+                animal_name
+              }
+            }
+            dist_animals{
+              animal_id
+            }
+          }
+        }
+      }`
     );
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
@@ -920,6 +961,7 @@ describe("Mongodb - Distributed Data Models", () => {
           countFilteredDist_animals: 0,
           dist_animalsConnection: {
             edges: [],
+            dist_animals: [],
           },
         },
       },

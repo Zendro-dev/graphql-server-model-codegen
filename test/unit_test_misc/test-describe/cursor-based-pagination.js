@@ -1,6 +1,7 @@
 module.exports.connection_book_schema = `
 type BookConnection{
   edges: [BookEdge]
+  books: [Book]
   pageInfo: pageInfo!
 }
 
@@ -18,7 +19,7 @@ module.exports.model_read_all_connection = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), book.definition.attributes);
     let records = await super.findAll(options);
@@ -37,7 +38,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, books: edges.map((edge) => edge.node)};
 }
 `;
 
@@ -116,7 +117,7 @@ booksConnectionImpl({
   order,
   pagination
 }) {
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.book.idAttribute(), models.book.definition.attributes);
     let records = await this.getBooks(options);
@@ -161,16 +162,17 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
         //validate after read
         let nodes = data_edges.map(e => e.node);
         let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
+        
+        let nodes_model = valid_nodes.map(e => new book(e));
 
-        let edges = valid_nodes.map( e =>{
-          let temp_node = new book(e);
+        let edges = nodes_model.map(temp_node  =>{
           return {
             node: temp_node,
             cursor: temp_node.base64Enconde()
           }
         })
 
-        return { edges, pageInfo };
+        return { edges, pageInfo, books: nodes_model };
       } else {
         throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
       }

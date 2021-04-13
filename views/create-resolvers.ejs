@@ -297,6 +297,7 @@ const associationArgsDef = {
         if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
           return {
             edges: [],
+            <%=associations_temp[i].target_lc_pl%>: [],
             pageInfo: {
                 startCursor: null,
                 endCursor: null,

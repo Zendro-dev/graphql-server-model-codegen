@@ -254,13 +254,13 @@ module.exports = class <%- adapterName -%> {
     }
   
     // Construct return object
-    const rows = records.map((row) => {
-      let edge = {};
-      let rowObject = new <%- adapterName -%>(<%- adapterName -%>.postReadCast(row));
-      edge.node = rowObject;
-      edge.cursor = rowObject.base64Enconde();
-      return edge;
-    });
+    records = records.map( row => { return new <%- adapterName -%>(<%- adapterName -%>.postReadCast(row))})
+    let rows = records.map( row => {
+        return {
+          node: row,
+          cursor: row.base64Enconde(),
+        }
+    })
   
     let startCursor = null;
     let nextCursor = null;
@@ -278,7 +278,7 @@ module.exports = class <%- adapterName -%> {
       hasNextPage: hasNextCursor,
       hasPreviousPage: false,
     };
-    return { edges: rows, pageInfo: pageInfo };
+    return { edges: rows, pageInfo: pageInfo, <%- namePl -%>: rows.map((edge) => edge.node)};
   }
 
   /**
