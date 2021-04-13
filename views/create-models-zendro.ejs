@@ -155,15 +155,16 @@ module.exports = class <%- name -%>{
         let nodes = data_edges.map(e => e.node);
         let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
 
-        let edges = valid_nodes.map( e =>{
-          let temp_node = new <%- name -%>(e);
+        let nodes_model = valid_nodes.map(e => new <%- name -%>(e));
+
+        let edges = nodes_model.map(temp_node  =>{
           return {
             node: temp_node,
             cursor: temp_node.base64Enconde()
           }
         })
 
-        return { edges, pageInfo };
+        return { edges, pageInfo, <%- namePl -%>: nodes_model };
       } else {
         throw new Error(`Remote server (${remoteZendroURL}) did not respond with data.`);
       }

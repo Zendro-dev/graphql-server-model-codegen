@@ -164,7 +164,7 @@ static async readAllCursor(search, order, pagination){
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, people:records};
 }
 `
 
