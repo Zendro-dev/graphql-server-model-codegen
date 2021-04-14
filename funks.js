@@ -970,7 +970,6 @@ generateSections = async function (sections, opts, dir_write) {
       case "resolvers":
       case "resolvers-ddm":
       case "resolvers-generic":
-      case "resolvers-mongodb":
       //models
       case "models":
       case "models-zendro":

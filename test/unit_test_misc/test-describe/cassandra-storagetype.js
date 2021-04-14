@@ -243,7 +243,8 @@ static async readAllCursor(search, pagination, benignErrorReporter, allowFilteri
   }
   return {
       edges: rows,
-      pageInfo: pageInfo
+      pageInfo: pageInfo,
+      cities: rows.map((edge) => edge.node)      
   };
 }
 `;
@@ -499,7 +500,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
       let ordered_records = cassandraHelper.orderCassandraRecords(nodes);
       let paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.limit);
       let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage);
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, false, "dist_incidents");
       return graphQLConnection;
 
     });
@@ -570,7 +571,8 @@ static async readAllCursor(search, pagination, benignErrorReporter, allowFilteri
   }
   return {
     edges: rows,
-    pageInfo: pageInfo
+    pageInfo: pageInfo,
+    dist_incidents: rows.map((edge) => edge.node)    
   };
 }
 `;

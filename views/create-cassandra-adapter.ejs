@@ -152,7 +152,7 @@ module.exports = class <%- adapterName -%> {
       hasNextPage: hasNextCursor,
       hasPreviousPage: false, // since cassandra does not support backward-pagination this will default false
     }
-    return {edges: rows, pageInfo: pageInfo};
+    return {edges: rows, pageInfo: pageInfo, <%- namePl -%>: rows.map((edge) => edge.node)};
   }
 
   

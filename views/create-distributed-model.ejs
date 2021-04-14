@@ -249,7 +249,7 @@ module.exports = class <%- nameLc -%>{
       let ordered_records = cassandraHelper.orderCassandraRecords(nodes);
       let paginated_records = helper.paginateRecordsCursor(ordered_records, pagination.limit);
       let hasNextPage = ordered_records.length > pagination.first || someHasNextPage;
-      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage);
+      let graphQLConnection = helper.toGraphQLConnectionObject(paginated_records, this, hasNextPage, false, "<%- namePl -%>");
       return graphQLConnection;
       <% } else { %>
       let ordered_records = helper.orderRecords(nodes, order);
