@@ -1,0 +1,43 @@
+<%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+    */
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      const mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+      await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
+      const checkCql = `SELECT * FROM "<%- namePl -%>" WHERE <%- idAttribute-%> = ?`;
+      let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
+      return new <%- name -%>(result.first());
+    }
+  <%} -%>
+<%}-%>
+
+<%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>
+  <% if (associationsArguments["to_many"][i].assocThroughArray) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_many"][i].sourceKey-%> - field Mutation (model-layer) for to_many associationsArguments to <%- op %>
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+    */
+    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      //handle inverse association
+      if(handle_inverse){
+        let promises = [];
+        <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+        });
+        await Promise.all(promises);
+      }
+
+      let mutation = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
+      await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>, <%- idAttribute-%>],{
+          prepare: true
+      });
+    }
+  <%} -%>
+<%}-%>

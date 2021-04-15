@@ -30,7 +30,7 @@ async function countAllAssociatedRecords(id, context) {
     return get_to_one_associated + get_to_many_associated;
 }
 
-`
+`;
 
 module.exports.validate_for_deletion = `
 /**
@@ -47,7 +47,7 @@ async function validForDeletion(id, context){
 
   return true;
 }
-`
+`;
 
 module.exports.delete_resolver = `
 /**
@@ -69,7 +69,7 @@ module.exports.delete_resolver = `
                 throw new Error("You don't have authorization to perform this action");
             }
     },
-`
+`;
 
 module.exports.valid_for_deletion_ddm = `
 /**
@@ -91,7 +91,7 @@ async function validForDeletion(id, context){
 
   return true;
 }
-`
+`;
 
 module.exports.handleAssociations = `
 /**
@@ -126,7 +126,7 @@ accession.prototype.handleAssociations = async function(input, benignErrorReport
       await Promise.all(promises_remove);
 
 }
-`
+`;
 
 module.exports.add_assoc_to_one_fieldMutation_resolver = `
 /**
@@ -139,7 +139,7 @@ accession.prototype.add_location = async function(input, benignErrorReporter) {
     await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter);
     this.locationId = input.addLocation;
 }
-`
+`;
 
 module.exports.remove_assoc_to_one_fieldMutation_resolver = `
 /**
@@ -154,7 +154,7 @@ accession.prototype.remove_location = async function(input, benignErrorReporter)
         this.locationId = null;
     }
 }
-`
+`;
 module.exports.add_assoc_to_one_fieldMutation_resolver_fK_in_target = `
 /**
  * add_dog - field Mutation for to_one associations to add
@@ -166,7 +166,7 @@ researcher.prototype.add_dog = async function(input, benignErrorReporter) {
     await models.dog.add_researcherId(input.addDog, this.getIdValue(), benignErrorReporter);
 }
 
-`
+`;
 
 module.exports.remove_assoc_to_one_fieldMutation_resolver_fK_in_target = `
 /**
@@ -179,7 +179,7 @@ researcher.prototype.remove_dog = async function(input, benignErrorReporter) {
     await models.dog.remove_researcherId(input.removeDog, this.getIdValue(), benignErrorReporter);
 }
 
-`
+`;
 
 module.exports.add_assoc_to_many_fieldMutation_resolver = `
 /**
@@ -198,7 +198,7 @@ accession.prototype.add_individuals = async function(input, benignErrorReporter)
     });
     await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
-`
+`;
 
 module.exports.remove_assoc_to_many_fieldMutation_resolver = `
 /**
@@ -217,11 +217,11 @@ accession.prototype.remove_individuals = async function(input, benignErrorReport
     });
     await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
-`
+`;
 
 module.exports._addAssoc_to_one_fieldMutation_sql_model = `
 static async add_locationId(accession_id, locationId) {
-  let updated = await Accession.update({
+  let updated = await accession.update({
       locationId: locationId
   }, {
       where: {
@@ -230,10 +230,10 @@ static async add_locationId(accession_id, locationId) {
   });
   return updated;
 }
-`
+`;
 module.exports._removeAssoc_to_one_fieldMutation_sql_model = `
 static async remove_locationId(accession_id, locationId) {
-  let updated = await Accession.update({
+  let updated = await accession.update({
       locationId: null
   }, {
       where: {
@@ -243,8 +243,8 @@ static async remove_locationId(accession_id, locationId) {
   });
   return updated;
 }
-`
-module.exports.to_one_add =`
+`;
+module.exports.to_one_add = `
 /**
  * add_location - field Mutation for to_one associations to add
  *
@@ -255,7 +255,7 @@ accession.prototype.add_location = async function(input, benignErrorReporter) {
     await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter);
     this.locationId = input.addLocation;
 }
-`
+`;
 
 module.exports.to_one_remove = `
 /**
@@ -270,7 +270,7 @@ accession.prototype.remove_location = async function(input, benignErrorReporter)
       this.locationId = null;
     }
 }
-`
+`;
 
 module.exports.to_many_add = `
 /**
@@ -289,7 +289,7 @@ accession.prototype.add_individuals = async function(input, benignErrorReporter)
     });
     await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
-`
+`;
 
 module.exports.to_many_remove = `
 /**
@@ -308,7 +308,7 @@ accession.prototype.remove_individuals = async function(input, benignErrorReport
     });
     await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
 }
-`
+`;
 
 module.exports.add_assoc_ddm_model = `
 /**
@@ -322,7 +322,7 @@ static async add_locationId(accession_id, locationId, benignErrorReporter) {
 let responsibleAdapter = this.adapterForIri(accession_id);
 return await adapters[responsibleAdapter].add_locationId(accession_id, locationId, benignErrorReporter);
 }
-`
+`;
 
 module.exports.remove_assoc_ddm_model = `
 /**
@@ -336,9 +336,9 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter) {
   let responsibleAdapter = this.adapterForIri(accession_id);
   return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId, benignErrorReporter);
 }
-`
+`;
 
-module.exports.to_one_remove_sql_adapter =  `
+module.exports.to_one_remove_sql_adapter = `
 static async remove_locationId(accession_id, locationId) {
   let updated = await super.update({
       locationId: null
@@ -350,7 +350,7 @@ static async remove_locationId(accession_id, locationId) {
   });
   return updated;
 }
-`
+`;
 
 module.exports.to_one_add_sql_adapter = `
 static async add_locationId(accession_id, locationId) {
@@ -363,7 +363,7 @@ static async add_locationId(accession_id, locationId) {
   });
   return updated;
 }
-`
+`;
 
 module.exports.to_one_add_zendro_adapter = `
 /**
@@ -408,7 +408,7 @@ let query = \`
       errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;
 
 module.exports.to_one_remove_zendro_adapter = `
 /**
@@ -452,7 +452,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;
 module.exports.add_one_resolver = `
 /**
  * addAccession - Check user authorization and creates a new record with data specified in the input argument
@@ -484,7 +484,7 @@ module.exports.add_one_resolver = `
              throw new Error("You don't have authorization to perform this action on adapter");
          }
  }
-`
+`;
 
 module.exports.update_one_resolver = `
 /**
@@ -517,7 +517,7 @@ module.exports.update_one_resolver = `
                throw new Error("You don't have authorization to perform this action on adapter");
            }
    }
-`
+`;
 
 module.exports.add_one_zendro_adapter = `
 static async addOne(input, benignErrorReporter) {
@@ -558,7 +558,7 @@ static async addOne(input, benignErrorReporter) {
     }
 
 }
-`
+`;
 
 module.exports.update_one_zendro_adapter = `
 static async updateOne(input, benignErrorReporter) {
@@ -599,4 +599,4 @@ static async updateOne(input, benignErrorReporter) {
       errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;

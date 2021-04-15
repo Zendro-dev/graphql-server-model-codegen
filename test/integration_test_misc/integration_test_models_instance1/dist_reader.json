@@ -1,0 +1,15 @@
+{
+    "model": "dist_reader",
+    "storageType" : "distributed-data-model",
+    "registry": ["dist_reader_instance1"],
+    "attributes": {
+        "reader_id": "String",
+        "reader_name": "String",
+        "age": "Float",
+        "student": "Boolean",
+        "lastSeen": "DateTime",
+        "history": "[String]"
+    },
+  
+    "internalId" : "reader_id"
+}

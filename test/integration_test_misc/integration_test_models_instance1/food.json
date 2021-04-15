@@ -1,0 +1,27 @@
+{
+    "model" : "food",
+    "storageType" : "mongodb",
+    "attributes" : {
+        "food_id": "String",
+        "food_name": "String",
+        "animal_ids": "[String]"
+    },
+
+    "associations":{
+      "animals":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "animal",
+        "targetKey": "food_ids",
+        "sourceKey": "animal_ids",
+        "keyIn": "food",
+        "targetStorageType": "mongodb"
+      }
+    },
+
+    "internalId": "food_id",
+    "id":{
+        "name": "food_id",
+        "type": "String" 
+    }
+}

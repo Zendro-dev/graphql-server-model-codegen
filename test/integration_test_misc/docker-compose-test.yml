@@ -11,10 +11,53 @@ services:
     networks:
      - instance1
 
+  gql_mongodb1:
+    image: mongo
+    container_name: mongodb1
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=sciencedb
+      - MONGO_INITDB_ROOT_PASSWORD=sciencedb
+      - MONGO_INITDB_DATABASE=sciencedb_development
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    ports:
+      - 27017:27017
+    networks:
+      - instance1
+
+  gql_cassandra1:
+    container_name: cassandra1
+    build:
+      context: .
+      dockerfile: Dockerfile.cassandra
+    volumes: 
+      - ./docker-entrypoint.sh.cassandra:/docker-entrypoint.sh
+      - ./cassandra-keyspace.cql:/docker-entrypoint-initdb.d/cassandra-keyspace.cql
+    ports: 
+      - 9042:9042
+    environment: 
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=128M
+    networks: 
+      - instance1
+      
+  gql_minio1:
+    image: minio/minio
+    container_name: minio1
+    environment:
+      MINIO_ROOT_USER: sciencedb
+      MINIO_ROOT_PASSWORD: sciencedb
+    ports:
+      - 9000:9000
+    command: server /data
+    networks:
+      - instance1
+
   gql_science_db_graphql_server1:
     container_name: server1
     depends_on:
       - gql_postgres1
+      - gql_mongodb1
     build:
       context: .
       dockerfile: Dockerfile.graphql_server

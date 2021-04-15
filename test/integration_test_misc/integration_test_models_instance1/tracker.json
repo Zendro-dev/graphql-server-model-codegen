@@ -1,0 +1,23 @@
+{
+    "model" : "tracker",
+    "storageType" : "mongodb",
+    "attributes" : {
+      "tracker_id": "String",
+      "animal_id" : "String",
+      "location": "String"
+    },
+    "associations": {
+      "unique_animal": {
+        "type" : "to_one",
+        "target" : "animal",
+        "targetKey" : "animal_id",
+        "keyIn": "tracker",
+        "targetStorageType" : "mongodb"
+      }
+    },
+    "internalId": "tracker_id",
+    "id": {
+        "name": "tracker_id",
+        "type": "String"
+    }
+}

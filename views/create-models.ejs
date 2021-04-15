@@ -28,7 +28,7 @@ const definition = <%- definition -%>;
  * @return {object}           Sequelize model with associations defined
  */
 
-module.exports = class <%- name -%> extends Sequelize.Model{
+module.exports = class <%- nameLc -%> extends Sequelize.Model{
 
   static init(sequelize, DataTypes){
     return super.init({
@@ -114,16 +114,16 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         <%if (key !== 'associations'){-%>
           <%if(associationsArguments[key][i].targetStorageType === 'sql' && !associationsArguments[key][i].assocThroughArray){-%>
             <%if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
-              <%- name -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
+              <%- nameLc -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
             <% if (associationsArguments[key][i].type === 'to_one' && associationsArguments[key][i].keyIn === associationsArguments[key][i].target){-%>
-              <%- name -%>.hasOne(models.<%= associationsArguments[key][i].target_lc -%>
+              <%- nameLc -%>.hasOne(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
             <% if (associationsArguments[key][i].type === 'to_many' && associationsArguments[key][i].keyIn === associationsArguments[key][i].target){-%>
-              <%- name -%>.hasMany(models.<%= associationsArguments[key][i].target_lc -%>
+              <%- nameLc -%>.hasMany(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
             <% if (associationsArguments[key][i].type === 'to_many_through_sql_cross_table' ){-%>
-              <%- name -%>.belongsToMany(models.<%= associationsArguments[key][i].target_lc -%>
+              <%- nameLc -%>.belongsToMany(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
             <% if(key === 'to_many_through_sql_cross_table'){ -%> ,{as: '<%= associationsArguments[key][i].name -%>',
             foreignKey:'<%= associationsArguments[key][i].sourceKey -%>',
@@ -138,17 +138,17 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   }
 
   static async readById(id){
-    let item = await <%- name -%>.findByPk(id);
+    let item = await <%- nameLc -%>.findByPk(id);
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
-    item = <%- name -%>.postReadCast(item)
+    item = <%- nameLc -%>.postReadCast(item)
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
   static async countRecords(search){
     let options = {}
-    options['where'] = helper.searchConditionsToSequelize(search, <%- name -%>.definition.attributes);
+    options['where'] = helper.searchConditionsToSequelize(search, <%- nameLc -%>.definition.attributes);
     return super.count(options);
   }
 
@@ -156,9 +156,9 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
-    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), <%- name -%>.definition.attributes);  
+    let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), <%- nameLc -%>.definition.attributes);  
     let records = await super.findAll(options);
-    records = records.map(x => <%- name -%>.postReadCast(x))
+    records = records.map(x => <%- nameLc -%>.postReadCast(x))
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
   }
@@ -168,10 +168,10 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- name -%>.definition.attributes);
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- nameLc -%>.definition.attributes);
     let records = await super.findAll(options);
 
-    records = records.map(x => <%- name -%>.postReadCast(x))
+    records = records.map(x => <%- nameLc -%>.postReadCast(x))
 
     // validationCheck after read
     records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
@@ -179,27 +179,26 @@ module.exports = class <%- name -%> extends Sequelize.Model{
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), <%- name -%>.definition.attributes);
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), <%- nameLc -%>.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    let nodes = edges.map(edge => edge.node); 
-    return {edges, pageInfo, <%- namePl -%>: nodes};
+    return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
   static async addOne(input){
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
-    input = <%- name -%>.preWriteCast(input)
+    input = <%- nameLc -%>.preWriteCast(input)
     try{
       const result = await this.sequelize.transaction( async(t) =>{
         let item = await super.create(input, {transaction:t});
         return item;
       });
-      <%- name -%>.postReadCast(result.dataValues)
-      <%- name -%>.postReadCast(result._previousDataValues)
+      <%- nameLc -%>.postReadCast(result.dataValues)
+      <%- nameLc -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
@@ -221,7 +220,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   static async updateOne(input){
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
-    input = <%- name -%>.preWriteCast(input)
+    input = <%- nameLc -%>.preWriteCast(input)
     try{
       let result = await this.sequelize.transaction( async (t) =>{
         let to_update = await super.findByPk(input[this.idAttribute()]);
@@ -232,8 +231,8 @@ module.exports = class <%- name -%> extends Sequelize.Model{
         let updated = await to_update.update(input, {transaction : t});
         return updated;
       });
-      <%- name -%>.postReadCast(result.dataValues)
-      <%- name -%>.postReadCast(result._previousDataValues)
+      <%- nameLc -%>.postReadCast(result.dataValues)
+      <%- nameLc -%>.postReadCast(result._previousDataValues)
       return result;
     }catch(error){
       throw error;
@@ -291,7 +290,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
           throw new Error(error);
       });
 
-      return `Bulk import of <%- name -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
+      return `Bulk import of <%- nameLc -%> records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
   }
 
   /**
@@ -453,7 +452,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
    * @return {type} Name of the attribute that functions as an internalId
    */
   static idAttribute() {
-    return <%- name -%>.definition.id.name;
+    return <%- nameLc -%>.definition.id.name;
   }
 
   /**
@@ -462,16 +461,16 @@ module.exports = class <%- name -%> extends Sequelize.Model{
    * @return {type} Type given in the JSON model
    */
   static idAttributeType() {
-    return <%- name -%>.definition.id.type;
+    return <%- nameLc -%>.definition.id.type;
   }
 
   /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- nameLc -%>.
    *
    * @return {type} id value
    */
   getIdValue() {
-    return this[<%- name -%>.idAttribute()]
+    return this[<%- nameLc -%>.idAttribute()]
   }
 
   static get definition(){
@@ -487,7 +486,7 @@ module.exports = class <%- name -%> extends Sequelize.Model{
   }
 
   stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
+    let attributes = Object.keys(<%- nameLc -%>.definition.attributes);
   <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
     let data_values = _.pick(this, attributes);
     return data_values;

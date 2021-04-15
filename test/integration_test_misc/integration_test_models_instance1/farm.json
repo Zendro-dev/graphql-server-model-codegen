@@ -1,0 +1,24 @@
+{
+    "model": "farm",
+    "storageType": "mongodb",
+    "attributes": {
+        "farm_id": "String",
+        "farm_name": "String",
+        "owner": "String"
+    },
+    "associations": {
+        "animals": {
+            "type": "to_many",
+            "target": "animal",
+            "targetKey": "farm_id",
+            "keyIn": "animal",
+            "targetStorageType": "mongodb",
+            "label": "animal_id"
+        }
+    },
+    "internalId": "farm_id",
+    "id": {
+        "name": "farm_id",
+        "type": "String"
+    }
+}
