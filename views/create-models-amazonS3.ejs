@@ -81,7 +81,12 @@ module.exports = class <%- nameLc -%> {
     return record;
   }
 
-
+  /**
+   * Cast field to corresponding data type.
+   * @param  {string} field  Value in the field.
+   * @param  {string} type   Datatype for current field.
+   * @return {null|int|bool|float|string} Parsed data field.
+   */
   static typeConversion(field, type) {
     let stringType = ["String", "Date", "Time", "DateTime"];
     if (stringType.includes(type)) {
@@ -211,20 +216,19 @@ module.exports = class <%- nameLc -%> {
     let query = `SELECT * FROM S3Object ${whereOptions} `;
   
     if (pagination && pagination.first) {
-      query += ` LIMIT ${pagination.first}`;
+      query += ` LIMIT ${pagination.first+1}`;
     }
   
     let records = null;
-    let num = 0;
     try {
       const s3 = await this.storageHandler;
-      let result = await s3
+      const result = await s3
         .selectObjectContent({
           ...params,
           Expression: query,
           })
         .promise();
-      let events = result.Payload;
+      const events = result.Payload;
       for await (const event of events) {
         // Check the top-level field to determine which event this is.
         if (event.Records) {
@@ -233,22 +237,6 @@ module.exports = class <%- nameLc -%> {
           records = JSON.parse("[" + records.slice(0, records.length - 1) + "]");
         }
       }
-      query = `SELECT COUNT(*) AS num FROM S3Object ${whereOptions}`;
-      result = await s3
-        .selectObjectContent({
-          ...params,
-          Expression: query,
-          })
-        .promise();
-        events = result.Payload;
-        for await (const event of events) {
-          // Check the top-level field to determine which event this is.
-          if (event.Records) {
-            // handle Records event
-            num = event.Records.Payload.toString();
-            num = JSON.parse(num.slice(0, num.length - 1)).num;
-          }
-        }
     } catch (e) {
       throw new Error(e);
     }
@@ -266,7 +254,8 @@ module.exports = class <%- nameLc -%> {
     let nextCursor = null;
     let hasNextCursor = false;
   
-    if (pagination && pagination.first && num > pagination.first) {
+    if (pagination && pagination.first && rows.length > pagination.first) {
+      rows.pop();
       startCursor = rows[0].cursor;
       nextCursor = rows[rows.length - 1].cursor;
       hasNextCursor = true;
@@ -278,7 +267,6 @@ module.exports = class <%- nameLc -%> {
       hasNextPage: hasNextCursor,
       hasPreviousPage: false,
     };
-    
     return { edges: rows, pageInfo: pageInfo, <%- namePl -%>: rows.map((edge) => edge.node)};
   }
 
@@ -303,6 +291,11 @@ module.exports = class <%- nameLc -%> {
     throw new Error('Not supported by Amazon S3');
   }
 
+  /**
+  * bulkAddCsv - Add records from csv file
+  *
+  * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
+  */
   static async bulkAddCsv(context) {
     let tmpFile = path.join(os.tmpdir(), uuidv4() + ".csv");
     try {

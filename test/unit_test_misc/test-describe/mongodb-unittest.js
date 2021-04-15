@@ -8,8 +8,8 @@ constructor(input) {
 
 module.exports.animal_readById = `
 static async readById(id) {
-    const db = await this.storageHandler
-    const collection = await db.collection("animal")
+    const db = await this.storageHandler;
+    const collection = await db.collection("animal");
     const id_name = this.idAttribute();
     let item = await collection.findOne({
         [id_name]: id
@@ -24,11 +24,11 @@ static async readById(id) {
 
 module.exports.animal_countRecords = `
 static async countRecords(search) {
-    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    const db = await this.storageHandler
-    const collection = await db.collection("animal")
-    let number = await collection.countDocuments(filter)
-    return number
+    const filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const db = await this.storageHandler;
+    const collection = await db.collection("animal");
+    const number = await collection.countDocuments(filter);
+    return number;
 }
 `;
 
@@ -37,16 +37,16 @@ static async readAll(search, order, pagination, benignErrorReporter) {
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the filter object for limit-offset-based pagination
-    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    let sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
+    const filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
 
-    let limit = pagination.limit ? pagination.limit : undefined;
-    let offset = pagination.offset ? pagination.offset : 0;
+    const limit = pagination.limit ? pagination.limit : undefined;
+    const offset = pagination.offset ? pagination.offset : 0;
 
-    const db = await this.storageHandler
-    const collection = await db.collection("animal")
-    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray()
-    documents = documents.map(doc => new animal(doc))
+    const db = await this.storageHandler;
+    const collection = await db.collection("animal");
+    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray();
+    documents = documents.map(doc => new animal(doc));
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
 
@@ -60,19 +60,19 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the filter object.
     let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    let newOrder = isForwardPagination ? order : helper.reverseOrderConditions(order)
+    let newOrder = isForwardPagination ? order : helper.reverseOrderConditions(order);
     // depending on the direction build the order object
-    let sort = mongoDbHelper.orderConditionsToMongoDb(newOrder, this.idAttribute(), isForwardPagination)
-    let orderFields = newOrder ? newOrder.map(x => x.field) : []
+    let sort = mongoDbHelper.orderConditionsToMongoDb(newOrder, this.idAttribute(), isForwardPagination);
+    let orderFields = newOrder ? newOrder.map(x => x.field) : [];
     // extend the filter for the given order and cursor
     filter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(pagination, sort, filter, orderFields, this.idAttribute());
 
     // add +1 to the LIMIT to get information about following pages.
     let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first + 1 : helper.isNotUndefinedAndNotNull(pagination.last) ? pagination.last + 1 : undefined;
 
-    const db = await this.storageHandler
-    const collection = await db.collection("animal")
-    let documents = await collection.find(filter).limit(limit).sort(sort).toArray()
+    const db = await this.storageHandler;
+    const collection = await db.collection("animal");
+    let documents = await collection.find(filter).limit(limit).sort(sort).toArray();
 
     // validationCheck after read
     documents = await validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
@@ -89,26 +89,26 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
         // build the filter object.
         let oppFilter = mongoDbHelper.searchConditionsToMongoDb(search);
 
-        let oppOrder = oppForwardPagination ? order : helper.reverseOrderConditions(order)
+        let oppOrder = oppForwardPagination ? order : helper.reverseOrderConditions(order);
         // depending on the direction build the order object
-        let oppSort = mongoDbHelper.orderConditionsToMongoDb(oppOrder, this.idAttribute(), oppForwardPagination)
-        let oppOrderFields = oppOrder ? oppOrder.map(x => x.field) : []
+        let oppSort = mongoDbHelper.orderConditionsToMongoDb(oppOrder, this.idAttribute(), oppForwardPagination);
+        let oppOrderFields = oppOrder ? oppOrder.map(x => x.field) : [];
         // extend the filter for the given order and cursor
         oppFilter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(oppPagination, oppSort, oppFilter, oppOrderFields, this.idAttribute());
         // add +1 to the LIMIT to get information about following pages.
         let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ? oppPagination.first + 1 : helper.isNotUndefinedAndNotNull(oppPagination.last) ? oppPagination.last + 1 : undefined;
-        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray()
+        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray();
     }
 
     // build the graphql Connection Object
-    let docs = documents.map( doc => { return new animal(doc)})
+    let docs = documents.map( doc => { return new animal(doc)});
     let edges = docs.map( doc => {
       return {
         node: doc,
         cursor: doc.base64Enconde(),
       }
-    })
-    let pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
+    });
+    const pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
     return {edges, pageInfo, animals: edges.map((edge) => edge.node)};
 }
 `;
@@ -118,14 +118,14 @@ static async addOne(input) {
     // validate input
     await validatorUtil.validateData('validateForCreate', this, input);
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const db = await this.storageHandler;
+        const collection = await db.collection("animal");
         // remove skipAssociationsExistenceChecks
-        delete input.skipAssociationsExistenceChecks
+        delete input.skipAssociationsExistenceChecks;
         const result = await collection.insertOne(input);
         const id_name = this.idAttribute();
         const document = await this.readById(input[id_name]);
-        return document
+        return document;
     } catch (error) {
         throw error;
     }
@@ -138,8 +138,8 @@ static async deleteOne(id) {
     //validate id
     await validatorUtil.validateData('validateForDelete', this, id);
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const db = await this.storageHandler;
+        const collection = await db.collection("animal");
         const id_name = this.idAttribute();
         const response = await collection.deleteOne({
             [id_name]: id
@@ -149,7 +149,7 @@ static async deleteOne(id) {
         }
         return 'Item successfully deleted';
     } catch (error) {
-        console.log(\`Record with ID = \${id} does not exist or could not been deleted\`)
+        console.log(\`Record with ID = \${id} does not exist or could not been deleted\`);
         throw error;
     }
 }
@@ -160,11 +160,11 @@ static async updateOne(input) {
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const db = await this.storageHandler;
+        const collection = await db.collection("animal");
         // remove skipAssociationsExistenceChecks
-        delete input.skipAssociationsExistenceChecks
-        const updatedContent = {}
+        delete input.skipAssociationsExistenceChecks;
+        const updatedContent = {};
         for (let key of Object.keys(input)) {
             if (key !== "id") {
                 updatedContent[key] = input[key];
@@ -181,7 +181,7 @@ static async updateOne(input) {
             throw new Error(\`Record with ID = \${input[id_name]} has not been updated\`);
         }
         const document = await this.readById(input[id_name]);
-        return document
+        return document;
     } catch (error) {
         throw error;
     }
@@ -417,8 +417,8 @@ static async bulkDisAssociateAnimalWithFarm_id(bulkAssociationInput, benignError
 
 module.exports.mongodb_adapter_readById = `
 static async readById(id){
-    const db = await this.storageHandler
-    const collection = await db.collection("dist_animal")
+    const db = await this.storageHandler;
+    const collection = await db.collection("dist_animal");
     const id_name = this.idAttribute();
     let item = await collection.findOne({[id_name] : id});
     if (item === null) {

@@ -35,7 +35,7 @@ module.exports = class <%- nameLc -%> {
     * @returns connected mongodb client
     */
   get storageHandler() {
-    return <%- nameLc -%>.storageHandler
+    return <%- nameLc -%>.storageHandler;
   }
 
   /**
@@ -48,9 +48,17 @@ module.exports = class <%- nameLc -%> {
     return "<%- nameLc -%>";
   }
 
+  /**
+  * readById - The model implementation for reading a single record given by its ID
+  *
+  * This method is the implementation for reading a single record for the MongoDb storage type, based on MongoDb node driver.
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
   static async readById(id){
-    const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
     const id_name = this.idAttribute();
     let item = await collection.findOne({[id_name] : id});
     if (item === null) {
@@ -60,52 +68,79 @@ module.exports = class <%- nameLc -%> {
     return validatorUtil.validateData('validateAfterRead', this, item);
   }
 
+  /**
+  * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
+  * for the MongoDb storage type, based on MongoDb node driver.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
   static async countRecords(search){
-    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
-    let number = await collection.countDocuments(filter)
-    return number
+    const filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    const number = await collection.countDocuments(filter);
+    return number;
   }
 
+  /**
+  * readAll - The model implementation for searching for records in MongoDB. This method uses limit-offset-based pagination.
+  *
+  * @param  {object} search - Search argument for filtering records
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param  {object} pagination - Offset and limit to get the records from and to respectively
+  * @param  {BenignErrorReporter} - benignErrorReporter can be used to generate the standard
+  * @return {array}  Array of records holding conditions specified by search, order and pagination argument
+  */
   static async readAll(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the filter object for limit-offset-based pagination
-    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    let sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
+    const filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
     
-    let limit = pagination.limit ? pagination.limit : undefined;
-    let offset = pagination.offset ? pagination.offset : 0;
+    const limit = pagination.limit ? pagination.limit : undefined;
+    const offset = pagination.offset ? pagination.offset : 0;
 
-    const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
-    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray()
-    documents = documents.map( doc => new <%- nameLc -%>(doc) )
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray();
+    documents = documents.map( doc => new <%- nameLc -%>(doc) );
     // validationCheck after read
     return validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
-
   }
 
+
+  /**
+  * readAllCursor - The model implementation for searching for records in MongoDB. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
   static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the filter object.
     let filter = mongoDbHelper.searchConditionsToMongoDb(search);
-    let newOrder = isForwardPagination ? order : helper.reverseOrderConditions(order)
+    let newOrder = isForwardPagination ? order : helper.reverseOrderConditions(order);
     // depending on the direction build the order object
-    let sort = mongoDbHelper.orderConditionsToMongoDb(newOrder, this.idAttribute(), isForwardPagination)
-    let orderFields = newOrder? newOrder.map( x => x.field ) : []
+    let sort = mongoDbHelper.orderConditionsToMongoDb(newOrder, this.idAttribute(), isForwardPagination);
+    let orderFields = newOrder? newOrder.map( x => x.field ) : [];
     // extend the filter for the given order and cursor
     filter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(pagination, sort, filter, orderFields, this.idAttribute());
 
     // add +1 to the LIMIT to get information about following pages.
     let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first + 1 : helper.isNotUndefinedAndNotNull(pagination.last) ? pagination.last + 1 : undefined;
     
-    const db = await this.storageHandler
-    const collection = await db.collection("<%- nameLc -%>")
-    let documents = await collection.find(filter).limit(limit).sort(sort).toArray()
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    let documents = await collection.find(filter).limit(limit).sort(sort).toArray();
 
     // validationCheck after read
     documents = await validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
@@ -119,53 +154,66 @@ module.exports = class <%- nameLc -%> {
         // build the filter object.
         let oppFilter = mongoDbHelper.searchConditionsToMongoDb(search);
 
-        let oppOrder = oppForwardPagination ? order : helper.reverseOrderConditions(order)
+        let oppOrder = oppForwardPagination ? order : helper.reverseOrderConditions(order);
         // depending on the direction build the order object
-        let oppSort = mongoDbHelper.orderConditionsToMongoDb(oppOrder, this.idAttribute(), oppForwardPagination)
-        let oppOrderFields = oppOrder? oppOrder.map( x => x.field ) : []
+        let oppSort = mongoDbHelper.orderConditionsToMongoDb(oppOrder, this.idAttribute(), oppForwardPagination);
+        let oppOrderFields = oppOrder? oppOrder.map( x => x.field ) : [];
         // extend the filter for the given order and cursor
         oppFilter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(oppPagination, oppSort, oppFilter, oppOrderFields, this.idAttribute());
         // add +1 to the LIMIT to get information about following pages.
         let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ? oppPagination.first + 1 : helper.isNotUndefinedAndNotNull(oppPagination.last) ? oppPagination.last + 1 : undefined;
-        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
     }
 
     // build the graphql Connection Object
-    let docs = documents.map( doc => { return new <%- nameLc -%>(doc)})
+    let docs = documents.map( doc => { return new <%- nameLc -%>(doc)});
     let edges = docs.map( doc => {
         return {
           node: doc,
           cursor: doc.base64Enconde(),
         }
-    })
-    let pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
+    });
+    const pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
     return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
+  /**
+  * addOne - The model implementation method for adding a record in MongoDb, based on MongoDb Node driver.
+  *
+  * @param {object} input - The input object.
+  * @return {object} The created record 
+  * @throw {Error} If the process fails, an error is thrown
+  */
   static async addOne(input){
     // validate input
     await validatorUtil.validateData('validateForCreate', this, input);
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("<%- nameLc -%>")
+        const db = await this.storageHandler;
+        const collection = await db.collection("<%- nameLc -%>");
         // remove skipAssociationsExistenceChecks
-        delete input.skipAssociationsExistenceChecks
+        delete input.skipAssociationsExistenceChecks;
         const result =  await collection.insertOne(input);
         const id_name = this.idAttribute();
         const document = await this.readById(input[id_name]);
-        return document
+        return document;
     } catch (error) {
         throw error;
     }
-
   }
 
+  /**
+  * deleteOne - The model implementation for deleting a single record, given by its ID, in MongoDb.
+  *
+  * @param {string} id - The ID of the record to be deleted
+  * @returns {string} A success message is returned
+  * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+  */
   static  async deleteOne(id){
     //validate id
     await validatorUtil.validateData('validateForDelete', this, id);
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("<%- nameLc -%>")
+        const db = await this.storageHandler;
+        const collection = await db.collection("<%- nameLc -%>");
         const id_name = this.idAttribute();
         const response = await collection.deleteOne({[id_name]: id});
         if (response.result.ok !== 1){
@@ -173,20 +221,27 @@ module.exports = class <%- nameLc -%> {
         }
         return 'Item successfully deleted';
     } catch (error) {
-        console.log(`Record with ID = ${id} does not exist or could not been deleted`)
+        console.log(`Record with ID = ${id} does not exist or could not been deleted`);
         throw error;
     }
   }
 
+  /**
+  * updateOne - The model implementation for updating a single record in MongoDb.
+  *
+  * @param {object} input - The input object.
+  * @returns {object} The updated record
+  * @throw {Error} If this method fails, an error is thrown
+  */
   static async updateOne(input){
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("<%- nameLc -%>")
+        const db = await this.storageHandler;
+        const collection = await db.collection("<%- nameLc -%>");
         // remove skipAssociationsExistenceChecks
-        delete input.skipAssociationsExistenceChecks
-        const updatedContent = {}
+        delete input.skipAssociationsExistenceChecks;
+        const updatedContent = {};
         for (let key of Object.keys(input)) {
             if (key !== "id"){
                 updatedContent[key] = input[key];
@@ -199,12 +254,17 @@ module.exports = class <%- nameLc -%> {
             throw new Error(`Record with ID = ${input[id_name]} has not been updated`);
         }
         const document = await this.readById(input[id_name]);
-        return document
+        return document;
     } catch (error) {
         throw error;
     }
   }
 
+  /**
+  * bulkAddCsv - Add records from csv file
+  *
+  * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
+  */
   static bulkAddCsv(context){
     let delim = context.request.body.delim;
     let arrayDelim = ";"
