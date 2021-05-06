@@ -978,6 +978,7 @@ generateSections = async function (sections, opts, dir_write) {
       case "models-cassandra":
       case "models-mongodb":
       case "models-amazonS3":
+      case "models-trino":
       //adapters
       case "sql-adapter":
       case "zendro-adapters":
@@ -985,6 +986,7 @@ generateSections = async function (sections, opts, dir_write) {
       case "cassandra-adapter":
       case "mongodb-adapter":
       case "amazonS3-adapter":
+      case "trino-adapter":
         file_name =
           dir_write + "/" + section.dir + "/" + section.fileName + ".js";
         break;
@@ -1088,6 +1090,8 @@ getStorageType = function (dataModel) {
         case "cassandra":
         case "mongodb":
         case "amazon-s3":
+        case "trino":
+        case "presto":
         //adapters
         case "sql-adapter":
         case "ddm-adapter":
@@ -1096,6 +1100,8 @@ getStorageType = function (dataModel) {
         case "cassandra-adapter":
         case "mongodb-adapter":
         case "amazon-s3-adapter":
+        case "trino-adapter":
+        case "presto-adapter":
           //ok
           break;
 
@@ -1104,9 +1110,12 @@ getStorageType = function (dataModel) {
           valid = false;
           console.error(
             colors.red(
-              `ERROR: The attribute 'storageType' has an invalid value. \nOne of the following types is expected: [sql, distributed-data-model, zendro-server, generic, sql-adapter, ddm-adapter, zendro-webservice-adapter, generic-adapter]. But '${
-                dataModel.storageType
-              }' was obtained on ${
+              `ERROR: The attribute 'storageType' has an invalid value. \n
+              One of the following types is expected: [sql, distributed-data-model, 
+                zendro-server, generic, sql-adapter, ddm-adapter, zendro-webservice-adapter, generic-adapter,
+                cassandra, mongodb, amazon-s3, trino, presto, cassandra-adapter, mongodb-adapter,
+                amazon-s3-adapter, trino-adapter, presto-adapter].
+                 But '${dataModel.storageType}' was obtained on ${
                 dataModel.adapterName !== undefined ? "adapter" : "model"
               } '${
                 dataModel.adapterName !== undefined
@@ -1155,6 +1164,8 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     "models/cassandra",
     "models/mongodb",
     "models/amazonS3",
+    "models/trino",
+    "models/presto",
   ];
   let models = [];
   let adapters = [];
@@ -1459,6 +1470,42 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         ];
         break;
 
+      case "trino":
+        sections = [
+          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+          {
+            dir: "models/trino",
+            template: "models-trino",
+            fileName: opts.nameLc,
+          },
+          {
+            dir: "validations",
+            template: "validations",
+            fileName: opts.nameLc,
+          },
+          { dir: "patches", template: "patches", fileName: opts.nameLc },
+        ];
+        break;
+
+      case "presto":
+        sections = [
+          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+          {
+            dir: "models/presto",
+            template: "models-trino",
+            fileName: opts.nameLc,
+          },
+          {
+            dir: "validations",
+            template: "validations",
+            fileName: opts.nameLc,
+          },
+          { dir: "patches", template: "patches", fileName: opts.nameLc },
+        ];
+        break;
+
       case "zendro-webservice-adapter":
         sections = [
           {
@@ -1541,6 +1588,28 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
           { dir: "patches", template: "patches", fileName: opts.adapterName },
         ];
         break;
+
+      case "trino-adapter":
+        sections = [
+          {
+            dir: "models/adapters",
+            template: "trino-adapter",
+            fileName: opts.adapterName,
+          },
+          { dir: "patches", template: "patches", fileName: opts.adapterName },
+        ];
+        break;
+
+      case "presto-adapter":
+        sections = [
+          {
+            dir: "models/adapters",
+            template: "trino-adapter",
+            fileName: opts.adapterName,
+          },
+          { dir: "patches", template: "patches", fileName: opts.adapterName },
+        ];
+        break;
       default:
         break;
     }
@@ -1572,6 +1641,8 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         "mongodb-adapter",
         "cassandra-adapter",
         "amazon-s3-adapter",
+        "trino-adapter",
+        "presto-adapter",
       ].includes(opts.storageType)
     ) {
       adapters.push(opts.adapterName);

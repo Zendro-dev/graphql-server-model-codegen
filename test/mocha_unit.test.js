@@ -11,6 +11,7 @@ const models_generic = require("./unit_test_misc/data_models_generic");
 const models_cassandra = require("./unit_test_misc/data_models_cassandra");
 const models_mongodb = require("./unit_test_misc/data_models_mongodb");
 const models_amazonS3 = require("./unit_test_misc/data_models_amazonS3");
+const models_trino = require("./unit_test_misc/data_models_trino");
 const requireFromString = require("require-from-string");
 const helpers = require("./unit_test_misc/helpers/reporting_helpers");
 const { test } = require("mocha");
@@ -3014,5 +3015,45 @@ describe("Amazon S3/ Minio Unit Test", function () {
       opts
     );
     testCompare(generated_model, data_test.amazonS3_adapter_readById);
+  });
+});
+
+describe("Trino/Presto Unit Test", () => {
+  let data_test = require("./unit_test_misc/test-describe/trino-unittest.js");
+
+  it("Trino model - doctor constructor", async () => {
+    let opts = funks.getOptions(models_trino.doctor);
+    let generated_model = await funks.generateJs("create-models-trino", opts);
+    testCompare(generated_model, data_test.doctor_constructor);
+  });
+
+  it("Trino model - doctor readById", async () => {
+    let opts = funks.getOptions(models_trino.doctor);
+    let generated_model = await funks.generateJs("create-models-trino", opts);
+    testCompare(generated_model, data_test.doctor_readById);
+  });
+
+  it("Trino model - doctor countRecords", async () => {
+    let opts = funks.getOptions(models_trino.doctor);
+    let generated_model = await funks.generateJs("create-models-trino", opts);
+    testCompare(generated_model, data_test.doctor_countRecords);
+  });
+
+  it("Trino model - doctor readAll", async () => {
+    let opts = funks.getOptions(models_trino.doctor);
+    let generated_model = await funks.generateJs("create-models-trino", opts);
+    testCompare(generated_model, data_test.doctor_readAll);
+  });
+
+  it("Trino model - doctor readAllCursor", async () => {
+    let opts = funks.getOptions(models_trino.doctor);
+    let generated_model = await funks.generateJs("create-models-trino", opts);
+    testCompare(generated_model, data_test.doctor_readAllCursor);
+  });
+
+  it("Trino adapter - dist_doctor_instance1 readById ", async () => {
+    let opts = funks.getOptions(models_trino.dist_doctor_instance1);
+    let generated_model = await funks.generateJs("create-trino-adapter", opts);
+    testCompare(generated_model, data_test.trino_adapter_readById);
   });
 });

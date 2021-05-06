@@ -108,9 +108,33 @@ services:
     container_name: postgres2
     build:
       context: .
-      dockerfile: Dockerfile.postgres
+      dockerfile: Dockerfile.postgres2
     ports:
-     - 1235:5431
+     - 1235:5432
+    networks:
+     - instance2
+
+  gql_presto:
+    image: ahanaio/prestodb-sandbox
+    container_name: presto1
+    depends_on:
+      - gql_postgres2
+    volumes: 
+      - ./postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
+    ports:
+      - 8081:8080
+    networks:
+      - instance2
+
+  gql_trino:
+    image: trinodb/trino 
+    container_name: trino1
+    depends_on:
+      - gql_postgres2
+    volumes: 
+      - ./postgresql.properties:/etc/trino/catalog/postgresql.properties
+    ports:
+      - 8080:8080
     networks:
       - instance2
 

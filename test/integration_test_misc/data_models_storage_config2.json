@@ -6,5 +6,19 @@
     "database": "sciencedb_development",
     "host": "gql_postgres2",
     "dialect": "postgres"
+  },
+  "default-trino": {
+    "storageType": "trino",
+    "catalog":"postgresql",
+    "schema":"public",
+    "trino_host": "gql_trino",
+    "trino_port": "8080"
+  },
+  "default-presto": {
+    "storageType": "presto",
+    "catalog":"postgresql",
+    "schema":"public",
+    "presto_host": "gql_presto",
+    "presto_port": "8080"
   }
 }
