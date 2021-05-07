@@ -41,17 +41,19 @@ module.exports.request_graph_ql_post_instance2 = function (query){
 /**
 * request_metaquery_post - Send "POST" request to meta_query route. Either jq or jsonPath must be non-null.
 *
-* @param {queries} {string}  Any queries to GraphQL as a string
+* @param {query} {string}  Any queries to GraphQL as a string
 * @param {jq} {string}       A jq command
 * @param {jsonPath} {string} A jsonPath command
 * @return {object}           Request response
 */
-module.exports.request_metaquery_post = async function(queries, jq, jsonPath) {
+module.exports.request_metaquery_post = async function(query, jq, jsonPath) {
     return await request('POST', metaqueryUrl, {
         json: {
-            queries:  queries,
-            jq:       jq != null ? `${jq}` : null,
-            jsonPath: jsonPath != null ? `${jsonPath}` : null
+            query:  `${query}`,
+        },
+        headers: {
+            ...(jq && {jq: `${jq}`}),
+            ...(jsonPath && {jsonPath: `${jsonPath}`}), 
         }
     });
 };
