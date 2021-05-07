@@ -462,10 +462,8 @@ writeAcls = async function (dir_write, models, adapters) {
   //set file name
   let file_name = dir_write + "/acl_rules.js";
   //set names
-  let modelsNames = models.map((item) => ({ name: item[0] }));
-  let adminModelsNames = ["role", "user", "role_to_user"].map((item) => ({
-    name: item,
-  }));
+  const modelsNames = models.map(item => item[0]);
+  let adminModelsNames = ['role', 'user', 'role_to_user'];
   //generate
   await generateSection(
     "acl_rules",
@@ -1560,8 +1558,6 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       });
 
     //save data for writeCommons
-    //models
-    models.push([opts.name, opts.namePl, opts.nameLc]);
     //adapters
     if (
       [
@@ -1575,6 +1571,8 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       ].includes(opts.storageType)
     ) {
       adapters.push(opts.adapterName);
+    } else {
+      models.push([opts.name , opts.namePl, opts.nameLc]);
     }
   }
   //msg

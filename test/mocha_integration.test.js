@@ -369,13 +369,13 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
 
     expect(res.statusCode).to.equal(200);
-    expect(resBody.data.transcript_counts.length).equal(3);
+    // expect(resBody.data.transcript_counts.length).equal(3);
 
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ transcript_counts(search: {field: gene, operator: eq, value: "Gene D"},pagination:{limit:5}) {gene}}`,
-        `{individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:5}) {name}}`,
-      ],
+      `{
+         t: transcript_counts(search: {field: gene, operator: eq, value: "Gene D"},pagination:{limit:5}) {gene}
+         i: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:5}) {name}
+      }`,
       ".",
       null
     );
@@ -383,15 +383,8 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     expect(res.statusCode).to.equal(200);
 
     expect(resBody).to.deep.equal({
-      data: [
-        {
-          transcript_counts: [{ gene: "Gene D" }],
-        },
-        {
-          individuals: [{ name: "Zazaniza" }],
-        },
-      ],
-    });
+      data:{t:[{gene:"Gene D"}],i:[{name:"Zazaniza"}]}
+    })
 
     res = itHelpers.request_graph_ql_post(
       `{ individuals (search: {field: name, operator: regexp, value: "Zazan[aeiou]za"},pagination:{limit:25}) {name}}`
@@ -416,10 +409,10 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     });
 
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}}`,
-      ],
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
+      }`,
       ".",
       null
     );
@@ -427,117 +420,96 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      data: [
-        {
-          firstPerson: [
-            {
-              name: "Zazanaza",
-            },
-          ],
-        },
-        {
-          secondPerson: [
-            {
-              name: "Zazaniza",
-            },
-          ],
-        },
-      ],
+      "data":{
+        "firstPerson":[{"name":"Zazanaza"}],
+        "secondPerson":[{"name":"Zazaniza"}]
+      }
     });
 
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {names}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}, pagination:{limit:10}) {names}}`,
-      ],
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {names}
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}, pagination:{limit:10}) {names}
+      }`,
       ".",
       null
     );
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
-
-    expect(resBody).to.deep.equal({
-      data: [null, null],
-      errors: [
-        {
-          message:
-            'Cannot query field "names" on type "individual". Did you mean "name"?',
-          locations: [
-            {
-              line: 1,
-              // column:95
-              column: 108,
-            },
-          ],
-        },
-        {
-          message:
-            'Cannot query field "names" on type "individual". Did you mean "name"?',
-          locations: [
-            {
-              line: 1,
-              // column:95
-              column: 109,
-            },
-          ],
-        },
-      ],
-    });
-
-    res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}}`,
-      ],
-      ".data",
-      null
+   
+    expect(resBody).to.deep.equal(
+      {
+        "errors": [
+          {
+            "message": "Cannot query field \"names\" on type \"individual\". Did you mean \"name\"?",
+            "locations": [
+              {
+                "line": 2,
+                "column": 114
+              }
+            ]
+          },
+          {
+            "message": "Cannot query field \"names\" on type \"individual\". Did you mean \"name\"?",
+            "locations": [
+              {
+                "line": 3,
+                "column": 116
+              }
+            ]
+          }
+        ]
+      }
     );
 
-    resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(200);
-    expect(resBody).to.deep.equal([
-      {
-        firstPerson: [
-          {
-            name: "Zazanaza",
-          },
-        ],
-      },
-      {
-        secondPerson: [
-          {
-            name: "Zazaniza",
-          },
-        ],
-      },
-    ]);
-
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"}, pagination:{limit:10}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}}`,
-      ],
-      ".~data",
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
+      }`
+      ,
+      ".firstPerson",
       null
     );
 
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      data: null,
-      errors: [
+      "data": [
         {
-          message:
-            'jq: error: syntax error, unexpected INVALID_CHARACTER (Unix shell quoting issues?) at <top-level>, line 1:\n.~data \njq: error: try .["field"] instead of .field for unusually named fields at <top-level>, line 1:\n.~data\njq: 2 compile errors\n',
-        },
-      ],
-    });
+          "name": "Zazanaza"
+        }
+      ]
+    }
+    );
 
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}, pagination:{limit:10}) {name}}`,
-      ],
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
+      }`,
+      ".~firstPerson",
+      null
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    
+    expect(resBody).to.deep.equal({
+      "data": null,
+      "errors": [
+        {
+          "message": "jq: error: syntax error, unexpected INVALID_CHARACTER (Unix shell quoting issues?) at <top-level>, line 1:\n.~firstPerson \njq: error: try .[\"field\"] instead of .field for unusually named fields at <top-level>, line 1:\n.~firstPerson\njq: 2 compile errors\n"
+        }
+      ]
+    }
+    );
+
+    res = await itHelpers.request_metaquery_post(
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
+      }`,
       null,
       "$"
     );
@@ -545,66 +517,58 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      data: [
-        {
-          firstPerson: [
-            {
-              name: "Zazanaza",
-            },
-          ],
-        },
-        {
-          secondPerson: [
-            {
-              name: "Zazaniza",
-            },
-          ],
-        },
-      ],
-    });
+      "data": {
+        "firstPerson": [
+          {
+            "name": "Zazanaza"
+          }
+        ],
+        "secondPerson": [
+          {
+            "name": "Zazaniza"
+          }
+        ]
+      }
+    }
+    );
 
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}}`,
-      ],
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
+      }`,
       null,
-      "$.data"
+      "$.firstPerson"
     );
 
     resBody = JSON.parse(res.body.toString("utf8"));
+    
     expect(res.statusCode).to.equal(200);
-    expect(resBody).to.deep.equal([
-      {
-        firstPerson: [
-          {
-            name: "Zazanaza",
-          },
-        ],
-      },
-      {
-        secondPerson: [
-          {
-            name: "Zazaniza",
-          },
-        ],
-      },
-    ]);
+    expect(resBody).to.deep.equal({
+      "data": [
+        {
+          "name": "Zazanaza"
+        }
+      ]
+    });
 
     res = await itHelpers.request_metaquery_post(
-      [
-        `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
-        `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}}`,
-      ],
+      `{
+        firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
+        secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
+      }`,
       null,
-      "$~data"
+      "$.firstPerson"
     );
 
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      data: null,
-      errors: [{ message: "this._trace(...).filter is not a function" }],
+      "data": [
+        {
+          "name": "Zazanaza"
+        }
+      ]
     });
 
     res = await itHelpers.request_metaquery_post(

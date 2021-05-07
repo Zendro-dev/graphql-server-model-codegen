@@ -64,6 +64,7 @@ services:
     volumes:
       - ../integration_test_env/gql_science_db_graphql_server1:/usr/src/app
       - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
+      - ./.env:/usr/src/app/.env
     ports:
       - "3000:3000"
     environment:
@@ -124,6 +125,7 @@ services:
     volumes:
       - ../integration_test_env/gql_science_db_graphql_server2:/usr/src/app
       - ./data_models_storage_config2.json:/usr/src/app/config/data_models_storage_config.json
+      - ./.env:/usr/src/app/.env
     ports:
       - "3030:3030"
     environment:
