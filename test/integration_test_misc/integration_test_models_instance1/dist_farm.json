@@ -1,0 +1,20 @@
+{
+    "model": "dist_farm",
+    "storageType" : "distributed-data-model",
+    "registry": ["dist_farm_instance1"],
+    "attributes": {
+        "farm_id": "String",
+        "farm_name": "String",
+        "owner": "String"
+    },
+    "associations": {
+        "dist_animals": {
+            "type": "to_many",
+            "target": "dist_animal",
+            "targetKey": "farm_id",
+            "keyIn": "dist_animal",
+            "targetStorageType": "distributed-data-model"
+        }
+    },
+    "internalId": "farm_id"
+}

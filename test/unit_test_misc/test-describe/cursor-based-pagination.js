@@ -1,6 +1,7 @@
 module.exports.connection_book_schema = `
 type BookConnection{
   edges: [BookEdge]
+  books: [Book]
   pageInfo: pageInfo!
 }
 
@@ -8,22 +9,22 @@ type BookEdge{
   cursor: String!
   node: Book!
 }
-`
+`;
 
 module.exports.connection_book_query = `
 booksConnection(search: searchBookInput, order: [orderBookInput], pagination: paginationCursorInput!): BookConnection
-`
+`;
 
 module.exports.model_read_all_connection = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-    
+
     // build the sequelize options object for cursor-based pagination
-    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), Book.definition.attributes);
+    let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), book.definition.attributes);
     let records = await super.findAll(options);
 
-    records = records.map(x => Book.postReadCast(x))
+    records = records.map(x => book.postReadCast(x))
 
     // validationCheck after read
     records = await validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
@@ -31,15 +32,15 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
     let oppRecords = [];
     if (pagination && (pagination.after || pagination.before)) {
-      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), Book.definition.attributes);
+      let oppOptions = helper.buildOppositeSearchSequelize(search, order, {...pagination, includeCursor: false}, this.idAttribute(), book.definition.attributes);
       oppRecords = await super.findAll(oppOptions);
     }
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, books: edges.map((edge) => edge.node)};
 }
-`
+`;
 
 module.exports.resolver_read_all_connection = `
 /**
@@ -68,7 +69,7 @@ module.exports.resolver_read_all_connection = `
         }
 
     },
-`
+`;
 
 module.exports.schema_to_many_association = `
 """
@@ -76,7 +77,7 @@ module.exports.schema_to_many_association = `
 """
 booksConnection(search: searchBookInput, order: [ orderBookInput ], pagination: paginationCursorInput!): BookConnection
 
-`
+`;
 
 module.exports.resolver_to_many_association = `
 /**
@@ -108,15 +109,15 @@ if (await checkAuthorization(context, 'Book', 'read') === true) {
             throw new Error("You don't have authorization to perform this action");
         }
 }
-`
+`;
 
-module.exports.model_many_to_many_association =`
+module.exports.model_many_to_many_association = `
 booksConnectionImpl({
   search,
   order,
   pagination
 }) {
-    
+
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.book.idAttribute(), models.book.definition.attributes);
     let records = await this.getBooks(options);
@@ -130,9 +131,10 @@ booksConnectionImpl({
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    let nodes = edges.map(edge => edge.node);
+    return {edges, pageInfo, books:nodes};
 }
-`
+`;
 
 module.exports.read_all_zendro_server = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
@@ -161,16 +163,17 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
         //validate after read
         let nodes = data_edges.map(e => e.node);
         let valid_nodes = await validatorUtil.bulkValidateData('validateAfterRead', this, nodes, benignErrorReporter);
+        
+        let nodes_model = valid_nodes.map(e => new book(e));
 
-        let edges = valid_nodes.map( e =>{
-          let temp_node = new Book(e);
+        let edges = nodes_model.map(temp_node  =>{
           return {
             node: temp_node,
             cursor: temp_node.base64Enconde()
           }
         })
 
-        return { edges, pageInfo };
+        return { edges, pageInfo, books: nodes_model };
       } else {
         throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
       }
@@ -179,7 +182,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
   }
-`
+`;
 
 module.exports.many_to_many_association_connection_zendro_server = `
 static async updateOne(input, benignErrorReporter){
@@ -214,7 +217,7 @@ static async updateOne(input, benignErrorReporter){
         // NO ERROR as such has been detected by the server (Express)
         // check if data was send
         if(response&&response.data&&response.data.data) {
-        return new Person(response.data.data.updatePerson);
+        return new person(response.data.data.updatePerson);
         } else {
         throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
         }
@@ -223,4 +226,4 @@ static async updateOne(input, benignErrorReporter){
         errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;

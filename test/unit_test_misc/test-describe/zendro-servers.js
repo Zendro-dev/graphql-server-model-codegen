@@ -1,6 +1,6 @@
 module.exports.server_url = `
   const remoteZendroURL = "http://something.other:7000/graphql";
-`
+`;
 
 module.exports.read_by_id = `
 static async readById( id, benignErrorReporter){
@@ -20,7 +20,7 @@ static async readById( id, benignErrorReporter){
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if (response && response.data && response.data.data) {
-      let item = new Book(response.data.data.readOneBook);
+      let item = new book(response.data.data.readOneBook);
       await validatorUtil.validateData('validateAfterRead', this, item);
       return item;
     } else {
@@ -32,7 +32,7 @@ static async readById( id, benignErrorReporter){
   }
 }
 
-`
+`;
 
 module.exports.read_all = `
 static async readAll(search, order, pagination, benignErrorReporter){
@@ -56,7 +56,7 @@ static async readAll(search, order, pagination, benignErrorReporter){
     if(response&&response.data&&response.data.data && response.data.data.books !== null) {
       let data = response.data.data.books;
       data = await validatorUtil.bulkValidateData('validateAfterRead', this, data, benignErrorReporter);
-      return data.map(item => {return new Book(item)});
+      return data.map(item => {return new book(item)});
     } else {
       throw new Error(\`Remote server (\${remoteZendroURL}) did not respond with data.\`);
     }
@@ -66,7 +66,7 @@ static async readAll(search, order, pagination, benignErrorReporter){
   }
 }
 
-`
+`;
 module.exports.count_records = `
 static async countRecords(search, benignErrorReporter){
   let query = \`query countBooks($search: searchBookInput){
@@ -96,7 +96,7 @@ static async countRecords(search, benignErrorReporter){
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;
 
 module.exports.add_one = `
 static async addOne(input, benignErrorReporter) {
@@ -120,7 +120,7 @@ static async addOne(input, benignErrorReporter) {
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
-      return new Book(response.data.data.addBook);
+      return new book(response.data.data.addBook);
     } else {
       throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
@@ -129,7 +129,7 @@ static async addOne(input, benignErrorReporter) {
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;
 module.exports.delete_by_id = `
 static async deleteOne(id, benignErrorReporter){
   //validate id
@@ -161,7 +161,7 @@ static async deleteOne(id, benignErrorReporter){
   }
 }
 
-`
+`;
 
 module.exports.update_one = `
 static async updateOne(input, benignErrorReporter){
@@ -185,7 +185,7 @@ static async updateOne(input, benignErrorReporter){
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response&&response.data&&response.data.data) {
-      return new Book(response.data.data.updateBook);
+      return new book(response.data.data.updateBook);
     } else {
       throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
@@ -195,7 +195,7 @@ static async updateOne(input, benignErrorReporter){
   }
 }
 
-`
+`;
 
 module.exports.csv_template = `
 static async csvTableTemplate(benignErrorReporter){
@@ -215,7 +215,7 @@ static async csvTableTemplate(benignErrorReporter){
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;
 module.exports.bulk_add_csv = `
 static async bulkAddCsv(context, benignErrorReporter){
   let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
@@ -244,9 +244,9 @@ static async bulkAddCsv(context, benignErrorReporter){
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;
 
-module.exports.many_to_many_association=`
+module.exports.many_to_many_association = `
 const definition = {
     model: 'Person',
     storageType: 'zendro-server',
@@ -284,7 +284,7 @@ const definition = {
 
 
 
-`
+`;
 
 module.exports.many_to_many_association_count = `
 static async countRecords(search, benignErrorReporter){
@@ -315,7 +315,7 @@ static async countRecords(search, benignErrorReporter){
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;
 
 module.exports.add_personId = `
 /**
@@ -350,7 +350,7 @@ static async add_personId(id, personId, benignErrorReporter) {
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response && response.data && response.data.data) {
-      return new Dog(response.data.data.updateDog);
+      return new dog(response.data.data.updateDog);
     } else {
       throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
@@ -359,7 +359,7 @@ static async add_personId(id, personId, benignErrorReporter) {
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;
 module.exports.remove_personId = `
 /**
  * remove_personId - field Mutation (adapter-layer) for to_one associationsArguments to remove
@@ -394,7 +394,7 @@ static async remove_personId(id, personId, benignErrorReporter) {
     // NO ERROR as such has been detected by the server (Express)
     // check if data was send
     if(response && response.data && response.data.data) {
-      return new Dog(response.data.data.updateDog);
+      return new dog(response.data.data.updateDog);
     } else {
       throw new Error(\`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`);
     }
@@ -403,4 +403,4 @@ static async remove_personId(id, personId, benignErrorReporter) {
     errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
   }
 }
-`
+`;

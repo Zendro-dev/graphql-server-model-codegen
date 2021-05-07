@@ -28,6 +28,13 @@ module.exports = {
     },
 
     {
+      roles: 'editor',
+      allows: [{
+        resources: '<%- models[i].name _%>',
+        permissions: 'search'
+      }]
+    },
+    {
       roles: 'reader',
       allows: [{
         resources: [

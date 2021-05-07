@@ -1,0 +1,17 @@
+{
+    "model": "reader",
+    "storageType": "amazon-s3",
+    "attributes": {
+      "reader_id": "String",
+      "reader_name": "String",
+      "age": "Float",
+      "student": "Boolean",
+      "lastSeen": "DateTime",
+      "history": "[String]"
+    },
+    "internalId": "reader_id",
+    "id": {
+      "name": "reader_id",
+      "type": "String"
+    }
+}

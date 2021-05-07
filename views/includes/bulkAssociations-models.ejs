@@ -68,8 +68,49 @@
         /*
         YOUR CODE GOES HERE
         */
-        throw new Error('bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>() is not implemented for model <%- name -%>');
+        throw new Error('bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>() is not implemented for model <%- nameLc -%>');
       }
     <%}_%>
+    <% if(storageType === 'mongodb' || storageType === 'mongodb-adapter'){_%>
+      static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
+        let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
+        let collection;
+        try {
+            const db = await this.storageHandler
+            collection = await db.collection("<%-nameLc-%>")
+        } catch (error) {
+            throw error;
+        }
+        let promises = [];
+        mappedForeignKeys.forEach(({
+            <%-associationsArguments["to_one"][i].targetKey-%>,
+            <%-idAttribute%>
+        }) => {
+            promises.push(collection.updateMany({<%-idAttribute%>:{$in:<%-idAttribute%>}<% if(op === 'remove')
+            {%>, <%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set:{<%-associationsArguments["to_one"][i].targetKey-%>:<% if(op === 'remove')
+            {_%>null<%} else {%><%-associationsArguments["to_one"][i].targetKey-%><%}-%>}}))
+        });
+        await Promise.all(promises);
+        return "Records successfully updated!"
+      }
+    <%}_%>
+    <% if(storageType === 'cassandra' || storageType === 'cassandra-adapter'){_%>
+      static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
+        let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
+        let promises = [];
+        let mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%-idAttribute%> IN ?`
+        mappedForeignKeys.forEach(({
+            <%-associationsArguments["to_one"][i].targetKey-%>,
+            <%-idAttribute%>
+        }) => {
+            promises.push(this.storageHandler.execute(mutationCql,[<% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%-idAttribute%>], {prepare: true}))
+        });
+
+
+        await Promise.all(promises);
+        return "Records successfully updated!"
+      }
+    <%}_%>
+
   <%}_%>
 <%}_%>

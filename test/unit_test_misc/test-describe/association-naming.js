@@ -22,29 +22,29 @@ dog.prototype.owner = async function({
                     "value": this.owner_id_test,
                     "operator": "eq"
                 });
-                let found = await resolvers.people({
+                let found = (await resolvers.peopleConnection({
                     search: nsearch,
-                    pagination: {limit:1}
-                }, context);
-                if (found) {
-                    return found[0]
+                    pagination: {first:1}
+                }, context)).edges;
+                if (found.length > 0) {
+                    return found[0].node
                 }
                 return found;
             }
     }
 }
-`
+`;
 
 module.exports.dog_owner_schema = `
     owner(search: searchPersonInput): Person
-`
+`;
 
 module.exports.dog_owner_model = `
-Dog.belongsTo(models.person, {
+dog.belongsTo(models.person, {
     as: 'owner',
     foreignKey: 'owner_id_test'
 });
-`
+`;
 
 module.exports.academicTeam_resolvers = `
 /**
@@ -77,18 +77,18 @@ academicTeam.prototype.membersFilter = function({
         pagination: pagination
     }, context);
 }
-`
+`;
 
 module.exports.academicTeam_schema = `
 """
 @search-request
 """
 membersFilter(search: searchResearcherInput, order: [ orderResearcherInput ], pagination: paginationInput!): [Researcher]
-`
+`;
 
 module.exports.academicTeam_model = `
 academicTeam.hasMany(models.researcher, {
     as: 'members',
     foreignKey: 'academicTeamId'
 });
-`
+`;

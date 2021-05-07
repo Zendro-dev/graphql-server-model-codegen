@@ -1,0 +1,404 @@
+'use strict';
+
+const _ = require('lodash');
+const validatorUtil = require('../../utils/validatorUtil');
+const path = require('path');
+const uuidv4 = require('uuidv4').uuid;
+const helper = require('../../utils/helper');
+const mongoDbHelper = require('../../utils/mongodb_helper')
+const errorHelper = require('../../utils/errors');
+const os = require('os');
+const helpersAcl = require('../../utils/helpers-acl');
+const fileTools = require('../../utils/file-tools');
+const email = require('../../utils/email');
+const fs = require('fs');
+const models = require(path.join(__dirname, '..', 'index.js'));
+
+// An exact copy of the the model definition that comes from the .json file
+const definition = <%- definition -%>;
+
+/**
+ * module - Creates a class for MongoDB data model
+ *
+ */
+
+module.exports = class <%- nameLc -%> {
+
+  constructor(input){
+    for (let key of Object.keys(input)) {
+        this[key] = input[key];
+    }
+  }
+
+  /**
+    * Get the storage handler, which is a static property of the data model class.
+    * @returns connected mongodb client
+    */
+  get storageHandler() {
+    return <%- nameLc -%>.storageHandler;
+  }
+
+  /**
+    * name - Getter for the name attribute
+    *
+    * This attribute is needed by the models' index
+    * @return {string} The name of the model
+  */
+  static get name(){
+    return "<%- nameLc -%>";
+  }
+
+  /**
+  * readById - The model implementation for reading a single record given by its ID
+  *
+  * This method is the implementation for reading a single record for the MongoDb storage type, based on MongoDb node driver.
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
+  static async readById(id){
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    const id_name = this.idAttribute();
+    let item = await collection.findOne({[id_name] : id});
+    if (item === null) {
+        throw new Error(`Record with ID = "${id}" does not exist`);
+    }
+    item = new <%- nameLc -%>(item);
+    return validatorUtil.validateData('validateAfterRead', this, item);
+  }
+
+  /**
+  * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
+  * for the MongoDb storage type, based on MongoDb node driver.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
+  static async countRecords(search){
+    const filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    const number = await collection.countDocuments(filter);
+    return number;
+  }
+
+  /**
+  * readAll - The model implementation for searching for records in MongoDB. This method uses limit-offset-based pagination.
+  *
+  * @param  {object} search - Search argument for filtering records
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param  {object} pagination - Offset and limit to get the records from and to respectively
+  * @param  {BenignErrorReporter} - benignErrorReporter can be used to generate the standard
+  * @return {array}  Array of records holding conditions specified by search, order and pagination argument
+  */
+  static async readAll(search, order, pagination, benignErrorReporter){
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    // build the filter object for limit-offset-based pagination
+    const filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    const sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
+    
+    const limit = pagination.limit ? pagination.limit : undefined;
+    const offset = pagination.offset ? pagination.offset : 0;
+
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray();
+    documents = documents.map( doc => new <%- nameLc -%>(doc) );
+    // validationCheck after read
+    return validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
+  }
+
+
+  /**
+  * readAllCursor - The model implementation for searching for records in MongoDB. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
+  static async readAllCursor(search, order, pagination, benignErrorReporter){
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    let isForwardPagination = helper.isForwardPagination(pagination);
+    // build the filter object.
+    let filter = mongoDbHelper.searchConditionsToMongoDb(search);
+    let newOrder = isForwardPagination ? order : helper.reverseOrderConditions(order);
+    // depending on the direction build the order object
+    let sort = mongoDbHelper.orderConditionsToMongoDb(newOrder, this.idAttribute(), isForwardPagination);
+    let orderFields = newOrder? newOrder.map( x => x.field ) : [];
+    // extend the filter for the given order and cursor
+    filter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(pagination, sort, filter, orderFields, this.idAttribute());
+
+    // add +1 to the LIMIT to get information about following pages.
+    let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first + 1 : helper.isNotUndefinedAndNotNull(pagination.last) ? pagination.last + 1 : undefined;
+    
+    const db = await this.storageHandler;
+    const collection = await db.collection("<%- nameLc -%>");
+    let documents = await collection.find(filter).limit(limit).sort(sort).toArray();
+
+    // validationCheck after read
+    documents = await validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
+    // get the first record (if exists) in the opposite direction to determine pageInfo.
+    // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
+    let oppDocuments = [];
+    if (pagination && (pagination.after || pagination.before)) {
+        // reverse the pagination Arguement. after -> before; set first/last to 0, so LIMIT 1 is executed in the reverse Search
+        let oppPagination = helper.reversePaginationArgument({...pagination, includeCursor: false});
+        let oppForwardPagination = helper.isForwardPagination(oppPagination);
+        // build the filter object.
+        let oppFilter = mongoDbHelper.searchConditionsToMongoDb(search);
+
+        let oppOrder = oppForwardPagination ? order : helper.reverseOrderConditions(order);
+        // depending on the direction build the order object
+        let oppSort = mongoDbHelper.orderConditionsToMongoDb(oppOrder, this.idAttribute(), oppForwardPagination);
+        let oppOrderFields = oppOrder? oppOrder.map( x => x.field ) : [];
+        // extend the filter for the given order and cursor
+        oppFilter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(oppPagination, oppSort, oppFilter, oppOrderFields, this.idAttribute());
+        // add +1 to the LIMIT to get information about following pages.
+        let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ? oppPagination.first + 1 : helper.isNotUndefinedAndNotNull(oppPagination.last) ? oppPagination.last + 1 : undefined;
+        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+    }
+
+    // build the graphql Connection Object
+    let docs = documents.map( doc => { return new <%- nameLc -%>(doc)});
+    let edges = docs.map( doc => {
+        return {
+          node: doc,
+          cursor: doc.base64Enconde(),
+        }
+    });
+    const pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
+    return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
+  }
+
+  /**
+  * addOne - The model implementation method for adding a record in MongoDb, based on MongoDb Node driver.
+  *
+  * @param {object} input - The input object.
+  * @return {object} The created record 
+  * @throw {Error} If the process fails, an error is thrown
+  */
+  static async addOne(input){
+    // validate input
+    await validatorUtil.validateData('validateForCreate', this, input);
+    try {
+        const db = await this.storageHandler;
+        const collection = await db.collection("<%- nameLc -%>");
+        // remove skipAssociationsExistenceChecks
+        delete input.skipAssociationsExistenceChecks;
+        const result =  await collection.insertOne(input);
+        const id_name = this.idAttribute();
+        const document = await this.readById(input[id_name]);
+        return document;
+    } catch (error) {
+        throw error;
+    }
+  }
+
+  /**
+  * deleteOne - The model implementation for deleting a single record, given by its ID, in MongoDb.
+  *
+  * @param {string} id - The ID of the record to be deleted
+  * @returns {string} A success message is returned
+  * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+  */
+  static  async deleteOne(id){
+    //validate id
+    await validatorUtil.validateData('validateForDelete', this, id);
+    try {
+        const db = await this.storageHandler;
+        const collection = await db.collection("<%- nameLc -%>");
+        const id_name = this.idAttribute();
+        const response = await collection.deleteOne({[id_name]: id});
+        if (response.result.ok !== 1){
+            throw new Error(`Record with ID = ${id} has not been deleted!`);
+        }
+        return 'Item successfully deleted';
+    } catch (error) {
+        console.log(`Record with ID = ${id} does not exist or could not been deleted`);
+        throw error;
+    }
+  }
+
+  /**
+  * updateOne - The model implementation for updating a single record in MongoDb.
+  *
+  * @param {object} input - The input object.
+  * @returns {object} The updated record
+  * @throw {Error} If this method fails, an error is thrown
+  */
+  static async updateOne(input){
+    //validate input
+    await validatorUtil.validateData('validateForUpdate', this, input);
+    try {
+        const db = await this.storageHandler;
+        const collection = await db.collection("<%- nameLc -%>");
+        // remove skipAssociationsExistenceChecks
+        delete input.skipAssociationsExistenceChecks;
+        const updatedContent = {};
+        for (let key of Object.keys(input)) {
+            if (key !== "id"){
+                updatedContent[key] = input[key];
+            }
+        }
+        const id_name = this.idAttribute();
+        const response = await collection.updateOne({[id_name]:input[id_name]}, {$set: updatedContent});
+
+        if (response.result.ok !== 1){
+            throw new Error(`Record with ID = ${input[id_name]} has not been updated`);
+        }
+        const document = await this.readById(input[id_name]);
+        return document;
+    } catch (error) {
+        throw error;
+    }
+  }
+
+  /**
+  * bulkAddCsv - Add records from csv file
+  *
+  * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
+  */
+  static bulkAddCsv(context){
+    let delim = context.request.body.delim;
+    let arrayDelim = ";"
+    let cols = context.request.body.cols;
+    let tmpFile = path.join(os.tmpdir(), uuidv4() + '.csv');
+
+    context.request.files.csv_file.mv(tmpFile).then(() => {
+
+        fileTools.parseCsvStream(tmpFile, this, delim, cols, "mongodb", arrayDelim).then((addedZipFilePath) => {
+            try {
+                console.log(`Sending ${addedZipFilePath} to the user.`);
+
+                let attach = [];
+                attach.push({
+                    filename: path.basename("added_data.zip"),
+                    path: addedZipFilePath
+                });
+
+                email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                    'ScienceDB batch add',
+                    'Your data has been successfully added to the database.',
+                    attach).then(function(info) {
+                    fileTools.deleteIfExists(addedZipFilePath);
+                    console.log(info);
+                }).catch(function(err) {
+                    fileTools.deleteIfExists(addedZipFilePath);
+                    console.error(err);
+                });
+
+            } catch (error) {
+                console.error(error.message);
+            }
+
+            fs.unlinkSync(tmpFile);
+        }).catch((error) => {
+            email.sendEmail(helpersAcl.getTokenFromContext(context).email,
+                'ScienceDB batch add', `${error.message}`).then(function(info) {
+                console.error(info);
+            }).catch(function(err) {
+                console.error(err);
+            });
+
+            fs.unlinkSync(tmpFile);
+        });
+
+
+
+    }).catch((error) => {
+        throw new Error(error);
+    });
+
+    return `Bulk import of user records started. You will be send an email to ${helpersAcl.getTokenFromContext(context).email} informing you about success or errors`;
+  }
+
+  /**
+   * csvTableTemplate - Allows the user to download a template in CSV format with the
+   * properties and types of this model.
+   *
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
+   * is invoked, the server will include any so reported errors in the final response, i.e. the
+   * GraphQL response will have a non empty errors property.
+   */
+  static async csvTableTemplate(benignErrorReporter){
+      return helper.csvTableTemplate(definition);
+  }
+
+  <%- include('./includes/create-generic-fieldResolvers'); %>
+  <%- include('./includes/create-models-fieldMutations-mongodb', {op: "add"}); %>
+  <%- include('./includes/create-models-fieldMutations-mongodb', {op: "remove"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
+  <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "remove"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+  static idAttribute() {
+    return <%- nameLc -%>.definition.id.name;
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model
+   */
+  static idAttributeType() {
+    return <%- nameLc -%>.definition.id.type;
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- nameLc -%>.
+   *
+   * @return {type} id value
+   */
+  getIdValue() {
+    return this[<%- nameLc -%>.idAttribute()]
+  }
+
+  static get definition(){
+    return definition;
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- nameLc -%>.definition.attributes);
+  <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
+  }
+
+}

@@ -165,7 +165,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     // build the graphql Connection Object
     let edges = helper.buildEdgeObject(records);
     let pageInfo = helper.buildPageInfo(edges, oppRecords, pagination);
-    return {edges, pageInfo};
+    return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
   static async addOne(input){
@@ -277,7 +277,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   static csvTableTemplate(){
-    return helper.csvTableTemplate(<%- name -%>);
+    return helper.csvTableTemplate(definition);
   }
 
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
@@ -304,7 +304,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   }
 
   /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- adapterName -%>.
    *
    * @return {type} id value
    */

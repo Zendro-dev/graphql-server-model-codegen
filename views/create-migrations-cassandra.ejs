@@ -1,0 +1,52 @@
+'use strict';
+const {  getConnectionInstances } = require('../../connection');
+
+/**
+ * @module - Migrations to create and to undo a table correpondant to a sequelize model.
+ */
+module.exports = {
+
+  /**
+   * up - Creates a table with the fields specified in the the createTable function.
+   *
+   * @return {promise}                Resolved if the table was created successfully, rejected otherwise.
+   */
+  up: async function(){
+    // get the default cassandra client
+    const connectionInstances = await getConnectionInstances();
+    const cassandraClient = connectionInstances.get("default-cassandra").connection;
+    let createString = 'CREATE TABLE "<%-namePl-%>"(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY';
+    let indexCreationStrings = [];
+
+    <% let keys = Object.keys(cassandraAttributesWithConvertedTypes) -%>
+      <%for (let i=0; i< keys.length; i++) {-%>
+        <% let type_seq =  cassandraAttributesWithConvertedTypes[ keys[i] ] -%>
+          createString += ', "<%=  keys[i] %>" <%- type_seq -%>';
+          indexCreationStrings.push("<%= keys[i] %>");
+       <%}-%>
+    createString += ");";
+
+    await cassandraClient.execute(createString);
+
+    let indexCreationPromises = indexCreationStrings.map(async i =>  
+      await cassandraClient.execute('CREATE INDEX IF NOT EXISTS <%-namePl-%>_' + i + '_index ON <%-namePl-%> (' + i + ');'));
+
+    await Promise.allSettled(indexCreationPromises);
+
+  },
+
+  /**
+   * down - Deletes a table.
+   *
+   * @param  {object} queryInterface Used to modify the table in the database.
+   * @param  {object} Sequelize      Sequelize instance with data types included
+   * @return {promise}                Resolved if the table was deleted successfully, rejected otherwise.
+   */
+  down: async function(){
+    // get the default cassandra client
+    const connectionInstances = await getConnectionInstances();
+    const cassandraClient = connectionInstances.get("default-cassandra").connection;
+    await cassandraClient.execute('DROP TABLE IF EXISTS <%-namePl-%>');
+  }
+
+};

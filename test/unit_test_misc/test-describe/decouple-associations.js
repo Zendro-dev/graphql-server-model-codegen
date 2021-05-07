@@ -1,4 +1,4 @@
-module.exports.belongsTo_resolver  = `
+module.exports.belongsTo_resolver = `
 /**
  * dog.prototype.researcher - Return associated record
  *
@@ -22,22 +22,22 @@ dog.prototype.researcher = async function({
                 "value": this.researcherId,
                 "operator": "eq"
             });
-            let found = await resolvers.researchers({
+            let found = (await resolvers.researchersConnection({
                 search: nsearch,
-                pagination: {limit: 1}
-            }, context);
-            if (found) {
-                return found[0]
+                pagination: {first: 1}
+            }, context)).edges;
+            if (found.length > 0) {
+                return found[0].node
             }
             return found;
         }
     }
 }
-`
+`;
 
 module.exports.belongsTo_model = `
 static async add_researcherId(id, researcherId) {
-  let updated = await Dog.update({
+  let updated = await dog.update({
       researcherId: researcherId
   }, {
       where: {
@@ -46,7 +46,7 @@ static async add_researcherId(id, researcherId) {
   });
   return updated;
 }
-`
+`;
 
 module.exports.hasOne_resolver = `
 /**
@@ -67,30 +67,30 @@ researcher.prototype.dog = async function({
           "operator": "eq"
       });
 
-      let found = await resolvers.dogs({
+      let found = (await resolvers.dogsConnection({
           search: nsearch,
-          pagination: {limit: 2}
-      }, context);
-      if(found){
+          pagination: {first: 2}
+      }, context)).edges;
+      if(found.length > 0){
           if(found.length > 1){
               context.benignErrors.push(new Error(
                 \`Not unique "to_one" association Error: Found > 1 dogs matching researcher with id \${this.getIdValue()}. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the Researcher model. Returning first Dog.\`
               ));
           }
-          return found[0];
+          return found[0].node;
       }
-      return found;
+      return null;
 }
-`
+`;
 
 module.exports.belongsTo_schema = `
   researcher(search: searchResearcherInput) : Researcher
-`
+`;
 
 module.exports.hasOne_schema = `
   dog(search: searchDogInput): Dog
 
-`
+`;
 
 module.exports.hasMany_model = `
 static associate(models) {
@@ -100,7 +100,7 @@ static associate(models) {
             foreignKey: 'individual_id'
         });
     }
-`
+`;
 
 module.exports.hasMany_resolver = `
 /**
@@ -133,14 +133,14 @@ individual.prototype.transcript_countsFilter = function({
         pagination: pagination
     }, context);
 }
-`
+`;
 module.exports.countAssociated_model = `
 static async countRecords(search) {
     let options = {}
     options['where'] = helper.searchConditionsToSequelize(search, individual.definition.attributes);
     return super.count(options);
 }
-`
+`;
 
 module.exports.countAssociated_resolver = `
 /**
@@ -165,7 +165,7 @@ individual.prototype.countFilteredTranscript_counts = function({
         search: nsearch
     }, context);
 }
-`
+`;
 
 module.exports.belongsToMany_model = `
 AuthorsFilterImpl({
@@ -177,7 +177,7 @@ AuthorsFilterImpl({
       let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.person.idAttribute(), models.person.definition.attributes);  
       return this.getAuthors(options);
     }
-`
+`;
 module.exports.belongsToMany_model_count = `
 countFilteredAuthorsImpl({
       search
@@ -186,7 +186,7 @@ countFilteredAuthorsImpl({
     options['where'] = helper.searchConditionsToSequelize(search);
     return this.countAuthors(options);
   }
-`
+`;
 
 module.exports.belongsToMany_resolver = `
 /**
@@ -217,7 +217,7 @@ book.prototype.AuthorsFilter = async function({
         }
 
 }
-`
+`;
 
 module.exports.belongsToMany_resolver_count = `
 /**
@@ -239,4 +239,4 @@ book.prototype.countFilteredAuthors = async function({
         }
 
 }
-`
+`;

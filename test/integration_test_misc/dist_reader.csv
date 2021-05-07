@@ -1,0 +1,4 @@
+reader_id,reader_name,age,student,lastSeen,history
+instance1-1,dist_Sally,15.4,true,2020-10-03T10:15:30Z,Critique of Pure Reason;The World as Will and Representation
+instance1-2,dist_Lily,20.6,true,2017-10-03T10:15:30Z,null
+instance1-3,dist_Dom,7.5,true,2021-03-03T10:15:30Z,NULL
