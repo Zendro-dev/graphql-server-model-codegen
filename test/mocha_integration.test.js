@@ -409,10 +409,6 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     });
 
     res = await itHelpers.request_metaquery_post(
-      // [
-      //   `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name}}`,
-      //   `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}}`,
-      // ],
       `{
         firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
         secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
@@ -431,10 +427,6 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     });
 
     res = await itHelpers.request_metaquery_post(
-      // [
-      //   `{ firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {names}}`,
-      //   `{secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}, pagination:{limit:10}) {names}}`,
-      // ],
       `{
         firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {names}
         secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"}, pagination:{limit:10}) {names}
