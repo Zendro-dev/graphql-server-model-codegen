@@ -1558,8 +1558,6 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       });
 
     //save data for writeCommons
-    //models
-    models.push([opts.name, opts.namePl, opts.nameLc]);
     //adapters
     if (
       [

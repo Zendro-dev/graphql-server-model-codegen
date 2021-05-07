@@ -23,17 +23,10 @@ module.exports = {
           '<%- modelsAndAdapters[i] _%>',
         <%}-%>
         ],
-        permissions: ['create', 'update', 'delete']
+        permissions: ['create', 'update', 'delete', 'search']
       }]
     },
 
-    {
-      roles: 'editor',
-      allows: [{
-        resources: '<%- models[i].name _%>',
-        permissions: 'search'
-      }]
-    },
     {
       roles: 'reader',
       allows: [{
