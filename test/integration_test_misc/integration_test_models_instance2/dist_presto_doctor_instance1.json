@@ -1,0 +1,17 @@
+{
+    "model": "dist_presto_doctor",
+    "storageType": "presto-adapter",
+    "adapterName": "dist_presto_doctor_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "doctor_id": "String",
+        "birthday": "DateTime",
+        "experience": "Int",
+        "rating": "Float",
+        "on_holiday": "Boolean",
+        "speciality": "[String]",
+        "telephone": "[Int]"
+    },
+  
+    "internalId": "doctor_id"
+}

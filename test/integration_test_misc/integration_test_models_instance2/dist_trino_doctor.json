@@ -1,0 +1,16 @@
+{
+    "model": "dist_trino_doctor",
+    "storageType" : "distributed-data-model",
+    "registry": ["dist_trino_doctor_instance1"],
+    "attributes": {
+        "doctor_id": "String",
+        "birthday": "DateTime",
+        "experience": "Int",
+        "rating": "Float",
+        "on_holiday": "Boolean",
+        "speciality": "[String]",
+        "telephone": "[Int]"
+    },
+  
+    "internalId" : "doctor_id"
+}

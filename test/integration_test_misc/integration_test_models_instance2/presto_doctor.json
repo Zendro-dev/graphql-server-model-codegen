@@ -1,0 +1,18 @@
+{
+    "model": "presto_doctor",
+    "storageType": "presto",
+    "attributes": {
+      "doctor_id": "String",
+      "birthday": "DateTime",
+      "experience": "Int",
+      "rating": "Float",
+      "on_holiday": "Boolean",
+      "speciality": "[String]",
+      "telephone": "[Int]"
+    },
+    "internalId": "doctor_id",
+    "id": {
+      "name": "doctor_id",
+      "type": "String"
+    }
+}

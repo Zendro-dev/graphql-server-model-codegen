@@ -47,6 +47,8 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
             case 'sql-adapter':
             case 'mongodb-adapter':
             case 'amazon-s3-adapter':
+            case 'trino-adapter':
+            case 'presto-adapter':
             case 'zendro-webservice-adapter':
                 return adapter.countRecords(search, benignErrorReporter);
             case 'cassandra-adapter':
@@ -124,6 +126,8 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
             case 'sql-adapter':
             case 'mongodb-adapter':
             case 'amazon-s3-adapter':
+            case 'trino-adapter':
+            case 'presto-adapter':
             case 'zendro-webservice-adapter':
                 return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
             case 'cassandra-adapter':

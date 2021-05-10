@@ -304,6 +304,28 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
 
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.readersConnection.edges.length).equal(1);
+
+    res = itHelpers.request_graph_ql_post(`
+    {
+      readersConnection(
+        search:{
+          operator:eq,
+          field:history,
+          value:"Critique of Pure Reason,The World as Will and Representation",
+          valueType:Array
+        },
+        pagination:{first:5}) {
+          edges{
+            node{
+              reader_name
+            }
+          }
+        }
+    }`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.readersConnection.edges.length).equal(1);
   });
 
   it("13. Reader: search with ne operator for array field", () => {
@@ -466,7 +488,7 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
     });
   });
 
-  it("02. Reader DDM: search", () => {
+  it("03. Reader DDM: search", () => {
     res = itHelpers.request_graph_ql_post(
       `{
         dist_readersConnection(
@@ -512,7 +534,7 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
     });
   });
 
-  it("03. Reader DDM: paginate", () => {
+  it("04. Reader DDM: paginate", () => {
     res = itHelpers.request_graph_ql_post(
       `{
         dist_readersConnection(pagination: {
@@ -576,7 +598,7 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
     });
   });
 
-  it("04. Reader DDM: count readers", () => {
+  it("05. Reader DDM: count readers", () => {
     res = itHelpers.request_graph_ql_post(`{countDist_readers}`);
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
