@@ -11,7 +11,7 @@ static async readById(id) {
     let item = null;
     try {
         const client = await this.storageHandler;
-        item = await prestoHelper.queryData(query, client, "trino");
+        item = await prestoHelper.queryData(query, client);
 
         if (!item) {
         throw new Error(\`Record with ID = "\${id}" does not exist\`);
@@ -33,11 +33,7 @@ static async countRecords(search, benignErrorReporter) {
     let num = null;
     try {
       const client = await this.storageHandler;
-      const result = await prestoHelper.queryData(
-        query,
-        client,
-        "trino"
-      );
+      const result = await prestoHelper.queryData(query, client);
       num = result[1][0][0];
     } catch (e) {
       throw new Error(e);
@@ -75,7 +71,7 @@ static async readAll(search, order, pagination, benignErrorReporter) {
     let result = null;
     try {
       const client = await this.storageHandler;
-      result = await prestoHelper.queryData(query, client, "trino");
+      result = await prestoHelper.queryData(query, client);
     } catch (e) {
       throw new Error(e);
     }
@@ -133,7 +129,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     let result = null;
 
     const client = await this.storageHandler;
-    result = await prestoHelper.queryData(query, client, "trino");
+    result = await prestoHelper.queryData(query, client);
 
     result = doctor.postReadCast(result);
     // validationCheck after read
@@ -185,11 +181,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
         \${oppFilter}  
         \${oppSort} 
         LIMIT \${oppLimit}\`;
-      oppResult = await prestoHelper.queryData(
-        query,
-        client,
-        "trino"
-      );
+      oppResult = await prestoHelper.queryData(query, client);
       oppResult = doctor.postReadCast(oppResult);
     }
 
@@ -214,7 +206,7 @@ static async readById(id){
     let item = null;
     try {
       const client = await this.storageHandler;
-      item = await prestoHelper.queryData(query, client, "trino-adapter");
+      item = await prestoHelper.queryData(query, client);
 
       if (!item) {
         throw new Error(\`Record with ID = "\${id}" does not exist\`);
