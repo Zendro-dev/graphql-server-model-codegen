@@ -85,7 +85,7 @@ module.exports = class <%- nameLc -%> {
     let item = null;
     try {
       const client = await this.storageHandler;
-      item = await prestoHelper.queryData(query, client, "<%- storageType -%>");
+      item = await prestoHelper.queryData(query, client);
 
       if (!item) {
         throw new Error(`Record with ID = "${id}" does not exist`);
@@ -115,11 +115,7 @@ module.exports = class <%- nameLc -%> {
     let num = null;
     try {
       const client = await this.storageHandler;
-      const result = await prestoHelper.queryData(
-        query,
-        client,
-        "<%- storageType -%>"
-      );
+      const result = await prestoHelper.queryData(query, client);
       num = result[1][0][0];
     } catch (e) {
       throw new Error(e);
@@ -160,7 +156,7 @@ module.exports = class <%- nameLc -%> {
     let result = null;
     try {
       const client = await this.storageHandler;
-      result = await prestoHelper.queryData(query, client, "<%- storageType -%>");
+      result = await prestoHelper.queryData(query, client);
     } catch (e) {
       throw new Error(e);
     }
@@ -224,7 +220,7 @@ module.exports = class <%- nameLc -%> {
     let result = null;
 
     const client = await this.storageHandler;
-    result = await prestoHelper.queryData(query, client, "<%- storageType -%>");
+    result = await prestoHelper.queryData(query, client);
 
     result = <%- nameLc -%>.postReadCast(result);
     // validationCheck after read
@@ -276,11 +272,7 @@ module.exports = class <%- nameLc -%> {
         ${oppFilter}  
         ${oppSort} 
         LIMIT ${oppLimit}`;
-      oppResult = await prestoHelper.queryData(
-        query,
-        client,
-        "<%- storageType -%>"
-      );
+      oppResult = await prestoHelper.queryData(query, client);
       oppResult = <%- nameLc -%>.postReadCast(oppResult);
     }
 
