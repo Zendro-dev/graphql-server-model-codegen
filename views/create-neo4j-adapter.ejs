@@ -1,0 +1,482 @@
+const _ = require("lodash");
+const validatorUtil = require("../../utils/validatorUtil");
+const path = require("path");
+const helper = require("../../utils/helper");
+const neo4jHelper = require("../../utils/neo4j_helper");
+const errorHelper = require("../../utils/errors");
+const neo4j = require("neo4j-driver");
+const config = require("../../config/data_models_storage_config.json")["<%- database -%>"];
+const models = require(path.join(__dirname, "..", "index.js"));
+
+const remoteZendroURL = "<%- url -%>";
+const iriRegex = new RegExp('<%- regex -%>');
+
+// An exact copy of the the model definition that comes from the .json file
+const definition = <%- definition -%>;
+
+/**
+ * module - Creates a class for Neo4j data model
+ *
+ */
+
+module.exports = class <%- adapterName -%> {
+
+  constructor(input){
+    for (let key of Object.keys(input)) {
+      this[key] = input[key];
+    }
+  }
+    
+  /**
+    * Get the storage handler, which is a static property of the data model class.
+    * @returns connected Neo4j client
+    */
+  get storageHandler() {
+    return <%- adapterName-%>.storageHandler;
+  }
+    
+  static get adapterName(){
+    return '<%- adapterName -%>';
+  }
+
+  static get adapterType(){
+    return '<%- storageType -%>';
+  }
+
+  static recognizeId(iri){
+    return iriRegex.test(iri);
+  }
+
+  /**
+   * readById - The model implementation for reading a single record given by its ID
+   *
+   * This method is the implementation for reading a single record for the neo4j storage type, based on neo4j node driver.
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
+  static async readById(id) {
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.READ,
+    });
+    try {
+      const result = await session.run(
+        `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) RETURN n`,
+        { id: id }
+      );
+      if (result.records.length === 0) {
+        throw new Error(`Record with ID = "${id}" does not exist`);
+      }
+      const singleRecord = result.records[0];
+      const node = singleRecord.get(0);
+      return validatorUtil.validateData(
+        "validateAfterRead",
+        this,
+        new <%- adapterName-%>(node.properties)
+      );
+    } catch (error) {
+      throw error;
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+   *
+   * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table,
+   * for the Neo4j storage type, based on Neo4j node driver.
+   * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * @return {number} The number of records that fulfill the condition, or of all records in the table
+   */
+  static async countRecords(search) {
+    const whereOptions = neo4jHelper.searchConditionsToNeo4j(
+      search,
+      definition
+    );
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.READ,
+    });
+    try {
+      const result = await session.run(
+        `MATCH (n:<%- nameCp -%>) ${whereOptions} RETURN COUNT(n)`
+      );
+      const singleRecord = result.records[0];
+      const num = singleRecord.get(0);
+      return num;
+    } catch (error) {
+      throw error;
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * readAllCursor - The model implementation for searching for records in Neo4j. This method uses cursor based pagination.
+   *
+   * @param {object} search - The search condition for which records shall be fetched
+   * @param  {array} order - Type of sorting (ASC, DESC) for each field
+   * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+   * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+   */
+  static async readAllCursor(search, order, pagination, benignErrorReporter) {
+    //use default BenignErrorReporter if no BenignErrorReporter defined
+    benignErrorReporter =
+      errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
+    let isForwardPagination = helper.isForwardPagination(pagination);
+    // build the whereOptions.
+    let filter = neo4jHelper.searchConditionsToNeo4j(search, definition);
+    let newOrder = isForwardPagination
+      ? order
+      : helper.reverseOrderConditions(order);
+    // depending on the direction build the order object
+    let sort = neo4jHelper.orderConditionsToNeo4j(
+      newOrder,
+      this.idAttribute(),
+      isForwardPagination
+    );
+    let orderFields = newOrder ? newOrder.map((x) => x.field) : [];
+    // extend the filter for the given order and cursor
+    filter = neo4jHelper.cursorPaginationArgumentsToNeo4j(
+      pagination,
+      sort,
+      filter,
+      orderFields,
+      this.idAttribute(),
+      definition.attributes
+    );
+
+    // add +1 to the LIMIT to get information about following pages.
+    let limit = helper.isNotUndefinedAndNotNull(pagination.first)
+      ? pagination.first + 1
+      : helper.isNotUndefinedAndNotNull(pagination.last)
+      ? pagination.last + 1
+      : undefined;
+
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.READ,
+    });
+    let nodes = [];
+    try {
+      const result = await session.run(
+        `MATCH (n:<%- nameCp -%>) ${filter} RETURN n ${sort} LIMIT ${limit}`
+      );
+      nodes = result.records.map((res) => new <%- adapterName-%>(res.get(0).properties));
+      nodes = await validatorUtil.bulkValidateData(
+        "validateAfterRead",
+        this,
+        nodes,
+        benignErrorReporter
+      );
+    } catch (error) {
+      throw error;
+    }
+
+    // get the first record (if exists) in the opposite direction to determine pageInfo.
+    // if no cursor was given there is no need for an extra query as the results will start at the first (or last) page.
+    let oppNodes = [];
+    if (pagination && (pagination.after || pagination.before)) {
+      // reverse the pagination Arguement. after -> before; set first/last to 0, so LIMIT 1 is executed in the reverse Search
+      let oppPagination = helper.reversePaginationArgument({
+        ...pagination,
+        includeCursor: false,
+      });
+      let oppForwardPagination = helper.isForwardPagination(oppPagination);
+      // build the filter object.
+      let oppFilter = neo4jHelper.searchConditionsToNeo4j(search, definition);
+
+      let oppOrder = oppForwardPagination
+        ? order
+        : helper.reverseOrderConditions(order);
+      // depending on the direction build the order object
+      let oppSort = neo4jHelper.orderConditionsToNeo4j(
+        oppOrder,
+        this.idAttribute(),
+        oppForwardPagination
+      );
+      let oppOrderFields = oppOrder ? oppOrder.map((x) => x.field) : [];
+      // extend the filter for the given order and cursor
+      oppFilter = neo4jHelper.cursorPaginationArgumentsToNeo4j(
+        oppPagination,
+        oppSort,
+        oppFilter,
+        oppOrderFields,
+        this.idAttribute(),
+        definition.attributes
+      );
+      // add +1 to the LIMIT to get information about following pages.
+      let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first)
+        ? oppPagination.first + 1
+        : helper.isNotUndefinedAndNotNull(oppPagination.last)
+        ? oppPagination.last + 1
+        : undefined;
+
+      try {
+        const oppResult = await session.run(
+          `MATCH (n:<%- nameCp -%>) ${oppFilter} RETURN n ${oppSort} LIMIT ${oppLimit}`
+        );
+        oppNodes = oppResult.records.map(
+          (res) => new <%- adapterName-%>(res.get(0).properties)
+        );
+      } catch (error) {
+        throw error;
+      } finally {
+        await session.close();
+      }
+    }
+
+    // build the graphql Connection Object
+    let edges = nodes.map((res) => {
+      return {
+        node: res,
+        cursor: res.base64Enconde(),
+      };
+    });
+    const pageInfo = helper.buildPageInfo(edges, oppNodes, pagination);
+    return { edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node) };
+  }
+
+  /**
+   * addOne - The model implementation method for adding a record in Neo4j, based on Neo4j Node driver.
+   *
+   * @param {object} input - The input object.
+   * @return {object} The created record
+   * @throw {Error} If the process fails, an error is thrown
+   */
+  static async addOne(input) {
+    // validate input
+    await validatorUtil.validateData("validateForCreate", this, input);
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.WRITE,
+    });
+    try {
+      delete input.skipAssociationsExistenceChecks;
+      input = neo4jHelper.processDateTime(input, definition.attributes);
+
+      const result = await session.run(`CREATE (a:<%- nameCp -%> $props) RETURN a`, {
+        props: input,
+      });
+      const singleRecord = result.records[0];
+      const node = singleRecord.get(0);
+      return new <%- adapterName-%>(node.properties);
+    } catch (error) {
+      throw error;
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * deleteOne - The model implementation for deleting a single record, given by its ID, in Neo4j.
+   *
+   * @param {string} id - The ID of the record to be deleted
+   * @returns {string} A success message is returned
+   * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+   */
+  static async deleteOne(id) {
+    //validate id
+    await validatorUtil.validateData("validateForDelete", this, id);
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.WRITE,
+    });
+    try {
+      const result = await session.run(
+        `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) DELETE n`,
+        { id: id }
+      );
+      if (result.records.length !== 0) {
+        throw new Error(`Record with ID = ${id} has not been deleted!`);
+      }
+      return "Item successfully deleted";
+    } catch (error) {
+      console.log(`Record with ID = ${id} could not be deleted`);
+      throw error;
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * updateOne - The model implementation for updating a single record in Neo4j.
+   *
+   * @param {object} input - The input object.
+   * @returns {object} The updated record
+   * @throw {Error} If this method fails, an error is thrown
+   */
+  static async updateOne(input) {
+    //validate input
+    await validatorUtil.validateData("validateForUpdate", this, input);
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.WRITE,
+    });
+    const id = input[this.idAttribute()];
+    try {
+      delete input.skipAssociationsExistenceChecks;
+      delete input[this.idAttribute()];
+      input = neo4jHelper.processDateTime(input, definition.attributes);
+
+      const result = await session.run(
+        `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) SET n+=$props RETURN n`,
+        { id: id, props: input }
+      );
+      if (result.records.length !== 1) {
+        throw new Error(`Record with ID = ${id} has not been updated!`);
+      }
+      const singleRecord = result.records[0];
+      const node = singleRecord.get(0);
+      return new <%- adapterName-%>(node.properties);
+    } catch (error) {
+      console.log(`Record with ID = ${id} could not be updated`);
+      throw error;
+    } finally {
+      await session.close();
+    }
+  }
+
+
+  <%#
+  /**
+   * Add and remove methods for to-one association where the foreign key
+   * is stored in this model and therefore this adapter is the responsible to update the foreign key.
+   */
+  -%>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
+  <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
+
+  /**
+   * bulkAddCsv - Add records from csv file
+   *
+   * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
+   */
+  static async bulkAddCsv(context) {
+    let field_delim = config.fieldDelimiter ?? ",";
+    let array_delim = config.arrayDelimiter ?? ";";
+
+    const driver = await this.storageHandler;
+    const session = driver.session({
+      database: config.database,
+      defaultAccessMode: neo4j.session.WRITE,
+    });
+    try {
+      let query = `LOAD CSV WITH HEADERS FROM 'file:///<%- adapterName-%>.csv' AS line FIELDTERMINATOR '${field_delim}' CREATE (:Movie {`;
+      for (let attr of Object.keys(definition.attributes)) {
+        let type = definition.attributes[attr].replace(/\s+/g, "");
+        if (type[0] === "[") {
+          type = type.slice(1, type.length - 1);
+          if (type === "Int") {
+            query += `${attr}: [i in split(line.${attr}, "${array_delim}") | toInteger(i)], `;
+          } else if (type === "Boolean") {
+            query += `${attr}: [i in split(line.${attr}, "${array_delim}") | toBoolean(i)], `;
+          } else if (type === "Float") {
+            query += `${attr}: [i in split(line.${attr}, "${array_delim}") | toFloat(i)], `;
+          } else {
+            query += `${attr}: split(line.${attr}, "${array_delim}"), `;
+          }
+        } else {
+          if (type === "Int") {
+            query += `${attr}: toInteger(line.${attr}), `;
+          } else if (type === "Boolean") {
+            query += `${attr}: toBoolean(line.${attr}), `;
+          } else if (type === "Float") {
+            query += `${attr}: toFloat(line.${attr}), `;
+          } else {
+            query += `${attr}: line.${attr}, `;
+          }
+        }
+      }
+      query = query.slice(0, query.length - 2) + "})";
+      const result = await session.run(query);
+      return `Successfully upload file`;
+    } catch (e) {
+      throw new Error(e);
+    } finally {
+      await session.close();
+    }
+  }
+
+  static csvTableTemplate(){
+    return helper.csvTableTemplate(definition);
+  }
+
+  <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
+  <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
+
+  /**
+   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
+   *
+   * @return {type} Name of the attribute that functions as an internalId
+   */
+
+  static idAttribute() {
+    return <%- adapterName -%>.definition.id.name;
+  }
+
+  /**
+   * idAttributeType - Return the Type of the internalId.
+   *
+   * @return {type} Type given in the JSON model
+   */
+
+  static idAttributeType() {
+    return <%- adapterName -%>.definition.id.type;
+  }
+
+  /**
+   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- adapterName -%>.
+   *
+   * @return {type} id value
+   */
+
+  getIdValue() {
+    return this[<%- adapterName -%>.idAttribute()]
+  }
+
+  static get definition(){
+    return definition;
+  }
+
+  static base64Decode(cursor){
+    return Buffer.from(cursor, 'base64').toString('utf-8');
+  }
+
+  base64Enconde(){
+    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
+  }
+
+  stripAssociations(){
+    let attributes = Object.keys(<%- adapterName -%>.definition.attributes);
+  <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
+    let data_values = _.pick(this, attributes);
+    return data_values;
+  }
+
+  static externalIdsArray(){
+    let externalIds = [];
+    if(definition.externalIds){
+      externalIds = definition.externalIds;
+    }
+
+    return externalIds;
+  }
+
+  static externalIdsObject(){
+    return {
+      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
+    };
+  }
+
+}
