@@ -1,0 +1,27 @@
+{
+    "model": "dist_movie",
+    "storageType" : "distributed-data-model",
+    "registry": ["dist_movie_instance1"],
+    "attributes": {
+        "movie_id": "String",
+        "release": "DateTime",
+        "runtime": "Int",
+        "box_office": "Float",
+        "is_adult": "Boolean",
+        "genres": "[String]",
+        "votes": "[Int]",
+        "director_id": "String"
+    },
+  
+    "associations": {
+        "dist_director": {
+            "type": "to_one",
+            "target": "dist_director",
+            "targetKey": "director_id",
+            "keyIn" : "dist_movie",
+            "targetStorageType": "distributed-data-model"
+        }
+    },
+  
+    "internalId" : "movie_id"
+}

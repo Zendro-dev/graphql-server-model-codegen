@@ -58,6 +58,8 @@ services:
     depends_on:
       - gql_postgres1
       - gql_mongodb1
+      - gql_cassandra1
+      - gql_minio1
     build:
       context: .
       dockerfile: Dockerfile.graphql_server
@@ -139,10 +141,27 @@ services:
     networks:
       - instance2
 
+  gql_neo4j:
+    image: neo4j
+    container_name: neo4j1
+    user: ${UID_GID}
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./import:/var/lib/neo4j/import
+    environment:
+      NEO4J_AUTH: neo4j/sciencedb
+    networks:
+      - instance2
+
   gql_science_db_graphql_server2:
     container_name: server2
     depends_on:
       - gql_postgres2
+      - gql_presto
+      - gql_trino
+      - gql_neo4j
     build:
       context: .
       dockerfile: Dockerfile.graphql_server

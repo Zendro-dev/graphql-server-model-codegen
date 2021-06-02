@@ -1,0 +1,23 @@
+{
+    "model" : "review",
+    "storageType" : "neo4j",
+    "attributes" : {
+      "review_id": "String",
+      "movie_id": "String",
+      "rating": "Float"
+    },
+    "associations": {
+      "unique_movie": {
+        "type" : "to_one",
+        "target" : "movie",
+        "targetKey" : "movie_id",
+        "keyIn": "review",
+        "targetStorageType" : "neo4j"
+      }
+    },
+    "internalId": "review_id",
+    "id": {
+        "name": "review_id",
+        "type": "String"
+    }
+}

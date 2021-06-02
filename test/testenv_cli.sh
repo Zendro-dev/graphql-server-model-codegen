@@ -98,7 +98,7 @@ fi
 # 1. Stop docker containers and remove anonymous volumes
 # 2. Re-start the docker containers
 if [[ $OPT_RESTART_DOCKER == "true" ]]; then
-  docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
+  UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
   bash "${TEST_DIR}/testenv_docker_up.sh"
   exit 0
 fi
@@ -114,6 +114,7 @@ if [[ $OPT_RUN_TESTS == "true" ]]; then
   mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
   mocha --timeout 10000 "${TEST_DIR}/mocha_integration_trino.test.js"
   mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
+  mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
 
   # 1. Remove docker containers, images, and volumes
   # 2. Remove the testing environment
@@ -132,7 +133,7 @@ fi
 # 4. Run integration tests
 # 5. Perform a full cleanup (optionally disabled)
 if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
-  docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
+  UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
   bash "${TEST_DIR}/testenv_generate_code.sh"
   bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
@@ -142,6 +143,7 @@ if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
   mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
   mocha --timeout 10000 "${TEST_DIR}/mocha_integration_trino.test.js"
   mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
+  mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
 
   # 1. Remove docker containers, images, and volumes
   # 2. Remove the testing environment
@@ -172,6 +174,7 @@ if [[ $DEFAULT_RUN == "true" ]]; then
   mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
   mocha --timeout 10000 "${TEST_DIR}/mocha_integration_trino.test.js"
   mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
+  mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
 
   # 1. Remove docker containers, images, and volumes
   # 2. Remove the testing environment
