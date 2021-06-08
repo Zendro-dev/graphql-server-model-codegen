@@ -25,6 +25,7 @@
 
     "measurements": {
       "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accessionId",
       "keyIn": "Measurement",

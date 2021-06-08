@@ -15,6 +15,7 @@
     "associations":{
       "books":{
         "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",

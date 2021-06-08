@@ -10,6 +10,7 @@
     "associations": {
       "dogs": {
         "type": "one_to_many",
+        "implementation": "foreignkey",
         "target": "dog",
         "targetKey": "person_id",
         "keyIn": "dog",
