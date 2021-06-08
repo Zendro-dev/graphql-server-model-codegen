@@ -8,7 +8,8 @@
     },
     "associations": {
         "animals": {
-            "type": "to_many",
+            "type": "one_to_many",
+            "implementation": "foreignkey",
             "target": "animal",
             "targetKey": "farm_id",
             "keyIn": "animal",

@@ -1,7 +1,7 @@
 {
   "model": "Location",
   "storageType": "sql",
-  "attributes" : {
+  "attributes": {
     "locationId": "String",
     "country": "String",
     "state": "String",
@@ -9,10 +9,11 @@
     "locality": "String"
   },
 
-  "associations" :{
+  "associations": {
 
     "accessions": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Accession",
       "targetKey": "locationId",
       "keyIn": "Accession",
@@ -21,6 +22,6 @@
     }
 
   },
-  "internalId" : "locationId"
+  "internalId": "locationId"
 
 }

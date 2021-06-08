@@ -1,18 +1,19 @@
 {
-    "model" : "tracker",
-    "storageType" : "mongodb",
-    "attributes" : {
+    "model": "tracker",
+    "storageType": "mongodb",
+    "attributes": {
       "tracker_id": "String",
-      "animal_id" : "String",
+      "animal_id": "String",
       "location": "String"
     },
     "associations": {
       "unique_animal": {
-        "type" : "to_one",
-        "target" : "animal",
-        "targetKey" : "animal_id",
+        "type": "one_to_one",
+        "implementation": "foreignkey",
+        "target": "animal",
+        "targetKey": "animal_id",
         "keyIn": "tracker",
-        "targetStorageType" : "mongodb"
+        "targetStorageType": "mongodb"
       }
     },
     "internalId": "tracker_id",

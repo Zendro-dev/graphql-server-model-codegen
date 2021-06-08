@@ -1,6 +1,6 @@
 {
     "model": "dist_farm",
-    "storageType" : "distributed-data-model",
+    "storageType": "distributed-data-model",
     "registry": ["dist_farm_instance1"],
     "attributes": {
         "farm_id": "String",
@@ -9,7 +9,8 @@
     },
     "associations": {
         "dist_animals": {
-            "type": "to_many",
+            "type": "one_to_many",
+            "implementation": "foreignkey",
             "target": "dist_animal",
             "targetKey": "farm_id",
             "keyIn": "dist_animal",

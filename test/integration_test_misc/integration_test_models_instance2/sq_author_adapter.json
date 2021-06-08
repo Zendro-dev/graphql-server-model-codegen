@@ -1,9 +1,9 @@
 {
-    "model" : "sq_author",
-    "storageType" : "sql-adapter",
+    "model": "sq_author",
+    "storageType": "sql-adapter",
     "adapterName": "author_local",
     "regex": "local",
-    "attributes" : {
+    "attributes": {
         "id": "String",
         "name": "String",
         "lastname": "String",
@@ -13,8 +13,7 @@
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",

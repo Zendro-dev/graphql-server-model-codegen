@@ -1,21 +1,22 @@
 {
-    "model" : "dog",
-    "storageType" : "ddm-adapter",
+    "model": "dog",
+    "storageType": "ddm-adapter",
     "adapterName": "dog_instance2",
     "regex": "instance2",
     "url": "http://server2:3030/graphql",
-    "attributes" : {
+    "attributes": {
         "name": "String",
       "dog_id": "String",
       "person_id": "String"
     },
     "associations": {
       "person": {
-        "type" : "to_one",
-        "target" : "person",
-        "targetKey" : "person_id",
+        "type": "many_to_one",
+        "implementation": "foreignkey",
+        "target": "person",
+        "targetKey": "person_id",
         "keyIn": "dog",
-        "targetStorageType" : "distributed-data-model"
+        "targetStorageType": "distributed-data-model"
       }
     },
     "internalId": "dog_id"

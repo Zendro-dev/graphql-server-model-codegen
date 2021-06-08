@@ -1,16 +1,16 @@
 {
-    "model" : "food",
-    "storageType" : "mongodb",
-    "attributes" : {
+    "model": "food",
+    "storageType": "mongodb",
+    "attributes": {
         "food_id": "String",
         "food_name": "String",
         "animal_ids": "[String]"
     },
 
-    "associations":{
-      "animals":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+    "associations": {
+      "animals": {
+        "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "animal",
         "targetKey": "food_ids",
         "sourceKey": "animal_ids",
@@ -20,7 +20,7 @@
     },
 
     "internalId": "food_id",
-    "id":{
+    "id": {
         "name": "food_id",
         "type": "String" 
     }

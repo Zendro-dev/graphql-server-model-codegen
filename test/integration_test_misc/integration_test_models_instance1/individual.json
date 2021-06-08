@@ -1,16 +1,17 @@
 {
-  "model" : "individual",
-  "storageType" : "SQL",
-  "attributes" : {
-    "name" : "String"
+  "model": "individual",
+  "storageType": "SQL",
+  "attributes": {
+    "name": "String"
   },
   "associations": {
     "transcript_counts": {
-      "type" : "to_many",
-      "target" : "transcript_count",
-      "targetKey" : "individual_id",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
+      "target": "transcript_count",
+      "targetKey": "individual_id",
       "keyIn": "transcript_count",
-      "targetStorageType" : "sql"
+      "targetStorageType": "sql"
     }
   }
 }

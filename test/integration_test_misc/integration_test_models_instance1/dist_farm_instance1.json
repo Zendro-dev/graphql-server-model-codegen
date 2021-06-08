@@ -10,7 +10,8 @@
     },
     "associations": {
       "dist_animals": {
-        "type": "to_many",
+        "type": "one_to_many",
+        "implementation": "foreignkey",
         "target": "dist_animal",
         "targetKey": "farm_id",
         "keyIn": "dist_animal",

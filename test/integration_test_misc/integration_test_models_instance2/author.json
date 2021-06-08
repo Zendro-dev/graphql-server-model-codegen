@@ -1,8 +1,8 @@
 {
-    "model" : "author",
-    "storageType" : "zendro-server",
+    "model": "author",
+    "storageType": "zendro-server",
     "url": "http://server1:3000/graphql",
-    "attributes" : {
+    "attributes": {
         "id": "String",
         "name": "String",
         "lastname": "String",
@@ -12,8 +12,7 @@
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
         "target": "book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",

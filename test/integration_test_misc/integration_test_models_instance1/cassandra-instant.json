@@ -14,14 +14,15 @@
     "associations": {
   
       "incident": {
-        "type": "to_one",
+        "type": "many_to_one",
+        "implementation": "foreignkey",
         "target": "Incident",
         "targetKey": "incident_assoc_id",
-        "keyIn" : "Instant",
+        "keyIn": "Instant",
         "targetStorageType": "cassandra"
       }
   
     },
   
-    "internalId" : "instant_id"
+    "internalId": "instant_id"
   }

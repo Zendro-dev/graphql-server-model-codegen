@@ -11,21 +11,23 @@
     "associations": {
   
       "instants": {
-        "type": "to_many",
+        "type": "one_to_many",
+        "implementation": "foreignkey",
         "target": "Instant",
         "targetKey": "incident_assoc_id",
-        "keyIn" : "Instant",
+        "keyIn": "Instant",
         "targetStorageType": "cassandra"
       },
       "town": {
-        "type": "to_one",
+        "type": "many_to_one",
+        "implementation": "foreignkey",
         "target": "capital",
         "targetKey": "capital_id",
-        "keyIn" : "Incident",
+        "keyIn": "Incident",
         "targetStorageType": "sql"
       }
   
     },
   
-    "internalId" : "incident_id"
+    "internalId": "incident_id"
   }

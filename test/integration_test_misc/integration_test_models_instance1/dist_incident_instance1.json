@@ -12,7 +12,8 @@
   "associations": {
 
     "dist_instants": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
       "keyIn": "Dist_instant",

@@ -1,26 +1,28 @@
 {
-    "model" : "person",
-    "storageType" : "sql-adapter",
+    "model": "person",
+    "storageType": "sql-adapter",
     "adapterName": "person_instance1",
     "regex": "instance1",
-    "attributes" : {
-      "name" : "String",
+    "attributes": {
+      "name": "String",
       "person_id": "String"
     },
     "associations": {
       "dogs": {
-        "type" : "to_many",
-        "target" : "dog",
-        "targetKey" : "person_id",
+        "type": "one_to_many",
+        "implementation": "foreignkey",
+        "target": "dog",
+        "targetKey": "person_id",
         "keyIn": "dog",
-        "targetStorageType" : "distributed-data-model"
+        "targetStorageType": "distributed-data-model"
       },
       "unique_parrot": {
-        "type" : "to_one",
-        "target" : "parrot",
-        "targetKey" : "person_id",
+        "type": "one_to_one",
+        "implementation": "foreignkey",
+        "target": "parrot",
+        "targetKey": "person_id",
         "keyIn": "parrot",
-        "targetStorageType" : "distributed-data-model"
+        "targetStorageType": "distributed-data-model"
       }
     },
     "internalId": "person_id"

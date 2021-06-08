@@ -2,7 +2,7 @@
   "model": "Location",
   "storageType": "zendro-server",
   "url": "http://server1:3000/graphql",
-  "attributes" : {
+  "attributes": {
     "locationId": "String",
     "country": "String",
     "state": "String",
@@ -13,7 +13,7 @@
   "associations" :{
 
     "accessions": {
-      "type": "to_many",
+      "type": "one_to_many",
       "target": "Accession",
       "targetKey": "locationId",
       "keyIn": "Accession",
@@ -22,6 +22,6 @@
     }
 
   },
-  "internalId" : "locationId"
+  "internalId": "locationId"
 
 }
