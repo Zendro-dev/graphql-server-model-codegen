@@ -694,7 +694,7 @@ getEditableAttributes = function (
 ) {
   let editable_attributes = {};
   let target_keys = parsedAssocForeignKeys.map((assoc) => {
-    if (assoc.reverseAssociationType) return assoc.sourceKey;
+    if (assoc.type === 'many_to_many' && assoc.implementation === 'foreignkey') return assoc.sourceKey;
     return assoc.targetKey;
   });
   for (let attrib in attributes) {
@@ -733,126 +733,134 @@ module.exports.parseAssociations = function (dataModel) {
   };
   if (associations !== undefined) {
     Object.entries(associations).forEach(([name, association]) => {
-      let type = association.type;
+      
+      const type = association.type;
+      const implementation = association.implementation;
+
+      const schema_attributes = [
+        association.target,
+        capitalizeString(association.target),
+        capitalizeString(name),
+      ];
       let holdsTheForeignKey = false;
       let assocThroughArray = false;
-      let isStandardAssociation =
-        association.type !== "generic_to_many" &&
-        association.type !== "generic_to_one";
+      let assoc = Object.assign({}, association);
 
-      //push association
-      if (isStandardAssociation) {
-        //standard
-        associations_info.associations.push(association);
-        association.targetStorageType = association.targetStorageType.toLowerCase();
-        associations_info.foreignKeyAssociations[name] = association.targetKey;
-      } else {
-        //generic
-        associations_info.genericAssociations.push(association);
-      }
-
-      //if(associations_type["many"].includes(association.type) )
-      if (association.type === "to_many") {
-        //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
-        associations_info.schema_attributes["many"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-        if (association.reverseAssociationType === "to_many") {
-          assocThroughArray = true;
-        }
-        //}else if(associations_type["one"].includes(association.type))
-      } else if (association.type === "to_one") {
-        associations_info.schema_attributes["one"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-        if (association.keyIn === dataModel.model) {
-          holdsTheForeignKey = true;
-        }
-      } else if (association.type === "to_many_through_sql_cross_table") {
-        if (
-          association.sourceKey === undefined ||
-          association.keysIn === undefined ||
-          association.targetStorageType !== "sql"
-        ) {
-          console.error(
-            colors.red(
-              `ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`
-            )
-          );
-        }
-        associations_info.schema_attributes["many"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-      } else if (association.type === "generic_to_one") {
-        associations_info.schema_attributes["generic_one"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-      } else if (association.type === "generic_to_many") {
-        associations_info.schema_attributes["generic_many"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-      } else {
+      if (type !== 'one_to_one' && type !== 'one_to_many' && type !== 'many_to_one' && type !== 'many_to_many') {
         console.error(
           colors.red("Association type " + association.type + " not supported.")
         );
       }
 
-      let assoc = Object.assign({}, association);
-      //push association
-      if (isStandardAssociation) {
-        //standard
-        assoc["name"] = name;
-        assoc["name_lc"] = uncapitalizeString(name);
-        assoc["name_cp"] = capitalizeString(name);
-        assoc["target_lc"] = uncapitalizeString(association.target);
-        assoc["target_lc_pl"] = inflection.pluralize(
-          uncapitalizeString(association.target)
-        );
-        assoc["target_pl"] = inflection.pluralize(association.target);
-        assoc["target_cp"] = capitalizeString(association.target); //inflection.capitalize(association.target);
-        assoc["target_cp_pl"] = capitalizeString(
-          inflection.pluralize(association.target)
-        ); //inflection.capitalize(inflection.pluralize(association.target));
+      // set default association fields
+      assoc["name"] = name;
+      assoc["name_lc"] = uncapitalizeString(name);
+      assoc["name_cp"] = capitalizeString(name);
+      assoc["target_lc"] = uncapitalizeString(association.target);
+      assoc["target_lc_pl"] = inflection.pluralize(
+        uncapitalizeString(association.target)
+      );
+      assoc["target_pl"] = inflection.pluralize(association.target);
+      assoc["target_cp"] = capitalizeString(association.target); //inflection.capitalize(association.target);
+      assoc["target_cp_pl"] = capitalizeString(
+        inflection.pluralize(association.target)
+      );
+
+      if (implementation !== 'generic') {
+        // set extra association fields
         assoc["targetKey"] = association.targetKey;
         assoc["targetKey_cp"] = capitalizeString(association.targetKey);
         if (association.keyIn) {
           assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
         }
-        assoc["holdsForeignKey"] = holdsTheForeignKey;
-        assoc["assocThroughArray"] = assocThroughArray;
+        assoc["holdsForeignKey"] = false;
+        assoc["assocThroughArray"] = false;
+
+        assoc.targetStorageType = association.targetStorageType.toLowerCase();
+        association.targetStorageType = association.targetStorageType.toLowerCase();
+        associations_info.associations.push(association);
+        associations_info.foreignKeyAssociations[name] = association.targetKey;
       } else {
-        //generic
-        assoc["name"] = name;
-        assoc["name_lc"] = uncapitalizeString(name);
-        assoc["name_cp"] = capitalizeString(name);
-        assoc["target_lc"] = uncapitalizeString(association.target);
-        assoc["target_lc_pl"] = inflection.pluralize(
-          uncapitalizeString(association.target)
-        );
-        assoc["target_pl"] = inflection.pluralize(association.target);
-        assoc["target_cp"] = capitalizeString(association.target); //inflection.capitalize(association.target);
-        assoc["target_cp_pl"] = capitalizeString(
-          inflection.pluralize(association.target)
-        ); //inflection.capitalize(inflection.pluralize(association.target));
+        associations_info.genericAssociations.push(association); 
       }
 
-      associations_info[type].push(assoc);
-      //associations_info[type].push(assoc);
+      // switch implementation types
+      switch (implementation) {
+        case 'generic':
+          switch (type) {
+            case 'one_to_one':
+            case 'many_to_one':
+              associations_info.schema_attributes["generic_one"][name] = schema_attributes;
+              associations_info['generic_to_one'].push(assoc);
+              break;
+            case 'one_to_many':
+            case 'many_to_many':
+              associations_info.schema_attributes["generic_many"][name] = schema_attributes;
+              associations_info['generic_to_many'].push(assoc);
+              break;
+            default:
+              break;
+          }
+          break;
+        case 'sql_cross_table':
+          if (type !== 'many_to_many'
+           || association.sourceKey === undefined
+           || association.keysIn === undefined
+           || association.targetStorageType !== "sql" ) {
+            console.error(
+              colors.red(
+                `ERROR: many_to_many through crosstable only allowed for relational database types with well defined cross-table`
+              )
+            );    
+          }
+
+          associations_info.schema_attributes["many"][name] = schema_attributes;
+          associations_info['to_many_through_sql_cross_table'].push(assoc);
+          break;
+        case 'foreignkey':
+          associations_info.foreignKeyAssociations[name] = association.targetKey;
+          switch (type) {
+            case 'one_to_one':
+            case 'many_to_one':
+              // schema attrtibutes
+              associations_info.schema_attributes["one"][name] = schema_attributes;
+              // holds foreignKey ?
+              if (association.keyIn === dataModel.model) {
+                assoc["holdsForeignKey"] = true; 
+              }
+              associations_info['to_one'].push(assoc);
+              break;
+            case 'many_to_many':
+              assoc["assocThroughArray"] = true;
+            case 'one_to_many':
+              associations_info.schema_attributes["many"][name] = schema_attributes;
+              associations_info['to_many'].push(assoc);
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          if (implementation) {
+            console.error(
+              colors.red(
+                `ERROR: unallowed association implementation type ${implementation}.`
+              )
+            ); 
+          } else {
+            console.error(
+              colors.red(
+                `ERROR: Please specify an implementation type.`
+              )
+            ); 
+          }
+      }
     });
-  }
+  };
   associations_info.mutations_attributes = attributesToString(
     associations_info.mutations_attributes
   );
+  // console.log(JSON.stringify(associations_info,null,2));
   return associations_info;
 };
 
