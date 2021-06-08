@@ -10,7 +10,8 @@ module.exports.book = {
   "associations":{
 
       "Authors" : {
-          "type" : "to_many",
+          "type" : "many_to_many",
+          "implementation": "sql_cross_table",
           "target" : "Person",
           "targetKey" : "personId",
           "sourceKey" : "bookId",
@@ -20,7 +21,8 @@ module.exports.book = {
           "sublabel" : "email"
         },
       "publisher" : {
-        "type" : "to_one",
+        "type" : "many_to_one",
+        "implementation": "foreignkey",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keyIn" : "Book",
@@ -42,7 +44,8 @@ module.exports.person = {
   },
   "associations":{
     "works":{
-      "type" : "to_many",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -52,7 +55,8 @@ module.exports.person = {
     },
 
     "company":{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "publi_sher",
       "targetKey": "companyId",
       "keyIn": "Person",
@@ -74,7 +78,8 @@ module.exports.dog_one_assoc = {
 
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
       "keyIn" : "Dog",
@@ -82,7 +87,8 @@ module.exports.dog_one_assoc = {
     },
 
     "veterinarian" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "veterinarianId",
       "keyIn" : "Dog",
@@ -104,7 +110,8 @@ module.exports.person_one_assoc = {
 
   "associations" : {
     "unique_pet" :{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "personId",
       "keyIn": "Dog",
@@ -112,7 +119,8 @@ module.exports.person_one_assoc = {
     },
 
     "patients" : {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "veterinarianId",
       "keyIn": "Dog",

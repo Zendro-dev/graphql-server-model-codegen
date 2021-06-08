@@ -1355,7 +1355,8 @@ describe("Parse associations", function () {
       },
       to_one: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkey",
           target: "individual",
           targetKey: "individual_id",
           targetKey_cp: "Individual_id",
@@ -1383,7 +1384,8 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkey",
           target: "individual",
           targetKey: "individual_id",
           keyIn: "transcript_count",
@@ -1413,7 +1415,8 @@ describe("Parse associations", function () {
       to_one: [],
       to_many: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkey",
           target: "transcript_count",
           keyIn: "transcript_count",
           targetKey: "individual_id",
@@ -1440,7 +1443,8 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkey",
           target: "transcript_count",
           keyIn: "transcript_count",
           targetKey: "individual_id",
@@ -1454,7 +1458,7 @@ describe("Parse associations", function () {
 
   it("03. Single to_many_through_sql_cross_table", function () {
     let association = models.assoc_through_project_researcher;
-    association.type = "to_many_through_sql_cross_table";
+    // association.type = "many_to_many";
     let model = { model: "Person", associations: { assoc: association } };
     let res = funks.parseAssociations(model, "sql");
     expect(res).to.deep.equal({
@@ -1470,7 +1474,8 @@ describe("Parse associations", function () {
       to_many: [],
       to_many_through_sql_cross_table: [
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Project",
           targetKey: "projectId",
           targetKey_cp: "ProjectId",
@@ -1497,7 +1502,8 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Project",
           targetKey: "projectId",
           sourceKey: "researcherId",
@@ -1518,7 +1524,7 @@ describe("Parse associations", function () {
 
   it("04. Two associations: to_many and to_many_through_sql_cross_table", function () {
     let person = models.person;
-    person.associations.books.type = "to_many_through_sql_cross_table";
+    // person.associations.books.type = "to_many_through_sql_cross_table";
     let res = funks.parseAssociations(person, "sql");
     expect(res).to.deep.equal({
       schema_attributes: {
@@ -1533,7 +1539,8 @@ describe("Parse associations", function () {
       to_one: [],
       to_many: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkey",
           target: "Dog",
           targetKey: "personId",
           targetKey_cp: "PersonId",
@@ -1554,7 +1561,8 @@ describe("Parse associations", function () {
       ],
       to_many_through_sql_cross_table: [
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Book",
           targetKey: "bookId",
           targetKey_cp: "BookId",
@@ -1581,14 +1589,16 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkey",
           target: "Dog",
           targetKey: "personId",
           keyIn: "Dog",
           targetStorageType: "sql",
         },
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Book",
           targetKey: "bookId",
           sourceKey: "personId",
@@ -1615,7 +1625,8 @@ describe("Parse associations", function () {
       },
       to_one: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkey",
           target: "Person",
           targetKey: "personId",
           targetKey_cp: "PersonId",
@@ -1636,7 +1647,8 @@ describe("Parse associations", function () {
           assocThroughArray: false,
         },
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkey",
           target: "Researcher",
           targetKey: "researcherId",
           targetKey_cp: "ResearcherId",
@@ -1666,7 +1678,8 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkey",
           target: "Person",
           targetKey: "personId",
           keyIn: "Dog",
@@ -1675,7 +1688,8 @@ describe("Parse associations", function () {
           sublabel: "lastName",
         },
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkey",
           target: "Researcher",
           targetKey: "researcherId",
           keyIn: "Dog",

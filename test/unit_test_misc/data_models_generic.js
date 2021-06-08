@@ -22,7 +22,8 @@ module.exports.personSql_toMany_dogGeneric = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -42,7 +43,8 @@ module.exports.dogGeneric_toOne_personSql = {
   },
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -66,7 +68,8 @@ module.exports.personSql_toOne_hometownGeneric = {
   },
   "associations":{
     "unique_homeTown":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Hometown",
       "targetKey" : "hometownId",
       "keyIn": "Person",
@@ -88,7 +91,8 @@ module.exports.hometownGeneric_toMany_personSql = {
   },
   "associations" : {
     "people" : {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "hometownId",
       "keyIn": "Person",
@@ -111,7 +115,8 @@ module.exports.dogGeneric_genericToOne_person = {
   },
   "associations" : {
     "owner" : {
-      "type" : "generic_to_one",
+      "type" : "many_to_one",
+      "implementation": "generic",
       "target" : "Person"
     }
   }
@@ -130,7 +135,8 @@ module.exports.personSql_genericToMany_dog = {
   },
   "associations":{
     "dogs": {
-      "type": "generic_to_many",
+      "type": "one_to_many",
+      "implementation": "generic",
       "target": "Dog"
     }
   },
@@ -149,7 +155,8 @@ module.exports.dogDdm_genericToOne_person = {
   },
   "associations" : {
     "owner" : {
-      "type" : "generic_to_one",
+      "type" : "many_to_one",
+      "implementation": "generic",
       "target" : "Person"
     }
   }
@@ -169,7 +176,8 @@ module.exports.personDdm_genericToMany_dog = {
   },
   "associations":{
     "dogs": {
-      "type": "generic_to_many",
+      "type": "one_to_many",
+      "implementation": "generic",
       "target": "Dog"
     }
   },

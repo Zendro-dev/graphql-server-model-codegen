@@ -10,7 +10,8 @@ module.exports.book =
   },
   "associations": {
       "publisher" : {
-        "type": "to_one",
+        "type": "many_to_one",
+        "implementation": "foreignkey",
         "target": "publi_sher",
         "targetKey": "publisher_id",
         "keyIn": "book",
@@ -18,7 +19,8 @@ module.exports.book =
       },
 
       "authors": {
-        "type": "to_many",
+        "type": "one_to_many",
+        "implementation": "foreignkey",
         "target": "Person",
         "targetKey": "person_id",
         "sourceKey": "book_id",
@@ -40,7 +42,8 @@ module.exports.person =
 
   "associations" : {
     "works" : {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "book",
       "targetKey": "book_id",
       "sourceKey": "person_id",
@@ -48,7 +51,8 @@ module.exports.person =
     },
 
     "company":{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "publi_sher",
       "targetKey": "companyId",
       "keyIn": "Person",
@@ -69,7 +73,8 @@ module.exports.publisher =
 
   "associations": {
     "publications" : {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "book",
       "targetKey": "publisher_id",
       "keyIn": "book",
@@ -77,7 +82,8 @@ module.exports.publisher =
     },
 
     "director":{
-      "type":"to_one",
+      "type":"many_to_one",
+      "implementation": "foreignkey",
       "target": "Person",
       "targetKey": "companyId",
       "keyIn": "Person",

@@ -10,7 +10,8 @@ module.exports.transcript_count = {
   },
   "associations":{
     "individual":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "individual",
       "targetKey" : "individual_id",
       "keyIn": "transcript_count",
@@ -27,7 +28,8 @@ module.exports.individual = {
   },
   "associations": {
     "transcript_counts": {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "transcript_count",
       "keyIn": "transcript_count",
       "targetKey" : "individual_id",
@@ -65,7 +67,8 @@ module.exports.person = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -73,7 +76,8 @@ module.exports.person = {
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -94,7 +98,8 @@ module.exports.book = {
   "associations":{
 
       "people" : {
-          "type" : "to_many_through_sql_cross_table",
+          "type" : "many_to_many",
+          "implementation": "sql_cross_table",
           "target" : "Person",
           "targetKey" : "personId",
           "sourceKey" : "bookId",
@@ -102,7 +107,8 @@ module.exports.book = {
           "targetStorageType" : "sql"
         },
       "publisher" : {
-        "type" : "to_one",
+        "type" : "many_to_one",
+        "implementation": "foreignkey",
         "target" : "Publisher",
         "targetKey" : "publisherId",
         "keyIn": "Book",
@@ -121,7 +127,8 @@ module.exports.researcher = {
   },
   "associations":{
     "projects":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Project",
       "targetKey" : "projectId",
       "sourceKey" : "researcherId",
@@ -129,7 +136,8 @@ module.exports.researcher = {
       "targetStorageType" : "sql"
     },
     "dog":{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "researcherId",
       "keyIn": "Dog",
@@ -150,7 +158,8 @@ module.exports.specie = {
 
   "associations":{
     "projects" : {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Project",
       "targetKey" : "specieId",
       "keyIn": "Project",
@@ -169,7 +178,8 @@ module.exports.dog = {
 
   "associations" : {
     "person" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -178,7 +188,8 @@ module.exports.dog = {
       "sublabel": "lastName"
     },
     "researcher":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target": "Researcher",
       "targetKey": "researcherId",
       "keyIn": "Dog",
@@ -189,7 +200,8 @@ module.exports.dog = {
 }
 
 module.exports.assoc_through_project_researcher = {
-  "type" : "to_many_through_sql_cross_table",
+  "type" : "many_to_many",
+  "implementation": "sql_cross_table",
   "target" : "Project",
   "targetKey" : "projectId",
   "sourceKey" : "researcherId",
@@ -204,7 +216,8 @@ module.exports.assoc_through_project_researcher = {
 }
 
 module.exports.assoc_dogs_researcher = {
-  "type" : "to_one",
+  "type" : "many_to_one",
+  "implementation": "foreignkey",
   "target": "Researcher",
   "targetKey": "researcherId",
   "keyIn": "Dog",
@@ -236,7 +249,8 @@ module.exports.inDiVIdual_camelcase = {
   },
   "associations": {
     "transcriptCounts": {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "transcriptCount",
       "targetKey" : "individual_id",
       "keyIn": "transcriptCount",
@@ -259,7 +273,8 @@ module.exports.transcriptCount_camelcase = {
   },
   "associations":{
     "inDiVIdual":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "inDiVIdual",
       "targetKey" : "individual_id",
       "keyIn": "transcriptCount",
@@ -280,7 +295,8 @@ module.exports.transcriptCount_indiv= {
   },
   "associations":{
     "individual":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Individual",
       "targetKey" : "individual_id",
       "keyIn": "transcriptCount",
@@ -302,7 +318,8 @@ module.exports.dog_owner = {
 
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "owner_id_test",
       "keyIn": "Dog",
@@ -311,7 +328,8 @@ module.exports.dog_owner = {
       "sublabel": "lastName"
     },
     "keeper":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target": "Researcher",
       "targetKey": "keeperId",
       "keyIn": "Dog",
@@ -332,7 +350,8 @@ module.exports.person_indices = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -341,7 +360,8 @@ module.exports.person_indices = {
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -365,7 +385,8 @@ module.exports.person_externalIds = {
     },
     "associations":{
       "dogs":{
-        "type" : "to_many",
+        "type" : "one_to_many",
+        "implementation": "foreignkey",
         "target" : "Dog",
         "targetKey" : "personId",
         "keyIn": "Dog",
@@ -374,7 +395,8 @@ module.exports.person_externalIds = {
       },
 
       "books":{
-        "type" : "to_many_through_sql_cross_table",
+        "type" : "many_to_many",
+        "implementation": "sql_cross_table", 
         "target" : "Book",
         "targetKey" : "bookId",
         "sourceKey" : "personId",
@@ -398,7 +420,8 @@ module.exports.academicTeam = {
   },
   "associations":{
     "members":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Researcher",
       "targetKey" : "academicTeamId",
       "keyIn": "Researcher",
@@ -421,7 +444,8 @@ module.exports.person_date = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -430,7 +454,8 @@ module.exports.person_date = {
     },
 
     "patients":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "doctor_Id",
       "keyIn": "Dog",
@@ -439,7 +464,8 @@ module.exports.person_date = {
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "book_Id",
       "sourceKey" : "person_Id",
@@ -462,7 +488,8 @@ module.exports.book_authors = {
   "associations":{
 
       "Authors" : {
-          "type" : "to_many_through_sql_cross_table",
+          "type" : "many_to_many",
+          "implementation": "sql_cross_table",
           "target" : "Person",
           "targetKey" : "person_Id",
           "sourceKey" : "book_Id",
@@ -472,7 +499,8 @@ module.exports.book_authors = {
           "sublabel" : "email"
         },
       "publisher" : {
-        "type" : "to_one",
+        "type" : "many_to_one",
+        "implementation": "foreignkey",
         "target" : "Publisher",
         "targetKey" : "publisherId",
         "keyIn" : "Book",
@@ -498,7 +526,8 @@ module.exports.person_description = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -506,7 +535,8 @@ module.exports.person_description = {
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -531,7 +561,8 @@ module.exports.person_description_optional = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -539,7 +570,8 @@ module.exports.person_description_optional = {
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -560,7 +592,8 @@ module.exports.academic_Team = {
   },
   "associations":{
     "members":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkey",
       "target" : "Researcher",
       "targetKey" : "AcademicTeam_Id",
       "keyIn": "Researcher",
@@ -581,7 +614,8 @@ module.exports.dog_one_assoc = {
 
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
       "keyIn" : "Dog",
@@ -602,7 +636,8 @@ module.exports.person_one_assoc = {
 
   "associations" : {
     "unique_pet" :{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "personId",
       "keyIn": "Dog",
@@ -623,7 +658,8 @@ module.exports.book_extendedIds = {
   },
   "associations": {
       "author": {
-          "type": "to_one",
+          "type": "many_to_one",
+          "implementation": "foreignkey",
           "target": "Person",
           "targetKey": "internalPersonId",
           "keyIn": "Book",
@@ -648,8 +684,8 @@ module.exports.author_foreignKeyArray = {
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -675,8 +711,8 @@ module.exports.author_zendro_remote = {
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "post_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -701,8 +737,8 @@ module.exports.author_ddm_array_fk ={
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -728,8 +764,8 @@ module.exports.author_sql_adapter_array_fk ={
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -757,8 +793,8 @@ module.exports.author_zendro_adapter_array_fk ={
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkey",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",

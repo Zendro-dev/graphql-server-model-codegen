@@ -12,7 +12,8 @@ module.exports.accession = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
       "keyIn" : "Individual",
@@ -21,7 +22,8 @@ module.exports.accession = {
     },
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
       "keyIn" : "Accession",
@@ -31,7 +33,8 @@ module.exports.accession = {
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accessionId",
       "keyIn" : "Measurement",
@@ -59,7 +62,8 @@ module.exports.accession_ddm = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
       "keyIn" : "Individual",
@@ -68,7 +72,8 @@ module.exports.accession_ddm = {
     },
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
       "keyIn" : "Accession",
@@ -78,7 +83,8 @@ module.exports.accession_ddm = {
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accessionId",
       "keyIn" : "Measurement",
@@ -107,7 +113,8 @@ module.exports.accession_sql_adapter = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
       "keyIn" : "Individual",
@@ -116,7 +123,8 @@ module.exports.accession_sql_adapter = {
     },
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
       "keyIn" : "Accession",
@@ -126,7 +134,8 @@ module.exports.accession_sql_adapter = {
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accession_id",
       "keyIn" : "Measurement",
@@ -155,7 +164,8 @@ module.exports.accession_zendro_adapter = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
       "keyIn" : "Individual",
@@ -165,7 +175,8 @@ module.exports.accession_zendro_adapter = {
 
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
       "keyIn" : "Accession",
@@ -175,7 +186,8 @@ module.exports.accession_zendro_adapter = {
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accession_id",
       "keyIn" : "Measurement",
