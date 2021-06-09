@@ -656,15 +656,34 @@ validateJsonFile = function (opts) {
     }
   });
 
-  //check: validate if to_one assoc with foreignKey in target model exists
-  //       Warn user that validation e.g. unique constraint needs to be added
-  opts.associationsArguments["to_one"].forEach((assoc) => {
-    if (assoc.holdsForeignKey === false) {
+  const {
+    to_one,
+    to_many,
+    to_many_through_sql_cross_table,
+    generic_to_one,
+    generic_to_many } = opts.associationsArguments;
+
+  const parsedAssociations = to_one.concat(to_many,to_many_through_sql_cross_table, generic_to_many, generic_to_one);
+
+  parsedAssociations.forEach((assoc) => {
+
+    //check: validate if to_one assoc with foreignKey in target model exists
+    //       Warn user that validation e.g. unique constraint needs to be added
+    if (assoc.holdsForeignKey === false && assoc.type.includes('to_one')) {
       check.warnings.push(
-        `WARNING: ${assoc.name} is a to_one associations with the foreignKey in ${assoc.target}. Be sure to validate uniqueness`
+        `WARNING: Association ${assoc.name} is a ${assoc.type} associations with the foreignKey in ${assoc.target}. Be sure to validate uniqueness`
       );
     }
-  });
+
+    //check: validate if the reverseAssociation field exist. Warn the user that
+    //       it is mandatory for the spa
+    if (!assoc.reverseAssociation) {
+      check.warnings.push(
+        ` WARNING: Association ${assoc.name} does not define the reverse association name in field "reverseAssociation". This field is mandatory for the single-page-app.`
+      )
+    }
+  })
+
 
   return check;
 };
@@ -742,8 +761,6 @@ module.exports.parseAssociations = function (dataModel) {
         capitalizeString(association.target),
         capitalizeString(name),
       ];
-      let holdsTheForeignKey = false;
-      let assocThroughArray = false;
       let assoc = Object.assign({}, association);
 
       if (type !== 'one_to_one' && type !== 'one_to_many' && type !== 'many_to_one' && type !== 'many_to_many') {
@@ -765,6 +782,7 @@ module.exports.parseAssociations = function (dataModel) {
       assoc["target_cp_pl"] = capitalizeString(
         inflection.pluralize(association.target)
       );
+      assoc["reverseAssociation"] = association.reverseAssociation;
 
       if (implementation !== 'generic') {
         // set extra association fields
@@ -783,7 +801,6 @@ module.exports.parseAssociations = function (dataModel) {
       } else {
         associations_info.genericAssociations.push(association); 
       }
-
       // switch implementation types
       switch (implementation) {
         case 'generic':
@@ -860,7 +877,6 @@ module.exports.parseAssociations = function (dataModel) {
   associations_info.mutations_attributes = attributesToString(
     associations_info.mutations_attributes
   );
-  // console.log(JSON.stringify(associations_info,null,2));
   return associations_info;
 };
 
