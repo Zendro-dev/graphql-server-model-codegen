@@ -177,12 +177,15 @@ name | Type | Description
 *label* | String | Name of the column in the target model to be used as a display name in the GUI.
 *sublabel* | String | Optional name of the column in the target model to be used as a sub-label in the GUI.
 
-When the association is of type *many_to_many* it's necessary to describe two extra arguments given that the association is made with a cross table. These arguments are:
+**Note**: The `keysIn` argument points to the model that stores the information about the foreignKey(s). That can be either a single key, a foreignkey array or a cross-model.  
+ 
+When the association is of type *many_to_many* it's necessary to describe an extra argument *sourceKey*:
 
 name | Type | Description
 ------- | ------- | --------------
 *sourceKey* | String | Key to identify the source id
-*keysIn* | String | Name of the cross table
+
+Be aware that in case of a *many_to_many* via an *sql_cross_table* implementation the keysIn field points to the cross model.
 
 ## NOTE:
 Be aware that in the case of this type of association the user is required to describe the cross table used in the field _keysIn_ as a model in its own. For example, if we have a model `User` and a model `Role` and they are associated in a `many_to_many` way, then we also need to describe the `role_to_user` model:
