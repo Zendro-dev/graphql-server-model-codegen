@@ -97,7 +97,9 @@ EXAMPLES OF VALID JSON FILES
 
   "associations" : {
     "person" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkey",
+      "reverseAssociation": "dogs",
       "target" : "Person",
       "targetKey" : "personId",
       "keyIn": "Dog",
@@ -119,7 +121,9 @@ EXAMPLES OF VALID JSON FILES
   },
   "associations":{
       "books" : {
-          "type" : "to_many",
+          "type" : "one_to_many",
+          "implementation": "foreignkey",
+          "reverseAssociation": "publisher",
           "target" : "Book",
           "targetKey" : "publisherId",
           "keyIn" : "Book",
@@ -153,16 +157,19 @@ Example:
 
 ### Associations Spec
 
-We will consider two types of associations accordingly to the number of records
-that can posibly be associated:
-1. to_one
-2. to_many
+We will consider four types of associations according to the relation between associated records of the two models:
+1. one_to_one
+2. many_to_one
+3. one_to_many
+4. many_to_many
 
 For both type of association, the necessary arguments would be:
 
 name | Type | Description
 ------- | ------- | --------------
-*type* | String | Type of association (like belongsTo, etc.)
+*type* | String | Type of association (`one_to_one`, `one_to_many`, etc.)
+*implementation* | String | implementation type of the association. Can be one of `foreignkey`, `generic` or `sql_cross_table` (only for `many_to_many`)`
+*reverseAssociation* | String | The name of the reverse association from the other model. This field is only mandatory for building the [single-page-app](https://github.com/Zendro-dev/single-page-app), *not* for generating the the graphql-server code via this repository.
 *target* | String | Name of model to which the current model will be associated with.
 *targetKey* | String | A unique identifier of the association for the case where there appear more than one association with the same model.
 *keyIn* | String | Name of the model where the targetKey is stored.
@@ -170,7 +177,7 @@ name | Type | Description
 *label* | String | Name of the column in the target model to be used as a display name in the GUI.
 *sublabel* | String | Optional name of the column in the target model to be used as a sub-label in the GUI.
 
-When the association is of type *to_many* and it referes to a more particular type of association *many_to_many*  it's necessary to describe two extra arguments given that the association is made with a cross table. These arguments are:
+When the association is of type *many_to_many* it's necessary to describe two extra arguments given that the association is made with a cross table. These arguments are:
 
 name | Type | Description
 ------- | ------- | --------------
@@ -178,7 +185,7 @@ name | Type | Description
 *keysIn* | String | Name of the cross table
 
 ## NOTE:
-Be aware that in the case of this type of association the user is required to describe the cross table used in the field _keysIn_ as a model in its own. For example, if we have a model `User` and a model `Role` and they are associated in a _manytomany_ way, then we also need to describe the `role_to_user` model:
+Be aware that in the case of this type of association the user is required to describe the cross table used in the field _keysIn_ as a model in its own. For example, if we have a model `User` and a model `Role` and they are associated in a `many_to_many` way, then we also need to describe the `role_to_user` model:
 
 ```jsonc
 //User model
@@ -191,7 +198,9 @@ Be aware that in the case of this type of association the user is required to de
   },
   "associations" :{
     "roles" : {
-      "type" : "to_many",
+      "type" : "many_to_many",
+      "implementation": "foreignkey",
+      "reverseAssociation": "dogs",
       "target" : "Role",
       "targetKey" : "role_Id",
       "sourceKey" : "user_Id",
@@ -217,6 +226,8 @@ Be aware that in the case of this type of association the user is required to de
     "users" : {
       "type" : "to_many",
       "target" : "User",
+      "implementation": "sql_cross_table",
+      "reverseAssociation": "roles",
       "targetKey" : "user_Id",
       "sourceKey" : "role_Id",
       "keysIn" : "role_to_user",
@@ -255,10 +266,12 @@ Example:
   "associations":{
       "publisher" : {
         "type" : "to_one", // association type
+        "implementation": "foreignkey", // standard implementation via foreign keys
+        "reverseAssociation": "dogs", // name of the association in the publisher model
         "target" : "publisher", // Model's name is `publisher`
         "targetKey" : "publisher_id", // Local alias for this association
         "keyIn": "book", // FK to publisher will be stored in the Book model
-        "targetStorageType" : Webservice", //  It's a remote database
+        "targetStorageType" : "Webservice", //  It's a remote database
         "label" : "name" // Show in GUI the name of the publisher taken from external DB
         }
   }
@@ -276,13 +289,15 @@ Example:
  "model" : "Book",
  "storageType" : "SQL",
  "attributes" : {
-        "id" : Int,
+        "id" : "Int",
         "title" : {"type":"String", "description": "The book's title"},
-        "ISBN": Int
+        "ISBN": "Int"
     },
  "associations" : {
         "authors" : {
-            "type" : "to_many",
+            "type" : "many_to_many",
+            "implementation": "sql_cross_table",
+            "reverseAssociation": "books",
             "target" : "Person",
             "targetKey" : "person_id",
             "sourceKey" : "book_id",
