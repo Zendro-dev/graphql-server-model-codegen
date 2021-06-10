@@ -26,7 +26,7 @@ module.exports.personSql_toMany_dogGeneric = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "generic",
       "label": "name"
     }
@@ -47,7 +47,7 @@ module.exports.dogGeneric_toOne_personSql = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
@@ -72,7 +72,7 @@ module.exports.personSql_toOne_hometownGeneric = {
       "implementation": "foreignkey",
       "target" : "Hometown",
       "targetKey" : "hometownId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType" : "generic",
       "label": "name"
     }
@@ -95,7 +95,7 @@ module.exports.hometownGeneric_toMany_personSql = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "hometownId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"

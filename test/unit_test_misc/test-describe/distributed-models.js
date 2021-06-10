@@ -341,7 +341,7 @@ const definition = {
             implementation: 'foreignkey',
             target: 'publi_sher',
             targetKey: 'companyId',
-            keyIn: 'Person',
+            keysIn: 'Person',
             targetStorageType: 'zendro-server'
         },
         dogs: {
@@ -349,7 +349,7 @@ const definition = {
             implementation: 'foreignkey',
             target: 'Dog',
             targetKey: 'personId',
-            keyIn: 'Dog',
+            keysIn: 'Dog',
             targetStorageType: 'sql'
         },
         parrot: {
@@ -357,7 +357,7 @@ const definition = {
             implementation: 'foreignkey',
             target: 'Parrot',
             targetKey: 'personId',
-            keyIn: 'Parrot',
+            keysIn: 'Parrot',
             targetStorageType: 'sql'
         }
     },
@@ -386,7 +386,7 @@ const definition = {
             implementation: 'foreignkey',
             target: 'Person',
             targetKey: 'personId',
-            keyIn: 'Dog',
+            keysIn: 'Dog',
             targetStorageType: 'sql'
         }
     },

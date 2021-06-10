@@ -17,7 +17,7 @@
       "implementation": "foreignkey",
       "target": "Accession",
       "targetKey": "locationId",
-      "keyIn": "Accession",
+      "keysIn": "Accession",
       "targetStorageType": "sql",
       "label": "accession_id"
     }

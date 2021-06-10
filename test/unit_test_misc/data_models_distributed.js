@@ -27,7 +27,7 @@ module.exports.book = {
         "implementation": "foreignkey",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
-        "keyIn" : "Book",
+        "keysIn" : "Book",
         "targetStorageType" : "zendro-server",
         "label" : "name"
         }
@@ -63,7 +63,7 @@ module.exports.book_ddm =
         "implementation": "foreignkey",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
-        "keyIn" : "Book",
+        "keysIn" : "Book",
         "targetStorageType" : "zendro-server",
         "label" : "name"
         }
@@ -98,7 +98,7 @@ module.exports.person_ddm =  {
         "implementation": "foreignkey",
         "target": "publi_sher",
         "targetKey": "companyId",
-        "keyIn": "Person",
+        "keysIn": "Person",
         "targetStorageType": "zendro-server"
       },
 
@@ -107,7 +107,7 @@ module.exports.person_ddm =  {
         "implementation": "foreignkey",
         "target": "Dog",
         "targetKey": "personId",
-        "keyIn": "Dog",
+        "keysIn": "Dog",
         "targetStorageType": "sql"
       },
 
@@ -116,7 +116,7 @@ module.exports.person_ddm =  {
         "implementation": "foreignkey",
         "target": "Parrot",
         "targetKey": "personId",
-        "keyIn": "Parrot",
+        "keysIn": "Parrot",
         "targetStorageType": "sql"
       },
     }
@@ -140,7 +140,7 @@ module.exports.dog_ddm =  {
         "implementation": "foreignkey",
         "target" : "Person",
         "targetKey" : "personId",
-        "keyIn" : "Dog",
+        "keysIn" : "Dog",
         "targetStorageType" : "sql"
       }
     }
@@ -166,7 +166,7 @@ module.exports.dog_ddm =  {
               "implementation": "foreignkey",
               "target": "Book",
               "targetKey": "internalPersonId",
-              "keyIn": "Book",
+              "keysIn": "Book",
               "targetStorageType": "sql",
               "label": "title"
           }
@@ -213,7 +213,7 @@ module.exports.dog_ddm =  {
         "implementation": "foreignkey",
         "target": "Person",
         "targetKey": "internalPersonId",
-        "keyIn": "Book",
+        "keysIn": "Book",
         "targetStorageType": "zendro-server",
         "label": "email"
       }
@@ -236,7 +236,7 @@ module.exports.dog_ddm_integration_test = {
         "implementation": "foreignkey",
         "target" : "person",
         "targetKey" : "person_id",
-        "keyIn": "dog",
+        "keysIn": "dog",
         "targetStorageType" : "distributed-data-model"
       }
     },
@@ -262,7 +262,7 @@ module.exports.dog_zendro_adapter_integration_test =
         "implementation": "foreignkey",
         "target" : "person",
         "targetKey" : "person_id",
-        "keyIn": "dog",
+        "keysIn": "dog",
         "targetStorageType" : "distributed-data-model"
       }
     },

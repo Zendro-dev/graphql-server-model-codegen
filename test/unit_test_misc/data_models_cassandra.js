@@ -21,7 +21,7 @@ module.exports.city = {
       "targetStorageType": "sql",
       "sourceKey": "river_ids",
       "targetKey": "city_ids",
-      "keyIn": "city",
+      "keysIn": "city",
     }
   },
   "internalId": "city_id"
@@ -44,7 +44,7 @@ module.exports.incident = {
       "implementation": "foreignkey",
       "target": "Instant",
       "targetKey": "incident_assoc_id",
-      "keyIn" : "Instant",
+      "keysIn" : "Instant",
       "targetStorageType": "cassandra"
     },
     "town": {
@@ -52,7 +52,7 @@ module.exports.incident = {
       "implementation": "foreignkey",
       "target": "capital",
       "targetKey": "capital_id",
-      "keyIn" : "Incident",
+      "keysIn" : "Incident",
       "targetStorageType": "sql"
     }
 
@@ -79,7 +79,7 @@ module.exports.dist_incident = {
       "implementation": "foreignkey",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
-      "keyIn" : "Dist_instant",
+      "keysIn" : "Dist_instant",
       "targetStorageType": "distributed-data-model"
     }
 
@@ -106,7 +106,7 @@ module.exports.dist_instant_instance1 = {
       "implementation": "foreignkey",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
-      "keyIn": "Dist_instant",
+      "keysIn": "Dist_instant",
       "targetStorageType": "distributed-data-model"
     }
 

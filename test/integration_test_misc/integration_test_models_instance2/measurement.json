@@ -16,7 +16,7 @@
       "implementation": "foreignkey",
       "target": "Accession",
       "targetKey": "accessionId",
-      "keyIn": "Measurement",
+      "keysIn": "Measurement",
       "targetStorageType": "sql",
       "label": "accession_id"
     }

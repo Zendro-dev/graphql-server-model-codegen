@@ -17,7 +17,7 @@
         "target": "author",
         "targetKey": "book_ids",
         "sourceKey": "author_ids",
-        "keyIn": "book",
+        "keysIn": "book",
         "targetStorageType": "sql"
       }
     },

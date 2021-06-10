@@ -113,13 +113,13 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>
         <%if (key !== 'associations'){-%>
           <%if(associationsArguments[key][i].targetStorageType === 'sql' && !associationsArguments[key][i].assocThroughArray){-%>
-            <%if (associationsArguments[key][i].type.includes('to_one') && associationsArguments[key][i].keyIn !== associationsArguments[key][i].target){-%>
+            <%if (associationsArguments[key][i].type.includes('to_one') && associationsArguments[key][i].keysIn !== associationsArguments[key][i].target){-%>
               <%- nameLc -%>.belongsTo(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
-            <% if (associationsArguments[key][i].type.includes('to_one') && associationsArguments[key][i].keyIn === associationsArguments[key][i].target){-%>
+            <% if (associationsArguments[key][i].type.includes('to_one') && associationsArguments[key][i].keysIn === associationsArguments[key][i].target){-%>
               <%- nameLc -%>.hasOne(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
-            <% if (associationsArguments[key][i].type === 'one_to_many' && associationsArguments[key][i].keyIn === associationsArguments[key][i].target){-%>
+            <% if (associationsArguments[key][i].type === 'one_to_many' && associationsArguments[key][i].keysIn === associationsArguments[key][i].target){-%>
               <%- nameLc -%>.hasMany(models.<%= associationsArguments[key][i].target_lc -%>
             <%}-%>
             <% if (associationsArguments[key][i].type === 'many_to_many' && associationsArguments[key][i].implementation === 'sql_cross_table'){-%>

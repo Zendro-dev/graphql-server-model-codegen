@@ -12,7 +12,7 @@
         "implementation": "foreignkey",
         "target": "animal",
         "targetKey": "animal_id",
-        "keyIn": "tracker",
+        "keysIn": "tracker",
         "targetStorageType": "mongodb"
       }
     },

@@ -15,7 +15,7 @@
       "implementation": "foreignkey",
       "target": "individual",
       "targetKey": "individual_id",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetStorageType": "sql"
     },
     "aminoacidsequence": {
@@ -23,7 +23,7 @@
       "implementation": "foreignkey",
       "target": "aminoacidsequence",
       "targetKey": "aminoacidsequence_id",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetStorageType": "generic"
     }
   }

@@ -25,7 +25,7 @@
       "targetStorageType": "cassandra",
       "sourceKey": "city_ids",
       "targetKey": "river_ids",
-      "keyIn": "river"
+      "keysIn": "river"
     }
   },
   "internalId": "river_id"

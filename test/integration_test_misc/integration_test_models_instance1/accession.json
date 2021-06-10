@@ -16,7 +16,7 @@
       "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn": "Accession",
+      "keysIn": "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
@@ -27,7 +27,7 @@
       "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accessionId",
-      "keyIn": "Measurement",
+      "keysIn": "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }

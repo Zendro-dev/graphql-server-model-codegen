@@ -16,7 +16,7 @@ module.exports.book_adapter = {
             "implementation": "foreignkey",
             "target": "Person",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "sql",
             "label": "email"
         }
@@ -43,7 +43,7 @@ module.exports.book_ddm = {
             "implementation": "foreignkey",
             "target": "Person",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "zendro-server",
             "label": "email"
         }
@@ -70,7 +70,7 @@ module.exports.person_adapter = {
             "implementation": "foreignkey",
             "target": "Book",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "sql",
             "label": "title"
         }
@@ -98,7 +98,7 @@ module.exports.person_ddm = {
             "implementation": "foreignkey",
             "target": "Book",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "zendro-server",
             "label": "title"
         }

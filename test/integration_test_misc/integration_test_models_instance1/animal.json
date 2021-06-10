@@ -19,7 +19,7 @@
             "implementation": "foreignkey",
             "target": "farm",
             "targetKey": "farm_id",
-            "keyIn": "animal",
+            "keysIn": "animal",
             "targetStorageType": "mongodb",
             "label": "farm_name"
         },
@@ -29,7 +29,7 @@
             "target": "food",
             "targetKey": "animal_ids",
             "sourceKey": "food_ids",
-            "keyIn": "animal",
+            "keysIn": "animal",
             "targetStorageType": "mongodb"
         },
         "unique_tracker": {
@@ -37,7 +37,7 @@
             "implementation": "foreignkey",
             "target": "tracker",
             "targetKey": "animal_id",
-            "keyIn": "tracker",
+            "keysIn": "tracker",
             "targetStorageType": "mongodb"
         }
     },

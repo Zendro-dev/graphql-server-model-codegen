@@ -25,7 +25,7 @@ module.exports.book = {
         "implementation": "foreignkey",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
-        "keyIn" : "Book",
+        "keysIn" : "Book",
         "targetStorageType" : "generic",
         "label" : "name"
         }
@@ -59,7 +59,7 @@ module.exports.person = {
       "implementation": "foreignkey",
       "target": "publi_sher",
       "targetKey": "companyId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType": "generic"
     }
   }
@@ -82,7 +82,7 @@ module.exports.dog_one_assoc = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn" : "Dog",
+      "keysIn" : "Dog",
       "targetStorageType" : "sql"
     },
 
@@ -91,7 +91,7 @@ module.exports.dog_one_assoc = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "veterinarianId",
-      "keyIn" : "Dog",
+      "keysIn" : "Dog",
       "targetStorageType" : "sql"
     }
   }
@@ -114,7 +114,7 @@ module.exports.person_one_assoc = {
       "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     },
 
@@ -123,7 +123,7 @@ module.exports.person_one_assoc = {
       "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "veterinarianId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     }
   }

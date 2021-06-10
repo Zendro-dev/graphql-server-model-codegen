@@ -19,7 +19,7 @@
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },

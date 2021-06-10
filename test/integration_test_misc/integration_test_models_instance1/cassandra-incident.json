@@ -15,7 +15,7 @@
         "implementation": "foreignkey",
         "target": "Instant",
         "targetKey": "incident_assoc_id",
-        "keyIn": "Instant",
+        "keysIn": "Instant",
         "targetStorageType": "cassandra"
       },
       "town": {
@@ -23,7 +23,7 @@
         "implementation": "foreignkey",
         "target": "capital",
         "targetKey": "capital_id",
-        "keyIn": "Incident",
+        "keysIn": "Incident",
         "targetStorageType": "sql"
       }
   

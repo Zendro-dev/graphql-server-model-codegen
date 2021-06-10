@@ -18,7 +18,7 @@
         "implementation": "foreignkey",
         "target": "Incident",
         "targetKey": "incident_assoc_id",
-        "keyIn": "Instant",
+        "keysIn": "Instant",
         "targetStorageType": "cassandra"
       }
   

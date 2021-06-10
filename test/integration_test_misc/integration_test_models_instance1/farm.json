@@ -12,7 +12,7 @@
             "implementation": "foreignkey",
             "target": "animal",
             "targetKey": "farm_id",
-            "keyIn": "animal",
+            "keysIn": "animal",
             "targetStorageType": "mongodb",
             "label": "animal_id"
         }

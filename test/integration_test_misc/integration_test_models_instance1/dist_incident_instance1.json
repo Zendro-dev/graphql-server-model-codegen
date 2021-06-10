@@ -16,7 +16,7 @@
       "implementation": "foreignkey",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
-      "keyIn": "Dist_instant",
+      "keysIn": "Dist_instant",
       "targetStorageType": "distributed-data-model"
     }
 

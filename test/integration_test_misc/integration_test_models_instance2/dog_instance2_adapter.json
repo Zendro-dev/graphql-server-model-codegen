@@ -14,7 +14,7 @@
         "implementation": "foreignkey",
         "target": "person",
         "targetKey": "person_id",
-        "keyIn": "dog",
+        "keysIn": "dog",
         "targetStorageType": "distributed-data-model"
       }
     },

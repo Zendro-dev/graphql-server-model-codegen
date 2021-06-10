@@ -17,7 +17,7 @@
         "target": "book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "author",
+        "keysIn": "author",
         "targetStorageType": "zendro-server"
       }
     },

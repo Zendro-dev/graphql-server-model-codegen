@@ -14,7 +14,7 @@
         "target": "animal",
         "targetKey": "food_ids",
         "sourceKey": "animal_ids",
-        "keyIn": "food",
+        "keysIn": "food",
         "targetStorageType": "mongodb"
       }
     },

@@ -14,7 +14,7 @@
         "implementation": "foreignkey",
         "target": "dog",
         "targetKey": "person_id",
-        "keyIn": "dog",
+        "keysIn": "dog",
         "targetStorageType": "distributed-data-model"
       },
       "unique_parrot": {
@@ -22,7 +22,7 @@
         "implementation": "foreignkey",
         "target": "parrot",
         "targetKey": "person_id",
-        "keyIn": "parrot",
+        "keysIn": "parrot",
         "targetStorageType": "distributed-data-model"
       }
     },

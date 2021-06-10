@@ -273,7 +273,7 @@ const definition = {
             implementation: 'foreignkey',
             target: 'publi_sher',
             targetKey: 'companyId',
-            keyIn: 'Person',
+            keysIn: 'Person',
             targetStorageType: 'generic'
         }
     },

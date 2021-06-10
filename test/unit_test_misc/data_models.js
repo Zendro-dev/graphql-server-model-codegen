@@ -14,7 +14,7 @@ module.exports.transcript_count = {
       "implementation": "foreignkey",
       "target" : "individual",
       "targetKey" : "individual_id",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetStorageType" : "sql"
     }
   }
@@ -31,7 +31,7 @@ module.exports.individual = {
       "type" : "one_to_many",
       "implementation": "foreignkey",
       "target" : "transcript_count",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetKey" : "individual_id",
       "targetStorageType" : "sql"
     }
@@ -71,7 +71,7 @@ module.exports.person = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql"
     },
 
@@ -111,7 +111,7 @@ module.exports.book = {
         "implementation": "foreignkey",
         "target" : "Publisher",
         "targetKey" : "publisherId",
-        "keyIn": "Book",
+        "keysIn": "Book",
         "targetStorageType" : "generic"
         }
   }
@@ -140,7 +140,7 @@ module.exports.researcher = {
       "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "researcherId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     }
   }
@@ -162,7 +162,7 @@ module.exports.specie = {
       "implementation": "foreignkey",
       "target" : "Project",
       "targetKey" : "specieId",
-      "keyIn": "Project",
+      "keysIn": "Project",
       "targetStorageType" : "sql"
     }
   }
@@ -182,7 +182,7 @@ module.exports.dog = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
@@ -192,7 +192,7 @@ module.exports.dog = {
       "implementation": "foreignkey",
       "target": "Researcher",
       "targetKey": "researcherId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "SQL",
       "label": "firstName"
     }
@@ -220,7 +220,7 @@ module.exports.assoc_dogs_researcher = {
   "implementation": "foreignkey",
   "target": "Researcher",
   "targetKey": "researcherId",
-  "keyIn": "Dog",
+  "keysIn": "Dog",
   "targetStorageType": "SQL",
   "target_lc": "researcher",
   "target_lc_pl": "researchers",
@@ -253,7 +253,7 @@ module.exports.inDiVIdual_camelcase = {
       "implementation": "foreignkey",
       "target" : "transcriptCount",
       "targetKey" : "individual_id",
-      "keyIn": "transcriptCount",
+      "keysIn": "transcriptCount",
       "targetStorageType" : "sql",
       "label" : "gene",
       "sublabel" : "variable"
@@ -277,7 +277,7 @@ module.exports.transcriptCount_camelcase = {
       "implementation": "foreignkey",
       "target" : "inDiVIdual",
       "targetKey" : "individual_id",
-      "keyIn": "transcriptCount",
+      "keysIn": "transcriptCount",
       "targetStorageType" : "sql",
       "label" : "name"
     }
@@ -299,7 +299,7 @@ module.exports.transcriptCount_indiv= {
       "implementation": "foreignkey",
       "target" : "Individual",
       "targetKey" : "individual_id",
-      "keyIn": "transcriptCount",
+      "keysIn": "transcriptCount",
       "targetStorageType" : "sql",
       "label" : "name"
     }
@@ -322,7 +322,7 @@ module.exports.dog_owner = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "owner_id_test",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
@@ -332,7 +332,7 @@ module.exports.dog_owner = {
       "implementation": "foreignkey",
       "target": "Researcher",
       "targetKey": "keeperId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "SQL",
       "label": "firstName"
     }
@@ -354,7 +354,7 @@ module.exports.person_indices = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "name"
     },
@@ -389,7 +389,7 @@ module.exports.person_externalIds = {
         "implementation": "foreignkey",
         "target" : "Dog",
         "targetKey" : "personId",
-        "keyIn": "Dog",
+        "keysIn": "Dog",
         "targetStorageType" : "sql",
         "label": "name"
       },
@@ -424,7 +424,7 @@ module.exports.academicTeam = {
       "implementation": "foreignkey",
       "target" : "Researcher",
       "targetKey" : "academicTeamId",
-      "keyIn": "Researcher",
+      "keysIn": "Researcher",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
@@ -448,7 +448,7 @@ module.exports.person_date = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "name"
     },
@@ -458,7 +458,7 @@ module.exports.person_date = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "doctor_Id",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "name"
     },
@@ -503,7 +503,7 @@ module.exports.book_authors = {
         "implementation": "foreignkey",
         "target" : "Publisher",
         "targetKey" : "publisherId",
-        "keyIn" : "Book",
+        "keysIn" : "Book",
         "targetStorageType" : "generic",
         "label" : "name"
         }
@@ -530,7 +530,7 @@ module.exports.person_description = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql"
     },
 
@@ -565,7 +565,7 @@ module.exports.person_description_optional = {
       "implementation": "foreignkey",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql"
     },
 
@@ -596,7 +596,7 @@ module.exports.academic_Team = {
       "implementation": "foreignkey",
       "target" : "Researcher",
       "targetKey" : "AcademicTeam_Id",
-      "keyIn": "Researcher",
+      "keysIn": "Researcher",
       "targetStorageType" : "sql"
     }
   }
@@ -618,7 +618,7 @@ module.exports.dog_one_assoc = {
       "implementation": "foreignkey",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn" : "Dog",
+      "keysIn" : "Dog",
       "targetStorageType" : "sql"
     }
   }
@@ -640,7 +640,7 @@ module.exports.person_one_assoc = {
       "implementation": "foreignkey",
       "target": "Dog",
       "targetKey": "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     }
   }
@@ -662,7 +662,7 @@ module.exports.book_extendedIds = {
           "implementation": "foreignkey",
           "target": "Person",
           "targetKey": "internalPersonId",
-          "keyIn": "Book",
+          "keysIn": "Book",
           "targetStorageType": "sql",
           "label": "email"
       }
@@ -689,7 +689,7 @@ module.exports.author_foreignKeyArray = {
         "target": "book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "author",
+        "keysIn": "author",
         "targetStorageType": "sql"
       }
     },
@@ -716,7 +716,7 @@ module.exports.author_zendro_remote = {
         "target": "post_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "post_author",
+        "keysIn": "post_author",
         "targetStorageType": "zendro-server"
       }
     },
@@ -742,7 +742,7 @@ module.exports.author_ddm_array_fk ={
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },
@@ -769,7 +769,7 @@ module.exports.author_sql_adapter_array_fk ={
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },
@@ -798,7 +798,7 @@ module.exports.author_zendro_adapter_array_fk ={
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },

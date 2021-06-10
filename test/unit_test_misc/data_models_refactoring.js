@@ -16,7 +16,7 @@ module.exports.accession = {
       "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "sql",
       "label": "name"
     },
@@ -26,7 +26,7 @@ module.exports.accession = {
       "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
@@ -37,7 +37,7 @@ module.exports.accession = {
       "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accessionId",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }
@@ -66,7 +66,7 @@ module.exports.accession_ddm = {
       "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "distributed-data-model",
       "label": "name"
     },
@@ -76,7 +76,7 @@ module.exports.accession_ddm = {
       "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
@@ -87,7 +87,7 @@ module.exports.accession_ddm = {
       "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accessionId",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }
@@ -117,7 +117,7 @@ module.exports.accession_sql_adapter = {
       "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "sql",
       "label": "name"
     },
@@ -127,7 +127,7 @@ module.exports.accession_sql_adapter = {
       "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
@@ -138,7 +138,7 @@ module.exports.accession_sql_adapter = {
       "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accession_id",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }
@@ -168,7 +168,7 @@ module.exports.accession_zendro_adapter = {
       "implementation": "foreignkey",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "sql",
       "label": "name"
     },
@@ -179,7 +179,7 @@ module.exports.accession_zendro_adapter = {
       "implementation": "foreignkey",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
@@ -190,7 +190,7 @@ module.exports.accession_zendro_adapter = {
       "implementation": "foreignkey",
       "target": "Measurement",
       "targetKey": "accession_id",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }

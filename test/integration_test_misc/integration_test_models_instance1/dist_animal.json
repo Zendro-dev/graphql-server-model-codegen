@@ -20,7 +20,7 @@
             "implementation": "foreignkey",
             "target": "dist_farm",
             "targetKey": "farm_id",
-            "keyIn": "dist_animal",
+            "keysIn": "dist_animal",
             "targetStorageType": "distributed-data-model"
         }
     },

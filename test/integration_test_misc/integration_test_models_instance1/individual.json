@@ -10,7 +10,7 @@
       "implementation": "foreignkey",
       "target": "transcript_count",
       "targetKey": "individual_id",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetStorageType": "sql"
     }
   }

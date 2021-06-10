@@ -14,7 +14,7 @@ module.exports.book =
         "implementation": "foreignkey",
         "target": "publi_sher",
         "targetKey": "publisher_id",
-        "keyIn": "book",
+        "keysIn": "book",
         "targetStorageType": "generic"
       },
 
@@ -55,7 +55,7 @@ module.exports.person =
       "implementation": "foreignkey",
       "target": "publi_sher",
       "targetKey": "companyId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType": "generic"
     }
   }
@@ -77,7 +77,7 @@ module.exports.publisher =
       "implementation": "foreignkey",
       "target": "book",
       "targetKey": "publisher_id",
-      "keyIn": "book",
+      "keysIn": "book",
       "targetStorageType": "generic"
     },
 
@@ -86,7 +86,7 @@ module.exports.publisher =
       "implementation": "foreignkey",
       "target": "Person",
       "targetKey": "companyId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType": "generic"
     }
   }

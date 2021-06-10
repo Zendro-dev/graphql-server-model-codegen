@@ -21,7 +21,7 @@
       "targetStorageType": "sql",
       "sourceKey": "river_ids",
       "targetKey": "city_ids",
-      "keyIn": "city"
+      "keysIn": "city"
     }
   },
   "internalId": "city_id"

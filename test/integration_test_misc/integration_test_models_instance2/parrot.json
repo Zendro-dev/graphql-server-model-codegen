@@ -13,7 +13,7 @@
       "implementation": "foreignkey",
       "target": "person",
       "targetKey": "person_id",
-      "keyIn": "parrot",
+      "keysIn": "parrot",
       "targetStorageType": "distributed-data-model"
     }
   },
