@@ -822,8 +822,7 @@ module.exports.parseAssociations = function (dataModel) {
         case 'sql_cross_table':
           if (type !== 'many_to_many'
            || association.sourceKey === undefined
-           || association.keysIn === undefined
-           || association.targetStorageType !== "sql" ) {
+           || association.keysIn === undefined ) {
             console.error(
               colors.red(
                 `ERROR: many_to_many through crosstable only allowed for relational database types with well defined cross-table`
