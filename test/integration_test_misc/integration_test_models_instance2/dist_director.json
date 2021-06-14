@@ -1,0 +1,20 @@
+{
+    "model": "dist_director",
+    "storageType" : "distributed-data-model",
+    "registry": ["dist_director_instance1"],
+    "attributes": {
+        "director_id": "String",
+        "director_name": "String",
+        "nationality": "String"
+    },
+    "associations": {
+        "dist_movies": {
+            "type": "to_many",
+            "target": "dist_movie",
+            "targetKey": "director_id",
+            "keyIn": "dist_movie",
+            "targetStorageType": "distributed-data-model"
+        }
+    },
+    "internalId": "director_id"
+}

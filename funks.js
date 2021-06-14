@@ -462,8 +462,8 @@ writeAcls = async function (dir_write, models, adapters) {
   //set file name
   let file_name = dir_write + "/acl_rules.js";
   //set names
-  const modelsNames = models.map(item => item[0]);
-  let adminModelsNames = ['role', 'user', 'role_to_user'];
+  const modelsNames = models.map((item) => item[0]);
+  let adminModelsNames = ["role", "user", "role_to_user"];
   //generate
   await generateSection(
     "acl_rules",
@@ -744,7 +744,8 @@ module.exports.parseAssociations = function (dataModel) {
       if (isStandardAssociation) {
         //standard
         associations_info.associations.push(association);
-        association.targetStorageType = association.targetStorageType.toLowerCase();
+        association.targetStorageType =
+          association.targetStorageType.toLowerCase();
         associations_info.foreignKeyAssociations[name] = association.targetKey;
       } else {
         //generic
@@ -977,6 +978,7 @@ generateSections = async function (sections, opts, dir_write) {
       case "models-mongodb":
       case "models-amazonS3":
       case "models-trino":
+      case "models-neo4j":
       //adapters
       case "sql-adapter":
       case "zendro-adapters":
@@ -985,6 +987,7 @@ generateSections = async function (sections, opts, dir_write) {
       case "mongodb-adapter":
       case "amazonS3-adapter":
       case "trino-adapter":
+      case "neo4j-adapter":
         file_name =
           dir_write + "/" + section.dir + "/" + section.fileName + ".js";
         break;
@@ -1090,6 +1093,7 @@ getStorageType = function (dataModel) {
         case "amazon-s3":
         case "trino":
         case "presto":
+        case "neo4j":
         //adapters
         case "sql-adapter":
         case "ddm-adapter":
@@ -1100,6 +1104,7 @@ getStorageType = function (dataModel) {
         case "amazon-s3-adapter":
         case "trino-adapter":
         case "presto-adapter":
+        case "neo4j-adapter":
           //ok
           break;
 
@@ -1111,8 +1116,8 @@ getStorageType = function (dataModel) {
               `ERROR: The attribute 'storageType' has an invalid value. \n
               One of the following types is expected: [sql, distributed-data-model, 
                 zendro-server, generic, sql-adapter, ddm-adapter, zendro-webservice-adapter, generic-adapter,
-                cassandra, mongodb, amazon-s3, trino, presto, cassandra-adapter, mongodb-adapter,
-                amazon-s3-adapter, trino-adapter, presto-adapter].
+                cassandra, mongodb, amazon-s3, trino, presto, neo4j, cassandra-adapter, mongodb-adapter,
+                amazon-s3-adapter, trino-adapter, presto-adapter, neo4j-adapter].
                  But '${dataModel.storageType}' was obtained on ${
                 dataModel.adapterName !== undefined ? "adapter" : "model"
               } '${
@@ -1164,6 +1169,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     "models/amazonS3",
     "models/trino",
     "models/presto",
+    "models/neo4j",
   ];
   let models = [];
   let adapters = [];
@@ -1504,6 +1510,24 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         ];
         break;
 
+      case "neo4j":
+        sections = [
+          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+          {
+            dir: "models/neo4j",
+            template: "models-neo4j",
+            fileName: opts.nameLc,
+          },
+          {
+            dir: "validations",
+            template: "validations",
+            fileName: opts.nameLc,
+          },
+          { dir: "patches", template: "patches", fileName: opts.nameLc },
+        ];
+        break;
+
       case "zendro-webservice-adapter":
         sections = [
           {
@@ -1608,6 +1632,18 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
           { dir: "patches", template: "patches", fileName: opts.adapterName },
         ];
         break;
+
+      case "neo4j-adapter":
+        sections = [
+          {
+            dir: "models/adapters",
+            template: "neo4j-adapter",
+            fileName: opts.adapterName,
+          },
+          { dir: "patches", template: "patches", fileName: opts.adapterName },
+        ];
+        break;
+
       default:
         break;
     }
@@ -1643,7 +1679,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     ) {
       adapters.push(opts.adapterName);
     } else {
-      models.push([opts.name , opts.namePl, opts.nameLc]);
+      models.push([opts.name, opts.namePl, opts.nameLc]);
     }
   }
   //msg

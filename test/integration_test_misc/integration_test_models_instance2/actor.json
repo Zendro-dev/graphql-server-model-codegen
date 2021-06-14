@@ -1,0 +1,27 @@
+{
+    "model" : "actor",
+    "storageType" : "neo4j",
+    "attributes" : {
+        "actor_id": "String",
+        "actor_name": "String",
+        "movie_ids": "[String]"
+    },
+
+    "associations":{
+      "movies":{
+        "type": "to_many",
+        "reverseAssociationType": "to_many",
+        "target": "movie",
+        "targetKey": "actor_ids",
+        "sourceKey": "movie_ids",
+        "keyIn": "actor",
+        "targetStorageType": "neo4j"
+      }
+    },
+
+    "internalId": "actor_id",
+    "id":{
+        "name": "actor_id",
+        "type": "String" 
+    }
+}

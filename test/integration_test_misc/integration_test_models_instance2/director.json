@@ -1,0 +1,24 @@
+{
+    "model": "director",
+    "storageType": "neo4j",
+    "attributes": {
+        "director_id": "String",
+        "director_name": "String",
+        "nationality": "String"
+    },
+    "associations": {
+        "movies": {
+            "type": "to_many",
+            "target": "movie",
+            "targetKey": "director_id",
+            "keyIn": "movie",
+            "targetStorageType": "neo4j",
+            "label": "movie_id"
+        }
+    },
+    "internalId": "director_id",
+    "id": {
+        "name": "director_id",
+        "type": "String"
+    }
+}
