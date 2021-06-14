@@ -383,8 +383,8 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     expect(res.statusCode).to.equal(200);
 
     expect(resBody).to.deep.equal({
-      data:{t:[{gene:"Gene D"}],i:[{name:"Zazaniza"}]}
-    })
+      data: { t: [{ gene: "Gene D" }], i: [{ name: "Zazaniza" }] },
+    });
 
     res = itHelpers.request_graph_ql_post(
       `{ individuals (search: {field: name, operator: regexp, value: "Zazan[aeiou]za"},pagination:{limit:25}) {name}}`
@@ -420,10 +420,10 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      "data":{
-        "firstPerson":[{"name":"Zazanaza"}],
-        "secondPerson":[{"name":"Zazaniza"}]
-      }
+      data: {
+        firstPerson: [{ name: "Zazanaza" }],
+        secondPerson: [{ name: "Zazaniza" }],
+      },
     });
 
     res = await itHelpers.request_metaquery_post(
@@ -436,38 +436,36 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     );
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
-   
-    expect(resBody).to.deep.equal(
-      {
-        "errors": [
-          {
-            "message": "Cannot query field \"names\" on type \"individual\". Did you mean \"name\"?",
-            "locations": [
-              {
-                "line": 2,
-                "column": 114
-              }
-            ]
-          },
-          {
-            "message": "Cannot query field \"names\" on type \"individual\". Did you mean \"name\"?",
-            "locations": [
-              {
-                "line": 3,
-                "column": 116
-              }
-            ]
-          }
-        ]
-      }
-    );
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message:
+            'Cannot query field "names" on type "individual". Did you mean "name"?',
+          locations: [
+            {
+              line: 2,
+              column: 114,
+            },
+          ],
+        },
+        {
+          message:
+            'Cannot query field "names" on type "individual". Did you mean "name"?',
+          locations: [
+            {
+              line: 3,
+              column: 116,
+            },
+          ],
+        },
+      ],
+    });
 
     res = await itHelpers.request_metaquery_post(
       `{
         firstPerson: individuals (search: {field: name, operator: eq, value: "Zazanaza"},pagination:{limit:10}) {name} 
         secondPerson: individuals (search: {field: name, operator: eq, value: "Zazaniza"},pagination:{limit:10}) {name}
-      }`
-      ,
+      }`,
       ".firstPerson",
       null
     );
@@ -475,13 +473,12 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      "data": [
+      data: [
         {
-          "name": "Zazanaza"
-        }
-      ]
-    }
-    );
+          name: "Zazanaza",
+        },
+      ],
+    });
 
     res = await itHelpers.request_metaquery_post(
       `{
@@ -494,16 +491,16 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
 
     expect(res.statusCode).to.equal(200);
-    
+
     expect(resBody).to.deep.equal({
-      "data": null,
-      "errors": [
+      data: null,
+      errors: [
         {
-          "message": "jq: error: syntax error, unexpected INVALID_CHARACTER (Unix shell quoting issues?) at <top-level>, line 1:\n.~firstPerson \njq: error: try .[\"field\"] instead of .field for unusually named fields at <top-level>, line 1:\n.~firstPerson\njq: 2 compile errors\n"
-        }
-      ]
-    }
-    );
+          message:
+            'jq: error: syntax error, unexpected INVALID_CHARACTER (Unix shell quoting issues?) at <top-level>, line 1:\n.~firstPerson \njq: error: try .["field"] instead of .field for unusually named fields at <top-level>, line 1:\n.~firstPerson\njq: 2 compile errors\n',
+        },
+      ],
+    });
 
     res = await itHelpers.request_metaquery_post(
       `{
@@ -517,20 +514,19 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      "data": {
-        "firstPerson": [
+      data: {
+        firstPerson: [
           {
-            "name": "Zazanaza"
-          }
+            name: "Zazanaza",
+          },
         ],
-        "secondPerson": [
+        secondPerson: [
           {
-            "name": "Zazaniza"
-          }
-        ]
-      }
-    }
-    );
+            name: "Zazaniza",
+          },
+        ],
+      },
+    });
 
     res = await itHelpers.request_metaquery_post(
       `{
@@ -542,14 +538,14 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     );
 
     resBody = JSON.parse(res.body.toString("utf8"));
-    
+
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      "data": [
+      data: [
         {
-          "name": "Zazanaza"
-        }
-      ]
+          name: "Zazanaza",
+        },
+      ],
     });
 
     res = await itHelpers.request_metaquery_post(
@@ -564,11 +560,11 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      "data": [
+      data: [
         {
-          "name": "Zazanaza"
-        }
-      ]
+          name: "Zazanaza",
+        },
+      ],
     });
 
     res = await itHelpers.request_metaquery_post(
