@@ -12,7 +12,7 @@
   "associations": {
     "individual": {
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "individual",
       "targetKey": "individual_id",
       "keysIn": "transcript_count",
@@ -20,7 +20,7 @@
     },
     "aminoacidsequence": {
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "aminoacidsequence",
       "targetKey": "aminoacidsequence_id",
       "keysIn": "transcript_count",

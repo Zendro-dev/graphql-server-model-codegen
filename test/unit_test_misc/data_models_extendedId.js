@@ -13,7 +13,7 @@ module.exports.book_adapter = {
     "associations": {
         "author": {
             "type": "many_to_one",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "Person",
             "targetKey": "internalPersonId",
             "keysIn": "Book",
@@ -40,7 +40,7 @@ module.exports.book_ddm = {
     "associations": {
         "author": {
             "type": "many_to_one",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "Person",
             "targetKey": "internalPersonId",
             "keysIn": "Book",
@@ -67,7 +67,7 @@ module.exports.person_adapter = {
     "associations": {
         "works": {
             "type": "one_to_many",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "Book",
             "targetKey": "internalPersonId",
             "keysIn": "Book",
@@ -95,7 +95,7 @@ module.exports.person_ddm = {
     "associations": {
         "works": {
             "type": "one_to_many",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "Book",
             "targetKey": "internalPersonId",
             "keysIn": "Book",

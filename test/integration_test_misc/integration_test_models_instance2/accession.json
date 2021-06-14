@@ -14,7 +14,7 @@
 
     "location": {
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Location",
       "targetKey": "locationId",
       "keysIn": "Accession",
@@ -25,7 +25,7 @@
 
     "measurements": {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Measurement",
       "targetKey": "accessionId",
       "keysIn": "Measurement",

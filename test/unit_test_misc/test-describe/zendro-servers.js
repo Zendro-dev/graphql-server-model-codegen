@@ -270,7 +270,7 @@ const definition = {
         },
         company: {
             type: 'many_to_one',
-            implementation: 'foreignkey',
+            implementation: 'foreignkeys',
             target: 'publi_sher',
             targetKey: 'companyId',
             keysIn: 'Person',

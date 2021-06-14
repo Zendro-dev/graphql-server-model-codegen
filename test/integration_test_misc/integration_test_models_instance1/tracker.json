@@ -9,7 +9,7 @@
     "associations": {
       "unique_animal": {
         "type": "one_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "animal",
         "targetKey": "animal_id",
         "keysIn": "tracker",

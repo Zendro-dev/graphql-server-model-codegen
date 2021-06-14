@@ -16,7 +16,7 @@
   "associations": {
     "rivers": {
       "type": "many_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "river",
       "targetStorageType": "sql",
       "sourceKey": "river_ids",

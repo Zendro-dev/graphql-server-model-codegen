@@ -16,7 +16,7 @@
     "associations": {
         "farm": {
             "type": "many_to_one",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "farm",
             "targetKey": "farm_id",
             "keysIn": "animal",
@@ -25,7 +25,7 @@
         },
         "food": {
             "type": "many_to_many",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "food",
             "targetKey": "animal_ids",
             "sourceKey": "food_ids",
@@ -34,7 +34,7 @@
         },
         "unique_tracker": {
             "type": "one_to_one",
-            "implementation": "foreignkey",
+            "implementation": "foreignkeys",
             "target": "tracker",
             "targetKey": "animal_id",
             "keysIn": "tracker",

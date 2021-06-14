@@ -11,7 +11,7 @@
     "associations": {
       "person": {
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "person",
         "targetKey": "person_id",
         "keysIn": "dog",

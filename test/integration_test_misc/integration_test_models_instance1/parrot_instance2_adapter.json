@@ -12,7 +12,7 @@
   "associations": {
     "unique_person": {
       "type": "one_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "person",
       "targetKey": "person_id",
       "keysIn": "parrot",

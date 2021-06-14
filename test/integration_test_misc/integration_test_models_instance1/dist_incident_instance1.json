@@ -13,7 +13,7 @@
 
     "dist_instants": {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
       "keysIn": "Dist_instant",

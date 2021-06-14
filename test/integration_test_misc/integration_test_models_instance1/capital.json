@@ -9,7 +9,7 @@
     "associations": {
       "unique_country": {
         "type": "one_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "country",
         "targetKey": "country_id",
         "keysIn": "capital",
@@ -17,7 +17,7 @@
       },
       "incidents": {
         "type": "one_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "Incident",
         "targetKey": "capital_id",
         "keysIn": "Incident",

@@ -11,7 +11,7 @@
     "associations": {
       "dogs": {
         "type": "one_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "dog",
         "targetKey": "person_id",
         "keysIn": "dog",
@@ -19,7 +19,7 @@
       },
       "unique_parrot": {
         "type": "one_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "parrot",
         "targetKey": "person_id",
         "keysIn": "parrot",

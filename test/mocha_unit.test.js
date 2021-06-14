@@ -1356,7 +1356,7 @@ describe("Parse associations", function () {
       to_one: [
         {
           type: "many_to_one",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "individual",
           targetKey: "individual_id",
           targetKey_cp: "Individual_id",
@@ -1386,7 +1386,7 @@ describe("Parse associations", function () {
       associations: [
         {
           type: "many_to_one",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "individual",
           targetKey: "individual_id",
           keysIn: "transcript_count",
@@ -1417,7 +1417,7 @@ describe("Parse associations", function () {
       to_many: [
         {
           type: "one_to_many",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "transcript_count",
           keysIn: "transcript_count",
           targetKey: "individual_id",
@@ -1446,7 +1446,7 @@ describe("Parse associations", function () {
       associations: [
         {
           type: "one_to_many",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "transcript_count",
           keysIn: "transcript_count",
           targetKey: "individual_id",
@@ -1544,7 +1544,7 @@ describe("Parse associations", function () {
       to_many: [
         {
           type: "one_to_many",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "Dog",
           targetKey: "personId",
           targetKey_cp: "PersonId",
@@ -1597,7 +1597,7 @@ describe("Parse associations", function () {
       associations: [
         {
           type: "one_to_many",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "Dog",
           targetKey: "personId",
           keysIn: "Dog",
@@ -1633,7 +1633,7 @@ describe("Parse associations", function () {
       to_one: [
         {
           type: "many_to_one",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "Person",
           targetKey: "personId",
           targetKey_cp: "PersonId",
@@ -1656,7 +1656,7 @@ describe("Parse associations", function () {
         },
         {
           type: "many_to_one",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "Researcher",
           targetKey: "researcherId",
           targetKey_cp: "ResearcherId",
@@ -1688,7 +1688,7 @@ describe("Parse associations", function () {
       associations: [
         {
           type: "many_to_one",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "Person",
           targetKey: "personId",
           keysIn: "Dog",
@@ -1698,7 +1698,7 @@ describe("Parse associations", function () {
         },
         {
           type: "many_to_one",
-          implementation: "foreignkey",
+          implementation: "foreignkeys",
           target: "Researcher",
           targetKey: "researcherId",
           keysIn: "Dog",

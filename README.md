@@ -98,7 +98,7 @@ EXAMPLES OF VALID JSON FILES
   "associations" : {
     "person" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "reverseAssociation": "dogs",
       "target" : "Person",
       "targetKey" : "personId",
@@ -122,7 +122,7 @@ EXAMPLES OF VALID JSON FILES
   "associations":{
       "books" : {
           "type" : "one_to_many",
-          "implementation": "foreignkey",
+          "implementation": "foreignkeys",
           "reverseAssociation": "publisher",
           "target" : "Book",
           "targetKey" : "publisherId",
@@ -163,12 +163,12 @@ We will consider four types of associations according to the relation between as
 3. one_to_many
 4. many_to_many
 
-For both type of association, the necessary arguments would be:
+For all types of association, the necessary arguments would be:
 
 name | Type | Description
 ------- | ------- | --------------
 *type* | String | Type of association (`one_to_one`, `one_to_many`, etc.)
-*implementation* | String | implementation type of the association. Can be one of `foreignkey`, `generic` or `sql_cross_table` (only for `many_to_many`)`
+*implementation* | String | implementation type of the association. Can be one of `foreignkeys`, `generic` or `sql_cross_table` (only for `many_to_many`)`
 *reverseAssociation* | String | The name of the reverse association from the other model. This field is only mandatory for building the [single-page-app](https://github.com/Zendro-dev/single-page-app), *not* for generating the the graphql-server code via this repository.
 *target* | String | Name of model to which the current model will be associated with.
 *targetKey* | String | A unique identifier of the association for the case where there appear more than one association with the same model.
@@ -202,7 +202,7 @@ Be aware that in the case of this type of association the user is required to de
   "associations" :{
     "roles" : {
       "type" : "many_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "reverseAssociation": "dogs",
       "target" : "Role",
       "targetKey" : "role_Id",
@@ -269,7 +269,7 @@ Example:
   "associations":{
       "publisher" : {
         "type" : "to_one", // association type
-        "implementation": "foreignkey", // standard implementation via foreign keys
+        "implementation": "foreignkeys", // standard implementation via foreign keys
         "reverseAssociation": "dogs", // name of the association in the publisher model
         "target" : "publisher", // Model's name is `publisher`
         "targetKey" : "publisher_id", // Local alias for this association

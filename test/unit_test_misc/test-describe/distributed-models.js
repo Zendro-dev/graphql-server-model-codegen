@@ -338,7 +338,7 @@ const definition = {
         },
         company: {
             type: 'many_to_one',
-            implementation: 'foreignkey',
+            implementation: 'foreignkeys',
             target: 'publi_sher',
             targetKey: 'companyId',
             keysIn: 'Person',
@@ -346,7 +346,7 @@ const definition = {
         },
         dogs: {
             type: 'one_to_many',
-            implementation: 'foreignkey',
+            implementation: 'foreignkeys',
             target: 'Dog',
             targetKey: 'personId',
             keysIn: 'Dog',
@@ -354,7 +354,7 @@ const definition = {
         },
         parrot: {
             type: 'many_to_one',
-            implementation: 'foreignkey',
+            implementation: 'foreignkeys',
             target: 'Parrot',
             targetKey: 'personId',
             keysIn: 'Parrot',
@@ -383,7 +383,7 @@ const definition = {
     associations: {
         owner: {
             type: 'many_to_one',
-            implementation: 'foreignkey',
+            implementation: 'foreignkeys',
             target: 'Person',
             targetKey: 'personId',
             keysIn: 'Dog',

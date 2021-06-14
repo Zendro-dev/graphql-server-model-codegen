@@ -15,7 +15,7 @@
   
       "incident": {
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "Incident",
         "targetKey": "incident_assoc_id",
         "keysIn": "Instant",

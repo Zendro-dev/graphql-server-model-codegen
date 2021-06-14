@@ -12,7 +12,7 @@
   
       "instants": {
         "type": "one_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "Instant",
         "targetKey": "incident_assoc_id",
         "keysIn": "Instant",
@@ -20,7 +20,7 @@
       },
       "town": {
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "capital",
         "targetKey": "capital_id",
         "keysIn": "Incident",

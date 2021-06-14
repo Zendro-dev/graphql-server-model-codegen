@@ -11,7 +11,7 @@ module.exports.transcript_count = {
   "associations":{
     "individual":{
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "individual",
       "targetKey" : "individual_id",
       "keysIn": "transcript_count",
@@ -29,7 +29,7 @@ module.exports.individual = {
   "associations": {
     "transcript_counts": {
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "transcript_count",
       "keysIn": "transcript_count",
       "targetKey" : "individual_id",
@@ -68,7 +68,7 @@ module.exports.person = {
   "associations":{
     "dogs":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -108,7 +108,7 @@ module.exports.book = {
         },
       "publisher" : {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "Publisher",
         "targetKey" : "publisherId",
         "keysIn": "Book",
@@ -137,7 +137,7 @@ module.exports.researcher = {
     },
     "dog":{
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "researcherId",
       "keysIn": "Dog",
@@ -159,7 +159,7 @@ module.exports.specie = {
   "associations":{
     "projects" : {
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Project",
       "targetKey" : "specieId",
       "keysIn": "Project",
@@ -179,7 +179,7 @@ module.exports.dog = {
   "associations" : {
     "person" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -189,7 +189,7 @@ module.exports.dog = {
     },
     "researcher":{
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Researcher",
       "targetKey": "researcherId",
       "keysIn": "Dog",
@@ -217,7 +217,7 @@ module.exports.assoc_through_project_researcher = {
 
 module.exports.assoc_dogs_researcher = {
   "type" : "many_to_one",
-  "implementation": "foreignkey",
+  "implementation": "foreignkeys",
   "target": "Researcher",
   "targetKey": "researcherId",
   "keysIn": "Dog",
@@ -250,7 +250,7 @@ module.exports.inDiVIdual_camelcase = {
   "associations": {
     "transcriptCounts": {
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "transcriptCount",
       "targetKey" : "individual_id",
       "keysIn": "transcriptCount",
@@ -274,7 +274,7 @@ module.exports.transcriptCount_camelcase = {
   "associations":{
     "inDiVIdual":{
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "inDiVIdual",
       "targetKey" : "individual_id",
       "keysIn": "transcriptCount",
@@ -296,7 +296,7 @@ module.exports.transcriptCount_indiv= {
   "associations":{
     "individual":{
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Individual",
       "targetKey" : "individual_id",
       "keysIn": "transcriptCount",
@@ -319,7 +319,7 @@ module.exports.dog_owner = {
   "associations" : {
     "owner" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "owner_id_test",
       "keysIn": "Dog",
@@ -329,7 +329,7 @@ module.exports.dog_owner = {
     },
     "keeper":{
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Researcher",
       "targetKey": "keeperId",
       "keysIn": "Dog",
@@ -351,7 +351,7 @@ module.exports.person_indices = {
   "associations":{
     "dogs":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -386,7 +386,7 @@ module.exports.person_externalIds = {
     "associations":{
       "dogs":{
         "type" : "one_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "Dog",
         "targetKey" : "personId",
         "keysIn": "Dog",
@@ -421,7 +421,7 @@ module.exports.academicTeam = {
   "associations":{
     "members":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Researcher",
       "targetKey" : "academicTeamId",
       "keysIn": "Researcher",
@@ -445,7 +445,7 @@ module.exports.person_date = {
   "associations":{
     "dogs":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -455,7 +455,7 @@ module.exports.person_date = {
 
     "patients":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "doctor_Id",
       "keysIn": "Dog",
@@ -500,7 +500,7 @@ module.exports.book_authors = {
         },
       "publisher" : {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "Publisher",
         "targetKey" : "publisherId",
         "keysIn" : "Book",
@@ -527,7 +527,7 @@ module.exports.person_description = {
   "associations":{
     "dogs":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -562,7 +562,7 @@ module.exports.person_description_optional = {
   "associations":{
     "dogs":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -593,7 +593,7 @@ module.exports.academic_Team = {
   "associations":{
     "members":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Researcher",
       "targetKey" : "AcademicTeam_Id",
       "keysIn": "Researcher",
@@ -615,7 +615,7 @@ module.exports.dog_one_assoc = {
   "associations" : {
     "owner" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
       "keysIn" : "Dog",
@@ -637,7 +637,7 @@ module.exports.person_one_assoc = {
   "associations" : {
     "unique_pet" :{
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "personId",
       "keysIn": "Dog",
@@ -659,7 +659,7 @@ module.exports.book_extendedIds = {
   "associations": {
       "author": {
           "type": "many_to_one",
-          "implementation": "foreignkey",
+          "implementation": "foreignkeys",
           "target": "Person",
           "targetKey": "internalPersonId",
           "keysIn": "Book",
@@ -685,7 +685,7 @@ module.exports.author_foreignKeyArray = {
     "associations":{
       "books":{
         "type": "many_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -712,7 +712,7 @@ module.exports.author_zendro_remote = {
     "associations":{
       "books":{
         "type": "many_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "post_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -738,7 +738,7 @@ module.exports.author_ddm_array_fk ={
     "associations":{
       "books":{
         "type": "many_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -765,7 +765,7 @@ module.exports.author_sql_adapter_array_fk ={
     "associations":{
       "books":{
         "type": "many_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
@@ -794,7 +794,7 @@ module.exports.author_zendro_adapter_array_fk ={
     "associations":{
       "books":{
         "type": "many_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",

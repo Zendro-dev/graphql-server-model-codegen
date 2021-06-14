@@ -22,7 +22,7 @@ module.exports.book = {
         },
       "publisher" : {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keysIn" : "Book",
@@ -56,7 +56,7 @@ module.exports.person = {
 
     "company":{
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "publi_sher",
       "targetKey": "companyId",
       "keysIn": "Person",
@@ -79,7 +79,7 @@ module.exports.dog_one_assoc = {
   "associations" : {
     "owner" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
       "keysIn" : "Dog",
@@ -88,7 +88,7 @@ module.exports.dog_one_assoc = {
 
     "veterinarian" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "veterinarianId",
       "keysIn" : "Dog",
@@ -111,7 +111,7 @@ module.exports.person_one_assoc = {
   "associations" : {
     "unique_pet" :{
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "personId",
       "keysIn": "Dog",
@@ -120,7 +120,7 @@ module.exports.person_one_assoc = {
 
     "patients" : {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "veterinarianId",
       "keysIn": "Dog",

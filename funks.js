@@ -713,7 +713,7 @@ getEditableAttributes = function (
 ) {
   let editable_attributes = {};
   let target_keys = parsedAssocForeignKeys.map((assoc) => {
-    if (assoc.type === 'many_to_many' && assoc.implementation === 'foreignkey') return assoc.sourceKey;
+    if (assoc.type === 'many_to_many' && assoc.implementation === 'foreignkeys') return assoc.sourceKey;
     return assoc.targetKey;
   });
   for (let attrib in attributes) {
@@ -833,7 +833,7 @@ module.exports.parseAssociations = function (dataModel) {
           associations_info.schema_attributes["many"][name] = schema_attributes;
           associations_info['to_many_through_sql_cross_table'].push(assoc);
           break;
-        case 'foreignkey':
+        case 'foreignkeys':
           associations_info.foreignKeyAssociations[name] = association.targetKey;
           switch (type) {
             case 'one_to_one':

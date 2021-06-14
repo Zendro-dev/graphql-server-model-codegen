@@ -19,7 +19,7 @@
   
       "dist_farm": {
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "dist_farm",
         "targetKey": "farm_id",
         "keysIn": "dist_animal",

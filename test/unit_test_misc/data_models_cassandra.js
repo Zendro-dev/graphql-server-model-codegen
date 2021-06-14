@@ -16,7 +16,7 @@ module.exports.city = {
   "associations": {
     "rivers": {
       "type": "many_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "river",
       "targetStorageType": "sql",
       "sourceKey": "river_ids",
@@ -41,7 +41,7 @@ module.exports.incident = {
 
     "instants": {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Instant",
       "targetKey": "incident_assoc_id",
       "keysIn" : "Instant",
@@ -49,7 +49,7 @@ module.exports.incident = {
     },
     "town": {
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "capital",
       "targetKey": "capital_id",
       "keysIn" : "Incident",
@@ -76,7 +76,7 @@ module.exports.dist_incident = {
 
     "dist_instants": {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
       "keysIn" : "Dist_instant",
@@ -103,7 +103,7 @@ module.exports.dist_instant_instance1 = {
 
     "dist_instants": {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
       "keysIn": "Dist_instant",

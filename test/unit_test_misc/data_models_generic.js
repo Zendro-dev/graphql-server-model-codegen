@@ -23,7 +23,7 @@ module.exports.personSql_toMany_dogGeneric = {
   "associations":{
     "dogs":{
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -44,7 +44,7 @@ module.exports.dogGeneric_toOne_personSql = {
   "associations" : {
     "owner" : {
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
       "keysIn": "Dog",
@@ -69,7 +69,7 @@ module.exports.personSql_toOne_hometownGeneric = {
   "associations":{
     "unique_homeTown":{
       "type" : "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Hometown",
       "targetKey" : "hometownId",
       "keysIn": "Person",
@@ -92,7 +92,7 @@ module.exports.hometownGeneric_toMany_personSql = {
   "associations" : {
     "people" : {
       "type" : "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "hometownId",
       "keysIn": "Person",

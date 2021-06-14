@@ -10,7 +10,7 @@
     "associations": {
       "animals": {
         "type": "many_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "animal",
         "targetKey": "food_ids",
         "sourceKey": "animal_ids",

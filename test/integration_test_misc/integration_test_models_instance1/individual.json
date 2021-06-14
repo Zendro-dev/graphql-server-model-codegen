@@ -7,7 +7,7 @@
   "associations": {
     "transcript_counts": {
       "type": "one_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "transcript_count",
       "targetKey": "individual_id",
       "keysIn": "transcript_count",

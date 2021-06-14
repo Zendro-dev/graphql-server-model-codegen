@@ -16,7 +16,7 @@ module.exports.animal = {
   associations: {
     farm: {
       type: "many_to_one",
-      implementation: "foreignkey",
+      implementation: "foreignkeys",
       target: "farm",
       targetKey: "farm_id",
       keysIn: "animal",
@@ -25,7 +25,7 @@ module.exports.animal = {
     },
     food: {
       type: "many_to_many",
-      implementation: "foreignkey",
+      implementation: "foreignkeys",
       target: "food",
       targetKey: "animal_ids",
       sourceKey: "food_ids",
@@ -60,7 +60,7 @@ module.exports.dist_animal_instance1 = {
   associations: {
     dist_farm: {
       type: "many_to_one",
-      implementation: "foreignkey",
+      implementation: "foreignkeys",
       target: "dist_farm",
       targetKey: "farm_id",
       keysIn: "dist_animal",

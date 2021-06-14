@@ -12,7 +12,7 @@
 
     "accession": {
       "type": "many_to_one",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "Accession",
       "targetKey": "accessionId",
       "keysIn": "Measurement",

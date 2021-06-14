@@ -20,7 +20,7 @@
     },
     "cities": {
       "type": "many_to_many",
-      "implementation": "foreignkey",
+      "implementation": "foreignkeys",
       "target": "city",
       "targetStorageType": "cassandra",
       "sourceKey": "city_ids",

@@ -24,7 +24,7 @@ module.exports.book = {
         },
       "publisher" : {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keysIn" : "Book",
@@ -60,7 +60,7 @@ module.exports.book_ddm =
         },
       "publisher" : {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
         "keysIn" : "Book",
@@ -95,7 +95,7 @@ module.exports.person_ddm =  {
 
       "company":{
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "publi_sher",
         "targetKey": "companyId",
         "keysIn": "Person",
@@ -104,7 +104,7 @@ module.exports.person_ddm =  {
 
       "dogs" :{
         "type": "one_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "Dog",
         "targetKey": "personId",
         "keysIn": "Dog",
@@ -113,7 +113,7 @@ module.exports.person_ddm =  {
 
       "parrot" :{
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "Parrot",
         "targetKey": "personId",
         "keysIn": "Parrot",
@@ -137,7 +137,7 @@ module.exports.dog_ddm =  {
     "associations" : {
       "owner" : {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "Person",
         "targetKey" : "personId",
         "keysIn" : "Dog",
@@ -163,7 +163,7 @@ module.exports.dog_ddm =  {
       "associations": {
           "works": {
               "type": "one_to_many",
-              "implementation": "foreignkey",
+              "implementation": "foreignkeys",
               "target": "Book",
               "targetKey": "internalPersonId",
               "keysIn": "Book",
@@ -210,7 +210,7 @@ module.exports.dog_ddm =  {
     "associations": {
       "author": {
         "type": "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "Person",
         "targetKey": "internalPersonId",
         "keysIn": "Book",
@@ -233,7 +233,7 @@ module.exports.dog_ddm_integration_test = {
     "associations": {
       "person": {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "person",
         "targetKey" : "person_id",
         "keysIn": "dog",
@@ -259,7 +259,7 @@ module.exports.dog_zendro_adapter_integration_test =
     "associations": {
       "person": {
         "type" : "many_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target" : "person",
         "targetKey" : "person_id",
         "keysIn": "dog",

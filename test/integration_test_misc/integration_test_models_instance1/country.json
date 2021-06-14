@@ -8,7 +8,7 @@
     "associations": {
       "unique_capital": {
         "type": "one_to_one",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "capital",
         "targetKey": "country_id",
         "keysIn": "capital",

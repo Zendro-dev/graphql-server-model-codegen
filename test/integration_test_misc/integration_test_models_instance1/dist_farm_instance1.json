@@ -11,7 +11,7 @@
     "associations": {
       "dist_animals": {
         "type": "one_to_many",
-        "implementation": "foreignkey",
+        "implementation": "foreignkeys",
         "target": "dist_animal",
         "targetKey": "farm_id",
         "keysIn": "dist_animal",
