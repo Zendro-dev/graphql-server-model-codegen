@@ -126,7 +126,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
       \${filter}  
       \${sort} 
       LIMIT \${limit}\`;
-    let result = null;
+    let result = [];
 
     const client = await this.storageHandler;
     result = await prestoHelper.queryData(query, client);
