@@ -23,7 +23,7 @@ module.exports.movie = {
       label: "director_name",
     },
     actor: {
-      type: "one_to_many",
+      type: "many_to_many",
       implementation: "foreignkeys",
       target: "actor",
       targetKey: "movie_ids",

@@ -23,6 +23,7 @@ module.exports.book =
         "implementation": "foreignkeys",
         "target": "Person",
         "targetKey": "person_id",
+        "keysIn": "Person",
         "sourceKey": "book_id",
         "targetStorageType": "generic"
       }
@@ -47,6 +48,7 @@ module.exports.person =
       "target": "book",
       "targetKey": "book_id",
       "sourceKey": "person_id",
+      "keysIn": "book",
       "targetStorageType": "generic"
     },
 
