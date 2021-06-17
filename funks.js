@@ -1153,7 +1153,6 @@ getStorageType = function (dataModel) {
   }
 
   if (valid) {
-    console.log(dataModel.model + " -- " + dataModel.storageType.toLowerCase())
     return dataModel.storageType.toLowerCase();
   } else {
     return "";
