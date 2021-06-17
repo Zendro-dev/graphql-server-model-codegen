@@ -268,7 +268,7 @@ Example:
   },
   "associations":{
       "publisher" : {
-        "type" : "to_one", // association type
+        "type" : "many_to_one", // association type
         "implementation": "foreignkeys", // standard implementation via foreign keys
         "reverseAssociation": "dogs", // name of the association in the publisher model
         "target" : "publisher", // Model's name is `publisher`
