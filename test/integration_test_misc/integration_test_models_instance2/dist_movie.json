@@ -15,10 +15,11 @@
   
     "associations": {
         "dist_director": {
-            "type": "to_one",
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
             "target": "dist_director",
             "targetKey": "director_id",
-            "keyIn" : "dist_movie",
+            "keysIn" : "dist_movie",
             "targetStorageType": "distributed-data-model"
         }
     },
