@@ -12,6 +12,7 @@ const models_cassandra = require("./unit_test_misc/data_models_cassandra");
 const models_mongodb = require("./unit_test_misc/data_models_mongodb");
 const models_amazonS3 = require("./unit_test_misc/data_models_amazonS3");
 const models_trino = require("./unit_test_misc/data_models_trino");
+const models_neo4j = require("./unit_test_misc/data_models_neo4j");
 const requireFromString = require("require-from-string");
 const helpers = require("./unit_test_misc/helpers/reporting_helpers");
 const { test } = require("mocha");
@@ -66,10 +67,8 @@ describe("Lower-case models", function () {
     );
     expect(g_model, "Incorrect model").to.have.string(test_model_attributes);
 
-    let test_model_associations = data_test.individual_model_associations.replace(
-      /\s/g,
-      ""
-    );
+    let test_model_associations =
+      data_test.individual_model_associations.replace(/\s/g, "");
     expect(g_model, "Incorrect model").to.have.string(test_model_associations);
   });
 });
@@ -988,10 +987,11 @@ describe("Cursor based pagination", function () {
     let opts = funks.getOptions(models_zendro.person);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
     let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.many_to_many_association_connection_zendro_server.replace(
-      /\s/g,
-      ""
-    );
+    let test_model =
+      data_test.many_to_many_association_connection_zendro_server.replace(
+        /\s/g,
+        ""
+      );
     expect(g_model, "No method found").to.have.string(test_model);
   });
 });
@@ -1766,10 +1766,8 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
     let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.add_assoc_to_one_fieldMutation_resolver.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test.add_assoc_to_one_fieldMutation_resolver.replace(/\s/g, "");
     expect(g_resolver).to.have.string(test_resolver);
   });
 
@@ -1777,10 +1775,8 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
     let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.remove_assoc_to_one_fieldMutation_resolver.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test.remove_assoc_to_one_fieldMutation_resolver.replace(/\s/g, "");
     expect(g_resolver).to.have.string(test_resolver);
   });
 
@@ -1788,10 +1784,11 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.add_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test.add_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(
+        /\s/g,
+        ""
+      );
     expect(g_resolvers).to.have.string(test_resolver);
   });
 
@@ -1799,10 +1796,11 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
     let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.remove_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test.remove_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(
+        /\s/g,
+        ""
+      );
     expect(g_resolvers).to.have.string(test_resolver);
   });
 
@@ -1810,10 +1808,8 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
     let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.add_assoc_to_many_fieldMutation_resolver.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test.add_assoc_to_many_fieldMutation_resolver.replace(/\s/g, "");
     expect(g_resolver).to.have.string(test_resolver);
   });
 
@@ -1821,10 +1817,8 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
     let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.remove_assoc_to_many_fieldMutation_resolver.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test.remove_assoc_to_many_fieldMutation_resolver.replace(/\s/g, "");
     expect(g_resolver).to.have.string(test_resolver);
   });
 
@@ -1832,10 +1826,8 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
     let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test._addAssoc_to_one_fieldMutation_sql_model.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test._addAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, "");
     expect(g_resolver).to.have.string(test_resolver);
   });
 
@@ -1843,10 +1835,8 @@ describe("Refactor associations - add / update SQL models", function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
     let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(
-      /\s/g,
-      ""
-    );
+    let test_resolver =
+      data_test._removeAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, "");
     expect(g_resolver).to.have.string(test_resolver);
   });
 });
@@ -3078,5 +3068,111 @@ describe("Trino/Presto Unit Test", () => {
     let opts = funks.getOptions(models_trino.dist_doctor_instance1);
     let generated_model = await funks.generateJs("create-trino-adapter", opts);
     testCompare(generated_model, data_test.trino_adapter_readById);
+  });
+});
+
+describe("Neo4j Unit Test", function () {
+  let data_test = require("./unit_test_misc/test-describe/neo4j-unittest");
+
+  it("neo4j model - movie constructor", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_constructor);
+  });
+
+  it("neo4j model - movie readById", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_readById);
+  });
+
+  it("neo4j model - movie countRecords", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_countRecords);
+  });
+
+  it("neo4j model - movie readAll", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_readAll);
+  });
+
+  it("neo4j model - movie readAllCursor", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_readAllCursor);
+  });
+
+  it("neo4j model - movie addOne", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_addOne);
+  });
+
+  it("neo4j model - movie deleteOne", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_deleteOne);
+  });
+
+  it("neo4j model - movie updateOne", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_updateOne);
+  });
+
+  it("neo4j model - movie bulkAddCsv", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_bulkAddCsv);
+  });
+
+  it("neo4j model - fieldMutations toOne - add director to movie", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_fieldMutation_add_director);
+  });
+
+  it("neo4j model - fieldMutations toOne - remove director from movie", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_fieldMutation_remove_director);
+  });
+
+  it("neo4j model - fieldMutations toMany - add actor to movie", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_fieldMutation_add_actor);
+  });
+
+  it("neo4j model - fieldMutations toMany - remove actor from movie", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.movie_fieldMutation_remove_actor);
+  });
+
+  it("neo4j model - fieldMutations bulkAssociation - add director to movie", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(
+      generated_model,
+      data_test.movie_fieldMutation_bulkAssociate_add
+    );
+  });
+
+  it("neo4j model - fieldMutations bulkAssociation - remove director from movie", async function () {
+    let opts = funks.getOptions(models_neo4j.movie);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(
+      generated_model,
+      data_test.movie_fieldMutation_bulkAssociate_remove
+    );
+  });
+
+  it("neo4j adapter - dist_movie_instance1 readById ", async function () {
+    let opts = funks.getOptions(models_neo4j.dist_movie_instance1);
+    let generated_model = await funks.generateJs("create-neo4j-adapter", opts);
+    testCompare(generated_model, data_test.neo4j_adapter_readById);
   });
 });

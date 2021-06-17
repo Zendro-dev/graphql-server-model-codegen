@@ -91,7 +91,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
     query += \` LIMIT \${pagination.first+1}\`;
   }
 
-  let records = null;
+  let records = [];
   try {
     const s3 = await this.storageHandler;
     const result = await s3

@@ -98,6 +98,47 @@
    * check the type of adapter and handle cassandra-adapter
    */
   -%>
+  <%if(storageType === 'neo4j-adapter'){-%>
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      const driver = await this.storageHandler;
+        const session = driver.session({
+          database: config.database,
+          defaultAccessMode: neo4j.session.WRITE,
+        });
+        let foreignKey = `MATCH (n:<%- nameCp -%>) WHERE n.<%-idAttribute%> = $id 
+          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN head(collect(n))`
+        
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- nameCp -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+          WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
+          DELETE r`<% } 
+        else { %>let create_relationships = `MATCH (a:<%- nameCp -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+          WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
+          CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
+
+        try{
+          const result = await session.run(foreignKey, {id: <%-idAttribute%>, target: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>});
+          await session.run(<% if (op == 'remove') { %>delete_relationships<% } else { %>create_relationships<%}-%>, 
+          {
+            id: <%-idAttribute%>,
+            target: <%-associationsArguments["to_one"][i].targetKey-%>,
+          })
+          const singleRecord = result.records[0];
+          const node = singleRecord.get(0);
+          return new <%- adapterName -%>(node)
+        } catch (error) {
+          throw error;
+        } finally {
+          await session.close();
+        }
+    }
+  <%}-%>
+  <%#  /*** End of the the cassandra-adapter case */ -%>
+
+  <%#
+  /**
+   * check the type of adapter and handle cassandra-adapter
+   */
+  -%>
   <%if(storageType === 'cassandra-adapter'){-%>
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
       const mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
@@ -168,7 +209,53 @@
       }
     <%}-%>
       <%#  /*** End of the the mongodb-adapter case */ -%>
+      <%if(storageType === 'neo4j-adapter'){-%>
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+        //handle inverse association
+        if(handle_inverse){
+          let promises = [];
+          <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+          });
+          await Promise.all(promises);
+        }
+  
+        const driver = await this.storageHandler;
+        const session = driver.session({
+          database: config.database,
+          defaultAccessMode: neo4j.session.WRITE,
+        });
+        let foreignKey = `MATCH (n:<%- nameCp -%>) WHERE n.<%-idAttribute%> = $id 
+          SET n.<%-associationsArguments["to_many"][i].sourceKey-%> = $updated_ids`
+        
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- nameCp -%>)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_many"][i].target_cp-%>) 
+          WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_many"][i].target-%>.idAttribute()} IN $source
+          DELETE r`<% }
+        else { %>let create_relationships = `MATCH (a:<%- nameCp -%>), (b:<%-associationsArguments["to_many"][i].target_cp-%>) 
+          WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_many"][i].target-%>.idAttribute()} IN $source
+          CREATE (a)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
 
+        try{
+          let record = await this.readById(<%- idAttribute-%>);
+          
+          if (record!==null){
+            let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%>, <%-associationsArguments["to_many"][i].sourceKey-%>);
+            await session.run(foreignKey, {id: <%-idAttribute%>, updated_ids: updated_ids});
+
+            await session.run(<% if (op == 'remove') { %>delete_relationships<% } else { %>create_relationships<%}-%>, 
+            {
+              id: <%-idAttribute%>,
+              source: <%-associationsArguments["to_many"][i].sourceKey-%>,
+            })
+          }
+        } catch (error) {
+          throw error;
+        } finally {
+          await session.close();
+        }
+      }
+    <%}-%>
+      <%#  /*** End of the the neo4j-adapter case */ -%>
       <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
         static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {
           let query = `

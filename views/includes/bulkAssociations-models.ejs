@@ -94,6 +94,43 @@
         return "Records successfully updated!"
       }
     <%}_%>
+    <% if(storageType === 'neo4j' || storageType === 'neo4j-adapter'){_%>
+      static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
+        let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
+
+        const driver = await this.storageHandler;
+        const session = driver.session({
+          database: config.database,
+          defaultAccessMode: neo4j.session.WRITE,
+        });
+        let foreignKey = `MATCH (n:<%- nameCp -%>) WHERE n.<%-idAttribute%> IN $id 
+          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target`
+
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- nameCp -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+          WHERE a.<%-idAttribute%> IN $id AND b.<%-associationsArguments["to_one"][i].targetKey-%> = $target
+          DELETE r`<% } 
+        else { %>let create_relationships = `MATCH (a:<%- nameCp -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+          WHERE a.<%-idAttribute%> IN $id AND b.<%-associationsArguments["to_one"][i].targetKey-%> = $target
+          CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
+        
+        try {
+          for (let { <%-associationsArguments["to_one"][i].targetKey-%>, <%-idAttribute%> } of mappedForeignKeys) {
+            await session.run(foreignKey, {id: <%-idAttribute%>, target: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>})
+            await session.run(<% if (op == 'remove') { %>delete_relationships<% } else { %>create_relationships<%}-%>, 
+            {
+              id: <%-idAttribute%>, 
+              target: <%-associationsArguments["to_one"][i].targetKey-%>,
+            })
+          }
+        } catch (error) {
+          throw error;
+        } finally {
+          await session.close();
+        }
+        
+        return "Records successfully updated!"
+      }
+    <%}_%>
     <% if(storageType === 'cassandra' || storageType === 'cassandra-adapter'){_%>
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
         let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
