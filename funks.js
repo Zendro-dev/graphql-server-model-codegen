@@ -788,9 +788,7 @@ module.exports.parseAssociations = function (dataModel) {
         // set extra association fields
         assoc["targetKey"] = association.targetKey;
         assoc["targetKey_cp"] = capitalizeString(association.targetKey);
-        if (association.keysIn) {
-          assoc["keysIn_lc"] = uncapitalizeString(association.keysIn);
-        }
+        assoc["keysIn_lc"] = uncapitalizeString(association.keysIn);
         assoc["holdsForeignKey"] = false;
         assoc["assocThroughArray"] = false;
 
@@ -1155,6 +1153,7 @@ getStorageType = function (dataModel) {
   }
 
   if (valid) {
+    console.log(dataModel.model + " -- " + dataModel.storageType.toLowerCase())
     return dataModel.storageType.toLowerCase();
   } else {
     return "";
