@@ -15,13 +15,13 @@ module.exports.city = {
   },
   "associations": {
     "rivers": {
-      "type": "to_many",
+      "type": "many_to_many",
+      "implementation": "foreignkeys",
       "target": "river",
       "targetStorageType": "sql",
       "sourceKey": "river_ids",
       "targetKey": "city_ids",
-      "keyIn": "city",
-      "reverseAssociationType": "to_many"
+      "keysIn": "city",
     }
   },
   "internalId": "city_id"
@@ -40,17 +40,19 @@ module.exports.incident = {
   "associations": {
 
     "instants": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Instant",
       "targetKey": "incident_assoc_id",
-      "keyIn" : "Instant",
+      "keysIn" : "Instant",
       "targetStorageType": "cassandra"
     },
     "town": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "capital",
       "targetKey": "capital_id",
-      "keyIn" : "Incident",
+      "keysIn" : "Incident",
       "targetStorageType": "sql"
     }
 
@@ -73,10 +75,11 @@ module.exports.dist_incident = {
   "associations": {
 
     "dist_instants": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
-      "keyIn" : "Dist_instant",
+      "keysIn" : "Dist_instant",
       "targetStorageType": "distributed-data-model"
     }
 
@@ -99,10 +102,11 @@ module.exports.dist_instant_instance1 = {
   "associations": {
 
     "dist_instants": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
-      "keyIn": "Dist_instant",
+      "keysIn": "Dist_instant",
       "targetStorageType": "distributed-data-model"
     }
 

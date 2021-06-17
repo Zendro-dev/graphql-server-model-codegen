@@ -1355,11 +1355,12 @@ describe("Parse associations", function () {
       },
       to_one: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkeys",
           target: "individual",
           targetKey: "individual_id",
           targetKey_cp: "Individual_id",
-          keyIn: "transcript_count",
+          keysIn: "transcript_count",
           targetStorageType: "sql",
           name: "individual",
           name_lc: "individual",
@@ -1369,9 +1370,10 @@ describe("Parse associations", function () {
           target_pl: "individuals",
           target_cp: "Individual",
           target_cp_pl: "Individuals",
-          keyIn_lc: "transcript_count",
+          keysIn_lc: "transcript_count",
           holdsForeignKey: true,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
       ],
       to_many: [],
@@ -1383,10 +1385,11 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkeys",
           target: "individual",
           targetKey: "individual_id",
-          keyIn: "transcript_count",
+          keysIn: "transcript_count",
           targetStorageType: "sql",
         },
       ],
@@ -1413,9 +1416,10 @@ describe("Parse associations", function () {
       to_one: [],
       to_many: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkeys",
           target: "transcript_count",
-          keyIn: "transcript_count",
+          keysIn: "transcript_count",
           targetKey: "individual_id",
           targetKey_cp: "Individual_id",
           targetStorageType: "sql",
@@ -1427,9 +1431,10 @@ describe("Parse associations", function () {
           target_pl: "transcript_counts",
           target_cp: "Transcript_count",
           target_cp_pl: "Transcript_counts",
-          keyIn_lc: "transcript_count",
+          keysIn_lc: "transcript_count",
           holdsForeignKey: false,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
       ],
       to_many_through_sql_cross_table: [],
@@ -1440,9 +1445,10 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkeys",
           target: "transcript_count",
-          keyIn: "transcript_count",
+          keysIn: "transcript_count",
           targetKey: "individual_id",
           targetStorageType: "sql",
         },
@@ -1454,7 +1460,7 @@ describe("Parse associations", function () {
 
   it("03. Single to_many_through_sql_cross_table", function () {
     let association = models.assoc_through_project_researcher;
-    association.type = "to_many_through_sql_cross_table";
+    // association.type = "many_to_many";
     let model = { model: "Person", associations: { assoc: association } };
     let res = funks.parseAssociations(model, "sql");
     expect(res).to.deep.equal({
@@ -1470,12 +1476,14 @@ describe("Parse associations", function () {
       to_many: [],
       to_many_through_sql_cross_table: [
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Project",
           targetKey: "projectId",
           targetKey_cp: "ProjectId",
           sourceKey: "researcherId",
           keysIn: "project_to_researcher",
+          keysIn_lc: "project_to_researcher",
           targetStorageType: "sql",
           source: "researchers",
           target_lc: "project",
@@ -1488,6 +1496,7 @@ describe("Parse associations", function () {
           name_cp: "Assoc",
           holdsForeignKey: false,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
       ],
       generic_to_one: [],
@@ -1497,7 +1506,8 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Project",
           targetKey: "projectId",
           sourceKey: "researcherId",
@@ -1518,7 +1528,7 @@ describe("Parse associations", function () {
 
   it("04. Two associations: to_many and to_many_through_sql_cross_table", function () {
     let person = models.person;
-    person.associations.books.type = "to_many_through_sql_cross_table";
+    // person.associations.books.type = "to_many_through_sql_cross_table";
     let res = funks.parseAssociations(person, "sql");
     expect(res).to.deep.equal({
       schema_attributes: {
@@ -1533,11 +1543,12 @@ describe("Parse associations", function () {
       to_one: [],
       to_many: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkeys",
           target: "Dog",
           targetKey: "personId",
           targetKey_cp: "PersonId",
-          keyIn: "Dog",
+          keysIn: "Dog",
           targetStorageType: "sql",
           name: "dogs",
           name_lc: "dogs",
@@ -1547,19 +1558,22 @@ describe("Parse associations", function () {
           target_pl: "Dogs",
           target_cp: "Dog",
           target_cp_pl: "Dogs",
-          keyIn_lc: "dog",
+          keysIn_lc: "dog",
           holdsForeignKey: false,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
       ],
       to_many_through_sql_cross_table: [
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Book",
           targetKey: "bookId",
           targetKey_cp: "BookId",
           sourceKey: "personId",
           keysIn: "books_to_people",
+          keysIn_lc: "books_to_people",
           targetStorageType: "sql",
           name: "books",
           name_lc: "books",
@@ -1571,6 +1585,7 @@ describe("Parse associations", function () {
           target_cp_pl: "Books",
           holdsForeignKey: false,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
       ],
       generic_to_one: [],
@@ -1581,14 +1596,16 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_many",
+          type: "one_to_many",
+          implementation: "foreignkeys",
           target: "Dog",
           targetKey: "personId",
-          keyIn: "Dog",
+          keysIn: "Dog",
           targetStorageType: "sql",
         },
         {
-          type: "to_many_through_sql_cross_table",
+          type: "many_to_many",
+          implementation: "sql_cross_table",
           target: "Book",
           targetKey: "bookId",
           sourceKey: "personId",
@@ -1615,11 +1632,12 @@ describe("Parse associations", function () {
       },
       to_one: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkeys",
           target: "Person",
           targetKey: "personId",
           targetKey_cp: "PersonId",
-          keyIn: "Dog",
+          keysIn: "Dog",
           targetStorageType: "sql",
           label: "firstName",
           sublabel: "lastName",
@@ -1631,16 +1649,18 @@ describe("Parse associations", function () {
           target_pl: "People",
           target_cp: "Person",
           target_cp_pl: "People",
-          keyIn_lc: "dog",
+          keysIn_lc: "dog",
           holdsForeignKey: true,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkeys",
           target: "Researcher",
           targetKey: "researcherId",
           targetKey_cp: "ResearcherId",
-          keyIn: "Dog",
+          keysIn: "Dog",
           targetStorageType: "sql",
           label: "firstName",
           name: "researcher",
@@ -1651,9 +1671,10 @@ describe("Parse associations", function () {
           target_pl: "Researchers",
           target_cp: "Researcher",
           target_cp_pl: "Researchers",
-          keyIn_lc: "dog",
+          keysIn_lc: "dog",
           holdsForeignKey: true,
           assocThroughArray: false,
+          reverseAssociation: undefined,
         },
       ],
       to_many: [],
@@ -1666,19 +1687,21 @@ describe("Parse associations", function () {
       },
       associations: [
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkeys",
           target: "Person",
           targetKey: "personId",
-          keyIn: "Dog",
+          keysIn: "Dog",
           targetStorageType: "sql",
           label: "firstName",
           sublabel: "lastName",
         },
         {
-          type: "to_one",
+          type: "many_to_one",
+          implementation: "foreignkeys",
           target: "Researcher",
           targetKey: "researcherId",
-          keyIn: "Dog",
+          keysIn: "Dog",
           targetStorageType: "sql",
           label: "firstName",
         },

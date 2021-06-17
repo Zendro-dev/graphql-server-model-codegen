@@ -10,10 +10,11 @@ module.exports.transcript_count = {
   },
   "associations":{
     "individual":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "individual",
       "targetKey" : "individual_id",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetStorageType" : "sql"
     }
   }
@@ -27,9 +28,10 @@ module.exports.individual = {
   },
   "associations": {
     "transcript_counts": {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "transcript_count",
-      "keyIn": "transcript_count",
+      "keysIn": "transcript_count",
       "targetKey" : "individual_id",
       "targetStorageType" : "sql"
     }
@@ -65,15 +67,17 @@ module.exports.person = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql"
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -94,7 +98,8 @@ module.exports.book = {
   "associations":{
 
       "people" : {
-          "type" : "to_many_through_sql_cross_table",
+          "type" : "many_to_many",
+          "implementation": "sql_cross_table",
           "target" : "Person",
           "targetKey" : "personId",
           "sourceKey" : "bookId",
@@ -102,10 +107,11 @@ module.exports.book = {
           "targetStorageType" : "sql"
         },
       "publisher" : {
-        "type" : "to_one",
+        "type" : "many_to_one",
+        "implementation": "foreignkeys",
         "target" : "Publisher",
         "targetKey" : "publisherId",
-        "keyIn": "Book",
+        "keysIn": "Book",
         "targetStorageType" : "generic"
         }
   }
@@ -121,7 +127,8 @@ module.exports.researcher = {
   },
   "associations":{
     "projects":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Project",
       "targetKey" : "projectId",
       "sourceKey" : "researcherId",
@@ -129,10 +136,11 @@ module.exports.researcher = {
       "targetStorageType" : "sql"
     },
     "dog":{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "researcherId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     }
   }
@@ -150,10 +158,11 @@ module.exports.specie = {
 
   "associations":{
     "projects" : {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Project",
       "targetKey" : "specieId",
-      "keyIn": "Project",
+      "keysIn": "Project",
       "targetStorageType" : "sql"
     }
   }
@@ -169,19 +178,21 @@ module.exports.dog = {
 
   "associations" : {
     "person" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
     },
     "researcher":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Researcher",
       "targetKey": "researcherId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "SQL",
       "label": "firstName"
     }
@@ -189,7 +200,8 @@ module.exports.dog = {
 }
 
 module.exports.assoc_through_project_researcher = {
-  "type" : "to_many_through_sql_cross_table",
+  "type" : "many_to_many",
+  "implementation": "sql_cross_table",
   "target" : "Project",
   "targetKey" : "projectId",
   "sourceKey" : "researcherId",
@@ -204,10 +216,11 @@ module.exports.assoc_through_project_researcher = {
 }
 
 module.exports.assoc_dogs_researcher = {
-  "type" : "to_one",
+  "type" : "many_to_one",
+  "implementation": "foreignkeys",
   "target": "Researcher",
   "targetKey": "researcherId",
-  "keyIn": "Dog",
+  "keysIn": "Dog",
   "targetStorageType": "SQL",
   "target_lc": "researcher",
   "target_lc_pl": "researchers",
@@ -236,10 +249,11 @@ module.exports.inDiVIdual_camelcase = {
   },
   "associations": {
     "transcriptCounts": {
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "transcriptCount",
       "targetKey" : "individual_id",
-      "keyIn": "transcriptCount",
+      "keysIn": "transcriptCount",
       "targetStorageType" : "sql",
       "label" : "gene",
       "sublabel" : "variable"
@@ -259,10 +273,11 @@ module.exports.transcriptCount_camelcase = {
   },
   "associations":{
     "inDiVIdual":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "inDiVIdual",
       "targetKey" : "individual_id",
-      "keyIn": "transcriptCount",
+      "keysIn": "transcriptCount",
       "targetStorageType" : "sql",
       "label" : "name"
     }
@@ -280,10 +295,11 @@ module.exports.transcriptCount_indiv= {
   },
   "associations":{
     "individual":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "Individual",
       "targetKey" : "individual_id",
-      "keyIn": "transcriptCount",
+      "keysIn": "transcriptCount",
       "targetStorageType" : "sql",
       "label" : "name"
     }
@@ -302,19 +318,21 @@ module.exports.dog_owner = {
 
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "owner_id_test",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
     },
     "keeper":{
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Researcher",
       "targetKey": "keeperId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "SQL",
       "label": "firstName"
     }
@@ -332,16 +350,18 @@ module.exports.person_indices = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "name"
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -365,16 +385,18 @@ module.exports.person_externalIds = {
     },
     "associations":{
       "dogs":{
-        "type" : "to_many",
+        "type" : "one_to_many",
+        "implementation": "foreignkeys",
         "target" : "Dog",
         "targetKey" : "personId",
-        "keyIn": "Dog",
+        "keysIn": "Dog",
         "targetStorageType" : "sql",
         "label": "name"
       },
 
       "books":{
-        "type" : "to_many_through_sql_cross_table",
+        "type" : "many_to_many",
+        "implementation": "sql_cross_table", 
         "target" : "Book",
         "targetKey" : "bookId",
         "sourceKey" : "personId",
@@ -398,10 +420,11 @@ module.exports.academicTeam = {
   },
   "associations":{
     "members":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Researcher",
       "targetKey" : "academicTeamId",
-      "keyIn": "Researcher",
+      "keysIn": "Researcher",
       "targetStorageType" : "sql",
       "label": "firstName",
       "sublabel": "lastName"
@@ -421,25 +444,28 @@ module.exports.person_date = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "name"
     },
 
     "patients":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "doctor_Id",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql",
       "label": "name"
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "book_Id",
       "sourceKey" : "person_Id",
@@ -462,7 +488,8 @@ module.exports.book_authors = {
   "associations":{
 
       "Authors" : {
-          "type" : "to_many_through_sql_cross_table",
+          "type" : "many_to_many",
+          "implementation": "sql_cross_table",
           "target" : "Person",
           "targetKey" : "person_Id",
           "sourceKey" : "book_Id",
@@ -472,10 +499,11 @@ module.exports.book_authors = {
           "sublabel" : "email"
         },
       "publisher" : {
-        "type" : "to_one",
+        "type" : "many_to_one",
+        "implementation": "foreignkeys",
         "target" : "Publisher",
         "targetKey" : "publisherId",
-        "keyIn" : "Book",
+        "keysIn" : "Book",
         "targetStorageType" : "generic",
         "label" : "name"
         }
@@ -498,15 +526,17 @@ module.exports.person_description = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql"
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -531,15 +561,17 @@ module.exports.person_description_optional = {
   },
   "associations":{
     "dogs":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Dog",
       "targetKey" : "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType" : "sql"
     },
 
     "books":{
-      "type" : "to_many_through_sql_cross_table",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -560,10 +592,11 @@ module.exports.academic_Team = {
   },
   "associations":{
     "members":{
-      "type" : "to_many",
+      "type" : "one_to_many",
+      "implementation": "foreignkeys",
       "target" : "Researcher",
       "targetKey" : "AcademicTeam_Id",
-      "keyIn": "Researcher",
+      "keysIn": "Researcher",
       "targetStorageType" : "sql"
     }
   }
@@ -581,10 +614,11 @@ module.exports.dog_one_assoc = {
 
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn" : "Dog",
+      "keysIn" : "Dog",
       "targetStorageType" : "sql"
     }
   }
@@ -602,10 +636,11 @@ module.exports.person_one_assoc = {
 
   "associations" : {
     "unique_pet" :{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     }
   }
@@ -623,10 +658,11 @@ module.exports.book_extendedIds = {
   },
   "associations": {
       "author": {
-          "type": "to_one",
+          "type": "many_to_one",
+          "implementation": "foreignkeys",
           "target": "Person",
           "targetKey": "internalPersonId",
-          "keyIn": "Book",
+          "keysIn": "Book",
           "targetStorageType": "sql",
           "label": "email"
       }
@@ -648,12 +684,12 @@ module.exports.author_foreignKeyArray = {
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "author",
+        "keysIn": "author",
         "targetStorageType": "sql"
       }
     },
@@ -675,12 +711,12 @@ module.exports.author_zendro_remote = {
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "post_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "post_author",
+        "keysIn": "post_author",
         "targetStorageType": "zendro-server"
       }
     },
@@ -701,12 +737,12 @@ module.exports.author_ddm_array_fk ={
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },
@@ -728,12 +764,12 @@ module.exports.author_sql_adapter_array_fk ={
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },
@@ -757,12 +793,12 @@ module.exports.author_zendro_adapter_array_fk ={
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },

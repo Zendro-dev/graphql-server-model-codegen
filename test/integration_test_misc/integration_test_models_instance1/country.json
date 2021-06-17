@@ -1,25 +1,27 @@
 {
-    "model" : "country",
-    "storageType" : "SQL",
-    "attributes" : {
-      "name" : "String",
-      "country_id" : "String"
+    "model": "country",
+    "storageType": "SQL",
+    "attributes": {
+      "name": "String",
+      "country_id": "String"
     },
     "associations": {
       "unique_capital": {
-        "type" : "to_one",
-        "target" : "capital",
-        "targetKey" : "country_id",
-        "keyIn": "capital",
-        "targetStorageType" : "sql"
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "capital",
+        "targetKey": "country_id",
+        "keysIn": "capital",
+        "targetStorageType": "sql"
       },
       "rivers": {
-        "type" : "to_many_through_sql_cross_table",
+        "type": "many_to_many",
+        "implementation": "sql_cross_table",
         "target": "river",
         "sourceKey": "country_id",
         "targetKey": "river_id",
         "keysIn": "country_to_river",
-        "targetStorageType" : "sql"
+        "targetStorageType": "sql"
       }
     },
     "internalId": "country_id"

@@ -14,27 +14,29 @@
     },
     "associations": {
         "director": {
-            "type": "to_one",
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
             "target": "director",
             "targetKey": "director_id",
-            "keyIn": "movie",
+            "keysIn": "movie",
             "targetStorageType": "neo4j",
             "label": "director_name"
         },
         "actor":{
-            "type": "to_many",
-            "reverseAssociationType": "to_many",
+            "type": "many_to_many",
+            "implementation": "foreignkeys",
             "target": "actor",
             "targetKey": "movie_ids",
             "sourceKey": "actor_ids",
-            "keyIn": "movie",
+            "keysIn": "movie",
             "targetStorageType": "neo4j"
         },
         "unique_review":{
-            "type" : "to_one",
+            "type" : "one_to_one",
+            "implementation": "foreignkeys",
             "target" : "review",
             "targetKey" : "movie_id",
-            "keyIn": "tracker",
+            "keysIn": "tracker",
             "targetStorageType" : "neo4j"
         }
     },

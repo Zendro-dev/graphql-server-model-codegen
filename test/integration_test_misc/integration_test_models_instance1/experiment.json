@@ -1,7 +1,7 @@
 {
-  "model" : "SequencingExperiment",
+  "model": "SequencingExperiment",
   "storageType": "sql",
-  "attributes":{
+  "attributes": {
       "name": "String",
       "start_date": "Date",
       "end_date": "Date",

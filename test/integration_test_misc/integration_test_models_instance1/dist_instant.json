@@ -1,6 +1,6 @@
 {
     "model": "Dist_instant",
-    "storageType" : "distributed-data-model",
+    "storageType": "distributed-data-model",
     "registry": ["dist_instant_instance1"],
     "cassandraRestrictions": true,
     "attributes": {
@@ -16,14 +16,15 @@
     "associations": {
   
       "dist_incident": {
-        "type": "to_one",
+        "type": "many_to_one",
+        "implementation": "foreignkeys",
         "target": "Dist_incident",
         "targetKey": "incident_assoc_id",
-        "keyIn" : "Dist_instant",
+        "keysIn": "Dist_instant",
         "targetStorageType": "distributed-data-model"
       }
   
     },
   
-    "internalId" : "instant_id"
+    "internalId": "instant_id"
   }

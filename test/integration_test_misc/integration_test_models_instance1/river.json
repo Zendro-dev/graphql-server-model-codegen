@@ -1,30 +1,31 @@
 {
-  "model" : "river",
-  "storageType" : "SQL",
-  "attributes" : {
-    "name" : "String",
-    "length" : "Int",
+  "model": "river",
+  "storageType": "SQL",
+  "attributes": {
+    "name": "String",
+    "length": "Int",
     "river_id": "String",
     
     "city_ids": "[String]"
   },
   "associations": {
     "countries": {
-      "type" : "to_many_through_sql_cross_table",
+      "type": "many_to_many",
+      "implementation": "sql_cross_table",
       "target": "country",
       "sourceKey": "river_id",
       "targetKey": "country_id",
       "keysIn": "country_to_river",
-      "targetStorageType" : "sql"
+      "targetStorageType": "sql"
     },
     "cities": {
-      "type": "to_many",
+      "type": "many_to_many",
+      "implementation": "foreignkeys",
       "target": "city",
       "targetStorageType": "cassandra",
       "sourceKey": "city_ids",
       "targetKey": "river_ids",
-      "keyIn": "river",
-      "reverseAssociationType":"to_many"
+      "keysIn": "river"
     }
   },
   "internalId": "river_id"

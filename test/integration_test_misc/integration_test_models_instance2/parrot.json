@@ -1,19 +1,20 @@
 {
-  "model" : "parrot",
-  "storageType" : "distributed-data-model",
+  "model": "parrot",
+  "storageType": "distributed-data-model",
   "registry": ["parrot_instance1", "parrot_instance2"],
-  "attributes" : {
-    "name" : "String",
+  "attributes": {
+    "name": "String",
     "parrot_id": "String",
     "person_id": "String"
   },
   "associations": {
     "unique_person": {
-      "type" : "to_one",
-      "target" : "person",
-      "targetKey" : "person_id",
-      "keyIn": "parrot",
-      "targetStorageType" : "distributed-data-model"
+      "type": "one_to_one",
+      "implementation": "foreignkeys",
+      "target": "person",
+      "targetKey": "person_id",
+      "keysIn": "parrot",
+      "targetStorageType": "distributed-data-model"
     }
   },
   "internalId": "parrot_id"

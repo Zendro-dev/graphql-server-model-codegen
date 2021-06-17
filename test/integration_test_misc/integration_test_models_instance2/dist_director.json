@@ -9,10 +9,11 @@
     },
     "associations": {
         "dist_movies": {
-            "type": "to_many",
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
             "target": "dist_movie",
             "targetKey": "director_id",
-            "keyIn": "dist_movie",
+            "keysIn": "dist_movie",
             "targetStorageType": "distributed-data-model"
         }
     },

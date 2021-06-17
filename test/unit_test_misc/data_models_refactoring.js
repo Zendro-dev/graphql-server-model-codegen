@@ -12,29 +12,32 @@ module.exports.accession = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "sql",
       "label": "name"
     },
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Measurement",
       "targetKey": "accessionId",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }
@@ -59,29 +62,32 @@ module.exports.accession_ddm = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "distributed-data-model",
       "label": "name"
     },
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Measurement",
       "targetKey": "accessionId",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }
@@ -107,29 +113,32 @@ module.exports.accession_sql_adapter = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "sql",
       "label": "name"
     },
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Measurement",
       "targetKey": "accession_id",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }
@@ -155,30 +164,33 @@ module.exports.accession_zendro_adapter = {
   "associations": {
 
     "individuals": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Individual",
       "targetKey": "accessionId",
-      "keyIn" : "Individual",
+      "keysIn" : "Individual",
       "targetStorageType": "sql",
       "label": "name"
     },
 
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn" : "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Measurement",
       "targetKey": "accession_id",
-      "keyIn" : "Measurement",
+      "keysIn" : "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }

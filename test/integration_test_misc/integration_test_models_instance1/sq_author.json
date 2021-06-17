@@ -1,22 +1,22 @@
 {
-    "model" : "sq_author",
-    "storageType" : "sql",
+    "model": "sq_author",
+    "storageType": "sql",
     "database": "default-sql",
-    "attributes" : {
+    "attributes": {
         "id": "String",
         "name": "String",
         "lastname": "String",
         "email": "String",
         "book_ids": "[ String ]"
     },
-    "associations":{
-      "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+    "associations": {
+      "books": {
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "sql"
       }
     },

@@ -15,20 +15,21 @@ module.exports.animal = {
   },
   associations: {
     farm: {
-      type: "to_one",
+      type: "many_to_one",
+      implementation: "foreignkeys",
       target: "farm",
       targetKey: "farm_id",
-      keyIn: "animal",
+      keysIn: "animal",
       targetStorageType: "mongodb",
       label: "farm_name",
     },
     food: {
-      type: "to_many",
-      reverseAssociationType: "to_many",
+      type: "many_to_many",
+      implementation: "foreignkeys",
       target: "food",
       targetKey: "animal_ids",
       sourceKey: "food_ids",
-      keyIn: "animal",
+      keysIn: "animal",
       targetStorageType: "mongodb",
     },
   },
@@ -58,10 +59,11 @@ module.exports.dist_animal_instance1 = {
 
   associations: {
     dist_farm: {
-      type: "to_one",
+      type: "many_to_one",
+      implementation: "foreignkeys",
       target: "dist_farm",
       targetKey: "farm_id",
-      keyIn: "dist_animal",
+      keysIn: "dist_animal",
       targetStorageType: "distributed-data-model",
     },
   },
