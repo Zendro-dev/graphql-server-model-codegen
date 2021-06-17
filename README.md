@@ -227,7 +227,7 @@ Be aware that in the case of this type of association the user is required to de
   },
   "associations" : {
     "users" : {
-      "type" : "to_many",
+      "type" : "many_to_many",
       "target" : "User",
       "implementation": "sql_cross_table",
       "reverseAssociation": "roles",
