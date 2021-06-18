@@ -27,5 +27,6 @@
   
     },
   
-    "internalId": "animal_id"
+    "internalId": "animal_id",
+    "useDataLoader": true
   }

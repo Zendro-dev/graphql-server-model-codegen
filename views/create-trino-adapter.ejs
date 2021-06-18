@@ -14,6 +14,7 @@ const iriRegex = new RegExp('<%- regex -%>');
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
+const DataLoader = require("dataloader");
 /**
  * module - Creates a class to administer model
  */
@@ -82,12 +83,50 @@ module.exports = class <%- adapterName -%> {
     return result;
   }
 
-  /**
+  <% if (useDataLoader) {%>/**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+   static async batchReadById(keys) {
+     let queryArg = {
+       operator: "in",
+       field: <%- adapterName -%>.idAttribute(),
+       value: keys.join(),
+       valueType: "Array",
+     };
+     let cursorRes = await <%- adapterName -%>.readAllCursor(queryArg);
+     cursorRes = cursorRes.<%- namePl -%>.reduce(
+       (map, obj) => ((map[obj[<%- adapterName -%>.idAttribute()]] = obj), map),
+       {}
+     );
+     return keys.map(
+       (key) =>
+         cursorRes[key] || new Error(`Record with ID = "${key}" does not exist`)
+     );
+   }
+ 
+   static readByIdLoader = new DataLoader(<%- adapterName -%>.batchReadById, {
+     cache: false,
+   });
+
+   /**
    * readById - The model implementation for reading a single record given by its ID
    *
    * This method is the implementation for reading a single record for the trino storage type, based on SQL.
    * @param {string} id - The ID of the requested record
-   * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+   * @return {object} The requested record as an object with the type <%- adapterName -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
+   static async readById(id) {
+     return await <%- adapterName -%>.readByIdLoader.load(id);
+   }<% } else 
+  {%>/**
+   * readById - The model implementation for reading a single record given by its ID
+   *
+   * This method is the implementation for reading a single record for the trino storage type, based on SQL.
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- adapterName -%>, or an error object if the validation after reading fails
    * @throws {Error} If the requested record does not exist
    */
   static async readById(id){
@@ -105,7 +144,8 @@ module.exports = class <%- adapterName -%> {
     }
     item = <%- adapterName -%>.postReadCast(item)[0];
     return validatorUtil.validateData("validateAfterRead", this, item);
-  }
+  }<%}-%>
+  
 
   /**
    * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
@@ -170,16 +210,19 @@ module.exports = class <%- adapterName -%> {
     );
 
     // add +1 to the LIMIT to get information about following pages.
-    let limit = helper.isNotUndefinedAndNotNull(pagination.first)
-      ? pagination.first + 1
-      : helper.isNotUndefinedAndNotNull(pagination.last)
-      ? pagination.last + 1
-      : undefined;
+    let limit;
+    if (pagination){
+      limit = helper.isNotUndefinedAndNotNull(pagination.first)
+        ? pagination.first + 1
+        : helper.isNotUndefinedAndNotNull(pagination.last)
+        ? pagination.last + 1
+        : undefined;
+    }
 
     let query = `SELECT * FROM <%- namePl -%>  
       ${filter}  
-      ${sort} 
-      LIMIT ${limit}`;
+      ${sort}`;
+    query += limit ? ` LIMIT ${limit}` : '';
     let result = [];
 
     const client = await this.storageHandler;
@@ -226,15 +269,18 @@ module.exports = class <%- adapterName -%> {
         definition.attributes
       );
       // add +1 to the LIMIT to get information about following pages.
-      let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first)
-        ? oppPagination.first + 1
-        : helper.isNotUndefinedAndNotNull(oppPagination.last)
-        ? oppPagination.last + 1
-        : undefined;
+      let oppLimit;
+      if (pagination){
+        oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first)
+          ? oppPagination.first + 1
+          : helper.isNotUndefinedAndNotNull(oppPagination.last)
+          ? oppPagination.last + 1
+          : undefined;
+      }
       query = `SELECT * FROM <%- namePl -%> 
         ${oppFilter}  
-        ${oppSort} 
-        LIMIT ${oppLimit}`;
+        ${oppSort}`;
+      query += oppLimit ? ` LIMIT ${limit}` : '';
       oppResult = await prestoHelper.queryData(query, client);
       oppResult = <%- adapterName -%>.postReadCast(oppResult);
     }

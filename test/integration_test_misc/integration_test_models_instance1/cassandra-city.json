@@ -24,5 +24,6 @@
       "reverseAssociationType":"to_many"
     }
   },
-  "internalId": "city_id"
+  "internalId": "city_id",
+  "useDataLoader": true
 }

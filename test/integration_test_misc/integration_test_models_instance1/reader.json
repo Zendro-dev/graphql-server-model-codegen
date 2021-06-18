@@ -13,5 +13,6 @@
     "id": {
       "name": "reader_id",
       "type": "String"
-    }
+    },
+    "useDataLoader": true
 }

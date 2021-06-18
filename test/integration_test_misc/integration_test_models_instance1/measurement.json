@@ -20,5 +20,6 @@
     }
   },
 
-  "internalId" : "measurement_id"
+  "internalId" : "measurement_id",
+  "useDataLoader": false
 }

@@ -14,5 +14,6 @@
     "id": {
       "name": "doctor_id",
       "type": "String"
-    }
+    },
+    "useDataLoader": false
 }

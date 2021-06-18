@@ -19,6 +19,7 @@ const iriRegex = new RegExp('<%- regex -%>');
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
+const DataLoader = require("dataloader");
 
 /**
  * module - Creates a sequelize model
@@ -120,14 +121,44 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return iriRegex.test(iri);
   }
 
-  static async readById(id){
+  <% if (useDataLoader) {%>/**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+   static async batchReadById(keys) {
+     let queryArg = {
+       operator: "in",
+       field: <%- adapterName -%>.idAttribute(),
+       value: keys.join(),
+       valueType: "Array",
+     };
+     let cursorRes = await <%- adapterName -%>.readAllCursor(queryArg);
+     cursorRes = cursorRes.<%- namePl -%>.reduce(
+       (map, obj) => ((map[obj[<%- adapterName -%>.idAttribute()]] = obj), map),
+       {}
+     );
+     return keys.map(
+       (key) =>
+         cursorRes[key] || new Error(`Record with ID = "${key}" does not exist`)
+     );
+   }
+ 
+   static readByIdLoader = new DataLoader(<%- adapterName -%>.batchReadById, {
+     cache: false,
+   });
+ 
+   static async readById(id) {
+     return await <%- adapterName -%>.readByIdLoader.load(id);
+   }<% } else 
+  {%>static async readById(id){
     let item = await <%- adapterName -%>.findByPk(id);
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
     item = <%- adapterName -%>.postReadCast(item)
     return item;
-  }
+  }<%}-%>
 
   static countRecords(search){
     let options = {};

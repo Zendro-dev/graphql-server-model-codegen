@@ -370,7 +370,7 @@ describe("Mongodb - Association", () => {
       },
     });
   });
-  it("02. Animal : Farm (n:1) - read one associated animal", () => {
+  it("02. Animal : Farm (n:1) - read one associated animal / read one farm", () => {
     let res = itHelpers.request_graph_ql_post(`{
         readOneAnimal(animal_id: "1"){
           animal_name
@@ -389,6 +389,24 @@ describe("Mongodb - Association", () => {
             farm_name: "Dogs' Home",
           },
           animal_name: "Sally1",
+        },
+      },
+    });
+
+    res = itHelpers.request_graph_ql_post(`{
+      readOneFarm(farm_id: "1"){
+        farm_id
+        farm_name
+        }
+    }`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneFarm: {
+          farm_id: "1",
+          farm_name: "Dogs' Home",
         },
       },
     });
@@ -710,7 +728,45 @@ describe("Mongodb - Distributed Data Models", () => {
     }
   });
 
-  it("02. Animal DDM: update the farm to associate with animals", () => {
+  it("02. Animal DDM: read one animal / read one farm", () => {
+    let res = itHelpers.request_graph_ql_post(`{
+        readOneDist_animal(animal_id: "instance1-02"){
+          animal_id
+          animal_name
+        }
+      }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_animal: {
+          animal_id: `instance1-02`,
+          animal_name: "Milka",
+        },
+      },
+    });
+    res = itHelpers.request_graph_ql_post(
+      `{
+        readOneDist_farm(farm_id: "instance1-01") {
+          farm_id
+          farm_name
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_farm: {
+          farm_id: "instance1-01",
+          farm_name: "Dogs' Home",
+        },
+      },
+    });
+  });
+
+  it("03. Animal DDM: update the farm to associate with animals", () => {
     let res = itHelpers.request_graph_ql_post(
       `mutation {
         updateDist_farm(farm_id: "instance1-01", addDist_animals: ["instance1-02", "instance1-03"]) {
@@ -760,7 +816,7 @@ describe("Mongodb - Distributed Data Models", () => {
     });
   });
 
-  it("03. Animal DDM: read all", () => {
+  it("04. Animal DDM: read all", () => {
     let res = itHelpers.request_graph_ql_post(
       `{
         dist_farmsConnection(pagination: {first: 25}) {
@@ -791,7 +847,7 @@ describe("Mongodb - Distributed Data Models", () => {
       },
     });
   });
-  it("04. Animal DDM: search, sort and pagination", () => {
+  it("05. Animal DDM: search, sort and pagination", () => {
     res = itHelpers.request_graph_ql_post(
       `{
         dist_animalsConnection(search: {field: animal_id, value: "instance.*", operator: regexp}, pagination: {first: 5}) {
@@ -933,7 +989,7 @@ describe("Mongodb - Distributed Data Models", () => {
     });
   });
 
-  it("05. Animal DDM: update the farm to remove associations", () => {
+  it("06. Animal DDM: update the farm to remove associations", () => {
     let res = itHelpers.request_graph_ql_post(
       `mutation {
         updateDist_farm(farm_id:"instance1-01" removeDist_animals:["instance1-02", "instance1-03"]) {

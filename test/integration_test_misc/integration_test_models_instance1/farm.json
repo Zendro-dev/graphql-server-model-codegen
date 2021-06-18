@@ -20,5 +20,6 @@
     "id": {
         "name": "farm_id",
         "type": "String"
-    }
+    },
+    "useDataLoader": false
 }

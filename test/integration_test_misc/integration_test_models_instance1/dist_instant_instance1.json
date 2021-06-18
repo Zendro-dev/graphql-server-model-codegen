@@ -25,5 +25,6 @@
 
   },
 
-  "internalId": "instant_id"
+  "internalId": "instant_id",
+  "useDataLoader": true
 }

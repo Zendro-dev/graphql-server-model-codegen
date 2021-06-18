@@ -43,5 +43,6 @@
     "id": {
         "name": "animal_id",
         "type": "String"
-    }
+    },
+    "useDataLoader": true
 }

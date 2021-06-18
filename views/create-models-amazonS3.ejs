@@ -13,6 +13,7 @@ const os = require("os");
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
+const DataLoader = require("dataloader");
 const params = {
     Bucket: config.bucket,
     Key: "<%- nameLc -%>.csv",
@@ -103,7 +104,45 @@ module.exports = class <%- nameLc -%> {
     }
   }
 
-  /**
+  <% if (useDataLoader) {%>/**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+   static async batchReadById(keys) {
+     let queryArg = {
+       operator: "in",
+       field: <%- nameLc -%>.idAttribute(),
+       value: keys.join(),
+       valueType: "Array",
+     };
+     let cursorRes = await <%- nameLc -%>.readAllCursor(queryArg);
+     cursorRes = cursorRes.<%- namePl -%>.reduce(
+       (map, obj) => ((map[obj[<%- nameLc -%>.idAttribute()]] = obj), map),
+       {}
+     );
+     return keys.map(
+       (key) =>
+         cursorRes[key] || new Error(`Record with ID = "${key}" does not exist`)
+     );
+   }
+ 
+   static readByIdLoader = new DataLoader(<%- nameLc -%>.batchReadById, {
+     cache: false,
+   });
+
+   /**
+   * readById - The model implementation for reading a single record given by its ID
+   *
+   * This method is the implementation for reading a single record for the Amazon S3 storage type, based on SQL.
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
+   static async readById(id) {
+     return await <%- nameLc -%>.readByIdLoader.load(id);
+   }<% } else 
+  {%>/**
   * readById - The model implementation for reading a single record given by its ID
   *
   * This method is the implementation for reading a single record for the Amazon S3 storage type, based on SQL.
@@ -137,7 +176,7 @@ module.exports = class <%- nameLc -%> {
     }
     item = new <%- nameLc -%>(<%- nameLc -%>.postReadCast(item));
     return validatorUtil.validateData("validateAfterRead", this, item);
-  }
+  }<%}-%>
 
   /**
   * countRecords - The model implementation for counting the number of records, possibly restricted by a search term

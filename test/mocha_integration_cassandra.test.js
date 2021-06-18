@@ -858,7 +858,41 @@ describe("Cassandra DDM", function () {
     });
   });
 
-  it("02. Update the incident to associate with an instant", function () {
+  it("02. Read an incident / Read an instant", function () {
+    let res = itHelpers.request_graph_ql_post(
+      '{readOneDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136") {incident_id incident_description}}'
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_incident: {
+          incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136",
+          incident_description: "First incident on server 1",
+        },
+      },
+    });
+
+    res = itHelpers.request_graph_ql_post(
+      '{readOneDist_instant(instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89") {instant_id year month day hour minute}}'
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_instant: {
+          instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89",
+          year: 2020,
+          month: 6,
+          day: 29,
+          hour: 15,
+          minute: 32,
+        },
+      },
+    });
+  });
+
+  it("03. Update the incident to associate with an instant", function () {
     let res = itHelpers.request_graph_ql_post(
       `mutation {
         updateDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", addDist_instants: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791") {
@@ -899,7 +933,7 @@ describe("Cassandra DDM", function () {
     });
   });
 
-  it("03. Update the other instant to associate with the incident", function () {
+  it("04. Update the other instant to associate with the incident", function () {
     let res = itHelpers.request_graph_ql_post(
       `mutation {
         updateDist_instant(instant_id: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89", addDist_incident: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136") {
@@ -934,7 +968,7 @@ describe("Cassandra DDM", function () {
     });
   });
 
-  it("04. Update the incident to remove the second instant", function () {
+  it("05. Update the incident to remove the second instant", function () {
     let res = itHelpers.request_graph_ql_post(
       `mutation {updateDist_incident(incident_id: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136", removeDist_instants: "instance1-592a5d9f-ee5f-4392-9e2e-6965e8250c89") {incident_id countFilteredDist_instants dist_instantsConnection(pagination: {first:2}) {edges {node {instant_id}}}}}`
     );
@@ -959,7 +993,7 @@ describe("Cassandra DDM", function () {
     });
   });
 
-  it("05. Update the first instant to remove the incident", function () {
+  it("06. Update the first instant to remove the incident", function () {
     let res = itHelpers.request_graph_ql_post(
       `mutation {updateDist_instant(instant_id: "instance1-1b85fddc-67a5-46f3-81a0-20aea167d791", removeDist_incident: "instance1-682bfd7b-3d77-4e1c-a964-cf8b10ef2136") {instant_id year month day hour minute dist_incident {incident_id}}}`
     );
@@ -980,7 +1014,7 @@ describe("Cassandra DDM", function () {
     });
   });
 
-  it("06. Add another incident and read all", function () {
+  it("07. Add another incident and read all", function () {
     let res = itHelpers.request_graph_ql_post(
       `mutation {addDist_incident(incident_id: "instance1-76aa1cb4-8c1b-42f1-bd10-c9c6ea29fb35", incident_description: "First incident on server 2") {incident_id incident_description}}`
     );
@@ -1026,7 +1060,7 @@ describe("Cassandra DDM", function () {
     });
   });
 
-  it("07. Search and pagination", function () {
+  it("08. Search and pagination", function () {
     let res = itHelpers.request_graph_ql_post(
       `mutation {addDist_incident(incident_id: "instance1-2a389803-68e7-4090-9ef5-c24df84693c9", incident_description: "Second incident on server 1") {incident_id incident_description countFilteredDist_instants dist_instantsConnection(pagination: {first:2}) {edges {node {instant_id}}}}}`
     );

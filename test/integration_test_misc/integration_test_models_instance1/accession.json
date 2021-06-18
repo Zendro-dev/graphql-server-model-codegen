@@ -31,5 +31,6 @@
     }
   },
 
-  "internalId" : "accession_id"
+  "internalId" : "accession_id",
+  "useDataLoader": true
 }

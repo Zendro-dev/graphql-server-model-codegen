@@ -20,5 +20,6 @@
     "id": {
         "name": "director_id",
         "type": "String"
-    }
+    },
+    "useDataLoader": false
 }

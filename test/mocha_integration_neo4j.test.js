@@ -399,7 +399,7 @@ describe("Neo4j - Association", () => {
       },
     });
   });
-  it("02. Movie : Director (n:1) - read one associated movie", () => {
+  it("02. Movie : Director (n:1) - read one movie / read one director", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
         readOneMovie(movie_id: "m1"){
@@ -420,6 +420,26 @@ describe("Neo4j - Association", () => {
             director_name: "Chloé Zhao",
           },
           movie_id: "m1",
+        },
+      },
+    });
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneDirector(director_id: "d1"){
+            director_id
+            director_name
+        }
+    }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDirector: {
+          director_id: "d1",
+          director_name: "Chloé Zhao",
         },
       },
     });
@@ -740,7 +760,50 @@ describe("Neo4j - Distributed Data Models", () => {
       });
     }
   });
-  it("02. Movie DDM: update the director to associate with movies", () => {
+
+  it("02. Movie DDM: read one movie / read one director", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneDist_movie(movie_id: "instance1-02"){
+            movie_id
+            runtime
+        }
+    }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_movie: {
+          movie_id: "instance1-02",
+          runtime: 110,
+        },
+      },
+    });
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneDist_director(director_id: "instance1-01"){
+            director_id
+            director_name
+        }
+    }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_director: {
+          director_id: "instance1-01",
+          director_name: "Chloé Zhao",
+        },
+      },
+    });
+  });
+
+  it("03. Movie DDM: update the director to associate with movies", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `mutation {
           updateDist_director(director_id: "instance1-01", addDist_movies: ["instance1-02", "instance1-03"]) {
@@ -789,7 +852,7 @@ describe("Neo4j - Distributed Data Models", () => {
       },
     });
   });
-  it("03. Movie DDM: read all", () => {
+  it("04. Movie DDM: read all", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
           dist_directorsConnection(pagination: {first: 25}) {
@@ -820,7 +883,7 @@ describe("Neo4j - Distributed Data Models", () => {
       },
     });
   });
-  it("04. Movie DDM: search, sort and pagination", () => {
+  it("05. Movie DDM: search, sort and pagination", () => {
     res = itHelpers.request_graph_ql_post_instance2(
       `{
           dist_moviesConnection(search: {field: movie_id, value: "instance.*", operator: regexp}, pagination: {first: 5}) {
@@ -961,7 +1024,7 @@ describe("Neo4j - Distributed Data Models", () => {
       },
     });
   });
-  it("05. Movie DDM: update the director to remove associations", () => {
+  it("06. Movie DDM: update the director to remove associations", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `mutation {
           updateDist_director(director_id:"instance1-01" removeDist_movies:["instance1-02", "instance1-03"]) {

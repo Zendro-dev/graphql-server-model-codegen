@@ -38,5 +38,6 @@
             "targetStorageType" : "neo4j"
         }
     },
-    "internalId": "movie_id"
+    "internalId": "movie_id",
+    "useDataLoader": true
 }

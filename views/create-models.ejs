@@ -19,6 +19,7 @@ const moment = require('moment');
 const errorHelper = require('../../utils/errors');
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
+const DataLoader = require("dataloader");
 
 /**
  * module - Creates a sequelize model
@@ -137,15 +138,45 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     <% } -%>
   }
 
-  static async readById(id){
+  <% if (useDataLoader) {%>/**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+   static async batchReadById(keys) {
+     let queryArg = {
+       operator: "in",
+       field: <%- nameLc -%>.idAttribute(),
+       value: keys.join(),
+       valueType: "Array",
+     };
+     let cursorRes = await <%- nameLc -%>.readAllCursor(queryArg);
+     cursorRes = cursorRes.<%- namePl -%>.reduce(
+       (map, obj) => ((map[obj[<%- nameLc -%>.idAttribute()]] = obj), map),
+       {}
+     );
+     return keys.map(
+       (key) =>
+         cursorRes[key] || new Error(`Record with ID = "${key}" does not exist`)
+     );
+   }
+ 
+   static readByIdLoader = new DataLoader(<%- nameLc -%>.batchReadById, {
+     cache: false,
+   });
+ 
+   static async readById(id) {
+     return await <%- nameLc -%>.readByIdLoader.load(id);
+   }<% } else 
+  {%>static async readById(id){
     let item = await <%- nameLc -%>.findByPk(id);
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
     }
     item = <%- nameLc -%>.postReadCast(item)
     return validatorUtil.validateData('validateAfterRead', this, item);
-  }
-
+  }<%}-%>
+  
   static async countRecords(search){
     let options = {}
     options['where'] = helper.searchConditionsToSequelize(search, <%- nameLc -%>.definition.attributes);
