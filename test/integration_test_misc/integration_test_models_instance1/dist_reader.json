@@ -1,6 +1,6 @@
 {
     "model": "dist_reader",
-    "storageType" : "distributed-data-model",
+    "storageType": "distributed-data-model",
     "registry": ["dist_reader_instance1"],
     "attributes": {
         "reader_id": "String",

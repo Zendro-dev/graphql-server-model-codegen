@@ -10,7 +10,8 @@ module.exports.book = {
   "associations":{
 
       "Authors" : {
-          "type" : "to_many",
+          "type" : "many_to_many",
+          "implementation": "sql_cross_table",
           "target" : "Person",
           "targetKey" : "personId",
           "sourceKey" : "bookId",
@@ -20,10 +21,11 @@ module.exports.book = {
           "sublabel" : "email"
         },
       "publisher" : {
-        "type" : "to_one",
+        "type" : "many_to_one",
+        "implementation": "foreignkeys",
         "target" : "publi_sher",
         "targetKey" : "publisher_id",
-        "keyIn" : "Book",
+        "keysIn" : "Book",
         "targetStorageType" : "generic",
         "label" : "name"
         }
@@ -42,7 +44,8 @@ module.exports.person = {
   },
   "associations":{
     "works":{
-      "type" : "to_many",
+      "type" : "many_to_many",
+      "implementation": "sql_cross_table",
       "target" : "Book",
       "targetKey" : "bookId",
       "sourceKey" : "personId",
@@ -52,10 +55,11 @@ module.exports.person = {
     },
 
     "company":{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "publi_sher",
       "targetKey": "companyId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType": "generic"
     }
   }
@@ -74,18 +78,20 @@ module.exports.dog_one_assoc = {
 
   "associations" : {
     "owner" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "personId",
-      "keyIn" : "Dog",
+      "keysIn" : "Dog",
       "targetStorageType" : "sql"
     },
 
     "veterinarian" : {
-      "type" : "to_one",
+      "type" : "many_to_one",
+      "implementation": "foreignkeys",
       "target" : "Person",
       "targetKey" : "veterinarianId",
-      "keyIn" : "Dog",
+      "keysIn" : "Dog",
       "targetStorageType" : "sql"
     }
   }
@@ -104,18 +110,20 @@ module.exports.person_one_assoc = {
 
   "associations" : {
     "unique_pet" :{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "personId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     },
 
     "patients" : {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Dog",
       "targetKey": "veterinarianId",
-      "keyIn": "Dog",
+      "keysIn": "Dog",
       "targetStorageType": "sql"
     }
   }

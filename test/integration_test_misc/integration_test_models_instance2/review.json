@@ -8,10 +8,11 @@
     },
     "associations": {
       "unique_movie": {
-        "type" : "to_one",
+        "type" : "one_to_one",
+        "implementation": "foreignkeys",
         "target" : "movie",
         "targetKey" : "movie_id",
-        "keyIn": "review",
+        "keysIn": "review",
         "targetStorageType" : "neo4j"
       }
     },

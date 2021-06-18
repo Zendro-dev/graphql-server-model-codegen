@@ -8,10 +8,11 @@
     },
     "associations": {
         "animals": {
-            "type": "to_many",
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
             "target": "animal",
             "targetKey": "farm_id",
-            "keyIn": "animal",
+            "keysIn": "animal",
             "targetStorageType": "mongodb",
             "label": "animal_id"
         }

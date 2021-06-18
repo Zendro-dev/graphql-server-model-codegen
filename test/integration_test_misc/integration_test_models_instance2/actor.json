@@ -9,12 +9,12 @@
 
     "associations":{
       "movies":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "movie",
         "targetKey": "actor_ids",
         "sourceKey": "movie_ids",
-        "keyIn": "actor",
+        "keysIn": "actor",
         "targetStorageType": "neo4j"
       }
     },

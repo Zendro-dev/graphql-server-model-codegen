@@ -11,10 +11,11 @@
   "associations": {
 
     "accession": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Accession",
       "targetKey": "accessionId",
-      "keyIn" : "Measurement",
+      "keysIn": "Measurement",
       "targetStorageType": "sql",
       "label": "accession_id"
     }

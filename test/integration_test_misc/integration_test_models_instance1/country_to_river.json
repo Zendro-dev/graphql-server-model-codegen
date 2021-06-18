@@ -1,8 +1,8 @@
 {
-  "model" : "country_to_river",
-  "storageType" : "SQL",
-  "attributes" : {
-    "country_id" : "String",
-    "river_id" : "String"
+  "model": "country_to_river",
+  "storageType": "SQL",
+  "attributes": {
+    "country_id": "String",
+    "river_id": "String"
   }
 }

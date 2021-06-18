@@ -657,15 +657,34 @@ validateJsonFile = function (opts) {
     }
   });
 
-  //check: validate if to_one assoc with foreignKey in target model exists
-  //       Warn user that validation e.g. unique constraint needs to be added
-  opts.associationsArguments["to_one"].forEach((assoc) => {
-    if (assoc.holdsForeignKey === false) {
+  const {
+    to_one,
+    to_many,
+    to_many_through_sql_cross_table,
+    generic_to_one,
+    generic_to_many } = opts.associationsArguments;
+
+  const parsedAssociations = to_one.concat(to_many,to_many_through_sql_cross_table, generic_to_many, generic_to_one);
+
+  parsedAssociations.forEach((assoc) => {
+
+    //check: validate if to_one assoc with foreignKey in target model exists
+    //       Warn user that validation e.g. unique constraint needs to be added
+    if (assoc.holdsForeignKey === false && assoc.type.includes('to_one')) {
       check.warnings.push(
-        `WARNING: ${assoc.name} is a to_one associations with the foreignKey in ${assoc.target}. Be sure to validate uniqueness`
+        `WARNING: Association ${assoc.name} is a ${assoc.type} associations with the foreignKey in ${assoc.target}. Be sure to validate uniqueness`
       );
     }
-  });
+
+    //check: validate if the reverseAssociation field exist. Warn the user that
+    //       it is mandatory for the spa
+    if (!assoc.reverseAssociation) {
+      check.warnings.push(
+        ` WARNING: Association ${assoc.name} does not define the reverse association name in field "reverseAssociation". This field is mandatory for the single-page-app.`
+      )
+    }
+  })
+
 
   return check;
 };
@@ -673,14 +692,14 @@ validateJsonFile = function (opts) {
 getEditableAssociations = function (associations) {
   let editableAssociations = [];
   associations["to_one"].forEach((association) => {
-    if (association.keyIn !== association.target) {
+    if (association.keysIn !== association.target) {
       editableAssociations.push(association);
     }
   });
 
   //for cases many to many through foreignKey array
   associations["to_many"].forEach((association) => {
-    if (association.keyIn !== association.target) {
+    if (association.keysIn !== association.target) {
       editableAssociations.push(association);
     }
   });
@@ -695,7 +714,7 @@ getEditableAttributes = function (
 ) {
   let editable_attributes = {};
   let target_keys = parsedAssocForeignKeys.map((assoc) => {
-    if (assoc.reverseAssociationType) return assoc.sourceKey;
+    if (assoc.type === 'many_to_many' && assoc.implementation === 'foreignkeys') return assoc.sourceKey;
     return assoc.targetKey;
   });
   for (let attrib in attributes) {
@@ -734,124 +753,125 @@ module.exports.parseAssociations = function (dataModel) {
   };
   if (associations !== undefined) {
     Object.entries(associations).forEach(([name, association]) => {
-      let type = association.type;
-      let holdsTheForeignKey = false;
-      let assocThroughArray = false;
-      let isStandardAssociation =
-        association.type !== "generic_to_many" &&
-        association.type !== "generic_to_one";
+      
+      const type = association.type;
+      const implementation = association.implementation;
 
-      //push association
-      if (isStandardAssociation) {
-        //standard
-        associations_info.associations.push(association);
-        association.targetStorageType =
-          association.targetStorageType.toLowerCase();
-        associations_info.foreignKeyAssociations[name] = association.targetKey;
-      } else {
-        //generic
-        associations_info.genericAssociations.push(association);
-      }
+      const schema_attributes = [
+        association.target,
+        capitalizeString(association.target),
+        capitalizeString(name),
+      ];
+      let assoc = Object.assign({}, association);
 
-      //if(associations_type["many"].includes(association.type) )
-      if (association.type === "to_many") {
-        //associations_info.schema_attributes["many"][name] = [ association.target, capitalizeString(association.target), capitalizeString(inflection.pluralize(association.target))];
-        associations_info.schema_attributes["many"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-        if (association.reverseAssociationType === "to_many") {
-          assocThroughArray = true;
-        }
-        //}else if(associations_type["one"].includes(association.type))
-      } else if (association.type === "to_one") {
-        associations_info.schema_attributes["one"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-        if (association.keyIn === dataModel.model) {
-          holdsTheForeignKey = true;
-        }
-      } else if (association.type === "to_many_through_sql_cross_table") {
-        if (
-          association.sourceKey === undefined ||
-          association.keysIn === undefined ||
-          association.targetStorageType !== "sql"
-        ) {
-          console.error(
-            colors.red(
-              `ERROR: to_many_through_sql_cross_table only allowed for relational database types with well defined cross-table`
-            )
-          );
-        }
-        associations_info.schema_attributes["many"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-      } else if (association.type === "generic_to_one") {
-        associations_info.schema_attributes["generic_one"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-      } else if (association.type === "generic_to_many") {
-        associations_info.schema_attributes["generic_many"][name] = [
-          association.target,
-          capitalizeString(association.target),
-          capitalizeString(name),
-        ];
-      } else {
+      if (type !== 'one_to_one' && type !== 'one_to_many' && type !== 'many_to_one' && type !== 'many_to_many') {
         console.error(
           colors.red("Association type " + association.type + " not supported.")
         );
       }
 
-      let assoc = Object.assign({}, association);
-      //push association
-      if (isStandardAssociation) {
-        //standard
-        assoc["name"] = name;
-        assoc["name_lc"] = uncapitalizeString(name);
-        assoc["name_cp"] = capitalizeString(name);
-        assoc["target_lc"] = uncapitalizeString(association.target);
-        assoc["target_lc_pl"] = inflection.pluralize(
-          uncapitalizeString(association.target)
-        );
-        assoc["target_pl"] = inflection.pluralize(association.target);
-        assoc["target_cp"] = capitalizeString(association.target); //inflection.capitalize(association.target);
-        assoc["target_cp_pl"] = capitalizeString(
-          inflection.pluralize(association.target)
-        ); //inflection.capitalize(inflection.pluralize(association.target));
+      // set default association fields
+      assoc["name"] = name;
+      assoc["name_lc"] = uncapitalizeString(name);
+      assoc["name_cp"] = capitalizeString(name);
+      assoc["target_lc"] = uncapitalizeString(association.target);
+      assoc["target_lc_pl"] = inflection.pluralize(
+        uncapitalizeString(association.target)
+      );
+      assoc["target_pl"] = inflection.pluralize(association.target);
+      assoc["target_cp"] = capitalizeString(association.target); //inflection.capitalize(association.target);
+      assoc["target_cp_pl"] = capitalizeString(
+        inflection.pluralize(association.target)
+      );
+      assoc["reverseAssociation"] = association.reverseAssociation;
+
+      if (implementation !== 'generic') {
+        // set extra association fields
         assoc["targetKey"] = association.targetKey;
         assoc["targetKey_cp"] = capitalizeString(association.targetKey);
-        if (association.keyIn) {
-          assoc["keyIn_lc"] = uncapitalizeString(association.keyIn);
-        }
-        assoc["holdsForeignKey"] = holdsTheForeignKey;
-        assoc["assocThroughArray"] = assocThroughArray;
-      } else {
-        //generic
-        assoc["name"] = name;
-        assoc["name_lc"] = uncapitalizeString(name);
-        assoc["name_cp"] = capitalizeString(name);
-        assoc["target_lc"] = uncapitalizeString(association.target);
-        assoc["target_lc_pl"] = inflection.pluralize(
-          uncapitalizeString(association.target)
-        );
-        assoc["target_pl"] = inflection.pluralize(association.target);
-        assoc["target_cp"] = capitalizeString(association.target); //inflection.capitalize(association.target);
-        assoc["target_cp_pl"] = capitalizeString(
-          inflection.pluralize(association.target)
-        ); //inflection.capitalize(inflection.pluralize(association.target));
-      }
+        assoc["keysIn_lc"] = uncapitalizeString(association.keysIn);
+        assoc["holdsForeignKey"] = false;
+        assoc["assocThroughArray"] = false;
 
-      associations_info[type].push(assoc);
-      //associations_info[type].push(assoc);
+        assoc.targetStorageType = association.targetStorageType.toLowerCase();
+        association.targetStorageType = association.targetStorageType.toLowerCase();
+        associations_info.associations.push(association);
+        associations_info.foreignKeyAssociations[name] = association.targetKey;
+      } else {
+        associations_info.genericAssociations.push(association); 
+      }
+      // switch implementation types
+      switch (implementation) {
+        case 'generic':
+          switch (type) {
+            case 'one_to_one':
+            case 'many_to_one':
+              associations_info.schema_attributes["generic_one"][name] = schema_attributes;
+              associations_info['generic_to_one'].push(assoc);
+              break;
+            case 'one_to_many':
+            case 'many_to_many':
+              associations_info.schema_attributes["generic_many"][name] = schema_attributes;
+              associations_info['generic_to_many'].push(assoc);
+              break;
+            default:
+              break;
+          }
+          break;
+        case 'sql_cross_table':
+          if (type !== 'many_to_many'
+           || association.sourceKey === undefined
+           || association.keysIn === undefined ) {
+            console.error(
+              colors.red(
+                `ERROR: many_to_many through crosstable only allowed for relational database types with well defined cross-table`
+              )
+            );    
+          }
+
+          associations_info.schema_attributes["many"][name] = schema_attributes;
+          associations_info['to_many_through_sql_cross_table'].push(assoc);
+          break;
+        case 'foreignkeys':
+          associations_info.foreignKeyAssociations[name] = association.targetKey;
+          switch (type) {
+            case 'one_to_one':
+            case 'many_to_one':
+              // schema attrtibutes
+              associations_info.schema_attributes["one"][name] = schema_attributes;
+              // holds foreignKey ?
+              if (association.keysIn === dataModel.model) {
+                assoc["holdsForeignKey"] = true; 
+              }
+              associations_info['to_one'].push(assoc);
+              break;
+            case 'many_to_many':
+              assoc["assocThroughArray"] = true;
+            case 'one_to_many':
+              associations_info.schema_attributes["many"][name] = schema_attributes;
+              associations_info['to_many'].push(assoc);
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          if (implementation) {
+            console.error(
+              colors.red(
+                `ERROR: unallowed association implementation type ${implementation}.`
+              )
+            ); 
+          } else {
+            console.error(
+              colors.red(
+                `ERROR: Please specify an implementation type.`
+              )
+            ); 
+          }
+      }
     });
-  }
+  };
   associations_info.mutations_attributes = attributesToString(
     associations_info.mutations_attributes
   );

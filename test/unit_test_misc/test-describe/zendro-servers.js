@@ -259,7 +259,8 @@ const definition = {
     },
     associations: {
         works: {
-            type: 'to_many',
+            type: 'many_to_many',
+            implementation: 'sql_cross_table',
             target: 'Book',
             targetKey: 'bookId',
             sourceKey: 'personId',
@@ -268,10 +269,11 @@ const definition = {
             label: 'title'
         },
         company: {
-            type: 'to_one',
+            type: 'many_to_one',
+            implementation: 'foreignkeys',
             target: 'publi_sher',
             targetKey: 'companyId',
-            keyIn: 'Person',
+            keysIn: 'Person',
             targetStorageType: 'generic'
         }
     },

@@ -330,7 +330,8 @@ const definition = {
     },
     associations: {
         works: {
-            type: 'to_many',
+            type: 'many_to_many',
+            implementation: 'sql_cross_table',
             target: 'Book',
             targetKey: 'bookId',
             sourceKey: 'personId',
@@ -338,24 +339,27 @@ const definition = {
             targetStorageType: 'sql'
         },
         company: {
-            type: 'to_one',
+            type: 'many_to_one',
+            implementation: 'foreignkeys',
             target: 'publi_sher',
             targetKey: 'companyId',
-            keyIn: 'Person',
+            keysIn: 'Person',
             targetStorageType: 'zendro-server'
         },
         dogs: {
-            type: 'to_many',
+            type: 'one_to_many',
+            implementation: 'foreignkeys',
             target: 'Dog',
             targetKey: 'personId',
-            keyIn: 'Dog',
+            keysIn: 'Dog',
             targetStorageType: 'sql'
         },
         parrot: {
-            type: 'to_one',
+            type: 'many_to_one',
+            implementation: 'foreignkeys',
             target: 'Parrot',
             targetKey: 'personId',
-            keyIn: 'Parrot',
+            keysIn: 'Parrot',
             targetStorageType: 'sql'
         }
     },
@@ -380,10 +384,11 @@ const definition = {
     },
     associations: {
         owner: {
-            type: 'to_one',
+            type: 'many_to_one',
+            implementation: 'foreignkeys',
             target: 'Person',
             targetKey: 'personId',
-            keyIn: 'Dog',
+            keysIn: 'Dog',
             targetStorageType: 'sql'
         }
     },

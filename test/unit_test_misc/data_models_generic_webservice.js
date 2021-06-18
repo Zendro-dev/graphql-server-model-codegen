@@ -10,17 +10,20 @@ module.exports.book =
   },
   "associations": {
       "publisher" : {
-        "type": "to_one",
+        "type": "many_to_one",
+        "implementation": "foreignkeys",
         "target": "publi_sher",
         "targetKey": "publisher_id",
-        "keyIn": "book",
+        "keysIn": "book",
         "targetStorageType": "generic"
       },
 
       "authors": {
-        "type": "to_many",
+        "type": "one_to_many",
+        "implementation": "foreignkeys",
         "target": "Person",
         "targetKey": "person_id",
+        "keysIn": "Person",
         "sourceKey": "book_id",
         "targetStorageType": "generic"
       }
@@ -40,18 +43,21 @@ module.exports.person =
 
   "associations" : {
     "works" : {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "book",
       "targetKey": "book_id",
       "sourceKey": "person_id",
+      "keysIn": "book",
       "targetStorageType": "generic"
     },
 
     "company":{
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "publi_sher",
       "targetKey": "companyId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType": "generic"
     }
   }
@@ -69,18 +75,20 @@ module.exports.publisher =
 
   "associations": {
     "publications" : {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "book",
       "targetKey": "publisher_id",
-      "keyIn": "book",
+      "keysIn": "book",
       "targetStorageType": "generic"
     },
 
     "director":{
-      "type":"to_one",
+      "type":"many_to_one",
+      "implementation": "foreignkeys",
       "target": "Person",
       "targetKey": "companyId",
-      "keyIn": "Person",
+      "keysIn": "Person",
       "targetStorageType": "generic"
     }
   }

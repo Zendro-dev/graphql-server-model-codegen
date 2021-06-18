@@ -1,8 +1,8 @@
 {
-    "model" : "sq_book",
-    "storageType" : "distributed-data-model",
+    "model": "sq_book",
+    "storageType": "distributed-data-model",
     "registry": ["book_remote","book_local"],
-    "attributes" : {
+    "attributes": {
         "id": "String",
         "title": "String",
         "genre": "String",
@@ -12,12 +12,12 @@
 
     "associations":{
       "authors":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "sq_author",
         "targetKey": "book_ids",
         "sourceKey": "author_ids",
-        "keyIn": "sq_book",
+        "keysIn": "sq_book",
         "targetStorageType": "distributed-data-model"
       }
     },

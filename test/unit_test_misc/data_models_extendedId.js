@@ -12,10 +12,11 @@ module.exports.book_adapter = {
     },
     "associations": {
         "author": {
-            "type": "to_one",
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
             "target": "Person",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "sql",
             "label": "email"
         }
@@ -38,10 +39,11 @@ module.exports.book_ddm = {
     },
     "associations": {
         "author": {
-            "type": "to_one",
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
             "target": "Person",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "zendro-server",
             "label": "email"
         }
@@ -64,10 +66,11 @@ module.exports.person_adapter = {
     },
     "associations": {
         "works": {
-            "type": "to_many",
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
             "target": "Book",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "sql",
             "label": "title"
         }
@@ -91,10 +94,11 @@ module.exports.person_ddm = {
     },
     "associations": {
         "works": {
-            "type": "to_many",
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
             "target": "Book",
             "targetKey": "internalPersonId",
-            "keyIn": "Book",
+            "keysIn": "Book",
             "targetStorageType": "zendro-server",
             "label": "title"
         }

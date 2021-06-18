@@ -1,7 +1,7 @@
 {
-  "model" : "city",
-  "storageType" : "cassandra",
-  "attributes" : {
+  "model": "city",
+  "storageType": "cassandra",
+  "attributes": {
     "city_id": "String",
     "name": "String",
 
@@ -15,13 +15,13 @@
   },
   "associations": {
     "rivers": {
-      "type": "to_many",
+      "type": "many_to_many",
+      "implementation": "foreignkeys",
       "target": "river",
       "targetStorageType": "sql",
       "sourceKey": "river_ids",
       "targetKey": "city_ids",
-      "keyIn": "city",
-      "reverseAssociationType":"to_many"
+      "keysIn": "city"
     }
   },
   "internalId": "city_id",

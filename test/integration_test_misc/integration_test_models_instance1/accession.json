@@ -12,20 +12,22 @@
   "associations": {
 
     "location": {
-      "type": "to_one",
+      "type": "many_to_one",
+      "implementation": "foreignkeys",
       "target": "Location",
       "targetKey": "locationId",
-      "keyIn" : "Accession",
+      "keysIn": "Accession",
       "targetStorageType": "sql",
       "label": "country",
       "sublabel": "state"
     },
 
     "measurements": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Measurement",
       "targetKey": "accessionId",
-      "keyIn" : "Measurement",
+      "keysIn": "Measurement",
       "targetStorageType": "sql",
       "label": "name"
     }

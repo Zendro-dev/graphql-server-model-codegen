@@ -12,10 +12,11 @@
   "associations": {
 
     "dist_instants": {
-      "type": "to_many",
+      "type": "one_to_many",
+      "implementation": "foreignkeys",
       "target": "Dist_instant",
       "targetKey": "incident_assoc_id",
-      "keyIn": "Dist_instant",
+      "keysIn": "Dist_instant",
       "targetStorageType": "distributed-data-model"
     }
 

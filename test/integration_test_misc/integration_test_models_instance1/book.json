@@ -1,8 +1,8 @@
 {
-    "model" : "book",
-    "storageType" : "sql",
+    "model": "book",
+    "storageType": "sql",
     "database": "default-sql",
-    "attributes" : {
+    "attributes": {
         "id": "String",
         "title": "String",
         "genre": "String",
@@ -10,14 +10,14 @@
         "author_ids": "[String]"
     },
 
-    "associations":{
-      "authors":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+    "associations": {
+      "authors": {
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "author",
         "targetKey": "book_ids",
         "sourceKey": "author_ids",
-        "keyIn": "book",
+        "keysIn": "book",
         "targetStorageType": "sql"
       }
     },

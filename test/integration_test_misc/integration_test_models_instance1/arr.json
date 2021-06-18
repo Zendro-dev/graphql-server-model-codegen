@@ -1,7 +1,7 @@
 {
     "model": "Arr",
     "storageType": "sql",
-    "attributes" : {
+    "attributes": {
       "arrId": "String",
       "country": "String",
       "singleTime": "Time",
@@ -14,7 +14,7 @@
       "arrDateTime": "[DateTime]"
     },
 
-    "internalId" : "arrId"
+    "internalId": "arrId"
   
   }
   

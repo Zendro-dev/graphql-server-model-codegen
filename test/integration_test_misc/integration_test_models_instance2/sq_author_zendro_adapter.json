@@ -1,10 +1,10 @@
 {
-    "model" : "sq_author",
-    "storageType" : "zendro-webservice-adapter",
+    "model": "sq_author",
+    "storageType": "zendro-webservice-adapter",
     "adapterName": "author_remote",
     "regex": "remote",
     "url": "http://server1:3000/graphql",
-    "attributes" : {
+    "attributes": {
         "id": "String",
         "name": "String",
         "lastname": "String",
@@ -14,12 +14,12 @@
 
     "associations":{
       "books":{
-        "type": "to_many",
-        "reverseAssociationType": "to_many",
+        "type": "many_to_many",
+        "implementation": "foreignkeys",
         "target": "sq_book",
         "targetKey": "author_ids",
         "sourceKey": "book_ids",
-        "keyIn": "sq_author",
+        "keysIn": "sq_author",
         "targetStorageType": "distributed-data-model"
       }
     },
