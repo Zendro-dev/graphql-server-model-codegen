@@ -90,12 +90,33 @@ static associate(models){
 `;
 
 module.exports.book_model_read_by_id = `
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: book.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await book.readAllCursor(queryArg);
+    cursorRes = cursorRes.books.reduce(
+        (map, obj) => ((map[obj[book.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(book.batchReadById, {
+    cache: false,
+});
+
 static async readById(id) {
-  let item = await book.findByPk(id);
-  if (item === null) {
-      throw new Error(\`Record with ID = "\${id}" does not exist\`);
-  }
-  item = book.postReadCast(item)
-return validatorUtil.validateData('validateAfterRead', this, item);
+    return await book.readByIdLoader.load(id);
 }
 `;

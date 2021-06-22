@@ -219,9 +219,7 @@ module.exports = class <%- adapterName -%> {
         : undefined;
     }
 
-    let query = `SELECT * FROM <%- namePl -%>  
-      ${filter}  
-      ${sort}`;
+    let query = `SELECT * FROM <%- namePl -%> ${filter} ${sort}`;
     query += limit ? ` LIMIT ${limit}` : '';
     let result = [];
 
@@ -277,9 +275,7 @@ module.exports = class <%- adapterName -%> {
           ? oppPagination.last + 1
           : undefined;
       }
-      query = `SELECT * FROM <%- namePl -%> 
-        ${oppFilter}  
-        ${oppSort}`;
+      query = `SELECT * FROM <%- namePl -%> ${oppFilter} ${oppSort}`;
       query += oppLimit ? ` LIMIT ${limit}` : '';
       oppResult = await prestoHelper.queryData(query, client);
       oppResult = <%- adapterName -%>.postReadCast(oppResult);

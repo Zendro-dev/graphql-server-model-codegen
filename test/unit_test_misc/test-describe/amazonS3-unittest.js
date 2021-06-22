@@ -7,33 +7,43 @@ constructor(input) {
 `;
 
 module.exports.reader_readById = `
-static async readById(id) {
-    const query = {
-      ...params,
-      Expression: \`SELECT * FROM S3Object WHERE \${this.idAttribute()} = '\${id}'\`,
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: reader.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
     };
-    let item = null;
-    try {
-      const s3 = await this.storageHandler;
-      const result = await s3.selectObjectContent(query).promise();
-      const events = result.Payload;
-      for await (const event of events) {
-        // Check the top-level field to determine which event this is.
-        if (event.Records) {
-          // handle Records event
-          item = event.Records.Payload.toString();
-          item = JSON.parse(item.slice(0, item.length - 1));
-        }
-      }
-      if (!item) {
-        throw new Error(\`Record with ID = "\${id}" does not exist\`);
-      }
-    } catch (e) {
-      throw new Error(e);
-    }
-    item = new reader(reader.postReadCast(item));
-    return validatorUtil.validateData("validateAfterRead", this, item);
-  }
+    let cursorRes = await reader.readAllCursor(queryArg);
+    cursorRes = cursorRes.readers.reduce(
+        (map, obj) => ((map[obj[reader.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(reader.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the Amazon S3 storage type, based on SQL.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type reader, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
+static async readById(id) {
+    return await reader.readByIdLoader.load(id);
+}
 `;
 
 module.exports.reader_countRecords = `
@@ -165,31 +175,41 @@ static async bulkAddCsv(context){
 `;
 
 module.exports.amazonS3_adapter_readById = `
-static async readById(id) {
-    const query = {
-      ...params,
-      Expression: \`SELECT * FROM S3Object WHERE \${this.idAttribute()} = '\${id}'\`,
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: dist_reader_instance1.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
     };
-    let item = null;
-    try {
-      const s3 = await this.storageHandler;
-      const result = await s3.selectObjectContent(query).promise();
-      const events = result.Payload;
-      for await (const event of events) {
-        // Check the top-level field to determine which event this is.
-        if (event.Records) {
-          // handle Records event
-          item = event.Records.Payload.toString();
-          item = JSON.parse(item.slice(0, item.length - 1));
-        }
-      }
-      if (!item) {
-        throw new Error(\`Record with ID = "\${id}" does not exist\`);
-      }
-    } catch (e) {
-      throw new Error(e);
-    }
-    item = new dist_reader_instance1(dist_reader_instance1.postReadCast(item));
-    return validatorUtil.validateData("validateAfterRead", this, item);
-  }
+    let cursorRes = await dist_reader_instance1.readAllCursor(queryArg);
+    cursorRes = cursorRes.dist_readers.reduce(
+        (map, obj) => ((map[obj[dist_reader_instance1.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(dist_reader_instance1.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the Amazon S3 storage type, based on SQL.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type dist_reader_instance1, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
+static async readById(id) {
+    return await dist_reader_instance1.readByIdLoader.load(id);
+}
 `;
