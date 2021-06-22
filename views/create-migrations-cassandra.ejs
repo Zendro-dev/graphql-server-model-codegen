@@ -29,7 +29,7 @@ module.exports = {
     await cassandraClient.execute(createString);
 
     let indexCreationPromises = indexCreationStrings.map(async i =>  
-      await cassandraClient.execute('CREATE INDEX IF NOT EXISTS <%-namePl-%>_' + i + '_index ON <%-namePl-%> (' + i + ');'));
+      await cassandraClient.execute('CREATE INDEX IF NOT EXISTS <%-namePl-%>_' + i + '_index ON "<%-namePl-%>" ("' + i + '");'));
 
     await Promise.allSettled(indexCreationPromises);
 
@@ -46,7 +46,7 @@ module.exports = {
     // get the default cassandra client
     const connectionInstances = await getConnectionInstances();
     const cassandraClient = connectionInstances.get("default-cassandra").connection;
-    await cassandraClient.execute('DROP TABLE IF EXISTS <%-namePl-%>');
+    await cassandraClient.execute('DROP TABLE IF EXISTS "<%-namePl-%>"');
   }
 
 };
