@@ -154,8 +154,17 @@ const associationArgsDef = {
         if (search === undefined || search === null) {
           return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
         } else {
+          <%# WORKAROUND FOR Cassandra targetStorageType:
+          In case of an association to a model within cassandra we need to do intersections
+          of the search parameters with the foreignkey array if the search is on the idAttribute
+          and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
+          with an "eq" / "in" on the primary key field. %>
+          <%if(associations_one[i].targetStorageType === 'cassandra'){%>
+            //WORKAROUND for cassandra targetStorageType. Mainpulate search to intersect Equal searches on the primaryKey
+            const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_one[i].targetKey%>, models.<%=associations_one[i].target_lc-%>.idAttribute());
+          <%}-%>
           //build new search filter
-          let nsearch = helper.addSearchField({
+          let nsearch = <%if(associations_one[i].targetStorageType === 'cassandra'){%>hasIdSearch ? search : <%}-%>helper.addSearchField({
             "search": search,
             "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
             "value": this.<%= associations_one[i].targetKey -%>,
@@ -260,13 +269,23 @@ const associationArgsDef = {
         if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
           return 0;
         }
-        let nsearch = helper.addSearchField({
+        <%# WORKAROUND FOR Cassandra targetStorageType:
+        In case of an association to a model within cassandra we need to do intersections
+        of the search parameters with the foreignkey array if the search is on the idAttribute
+        and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
+        with an "eq" / "in" on the primary key field. %> 
+        <%if(associations_temp[i].targetStorageType === 'cassandra'){%>
+          //WORKAROUND for cassandra targetStorageType. Mainpulate search to intersect Equal searches on the primaryKey
+          const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_temp[i].sourceKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+        <%}-%>
+        let nsearch = <%if(associations_temp[i].targetStorageType === 'cassandra'){%>hasIdSearch ? search : <%}-%>helper.addSearchField({
           "search": search,
           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
           "value": this.<%=associations_temp[i].sourceKey%>.join(','),
           "valueType": "Array",
           "operator": "in"
         });
+        
     <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
@@ -293,26 +312,34 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
 
     <%if(associations_temp[i].assocThroughArray){%>
-        //return an empty response if the foreignKey Array is empty, no need to query the database
-        if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
-          return {
-            edges: [],
-            <%=associations_temp[i].target_lc_pl%>: [],
-            pageInfo: {
-                startCursor: null,
-                endCursor: null,
-                hasPreviousPage: false,
-                hasNextPage: false
-            }
-          };
-        }
-        let nsearch = helper.addSearchField({
-          "search": search,
-          "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
-          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
-          "valueType": "Array",
-          "operator": "in"
-        });
+      //return an empty response if the foreignKey Array is empty, no need to query the database
+      if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
+        return {
+          edges: [],
+          <%=associations_temp[i].target_lc_pl%>: [],
+          pageInfo: {
+            startCursor: null,
+            endCursor: null,
+            hasPreviousPage: false,
+            hasNextPage: false
+          }
+        };
+      }
+      <%# WORKAROUND FOR Cassandra targetStorageType:
+      In case of an association to a model within cassandra we need to do intersections
+      of the search parameters with the foreignkey array if the search is on the idAttribute
+      and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
+      with an "eq" / "in" on the primary key field. %> 
+      <%if(associations_temp[i].targetStorageType === 'cassandra'){%>
+        const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_temp[i].sourceKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+      <%}-%>
+      let nsearch = <%if(associations_temp[i].targetStorageType === 'cassandra'){%>hasIdSearch ? search : <%}-%>helper.addSearchField({
+        "search": search,
+        "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+        "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+        "valueType": "Array",
+        "operator": "in"
+      });
     <%}else{-%>
 
       //build new search filter

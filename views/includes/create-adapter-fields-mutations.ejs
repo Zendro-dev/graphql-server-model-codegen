@@ -95,7 +95,7 @@
   
   <%#
   /**
-   * check the type of adapter and handle cassandra-adapter
+   * check the type of adapter and handle neo4j-adapter
    */
   -%>
   <%if(storageType === 'neo4j-adapter'){-%>
@@ -132,7 +132,7 @@
         }
     }
   <%}-%>
-  <%#  /*** End of the the cassandra-adapter case */ -%>
+  <%#  /*** End of the the neo4j-adapter case */ -%>
 
   <%#
   /**
@@ -294,6 +294,29 @@
     <%}-%>
     <%#  /** End of the zendro-webservice-adapter case and the ddm-adapter case */ -%>
 
+    <%#
+    /**
+     * check the type of adapter and handle cassandra-adapter
+     */
+    -%>
+    <%if(storageType === 'cassandra-adapter'){-%>
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      //handle inverse association
+      if(handle_inverse){
+        let promises = [];
+        <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+        });
+        await Promise.all(promises);
+      }
+
+      let mutation = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
+      await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>, <%- idAttribute-%>],{
+          prepare: true
+      });
+    }
+    <%}-%>
+    <%#  /*** End of the the cassandra-adapter case */ -%>
 
   <%} -%>
 <%}-%>
