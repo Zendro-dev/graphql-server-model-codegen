@@ -2722,6 +2722,12 @@ describe("Cassandra storagetype", function () {
     testCompare(generated_resolver, data_test.cassandra_resolver_Count);
   });
 
+  it("targetStorageType cassandra fieldResolver Workaround - citiesConnection", async function () {
+    let opts = funks.getOptions(models_cassandra.river);
+    let generated_resolver = await funks.generateJs("create-resolvers", opts);
+    testCompare(generated_resolver, data_test.river_many_to_many_cassandra_fieldResolver_Connection);
+  });
+
   it("cassandra models - constructor", async function () {
     let opts = funks.getOptions(models_cassandra.city);
     let generated_model = await funks.generateJs(
