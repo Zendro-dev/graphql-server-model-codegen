@@ -668,7 +668,23 @@ describe("Cassandra Local", function () {
     });
   });
 
-  it("17. Delete the associations", function () {
+  it("17. Read one instant and search on associated incident primary key", function () {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        readOneInstant(instant_id: "instant_1") {
+          instant_id
+          incident(search: {field: incident_id value:"incident_7" operator:eq}) {
+            incident_id
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({"data":{"readOneInstant":{"instant_id":"instant_1","incident":{"incident_id":"incident_7"}}}})
+  }); 
+
+  it("18. Delete the associations", function () {
     let res = itHelpers.request_graph_ql_post(
       `{instantsConnection(pagination:{first:20}, search:{field: incident_assoc_id, operator: eq, value:"incident_7"}) {edges {node{ instant_id}}}}`
     );
@@ -694,7 +710,7 @@ describe("Cassandra Local", function () {
     }
   });
 
-  it("18. Get the table template", function () {
+  it("19. Get the table template", function () {
     let res = itHelpers.request_graph_ql_post(`{csvTableTemplateIncident}`);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
@@ -708,7 +724,7 @@ describe("Cassandra Local", function () {
     });
   });
 
-  it("19. Associate cassandra to sql model", function () {
+  it("20. Associate cassandra to sql model", function () {
     // create sql-capital
     let res = itHelpers.request_graph_ql_post(
       `mutation { addCapital(capital_id: "cass_assoc_capital_1", name: "London") {capital_id}}`
@@ -1307,7 +1323,95 @@ describe("cassandra Foreign-key arrays", function () {
     });
   });
 
-  it("03. Update record and remove one association - cassandra", function () {
+  it("03. Query rivers and filter associated cities on city_id existent in the fkarray: simple search - cassandra", function () {
+    // Operator: eq
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        riversConnection(pagination:{first:2}) {
+          rivers{
+            river_id
+            citiesConnection(
+              pagination: {first: 2}
+              search: {field: city_id, value: "cassandra_city_1", operator: eq}
+              ){
+              edges {
+                node {
+                  city_id
+                }
+              }
+            }
+          }
+        }
+      }
+      `
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data).to.deep.equal({"riversConnection":{"rivers":[{"river_id":"fkA_river_1","citiesConnection":{"edges":[{"node":{"city_id":"cassandra_city_1"}}]}}]}});
+
+    
+  });
+
+  it("04. Query rivers and filter associated cities on city_id existent in the fkarray: complex search - cassandra", function(){
+    //Operator: in
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        riversConnection(pagination:{first:2}) {
+          rivers{
+            river_id
+            citiesConnection(
+              pagination: {first: 2}
+              search: { operator: and, search:[
+                {field: city_id, value: "cassandra_city_2", operator: eq},
+                {field: name, value: "duesseldorf", operator: eq}
+              ]}
+              ){ 
+              edges {
+                node {
+                  city_id
+                }
+              }
+            }
+          }
+        }
+      }
+      `
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(resBody.data).to.deep.equal({"riversConnection":{"rivers":[{"river_id":"fkA_river_1","citiesConnection":{"edges":[{"node":{"city_id":"cassandra_city_2"}}]}}]}});
+  });
+  
+  it("05. Query rivers and filter associated cities on city_id existent in the fkarray: IN search - cassandra", function(){
+    //Operator: in
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        riversConnection(pagination:{first:2}) {
+          rivers{
+            river_id
+            citiesConnection(
+              pagination: {first: 2}
+              search: {field: city_id, value: "cassandra_city_2,cassandra_city_1,city_non_existent", operator: in, valueType:Array} 
+              ){ 
+              edges {
+                node {
+                  city_id
+                }
+              }
+            }
+          }
+        }
+      }
+      `
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(resBody.data).to.deep.equal({"riversConnection":{"rivers":[{"river_id":"fkA_river_1","citiesConnection":{"edges":[{"node":{"city_id":"cassandra_city_1"}},{"node":{"city_id":"cassandra_city_2"}}]}}]}})
+  });
+
+  it("06. Update record and remove one association - cassandra", function () {
     let res = itHelpers.request_graph_ql_post(
       'mutation{updateCity(city_id:"cassandra_city_1" removeRivers:["fkA_river_1"]){city_id river_ids}}'
     );
@@ -1329,7 +1433,7 @@ describe("cassandra Foreign-key arrays", function () {
     });
   });
 
-  it("04. Update record and add one association - cassandra", function () {
+  it("07. Update record and add one association - cassandra", function () {
     let res = itHelpers.request_graph_ql_post(
       'mutation{updateRiver(river_id:"fkA_river_1" addCities:["cassandra_city_1"]){river_id city_ids}}'
     );
@@ -1364,7 +1468,7 @@ describe("cassandra Foreign-key arrays", function () {
     });
   });
 
-  it("05. Update record and remove all association - cassandra", function () {
+  it("08. Update record and remove all association - cassandra", function () {
     let res = itHelpers.request_graph_ql_post(
       'mutation{updateRiver(river_id:"fkA_river_1" removeCities:["cassandra_city_1","cassandra_city_2"]){river_id city_ids}}'
     );

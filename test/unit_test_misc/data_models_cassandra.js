@@ -27,6 +27,39 @@ module.exports.city = {
   internalId: "city_id",
 };
 
+module.exports.river = {
+  "model": "river",
+  "storageType": "SQL",
+  "attributes": {
+    "name": "String",
+    "length": "Int",
+    "river_id": "String",
+    
+    "city_ids": "[String]"
+  },
+  "associations": {
+    "countries": {
+      "type": "many_to_many",
+      "implementation": "sql_cross_table",
+      "target": "country",
+      "sourceKey": "river_id",
+      "targetKey": "country_id",
+      "keysIn": "country_to_river",
+      "targetStorageType": "sql"
+    },
+    "cities": {
+      "type": "many_to_many",
+      "implementation": "foreignkeys",
+      "target": "city",
+      "targetStorageType": "cassandra",
+      "sourceKey": "city_ids",
+      "targetKey": "river_ids",
+      "keysIn": "river"
+    }
+  },
+  "internalId": "river_id"
+}
+
 module.exports.incident = {
   model: "Incident",
   storageType: "cassandra",

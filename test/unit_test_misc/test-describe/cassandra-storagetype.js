@@ -161,6 +161,41 @@ countCities: async function({
 }
 `;
 
+module.exports.river_many_to_many_cassandra_fieldResolver_Connection = `
+river.prototype.citiesConnection = function({
+  search,
+  order,
+  pagination
+}, context) {
+  //return an empty response if the foreignKey Array is empty, no need to query the database
+  if (!Array.isArray(this.city_ids) || this.city_ids.length === 0) {
+      return {
+          edges: [],
+          cities: [],
+          pageInfo: {
+              startCursor: null,
+              endCursor: null,
+              hasPreviousPage: false,
+              hasNextPage: false
+          }
+      };
+  }
+  const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.city_ids, models.city.idAttribute());
+  let nsearch = hasIdSearch ? search : helper.addSearchField({
+      "search": search,
+      "field": models.city.idAttribute(),
+      "value": this.city_ids.join(','),
+      "valueType": "Array",
+      "operator": "in"
+  });
+  return resolvers.citiesConnection({
+      search: nsearch,
+      order: order,
+      pagination: pagination
+  }, context);
+}
+`;
+
 module.exports.cassandra_model_constructor = `
 constructor(input) {
   for (let key of Object.keys(input)) {
