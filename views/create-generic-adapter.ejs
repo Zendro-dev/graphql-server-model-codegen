@@ -38,6 +38,22 @@ module.exports = class <%- nameLc -%>{
   }
 
   /**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+  static async batchReadById(keys) {
+    /*
+    YOUR CODE GOES HERE
+     */
+    throw new Error('readById() is not implemented for model <%- nameLc -%>');
+  }
+
+  static readByIdLoader = new DataLoader(<%- nameLc -%>.batchReadById, {
+    cache: false,
+  });
+
+  /**
    * readById - Search for the <%- nameLc -%> record whose id is equal to the @id received as parameter.
    * Returns an instance of this class (<%- nameLc -%>), with all its properties
    * set from the values of the record fetched.
@@ -54,18 +70,13 @@ module.exports = class <%- nameLc -%>{
    * @see: constructor() of the class <%- nameLc -%>;
    * 
    * @param  {<%- idAttributeType %>} id The id of the record that needs to be fetched.
-   * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard 
    * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
    * is invoked, the server will include any so reported errors in the final response, i.e. the 
    * GraphQL response will have a non empty errors property.
    * @return {<%- nameLc -%>} Instance of <%- nameLc -%> class.
    */
-  static async readById( id, benignErrorReporter ){
-    
-    /*
-    YOUR CODE GOES HERE
-     */
-    throw new Error('readById() is not implemented for model <%- nameLc -%>');
+  static async readById(id) {
+    return await <%- nameLc -%>.readByIdLoader.load(id);
   }
 
   /**
