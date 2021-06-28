@@ -2453,8 +2453,7 @@ describe("Generic Adapter", function () {
     );
     let g_schema = generated_schema.replace(/\s/g, "");
     expect(g_schema, "Incorrect schema")
-      .to.match(data_test.test20_1)
-      .and.to.match(data_test.test20_2)
+      .to.match(data_test.test20_2)
       .and.to.match(data_test.test20_3)
       .and.to.match(data_test.test20_4)
       .and.to.match(data_test.test20_5)
@@ -2467,6 +2466,7 @@ describe("Generic Adapter", function () {
       .and.to.match(data_test.test20_12)
       .and.to.match(data_test.test20_13)
       .and.to.match(data_test.test20_14);
+    testCompare(generated_schema, data_test.test20_1);
   });
 });
 
@@ -2725,7 +2725,10 @@ describe("Cassandra storagetype", function () {
   it("targetStorageType cassandra fieldResolver Workaround - citiesConnection", async function () {
     let opts = funks.getOptions(models_cassandra.river);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    testCompare(generated_resolver, data_test.river_many_to_many_cassandra_fieldResolver_Connection);
+    testCompare(
+      generated_resolver,
+      data_test.river_many_to_many_cassandra_fieldResolver_Connection
+    );
   });
 
   it("cassandra models - constructor", async function () {

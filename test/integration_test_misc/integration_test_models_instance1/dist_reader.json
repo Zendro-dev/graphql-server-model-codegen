@@ -11,5 +11,6 @@
         "history": "[String]"
     },
   
-    "internalId": "reader_id"
+    "internalId" : "reader_id",
+    "useDataLoader": false
 }

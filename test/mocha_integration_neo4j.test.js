@@ -399,7 +399,7 @@ describe("Neo4j - Association", () => {
       },
     });
   });
-  it("02. Movie : Director (n:1) - read one associated movie", () => {
+  it("02. Movie : Director (n:1) - read one movie / read one director", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
         readOneMovie(movie_id: "m1"){
@@ -420,6 +420,26 @@ describe("Neo4j - Association", () => {
             director_name: "Chloé Zhao",
           },
           movie_id: "m1",
+        },
+      },
+    });
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneDirector(director_id: "d1"){
+            director_id
+            director_name
+        }
+    }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDirector: {
+          director_id: "d1",
+          director_name: "Chloé Zhao",
         },
       },
     });
@@ -740,7 +760,50 @@ describe("Neo4j - Distributed Data Models", () => {
       });
     }
   });
-  it("02. Movie DDM: update the director to associate with movies", () => {
+
+  it("02. Movie DDM: read one movie / read one director", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneDist_movie(movie_id: "instance1-02"){
+            movie_id
+            runtime
+        }
+    }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_movie: {
+          movie_id: "instance1-02",
+          runtime: 110,
+        },
+      },
+    });
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneDist_director(director_id: "instance1-01"){
+            director_id
+            director_name
+        }
+    }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneDist_director: {
+          director_id: "instance1-01",
+          director_name: "Chloé Zhao",
+        },
+      },
+    });
+  });
+
+  it("03. Movie DDM: update the director to associate with movies", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `mutation {
           updateDist_director(director_id: "instance1-01", addDist_movies: ["instance1-02", "instance1-03"]) {
@@ -789,7 +852,7 @@ describe("Neo4j - Distributed Data Models", () => {
       },
     });
   });
-  it("03. Movie DDM: read all", () => {
+  it("04. Movie DDM: read all", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
           dist_directorsConnection(pagination: {first: 25}) {
@@ -820,7 +883,7 @@ describe("Neo4j - Distributed Data Models", () => {
       },
     });
   });
-  it("04. Movie DDM: search, sort and pagination", () => {
+  it("05. Movie DDM: search, sort and pagination", () => {
     res = itHelpers.request_graph_ql_post_instance2(
       `{
           dist_moviesConnection(search: {field: movie_id, value: "instance.*", operator: regexp}, pagination: {first: 5}) {
@@ -961,7 +1024,7 @@ describe("Neo4j - Distributed Data Models", () => {
       },
     });
   });
-  it("05. Movie DDM: update the director to remove associations", () => {
+  it("06. Movie DDM: update the director to remove associations", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `mutation {
           updateDist_director(director_id:"instance1-01" removeDist_movies:["instance1-02", "instance1-03"]) {
@@ -991,6 +1054,338 @@ describe("Neo4j - Distributed Data Models", () => {
             edges: [],
             dist_movies: [],
           },
+        },
+      },
+    });
+  });
+});
+
+describe("data loader for readById method", () => {
+  //set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        n1: addMovie(movie_id:"m1", genres:["action","thriller"]){ genres }
+        n2: addMovie(movie_id:"m2", genres:["wuxia","mystery"]){ genres }
+        n3: addMovie(movie_id:"m3", genres:["crime","horror"]){ genres }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post_instance2(`
+      mutation {
+        n1: addDirector( director_id: "d1", director_name: "Chloé Zhao", addMovies: ["m1", "m2"] ){ director_name }
+        n2: addDirector( director_id: "d2", director_name: "Sakamoto Yuuji", addMovies: ["m3"] ){ director_name }
+      }`);
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        n1: addActor(actor_id:"a1", actor_name:"Yokohama Ryusei", addMovies:["m1", "m3"]){ actor_id }
+        n2: addActor(actor_id:"a2", actor_name:"Minami Hamabe", addMovies:["m1", "m2"]){ actor_id }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        addReview(review_id:"r1", rating:4.9, addUnique_movie:"m2"){
+          review_id
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+  });
+  //clean up records
+  after(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        n0: updateDirector(director_id: "d1", removeMovies: ["m1", "m2"]) { director_name }
+        n1: updateDirector(director_id: "d2", removeMovies: ["m3"]) { director_name }
+        n2: updateActor(actor_id: "a1", removeMovies:["m1", "m3"]){ actor_id }
+        n3: updateActor(actor_id: "a2", removeMovies:["m1", "m2"]){ actor_id }
+        n4: updateReview(review_id: "r1", removeUnique_movie: "m2"){ review_id }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        n1: deleteMovie (movie_id: "m1")
+        n2: deleteMovie (movie_id: "m2")
+        n3: deleteMovie (movie_id: "m3")
+        n4: deleteDirector (director_id: "d1")
+        n5: deleteDirector (director_id: "d2")
+        n6: deleteActor (actor_id: "a1")
+        n7: deleteActor (actor_id: "a2")
+        n8: deleteReview (review_id: "r1")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+  });
+  it("01. director -> movie: one to many", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        n0: readOneDirector(director_id: "d1") {
+          countFilteredMovies(search: null)
+          moviesFilter(pagination:{offset: 0, limit: 2}){
+            genres
+          }
+          moviesConnection(pagination:{first:2}){
+            movies{
+              movie_id
+            }
+          }
+        }
+        n1: readOneDirector(director_id: "d2") {
+          countFilteredMovies(search: null)
+          moviesFilter(pagination:{offset: 0, limit: 2}){
+            genres
+          }
+          moviesConnection(pagination:{first:2}){
+            movies{
+              movie_id
+            }
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        moviesConnection: {
+          movies: [
+            {
+              movie_id: "m1",
+            },
+            {
+              movie_id: "m2",
+            },
+          ],
+        },
+        moviesFilter: [
+          {
+            genres: ["action", "thriller"],
+          },
+          {
+            genres: ["wuxia", "mystery"],
+          },
+        ],
+        countFilteredMovies: 2,
+      },
+      n1: {
+        moviesConnection: {
+          movies: [
+            {
+              movie_id: "m3",
+            },
+          ],
+        },
+        moviesFilter: [
+          {
+            genres: ["crime", "horror"],
+          },
+        ],
+        countFilteredMovies: 1,
+      },
+    });
+  });
+  it("02. movie -> director: many to one", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(`{
+      n0: readOneMovie(movie_id: "m1"){
+        genres
+        director{
+          director_name
+        }
+      }
+      n1: readOneMovie(movie_id: "m2"){
+        genres
+        director{
+          director_name
+        }
+      }
+      n2: readOneMovie(movie_id: "m3"){
+        genres
+        director{
+          director_name
+        }
+      }
+      n4: readOneMovie(movie_id: "m4"){
+        genres
+        director{
+          director_name
+        }
+      }
+    }`);
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.errors).to.deep.equal([
+      {
+        message: 'Record with ID = "m4" does not exist',
+        locations: [
+          {
+            column: 7,
+            line: 20,
+          },
+        ],
+        path: ["n4"],
+      },
+    ]);
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        genres: ["action", "thriller"],
+        director: {
+          director_name: "Chloé Zhao",
+        },
+      },
+      n1: {
+        genres: ["wuxia", "mystery"],
+        director: {
+          director_name: "Chloé Zhao",
+        },
+      },
+      n2: {
+        genres: ["crime", "horror"],
+        director: {
+          director_name: "Sakamoto Yuuji",
+        },
+      },
+      n4: null,
+    });
+  });
+  it("03. movie <-> actor: many to many", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        n0: readOneMovie(movie_id: "m1") {
+          countFilteredActor(search: null)
+          actorFilter(pagination:{offset: 0, limit: 2}){
+            actor_id
+          }
+          actorConnection(search: null, pagination: {first:2})
+          {
+            edges{
+              node{
+                actor_id
+              }
+            }
+          }
+        }
+        n1: readOneMovie(movie_id: "m2") {
+          countFilteredActor(search: null)
+          actorFilter(pagination:{offset: 0, limit: 2}){
+            actor_id
+          }
+          actorConnection(search: null, pagination: {first:2})
+          {
+            edges{
+              node{
+                actor_id
+              }
+            }
+          }
+        }
+        n2: readOneMovie(movie_id: "m3") {
+          countFilteredActor(search: null)
+          actorFilter(pagination:{offset: 0, limit: 2}){
+            actor_id
+          }
+          actorConnection(search: null, pagination: {first:2})
+          {
+            edges{
+              node{
+                actor_id
+              }
+            }
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        countFilteredActor: 2,
+        actorConnection: {
+          edges: [
+            {
+              node: {
+                actor_id: "a1",
+              },
+            },
+            {
+              node: {
+                actor_id: "a2",
+              },
+            },
+          ],
+        },
+        actorFilter: [
+          {
+            actor_id: "a1",
+          },
+          {
+            actor_id: "a2",
+          },
+        ],
+      },
+      n1: {
+        countFilteredActor: 1,
+        actorConnection: {
+          edges: [
+            {
+              node: {
+                actor_id: "a2",
+              },
+            },
+          ],
+        },
+        actorFilter: [
+          {
+            actor_id: "a2",
+          },
+        ],
+      },
+      n2: {
+        countFilteredActor: 1,
+        actorConnection: {
+          edges: [
+            {
+              node: {
+                actor_id: "a1",
+              },
+            },
+          ],
+        },
+        actorFilter: [
+          {
+            actor_id: "a1",
+          },
+        ],
+      },
+    });
+  });
+  it("04. movie <-> review: one to one", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+        readOneMovie(movie_id: "m2") {
+          genres
+          unique_review(search: null){
+            review_id
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      readOneMovie: {
+        genres: ["wuxia", "mystery"],
+        unique_review: {
+          review_id: "r1",
         },
       },
     });

@@ -205,17 +205,42 @@ constructor(input) {
 `;
 
 module.exports.cassandra_model_readById = `
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: city.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await city.readAllCursor(queryArg);
+    cursorRes = cursorRes.cities.reduce(
+        (map, obj) => ((map[obj[city.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(city.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the Cassandra storage type, based on CQL.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type city, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
 static async readById(id) {
-  const query = \`SELECT * FROM "cities" WHERE city_id = ?\`;
-  let queryResult = await this.storageHandler.execute(query, [id], {
-      prepare: true
-  });
-  let firstResult = queryResult.first();
-  if (firstResult === null) {
-      throw new Error(\`Record with ID = "\${id}" does not exist\`);
-  }
-  let item = new city(firstResult);
-  return validatorUtil.validateData('validateAfterRead', this, item);
+    return await city.readByIdLoader.load(id);
 }
 `;
 

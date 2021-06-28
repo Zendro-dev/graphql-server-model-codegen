@@ -96,13 +96,34 @@ static recognizeId(iri) {
 `;
 
 module.exports.readById = `
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: peopleLocalSql.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await peopleLocalSql.readAllCursor(queryArg);
+    cursorRes = cursorRes.people.reduce(
+        (map, obj) => ((map[obj[peopleLocalSql.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(peopleLocalSql.batchReadById, {
+    cache: false,
+});
+
 static async readById(id) {
-    let item = await peopleLocalSql.findByPk(id);
-    if (item === null) {
-        throw new Error(\`Record with ID = "\${id}" does not exist\`);
-    }
-    item = peopleLocalSql.postReadCast(item)
-    return item;
+    return await peopleLocalSql.readByIdLoader.load(id);
 }
 `;
 

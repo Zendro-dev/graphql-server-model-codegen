@@ -12,7 +12,7 @@ const models = require(path.join(__dirname, "..", "index.js"));
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
-
+const DataLoader = require("dataloader");
 /**
  * module - Creates a class for Neo4j data model
  *
@@ -43,7 +43,45 @@ module.exports = class <%- nameLc -%> {
     return "<%- nameLc -%>";
   }
 
-  /**
+  <% if (useDataLoader) {%>/**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+   static async batchReadById(keys) {
+     let queryArg = {
+       operator: "in",
+       field: <%- nameLc -%>.idAttribute(),
+       value: keys.join(),
+       valueType: "Array",
+     };
+     let cursorRes = await <%- nameLc -%>.readAllCursor(queryArg);
+     cursorRes = cursorRes.<%- namePl -%>.reduce(
+       (map, obj) => ((map[obj[<%- nameLc -%>.idAttribute()]] = obj), map),
+       {}
+     );
+     return keys.map(
+       (key) =>
+         cursorRes[key] || new Error(`Record with ID = "${key}" does not exist`)
+     );
+   }
+ 
+   static readByIdLoader = new DataLoader(<%- nameLc -%>.batchReadById, {
+     cache: false,
+   });
+ 
+   /**
+   * readById - The model implementation for reading a single record given by its ID
+   *
+   * This method is the implementation for reading a single record for the neo4j storage type, based on neo4j node driver.
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
+   static async readById(id) {
+     return await <%- nameLc -%>.readByIdLoader.load(id);
+   }<% } else 
+  {%>/**
    * readById - The model implementation for reading a single record given by its ID
    *
    * This method is the implementation for reading a single record for the neo4j storage type, based on neo4j node driver.
@@ -77,7 +115,7 @@ module.exports = class <%- nameLc -%> {
     } finally {
       await session.close();
     }
-  }
+  }<%}-%>
 
   /**
    * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
@@ -199,11 +237,14 @@ module.exports = class <%- nameLc -%> {
     );
 
     // add +1 to the LIMIT to get information about following pages.
-    let limit = helper.isNotUndefinedAndNotNull(pagination.first)
-      ? pagination.first + 1
-      : helper.isNotUndefinedAndNotNull(pagination.last)
-      ? pagination.last + 1
-      : undefined;
+    let limit;
+    if (pagination){
+      limit = helper.isNotUndefinedAndNotNull(pagination.first)
+        ? pagination.first + 1
+        : helper.isNotUndefinedAndNotNull(pagination.last)
+        ? pagination.last + 1
+        : undefined;      
+    }
 
     const driver = await this.storageHandler;
     const session = driver.session({
@@ -212,9 +253,9 @@ module.exports = class <%- nameLc -%> {
     });
     let nodes = [];
     try {
-      const result = await session.run(
-        `MATCH (n:<%- nameCp -%>) ${filter} RETURN n ${sort} LIMIT ${limit}`
-      );
+      let query = `MATCH (n:<%- nameCp -%>) ${filter} RETURN n ${sort}`
+      query += limit? ` LIMIT ${limit}` : "";
+      const result = await session.run(query);
       nodes = result.records.map((res) => new <%- nameLc -%>(res.get(0).properties));
       nodes = await validatorUtil.bulkValidateData(
         "validateAfterRead",
@@ -259,16 +300,18 @@ module.exports = class <%- nameLc -%> {
         definition.attributes
       );
       // add +1 to the LIMIT to get information about following pages.
-      let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first)
-        ? oppPagination.first + 1
-        : helper.isNotUndefinedAndNotNull(oppPagination.last)
-        ? oppPagination.last + 1
-        : undefined;
-
+      let oppLimit;
+      if (pagination){
+        oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first)
+          ? oppPagination.first + 1
+          : helper.isNotUndefinedAndNotNull(oppPagination.last)
+          ? oppPagination.last + 1
+          : undefined;
+      }
       try {
-        const oppResult = await session.run(
-          `MATCH (n:<%- nameCp -%>) ${oppFilter} RETURN n ${oppSort} LIMIT ${oppLimit}`
-        );
+        let query = `MATCH (n:<%- nameCp -%>) ${oppFilter} RETURN n ${oppSort}`;
+        query += limit? ` LIMIT ${oppLimit}` : "";
+        const oppResult = await session.run(query);
         oppNodes = oppResult.records.map(
           (res) => new <%- nameLc -%>(res.get(0).properties)
         );

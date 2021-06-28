@@ -18,6 +18,7 @@
         "targetStorageType": "distributed-data-model"
       }
     },
-    "internalId": "director_id"
+    "internalId": "director_id",
+    "useDataLoader": false
 }
   

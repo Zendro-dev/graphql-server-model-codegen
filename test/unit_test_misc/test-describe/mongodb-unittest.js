@@ -7,18 +7,42 @@ constructor(input) {
 `;
 
 module.exports.animal_readById = `
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: animal.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await animal.readAllCursor(queryArg);
+    cursorRes = cursorRes.animals.reduce(
+        (map, obj) => ((map[obj[animal.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(animal.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the MongoDb storage type, based on MongoDb node driver.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type animal, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
 static async readById(id) {
-    const db = await this.storageHandler;
-    const collection = await db.collection("animal");
-    const id_name = this.idAttribute();
-    let item = await collection.findOne({
-        [id_name]: id
-    });
-    if (item === null) {
-        throw new Error(\`Record with ID = "\${id}" does not exist\`);
-    }
-    item = new animal(item);
-    return validatorUtil.validateData('validateAfterRead', this, item);
+    return await animal.readByIdLoader.load(id);
 }
 `;
 
@@ -68,11 +92,20 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     filter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(pagination, sort, filter, orderFields, this.idAttribute());
 
     // add +1 to the LIMIT to get information about following pages.
-    let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first + 1 : helper.isNotUndefinedAndNotNull(pagination.last) ? pagination.last + 1 : undefined;
+    let limit;
+    if (pagination) {
+        limit = helper.isNotUndefinedAndNotNull(pagination.first) ?
+            pagination.first + 1 :
+            helper.isNotUndefinedAndNotNull(pagination.last) ?
+            pagination.last + 1 :
+            undefined;
+    }
 
     const db = await this.storageHandler;
     const collection = await db.collection("animal");
-    let documents = await collection.find(filter).limit(limit).sort(sort).toArray();
+    let documents = limit ?
+        await collection.find(filter).limit(limit).sort(sort).toArray() :
+        await collection.find(filter).sort(sort).toArray();
 
     // validationCheck after read
     documents = await validatorUtil.bulkValidateData('validateAfterRead', this, documents, benignErrorReporter);
@@ -96,20 +129,35 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
         // extend the filter for the given order and cursor
         oppFilter = mongoDbHelper.cursorPaginationArgumentsToMongoDb(oppPagination, oppSort, oppFilter, oppOrderFields, this.idAttribute());
         // add +1 to the LIMIT to get information about following pages.
-        let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ? oppPagination.first + 1 : helper.isNotUndefinedAndNotNull(oppPagination.last) ? oppPagination.last + 1 : undefined;
-        oppDocuments = await collection.find(oppFilter).limit(oppLimit).toArray();
+        let oppLimit;
+        if (pagination) {
+            oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ?
+                oppPagination.first + 1 :
+                helper.isNotUndefinedAndNotNull(oppPagination.last) ?
+                oppPagination.last + 1 :
+                undefined;
+        }
+        oppDocuments = oppLimit ?
+            await collection.find(oppFilter).limit(oppLimit).toArray() :
+            await collection.find(oppFilter).toArray();
     }
 
     // build the graphql Connection Object
-    let docs = documents.map( doc => { return new animal(doc)});
-    let edges = docs.map( doc => {
-      return {
-        node: doc,
-        cursor: doc.base64Enconde(),
-      }
+    let docs = documents.map(doc => {
+        return new animal(doc)
+    });
+    let edges = docs.map(doc => {
+        return {
+            node: doc,
+            cursor: doc.base64Enconde(),
+        }
     });
     const pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);
-    return {edges, pageInfo, animals: edges.map((edge) => edge.node)};
+    return {
+        edges,
+        pageInfo,
+        animals: edges.map((edge) => edge.node)
+    };
 }
 `;
 
@@ -416,15 +464,41 @@ static async bulkDisAssociateAnimalWithFarm_id(bulkAssociationInput, benignError
 `;
 
 module.exports.mongodb_adapter_readById = `
-static async readById(id){
-    const db = await this.storageHandler;
-    const collection = await db.collection("dist_animal");
-    const id_name = this.idAttribute();
-    let item = await collection.findOne({[id_name] : id});
-    if (item === null) {
-        throw new Error(\`Record with ID = "\${id}" does not exist\`);
-    }
-    item = new dist_animal_instance1(item);
-    return validatorUtil.validateData('validateAfterRead', this, item);
-  }
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: dist_animal_instance1.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await dist_animal_instance1.readAllCursor(queryArg);
+    cursorRes = cursorRes.dist_animals.reduce(
+        (map, obj) => ((map[obj[dist_animal_instance1.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(dist_animal_instance1.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the MongoDb storage type, based on MongoDb node driver.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type dist_animal_instance1, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
+static async readById(id) {
+    return await dist_animal_instance1.readByIdLoader.load(id);
+}
 `;

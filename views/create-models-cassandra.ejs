@@ -11,6 +11,7 @@ const models = require(path.join(__dirname, '..', 'index.js'));
 
 // An exact copy of the the model definition that comes from the .json file
 const definition = <%- definition -%>;
+const DataLoader = require("dataloader");
 
 /**
  * module - Creates a class to administer Cassandra model types
@@ -36,7 +37,45 @@ module.exports = class <%- name -%> {
     return "<%- nameLc -%>";
   }
 
-  /**
+  <% if (useDataLoader) {%>/**
+    * Batch function for readById method.
+    * @param  {array} keys  keys from readById method
+    * @return {array}       searched results
+    */
+   static async batchReadById(keys) {
+     let queryArg = {
+       operator: "in",
+       field: <%- name -%>.idAttribute(),
+       value: keys.join(),
+       valueType: "Array",
+     };
+     let cursorRes = await <%- name -%>.readAllCursor(queryArg);
+     cursorRes = cursorRes.<%- namePl -%>.reduce(
+       (map, obj) => ((map[obj[<%- name -%>.idAttribute()]] = obj), map),
+       {}
+     );
+     return keys.map(
+       (key) =>
+         cursorRes[key] || new Error(`Record with ID = "${key}" does not exist`)
+     );
+   }
+ 
+   static readByIdLoader = new DataLoader(<%- name -%>.batchReadById, {
+     cache: false,
+   });
+
+   /**
+   * readById - The model implementation for reading a single record given by its ID
+   *
+   * This method is the implementation for reading a single record for the Cassandra storage type, based on CQL.
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- name -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
+   static async readById(id) {
+     return await <%- name -%>.readByIdLoader.load(id);
+   }<% } else 
+  {%>/**
   * readById - The model implementation for reading a single record given by its ID
   *
   * This method is the implementation for reading a single record for the Cassandra storage type, based on CQL.
@@ -53,8 +92,8 @@ module.exports = class <%- name -%> {
     }
     let item = new <%- name -%>(firstResult);
     return validatorUtil.validateData('validateAfterRead', this, item);
-  }
-
+  }<%}-%>
+  
   /**
   * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
   *

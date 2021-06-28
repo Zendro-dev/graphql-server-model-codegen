@@ -22,5 +22,6 @@
 
   },
 
-  "internalId": "incident_id"
+  "internalId": "incident_id",
+  "useDataLoader": false
 }

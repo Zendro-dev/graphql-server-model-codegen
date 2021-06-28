@@ -24,5 +24,6 @@
       "keysIn": "city"
     }
   },
-  "internalId": "city_id"
+  "internalId": "city_id",
+  "useDataLoader": true
 }

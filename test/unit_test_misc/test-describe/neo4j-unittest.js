@@ -7,33 +7,42 @@ constructor(input) {
 `;
 
 module.exports.movie_readById = `
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: movie.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await movie.readAllCursor(queryArg);
+    cursorRes = cursorRes.movies.reduce(
+        (map, obj) => ((map[obj[movie.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(movie.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the neo4j storage type, based on neo4j node driver.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type movie, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
 static async readById(id) {
-    const driver = await this.storageHandler;
-    const session = driver.session({
-        database: config.database,
-        defaultAccessMode: neo4j.session.READ,
-    });
-    try {
-        const result = await session.run(
-            \`MATCH (n:Movie {\${this.idAttribute()}:\$id}) RETURN n\`, {
-                id: id
-            }
-        );
-        if (result.records.length === 0) {
-            throw new Error(\`Record with ID = "\${id}" does not exist\`);
-        }
-        const singleRecord = result.records[0];
-        const node = singleRecord.get(0);
-        return validatorUtil.validateData(
-            "validateAfterRead",
-            this,
-            new movie(node.properties)
-        );
-    } catch (error) {
-        throw error;
-    } finally {
-        await session.close();
-    }
+    return await movie.readByIdLoader.load(id);
 }
 `;
 
@@ -135,11 +144,14 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     );
 
     // add +1 to the LIMIT to get information about following pages.
-    let limit = helper.isNotUndefinedAndNotNull(pagination.first) ?
-        pagination.first + 1 :
-        helper.isNotUndefinedAndNotNull(pagination.last) ?
-        pagination.last + 1 :
-        undefined;
+    let limit;
+    if (pagination) {
+        limit = helper.isNotUndefinedAndNotNull(pagination.first) ?
+            pagination.first + 1 :
+            helper.isNotUndefinedAndNotNull(pagination.last) ?
+            pagination.last + 1 :
+            undefined;
+    }
 
     const driver = await this.storageHandler;
     const session = driver.session({
@@ -148,9 +160,9 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     });
     let nodes = [];
     try {
-        const result = await session.run(
-            \`MATCH (n:Movie) \${filter} RETURN n \${sort} LIMIT \${limit}\`
-        );
+        let query = \`MATCH (n:Movie) \${filter} RETURN n \${sort}\`
+        query += limit ? \` LIMIT \${limit}\` : "";
+        const result = await session.run(query);
         nodes = result.records.map((res) => new movie(res.get(0).properties));
         nodes = await validatorUtil.bulkValidateData(
             "validateAfterRead",
@@ -195,16 +207,18 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
             definition.attributes
         );
         // add +1 to the LIMIT to get information about following pages.
-        let oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ?
-            oppPagination.first + 1 :
-            helper.isNotUndefinedAndNotNull(oppPagination.last) ?
-            oppPagination.last + 1 :
-            undefined;
-
+        let oppLimit;
+        if (pagination) {
+            oppLimit = helper.isNotUndefinedAndNotNull(oppPagination.first) ?
+                oppPagination.first + 1 :
+                helper.isNotUndefinedAndNotNull(oppPagination.last) ?
+                oppPagination.last + 1 :
+                undefined;
+        }
         try {
-            const oppResult = await session.run(
-                \`MATCH (n:Movie) \${oppFilter} RETURN n \${oppSort} LIMIT \${oppLimit}\`
-            );
+            let query = \`MATCH (n:Movie) \${oppFilter} RETURN n \${oppSort}\`;
+            query += limit ? \` LIMIT \${oppLimit}\` : "";
+            const oppResult = await session.run(query);
             oppNodes = oppResult.records.map(
                 (res) => new movie(res.get(0).properties)
             );
@@ -603,32 +617,41 @@ static async bulkDisAssociateMovieWithDirector_id(bulkAssociationInput, benignEr
 `;
 
 module.exports.neo4j_adapter_readById = `
-static async readById(id){
-    const driver = await this.storageHandler;
-    const session = driver.session({
-        database: config.database,
-        defaultAccessMode: neo4j.session.READ,
-    });
-    try {
-        const result = await session.run(
-            \`MATCH (n:Dist_movie {\${this.idAttribute()}:\$id}) RETURN n\`, {
-                id: id
-            }
-        );
-        if (result.records.length === 0) {
-            throw new Error(\`Record with ID = "\${id}" does not exist\`);
-        }
-        const singleRecord = result.records[0];
-        const node = singleRecord.get(0);
-        return validatorUtil.validateData(
-            "validateAfterRead",
-            this,
-            new dist_movie_instance1(node.properties)
-        );
-    } catch (error) {
-        throw error;
-    } finally {
-        await session.close();
-    }
+/**
+ * Batch function for readById method.
+ * @param  {array} keys  keys from readById method
+ * @return {array}       searched results
+ */
+static async batchReadById(keys) {
+    let queryArg = {
+        operator: "in",
+        field: dist_movie_instance1.idAttribute(),
+        value: keys.join(),
+        valueType: "Array",
+    };
+    let cursorRes = await dist_movie_instance1.readAllCursor(queryArg);
+    cursorRes = cursorRes.dist_movies.reduce(
+        (map, obj) => ((map[obj[dist_movie_instance1.idAttribute()]] = obj), map), {}
+    );
+    return keys.map(
+        (key) =>
+        cursorRes[key] || new Error(\`Record with ID = "\${key}" does not exist\`)
+    );
+}
+
+static readByIdLoader = new DataLoader(dist_movie_instance1.batchReadById, {
+    cache: false,
+});
+
+/**
+ * readById - The model implementation for reading a single record given by its ID
+ *
+ * This method is the implementation for reading a single record for the neo4j storage type, based on neo4j node driver.
+ * @param {string} id - The ID of the requested record
+ * @return {object} The requested record as an object with the type dist_movie_instance1, or an error object if the validation after reading fails
+ * @throws {Error} If the requested record does not exist
+ */
+static async readById(id) {
+    return await dist_movie_instance1.readByIdLoader.load(id);
 }
 `;

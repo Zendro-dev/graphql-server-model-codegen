@@ -3959,3 +3959,387 @@ describe("Helper connection for direct access to nodes", function () {
     });
   });
 });
+
+describe("data loader for readById method", () => {
+  //set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        n1: addAccession(accession_id: "a-instance1", collectors_name: "aa") {
+          accession_id
+        }
+        n2: addAccession(accession_id: "c-instance1", collectors_name: "cc") {
+          accession_id
+        }
+        n3: addAccession(accession_id: "d-instance1", collectors_name: "dd") {
+          accession_id
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`
+      mutation {
+        n1: addLocation(locationId: "l1", country: "c1",
+        addAccessions:["a-instance1"]){
+          locationId
+          country
+        }
+        n2: addLocation(locationId: "l2", country: "c2",
+        addAccessions:["c-instance1", "d-instance1"]){
+          locationId
+          country
+        }
+      }`);
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: addBook(id:"b1" title:"t1"){id}
+        n1: addBook(id:"b2" title:"t2"){id} 
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n1: addAuthor(id:"a1" name:"n1" addBooks:["b1","b2"]){id}
+        n2: addAuthor(id:"a2" name:"n2" addBooks:["b1"]){id}
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        addCountry(country_id: "GER", name: "Germany") {country_id}
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        addCapital(capital_id:"GER_B", name: "Berlin", addUnique_country:"GER") {capital_id}
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+  });
+  //clean up records
+  after(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        n0: updateLocation(locationId: "l1", removeAccessions: ["a-instance1"]) {
+          locationId
+        }
+        n1: updateLocation(locationId: "l2", removeAccessions: ["c-instance1", "d-instance1"]) {
+          locationId
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n1: deleteLocation(locationId:"l1")
+        n2: deleteLocation(locationId:"l2")
+        n3: deleteAccession(accession_id:"a-instance1")
+        n4: deleteAccession(accession_id:"c-instance1")
+        n5: deleteAccession(accession_id:"d-instance1")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: updateAuthor(id:"a1" removeBooks:["b1","b2"]){id }
+        n1: updateAuthor(id:"a2" removeBooks:["b1"]){id}
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: deleteBook(id:"b1")
+        n1: deleteBook(id:"b2")
+        n2: deleteAuthor(id:"a1")
+        n3: deleteAuthor(id:"a2")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation {
+        updateCountry(country_id: "GER", removeUnique_capital:"GER_B") {country_id}
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation {
+        n1: deleteCountry(country_id: "GER")
+        n2: deleteCapital(capital_id: "GER_B")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+  });
+  it("01. location -> accession: one to many", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        n0: readOneLocation(locationId: "l1") {
+          countFilteredAccessions(search: null)
+          accessionsFilter(pagination:{offset: 0, limit: 2}){
+            accession_id
+          }
+          accessionsConnection(search: null,
+            pagination: {first:2})
+          {
+              edges{
+                node{
+                  accession_id
+                }
+              }
+          }
+        }
+        n1: readOneLocation(locationId: "l2") {
+          countFilteredAccessions(search: null)
+          accessionsFilter(pagination:{offset: 0, limit: 2}){
+            accession_id
+          }
+          accessionsConnection(search: null,
+            pagination: {first:2})
+          {
+              edges{
+                node{
+                  accession_id
+                }
+              }
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        accessionsConnection: {
+          edges: [
+            {
+              node: {
+                accession_id: "a-instance1",
+              },
+            },
+          ],
+        },
+        accessionsFilter: [
+          {
+            accession_id: "a-instance1",
+          },
+        ],
+        countFilteredAccessions: 1,
+      },
+      n1: {
+        accessionsConnection: {
+          edges: [
+            {
+              node: {
+                accession_id: "c-instance1",
+              },
+            },
+            {
+              node: {
+                accession_id: "d-instance1",
+              },
+            },
+          ],
+        },
+        accessionsFilter: [
+          {
+            accession_id: "c-instance1",
+          },
+          {
+            accession_id: "d-instance1",
+          },
+        ],
+        countFilteredAccessions: 2,
+      },
+    });
+  });
+  it("02. accession -> location: many to one", () => {
+    let res = itHelpers.request_graph_ql_post(`{
+      n0: readOneAccession(accession_id: "a-instance1") {
+        accession_id
+        collectors_name
+        location(search:null){
+          locationId
+        }
+      }
+      n1: readOneAccession(accession_id: "b-instance1") {
+        accession_id
+        collectors_name
+        location(search:null){
+          locationId
+        }
+      }
+      n2: readOneAccession(accession_id: "c-instance1") {
+        accession_id
+        collectors_name
+        location(search:null){
+          locationId
+        }
+      }
+      n3: readOneAccession(accession_id: "d-instance1") {
+        accession_id
+        collectors_name
+        location(search:null){
+          locationId
+        }
+      }
+    }`);
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.errors).to.deep.equal([
+      {
+        message: 'Record with ID = "b-instance1" does not exist',
+        locations: [
+          {
+            column: 7,
+            line: 9,
+          },
+        ],
+        path: ["n1"],
+      },
+    ]);
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        accession_id: "a-instance1",
+        collectors_name: "aa",
+        location: {
+          locationId: "l1",
+        },
+      },
+      n1: null,
+      n2: {
+        accession_id: "c-instance1",
+        collectors_name: "cc",
+        location: {
+          locationId: "l2",
+        },
+      },
+      n3: {
+        accession_id: "d-instance1",
+        collectors_name: "dd",
+        location: {
+          locationId: "l2",
+        },
+      },
+    });
+  });
+  it("03. book <-> author: many to many", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        n0: readOneBook(id: "b1") {
+          countFilteredAuthors(search: null)
+          authorsFilter(pagination:{offset: 0, limit: 2}){
+            id
+          }
+          authorsConnection(search: null,
+            pagination: {first:2})
+          {
+              edges{
+                node{
+                  id
+                }
+              }
+          }
+        }
+        n1: readOneBook(id: "b2") {
+          countFilteredAuthors(search: null)
+          authorsFilter(pagination:{offset: 0, limit: 2}){
+            id
+          }
+          authorsConnection(search: null,
+            pagination: {first:2})
+          {
+              edges{
+                node{
+                  id
+                }
+              }
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        authorsConnection: {
+          edges: [
+            {
+              node: {
+                id: "a1",
+              },
+            },
+            {
+              node: {
+                id: "a2",
+              },
+            },
+          ],
+        },
+        authorsFilter: [
+          {
+            id: "a1",
+          },
+          {
+            id: "a2",
+          },
+        ],
+        countFilteredAuthors: 2,
+      },
+      n1: {
+        authorsConnection: {
+          edges: [
+            {
+              node: {
+                id: "a1",
+              },
+            },
+          ],
+        },
+        authorsFilter: [
+          {
+            id: "a1",
+          },
+        ],
+        countFilteredAuthors: 1,
+      },
+    });
+  });
+  it("04. capital <-> country: one to one", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        readOneCountry(country_id: "GER") {
+          name
+          unique_capital(search: null){
+            capital_id
+            name
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      readOneCountry: {
+        name: "Germany",
+        unique_capital: {
+          capital_id: "GER_B",
+          name: "Berlin",
+        },
+      },
+    });
+  });
+});

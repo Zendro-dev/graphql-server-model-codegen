@@ -18,6 +18,7 @@
         "targetStorageType": "distributed-data-model"
       }
     },
-    "internalId": "farm_id"
+    "internalId": "farm_id",
+    "useDataLoader": false
 }
   
