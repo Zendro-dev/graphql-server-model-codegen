@@ -1024,3 +1024,335 @@ describe("Mongodb - Distributed Data Models", () => {
     });
   });
 });
+
+describe("data loader for readById method", () => {
+  //set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        n1: addAnimal(animal_id:"1", animal_name:"Lily"){ animal_name }
+        n2: addAnimal(animal_id:"2", animal_name:"Sally"){ animal_name }
+        n3: addAnimal(animal_id:"3", animal_name:"Luna"){ animal_name }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(`
+      mutation {
+        n1: addFarm( farm_id: 1, farm_name: "Dogs' Home", addAnimals: [1, 2] ){ farm_name }
+        n2: addFarm( farm_id: 2, farm_name: "Cats' Home", addAnimals: [3] ){ farm_name }
+      }`);
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n1: addFood(food_id:"1", food_name:"dried fish", addAnimals:[1, 3]){ food_id }
+        n2: addFood(food_id:"2", food_name:"bone", addAnimals:[1, 2]){ food_id }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        addTracker(tracker_id:1, location:"garden", addUnique_animal:2){
+          tracker_id
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+  });
+  //clean up records
+  after(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        n0: updateFarm(farm_id: 1, removeAnimals: [1, 2]) { farm_name }
+        n1: updateFarm(farm_id: 2, removeAnimals: [3]) { farm_name }
+        n2: updateFood(food_id: 1, removeAnimals:[1, 3]){ food_id }
+        n3: updateFood(food_id: 2, removeAnimals:[1, 2]){ food_id }
+        n4: updateTracker(tracker_id: 1, removeUnique_animal: 2){ tracker_id }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n1: deleteAnimal (animal_id: "1")
+        n2: deleteAnimal (animal_id: "2")
+        n3: deleteAnimal (animal_id: "3")
+        n4: deleteFarm (farm_id: "1")
+        n5: deleteFarm (farm_id: "2")
+        n6: deleteFood (food_id: "1")
+        n7: deleteFood (food_id: "2")
+        n8: deleteTracker (tracker_id: "1")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+  });
+  it("01. farm -> animal: one to many", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        n0: readOneFarm(farm_id: "1") {
+          countFilteredAnimals(search: null)
+          animalsFilter(pagination:{offset: 0, limit: 2}){
+            animal_name
+          }
+          animalsConnection(pagination:{first:2}){
+            animals{
+              animal_id
+            }
+          }
+        }
+        n1: readOneFarm(farm_id: "2") {
+          countFilteredAnimals(search: null)
+          animalsFilter(pagination:{offset: 0, limit: 2}){
+            animal_name
+          }
+          animalsConnection(pagination:{first:2}){
+            animals{
+              animal_id
+            }
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        animalsConnection: {
+          animals: [
+            {
+              animal_id: "1",
+            },
+            {
+              animal_id: "2",
+            },
+          ],
+        },
+        animalsFilter: [
+          {
+            animal_name: "Lily",
+          },
+          {
+            animal_name: "Sally",
+          },
+        ],
+        countFilteredAnimals: 2,
+      },
+      n1: {
+        animalsConnection: {
+          animals: [
+            {
+              animal_id: "3",
+            },
+          ],
+        },
+        animalsFilter: [
+          {
+            animal_name: "Luna",
+          },
+        ],
+        countFilteredAnimals: 1,
+      },
+    });
+  });
+  it("02. animal -> farm: many to one", () => {
+    let res = itHelpers.request_graph_ql_post(`{
+      n0: readOneAnimal(animal_id: "1"){
+        animal_name
+        farm{
+          farm_name
+        }
+      }
+      n1: readOneAnimal(animal_id: "2"){
+        animal_name
+        farm{
+          farm_name
+        }
+      }
+      n2: readOneAnimal(animal_id: "3"){
+        animal_name
+        farm{
+          farm_name
+        }
+      }
+      n4: readOneAnimal(animal_id: "4"){
+        animal_name
+        farm{
+          farm_name
+        }
+      }
+    }`);
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.errors).to.deep.equal([
+      {
+        message: 'Record with ID = "4" does not exist',
+        locations: [
+          {
+            column: 7,
+            line: 20,
+          },
+        ],
+        path: ["n4"],
+      },
+    ]);
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        animal_name: "Lily",
+        farm: {
+          farm_name: "Dogs' Home",
+        },
+      },
+      n1: {
+        animal_name: "Sally",
+        farm: {
+          farm_name: "Dogs' Home",
+        },
+      },
+      n2: {
+        animal_name: "Luna",
+        farm: {
+          farm_name: "Cats' Home",
+        },
+      },
+      n4: null,
+    });
+  });
+  it("03. animal <-> food: many to many", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        n0: readOneAnimal(animal_id: "1") {
+          countFilteredFood(search: null)
+          foodFilter(pagination:{offset: 0, limit: 2}){
+            food_id
+          }
+          foodConnection(search: null, pagination: {first:2})
+          {
+            edges{
+              node{
+                food_id
+              }
+            }
+          }
+        }
+        n1: readOneAnimal(animal_id: "2") {
+          countFilteredFood(search: null)
+          foodFilter(pagination:{offset: 0, limit: 2}){
+            food_id
+          }
+          foodConnection(search: null, pagination: {first:2})
+          {
+            edges{
+              node{
+                food_id
+              }
+            }
+          }
+        }
+        n2: readOneAnimal(animal_id: "3") {
+          countFilteredFood(search: null)
+          foodFilter(pagination:{offset: 0, limit: 2}){
+            food_id
+          }
+          foodConnection(search: null, pagination: {first:2})
+          {
+            edges{
+              node{
+                food_id
+              }
+            }
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      n0: {
+        countFilteredFood: 2,
+        foodConnection: {
+          edges: [
+            {
+              node: {
+                food_id: "1",
+              },
+            },
+            {
+              node: {
+                food_id: "2",
+              },
+            },
+          ],
+        },
+        foodFilter: [
+          {
+            food_id: "1",
+          },
+          {
+            food_id: "2",
+          },
+        ],
+      },
+      n1: {
+        countFilteredFood: 1,
+        foodConnection: {
+          edges: [
+            {
+              node: {
+                food_id: "2",
+              },
+            },
+          ],
+        },
+        foodFilter: [
+          {
+            food_id: "2",
+          },
+        ],
+      },
+      n2: {
+        countFilteredFood: 1,
+        foodConnection: {
+          edges: [
+            {
+              node: {
+                food_id: "1",
+              },
+            },
+          ],
+        },
+        foodFilter: [
+          {
+            food_id: "1",
+          },
+        ],
+      },
+    });
+  });
+  it("04. animal <-> tracker: one to one", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        readOneAnimal(animal_id: "2") {
+          animal_name
+          unique_tracker(search: null){
+            tracker_id
+          }
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      readOneAnimal: {
+        animal_name: "Sally",
+        unique_tracker: {
+          tracker_id: "1",
+        },
+      },
+    });
+  });
+});

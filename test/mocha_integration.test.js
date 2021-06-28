@@ -4163,7 +4163,7 @@ describe("data loader for readById method", () => {
       },
     });
   });
-  it("02. accession -> location: one to many", () => {
+  it("02. accession -> location: many to one", () => {
     let res = itHelpers.request_graph_ql_post(`{
       n0: readOneAccession(accession_id: "a-instance1") {
         accession_id
@@ -4194,7 +4194,7 @@ describe("data loader for readById method", () => {
         }
       }
     }`);
-    // expect(res.statusCode).to.equal(200);
+    expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
     //check associated records
     expect(resBody.errors).to.deep.equal([
@@ -4317,7 +4317,7 @@ describe("data loader for readById method", () => {
       },
     });
   });
-  it("03. capital <-> country: one to one", () => {
+  it("04. capital <-> country: one to one", () => {
     let res = itHelpers.request_graph_ql_post(
       `{
         readOneCountry(country_id: "GER") {
