@@ -766,7 +766,7 @@ module.exports.parseAssociations = function (dataModel) {
 
       if (type !== 'one_to_one' && type !== 'one_to_many' && type !== 'many_to_one' && type !== 'many_to_many') {
         console.error(
-          colors.red("Association type " + association.type + " not supported.")
+          colors.red("Association type " + type + " not supported.")
         );
       }
 
@@ -784,6 +784,7 @@ module.exports.parseAssociations = function (dataModel) {
         inflection.pluralize(association.target)
       );
       assoc["reverseAssociation"] = association.reverseAssociation;
+      assoc["type"] = association.type;
 
       if (implementation !== 'generic') {
         // set extra association fields
@@ -835,8 +836,11 @@ module.exports.parseAssociations = function (dataModel) {
         case 'foreignkeys':
           associations_info.foreignKeyAssociations[name] = association.targetKey;
           switch (type) {
-            case 'one_to_one':
             case 'many_to_one':
+              if (association.keysIn !== dataModel.model) {
+                assoc["assocThroughArray"] = true; 
+              } 
+            case 'one_to_one':
               // schema attrtibutes
               associations_info.schema_attributes["one"][name] = schema_attributes;
               // holds foreignKey ?
@@ -848,6 +852,8 @@ module.exports.parseAssociations = function (dataModel) {
             case 'many_to_many':
               assoc["assocThroughArray"] = true;
             case 'one_to_many':
+              if (association.keysIn === dataModel.model)
+                assoc["assocThroughArray"] = true;
               associations_info.schema_attributes["many"][name] = schema_attributes;
               associations_info['to_many'].push(assoc);
               break;
@@ -875,6 +881,7 @@ module.exports.parseAssociations = function (dataModel) {
   associations_info.mutations_attributes = attributesToString(
     associations_info.mutations_attributes
   );
+  console.log(JSON.stringify(associations_info,null,2));
   return associations_info;
 };
 
