@@ -216,6 +216,7 @@ const associationArgsDef = {
 -%>
 <% associations_temp = associationsArguments["to_many"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
+  <% foreignKey = associations_temp[i].type === 'many_to_many' ? associations_temp[i].sourceKey : associations_temp[i].targetKey-%>
   /**
    * <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter - Check user authorization and return certain number, specified in pagination argument, of records
    * associated with the current instance, this records should also
@@ -231,13 +232,13 @@ const associationArgsDef = {
 
     <%if(associations_temp[i].assocThroughArray){%>
         //return an empty response if the foreignKey Array is empty, no need to query the database
-        if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
+        if (!Array.isArray(this.<%=foreignKey%>) || this.<%=foreignKey%>.length === 0 ) {
           return [];
         }
         let nsearch = helper.addSearchField({
           "search": search,
           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
-          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+          "value": this.<%=foreignKey%>.join(','),
           "valueType": "Array",
           "operator": "in"
         });
@@ -266,7 +267,7 @@ const associationArgsDef = {
 
     <%if(associations_temp[i].assocThroughArray){%>
         //return 0 if the foreignKey Array is empty, no need to query the database
-        if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
+        if (!Array.isArray(this.<%=foreignKey%>) || this.<%=foreignKey%>.length === 0 ) {
           return 0;
         }
         <%# WORKAROUND FOR Cassandra targetStorageType:
@@ -276,12 +277,12 @@ const associationArgsDef = {
         with an "eq" / "in" on the primary key field. %> 
         <%if(associations_temp[i].targetStorageType === 'cassandra'){%>
           //WORKAROUND for cassandra targetStorageType. Mainpulate search to intersect Equal searches on the primaryKey
-          const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_temp[i].sourceKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+          const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=foreignKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
         <%}-%>
         let nsearch = <%if(associations_temp[i].targetStorageType === 'cassandra'){%>hasIdSearch ? search : <%}-%>helper.addSearchField({
           "search": search,
           "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
-          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+          "value": this.<%=foreignKey%>.join(','),
           "valueType": "Array",
           "operator": "in"
         });
@@ -313,7 +314,7 @@ const associationArgsDef = {
 
     <%if(associations_temp[i].assocThroughArray){%>
       //return an empty response if the foreignKey Array is empty, no need to query the database
-      if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
+      if (!Array.isArray(this.<%=foreignKey%>) || this.<%=foreignKey%>.length === 0 ) {
         return {
           edges: [],
           <%=associations_temp[i].target_lc_pl%>: [],
@@ -331,12 +332,12 @@ const associationArgsDef = {
       and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
       with an "eq" / "in" on the primary key field. %> 
       <%if(associations_temp[i].targetStorageType === 'cassandra'){%>
-        const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_temp[i].sourceKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
+        const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=foreignKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
       <%}-%>
       let nsearch = <%if(associations_temp[i].targetStorageType === 'cassandra'){%>hasIdSearch ? search : <%}-%>helper.addSearchField({
         "search": search,
         "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
-        "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+        "value": this.<%=foreignKey%>.join(','),
         "valueType": "Array",
         "operator": "in"
       });
