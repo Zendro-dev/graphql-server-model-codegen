@@ -1179,19 +1179,6 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     "validations",
     "patches",
   ];
-  let sectionsDirsB = [
-    "models/sql",
-    "models/zendro-server",
-    "models/adapters",
-    "models/distributed",
-    "models/generic",
-    "models/cassandra",
-    "models/mongodb",
-    "models/amazonS3",
-    "models/trino",
-    "models/presto",
-    "models/neo4j",
-  ];
   let models = [];
   let adapters = [];
   let attributes_schema = {};
