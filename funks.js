@@ -1342,25 +1342,6 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
     let sections = []; //schemas, resolvers, models, migrations, validations, patches
     const migrationsDir = join("migrations", opts.database);
 
-    //Create models/<storageType> if it doesn't exist yet.
-    const storageDir = dir_write + "/models/" + opts.storageType;
-    if (!fs.existsSync(storageDir)) {
-      try {
-        fs.mkdirSync(storageDir);
-        //msg
-        if (verbose) console.log("@@@ dir created: ", colors.dim(storageDir));
-      } catch (e) {
-        //err
-        console.log(
-          colors.red("! mkdir.error: "),
-          "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS"
-        );
-        console.log(colors.red("!@ mkdir.error: "), e);
-        console.log(colors.red("done"));
-        process.exit(1);
-      }
-    }
-
     switch (opts.storageType) {
       case "sql":
         sections = [
