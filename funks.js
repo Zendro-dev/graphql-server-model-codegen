@@ -144,6 +144,15 @@ attributesToJsonSchemaProperties = function (attributes) {
     "[Date]",
     "[Time]",
     "[DateTime]",
+    "[Point]",
+    "[MultiPoint]",
+    "[LineString]",
+    "[MultiLineString]",
+    "[Polygon]",
+    "[MultiPolygon]",
+    "[GeometryCollection]",
+    "[Feature]",
+    "[FeatureCollection]"
   ];
 
   for (key in jsonSchemaProps) {
@@ -178,6 +187,38 @@ attributesToJsonSchemaProperties = function (attributes) {
     } else if (jsonSchemaProps[key] === "uuid") {
       jsonSchemaProps[key] = {
         type: ["uuid", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "Point") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "MultiPoint") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "LineString") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "MultiLineString") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "MultiPolygon") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "GeometryCollection") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "Feature") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
+    } else if (jsonSchemaProps[key] === "FeatureCollection") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
       };
     } else if (arrayType.includes(jsonSchemaProps[key])) {
       jsonSchemaProps[key] = {
