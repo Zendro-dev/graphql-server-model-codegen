@@ -156,6 +156,9 @@ enum <%- name -%>Field {
   toke <%}%>
 }
 
+<%# Search Operators -%>
+<%=getOperators(storageType)_%> 
+
 <%#
 /**
  * Section 4
@@ -166,7 +169,7 @@ input search<%- nameCp -%>Input {
   field: <%- name -%>Field
   value: String
   valueType: InputType
-  operator: <% if (cassandraRestrictions) { %>CassandraOperator<% } else { %>Operator<% } %>
+  operator: Operator
   excludeAdapterNames: [String]
   search: [search<%- nameCp-%>Input]
 }
