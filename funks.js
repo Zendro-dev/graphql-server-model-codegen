@@ -204,6 +204,10 @@ attributesToJsonSchemaProperties = function (attributes) {
       jsonSchemaProps[key] = {
         type: ["object", "null"],
       };
+    } else if (jsonSchemaProps[key] === "Polygon") {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
+      };
     } else if (jsonSchemaProps[key] === "MultiPolygon") {
       jsonSchemaProps[key] = {
         type: ["object", "null"],
