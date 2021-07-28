@@ -1243,6 +1243,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
    * Processes each JSON file on input directory.
    */
   let json_files = fs.readdirSync(json_dir);
+  json_files = json_files.filter(file => path.extname(file).toLowerCase() === '.json')
   for (let i = 0; i < json_files.length; i++) {
     let json_file = json_files[i];
     let file_to_object = null;
