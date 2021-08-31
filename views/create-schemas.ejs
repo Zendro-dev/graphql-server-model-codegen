@@ -149,8 +149,7 @@ type <%- nameCp -%>Edge{
     <%= key %>
 <%}-%>
   }
-  <%# Search Operators -%>
-  <%= getOperators(storageType)%> 
+  
 <%#
 /**
  * Section 4
@@ -161,7 +160,7 @@ type <%- nameCp -%>Edge{
     field: <%- name -%>Field
     value: String
     valueType: InputType
-    operator: Operator
+    operator: <%= getOperators(storageType)%> 
     search: [search<%- nameCp-%>Input]
   }
 

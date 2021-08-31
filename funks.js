@@ -352,32 +352,62 @@ writeSchemaCommons = function (dir_write) {
     Time
     DateTime
   }
-
-  ${getOperators}
-
-  enum Operator{
-    like
-    notLike
-    or
-    and
-    eq
-    between
-    notBetween
-    in
-    notIn
-    gt
-    gte
-    lt
-    lte
-    ne
-    regexp
-    notRegexp
-    contains
-    contained
-    not
-    all
-  }
   
+  enum Operator{
+    like notLike ilike notIlike regexp notRegexp
+		eq gt gte lt lte ne between notBetween
+		in notIn contains
+		or and not all  
+  }
+
+  enum GenericOperator {
+    like notLike ilike notIlike regexp notRegexp
+	  eq gt gte lt lte ne between notBetween
+		in notIn contains
+		or and not all 
+  }
+
+  enum SqlOperator {
+		like notLike ilike notIlike regexp notRegexp
+		eq gt gte lt lte ne between notBetween
+		in notIn contains
+		or and not all
+	}	
+
+	enum MongodbOperator {
+		like notLike ilike notIlike regexp notRegexp
+		eq gt gte lt lte ne
+		in notIn contains
+		or and not
+	}	
+
+	enum Neo4jOperator {
+		like notLike ilike notIlike regexp notRegexp
+		eq gt gte lt lte ne
+		in notIn contains
+		or and not
+	}	
+
+	enum CassandraOperator {
+		eq gt gte lt lte ne
+		in contains
+		and
+	}	
+
+  enum PrestoOperator {
+    like notLike ilike notIlike regexp notRegexp
+    eq gt gte lt lte ne between notBetween
+    in notIn contains
+    or and not
+  }
+
+  enum AmazonS3Operator {
+    like notLike ilike notIlike
+    eq gt gte lt lte ne between notBetween
+    in notIn contains
+    or and not
+  }	
+
   enum Order{
     DESC
     ASC
