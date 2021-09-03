@@ -282,6 +282,97 @@ describe("Neo4j - Basic CRUD Operations", () => {
   });
 });
 
+describe.only("Neo4j - Operators", () => {
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "mutation {bulkAddMovieCsv}"
+    );
+
+    expect(JSON.parse(res.body.toString("utf8")).data.bulkAddMovieCsv).equal(
+      "Successfully upload file"
+    );
+    await delay(500);
+  }); 
+
+  after(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "{ movies(pagination:{limit:25}) {movie_id} }"
+    );
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+
+    for (let i = 0; i < movies.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteMovie (movie_id: "${movies[i].movie_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    } 
+  });
+
+  it("01. Movie: like , notLike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field: movie_id operator:like value:"_2"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(1); 
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field: movie_id operator:notLike value:"_2"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(5); 
+  });
+
+  it("02. Movie: iLike , notILike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:iLike value:"M_"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(6);
+    
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:notILike value:"M_"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(0); 
+  });
+
+  it("03. Movie: in , notIn", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:in value:"m3,m4,m5,m6" valueType:Array}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(4);
+    
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:notIn value:"m3,m4,m5,m6" valueType:Array}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(2);
+  });
+
+  it("04. Movie: contains, notContains", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:genres operator:contains value:"horror"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(2);
+    
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:genres operator:notContains value:"horror"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(4);
+  });
+})
+
 describe("Neo4j - Association", () => {
   // set up the environment
   before(async () => {
