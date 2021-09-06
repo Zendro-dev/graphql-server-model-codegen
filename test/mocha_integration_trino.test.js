@@ -151,11 +151,11 @@ describe("Trino - Read Access", () => {
     expect(resBody.data.trino_doctors.length).equal(2);
   });
 
-  it("07. trino_doctor: search with in operator for array field", () => {
+  it("07. trino_doctor: search with contains operator for array field", () => {
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
       trino_doctors(
-        search:{operator:in, field:telephone, value:"152234"},
+        search:{operator:contains, field:telephone, value:"152234"},
         pagination:{limit:5}) {
           doctor_id
         }
@@ -168,7 +168,7 @@ describe("Trino - Read Access", () => {
     res = itHelpers.request_graph_ql_post_instance2(`
     {
       trino_doctors(
-        search:{operator:in, field:speciality, value:"Tinnitus"},
+        search:{operator:contains, field:speciality, value:"Tinnitus"},
         pagination:{limit:5}) {
           doctor_id
         }
@@ -179,13 +179,13 @@ describe("Trino - Read Access", () => {
     expect(resBody.data.trino_doctors.length).equal(1);
   });
 
-  it("08. trino_doctor: search with not & in operators for array field", () => {
+  it("08. trino_doctor: search with not & contains operators for array field", () => {
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
       trino_doctors(
         search:{
           operator:not,
-          search:{operator:in, field:telephone, value:"152234"}
+          search:{operator:contains, field:telephone, value:"152234"}
         },
         pagination:{limit:5}) {
           doctor_id
@@ -253,7 +253,7 @@ describe("Trino - Read Access", () => {
     expect(resBody.data.trino_doctors.length).equal(4);
   });
 
-  it("11. trino_doctor: search with between operator", () => {
+  it.only("11. trino_doctor: search with between operator", () => {
     // string field
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
@@ -264,6 +264,8 @@ describe("Trino - Read Access", () => {
         }
     }`);
     let resBody = JSON.parse(res.body.toString("utf8"));
+
+    console.log(JSON.stringify(resBody, null, 2))
 
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({

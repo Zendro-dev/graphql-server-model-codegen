@@ -238,11 +238,11 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
     expect(resBody.data.readersConnection.edges.length).equal(3);
   });
 
-  it("10. Reader: search with in operator for array field", () => {
+  it("10. Reader: search with contains operator for array field", () => {
     let res = itHelpers.request_graph_ql_post(`
     {
       readersConnection(
-        search:{operator:in, field:history, value:"Critique of Pure Reason"},
+        search:{operator:contains, field:history, value:"Critique of Pure Reason"},
         pagination:{first:5}) {
           edges{
             node{
@@ -252,19 +252,18 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
         }
     }`);
     let resBody = JSON.parse(res.body.toString("utf8"));
-
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.readersConnection.edges.length).equal(1);
   });
 
-  it("11. Reader: search with not & in operators for array field", () => {
+  it("11. Reader: search with not & contains operators for array field", () => {
     let res = itHelpers.request_graph_ql_post(`
     {
       readersConnection(
         search:{
           operator:not,
           search:{
-            operator:in,
+            operator:contains,
             field:history,
             value:"Critique of Pure Reason"
           }

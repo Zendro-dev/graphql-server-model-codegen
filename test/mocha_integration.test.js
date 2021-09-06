@@ -1685,9 +1685,9 @@ describe("Date types test", function () {
   });
 });
 
-describe("Distributed Data Models", function () {
+describe.only("Distributed Data Models", function () {
   // The entries created in this test are used in the following ones as well
-  it("01. Create a person and 2 dogs", function () {
+  it.only("01. Create a person and 2 dogs", function () {
     let res = itHelpers.request_graph_ql_post(
       'mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}'
     );
@@ -3715,8 +3715,15 @@ describe("Array type attributes: create, update and read record for Arr table", 
 
     expect(res.statusCode).to.equal(200);
 
+    res = itHelpers.request_graph_ql_post(
+      'mutation { addArr(arrId: 2, country: "USA", ' +
+        'arrStr:["str1", "str2", "str3"], arrInt:[1, 2, 3,4], arrFloat:[1.1, 3.34, 453.232], arrBool:[true, false]) { arrId } }'
+    );
+
+    expect(res.statusCode).to.equal(200);
+
     let cnt = await itHelpers.count_all_records("countArrs");
-    expect(cnt).to.equal(1);
+    expect(cnt).to.equal(2);
   });
 
   it("02. Arr update", function () {
@@ -3776,24 +3783,44 @@ describe("Array type attributes: create, update and read record for Arr table", 
     expect(resBody.data.arrs.length).equal(1);
   });
 
-  it("06. Arr search with in", function () {
+  it("06. Arr search with contains", function () {
     let res = itHelpers.request_graph_ql_post(
-      '{arrs(search:{operator:in, field:arrInt, value:"3"},' +
+      '{arrs(search:{operator:contains, field:arrInt, value:"3"},' +
         "pagination:{limit:3}) {arrId}}"
     );
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
-    expect(resBody.data.arrs.length).equal(1);
+    expect(resBody.data.arrs.length).equal(2);
   });
 
-  it("07. Arr search with notIn", function () {
+  it("07. Arr search with notContains", function () {
     let res = itHelpers.request_graph_ql_post(
-      '{arrs(search:{operator:notIn, field:arrInt, value:"5"},' +
+      '{arrs(search:{operator:notContains, field:arrInt, value:"5"},' +
         "pagination:{limit:3}) {arrId}}"
     );
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
-    expect(resBody.data.arrs.length).equal(1);
+    expect(resBody.data.arrs.length).equal(2);
+  });
+
+  it("08. Arr search with in", function () {
+    let res = itHelpers.request_graph_ql_post(
+      '{arrs( search :{operator: in, field:country, value: "Germany,USA" valueType:Array}' +
+        "pagination:{limit:3}) {arrId}}"
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.arrs.length).equal(2);
+  });
+
+  it("09. Arr search with notIn", function () {
+    let res = itHelpers.request_graph_ql_post(
+      '{arrs( search :{operator: notIn, field:country, value: "Germany,USA" valueType:Array}' +
+        "pagination:{limit:3}) {arrId}}"
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody.data.arrs.length).equal(0);
   });
 });
 
