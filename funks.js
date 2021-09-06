@@ -353,13 +353,6 @@ writeSchemaCommons = function (dir_write) {
     DateTime
   }
   
-  enum Operator{
-    like notLike iLike notILike regexp notRegexp
-		eq gt gte lt lte ne between notBetween
-		in notIn contains notContains
-		or and not all  
-  }
-
   enum GenericPrestoSqlOperator {
 		like notLike iLike notILike regexp notRegexp
 		eq gt gte lt lte ne between notBetween
