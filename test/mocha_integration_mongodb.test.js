@@ -246,7 +246,30 @@ describe("Mongodb - Basic CRUD Operations", () => {
     });
   });
 
-  it("10. Animal: get the table template", () => {
+  it("10. Animal: not operator", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:2}, 
+            search:{operator:not search:{field:animal_id value:"2" operator:eq}}) {
+              animal_id
+              animal_name
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        animals: [
+          { animal_id: "1", animal_name: "Sally1" },
+          { animal_id: "3", animal_name: "Milka1" },
+        ],
+      },
+    });
+  });
+
+  it("11. Animal: get the table template", () => {
     let res = itHelpers.request_graph_ql_post(`{csvTableTemplateAnimal}`);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);

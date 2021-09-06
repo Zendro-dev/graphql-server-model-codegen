@@ -265,7 +265,30 @@ describe("Neo4j - Basic CRUD Operations", () => {
     });
   });
 
-  it("10. Movie: get the table template", () => {
+  it("10. Movie: not operator", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          movies(pagination: {limit:2}, 
+            search:{operator:not search:{field:movie_id value:"m2" operator:eq}}) {
+              movie_id
+              runtime
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        movies: [
+          { movie_id: "m1", runtime: 130 },
+          { movie_id: "m3", runtime: 120 },
+        ],
+      },
+    });
+  });
+
+  it("11. Movie: get the table template", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{csvTableTemplateMovie}`
     );

@@ -253,7 +253,123 @@ describe("Presto - Read Access", () => {
     expect(resBody.data.presto_doctors.length).equal(4);
   });
 
-  it("11. presto_doctor: sort", () => {
+  it("11. presto_doctor: search with between operator", () => {
+    // string field
+    let res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: doctor_id, operator: between, valueType: Array, value: "d1,d2"},
+        pagination: {limit: 25}) {
+          doctor_id
+        }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d1",
+          },
+          {
+            doctor_id: "d2",
+          },
+        ],
+      },
+    });
+    // int field
+    res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: experience, operator: between, valueType: Array, value: "3,5"}, 
+        pagination: {limit: 25}) {
+          doctor_id
+          experience
+        }
+    }
+    `);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d1",
+            experience: 3,
+          },
+          {
+            doctor_id: "d3",
+            experience: 5,
+          },
+          {
+            doctor_id: "d4",
+            experience: 4,
+          },
+        ],
+      },
+    });
+  });
+
+  it("12. presto_doctor: search with notBetween operator", () => {
+    // string field
+    let res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: doctor_id, operator: notBetween, valueType: Array, value: "d1,d2"},
+        pagination: {limit: 25}) {
+          doctor_id
+        }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d3",
+          },
+          {
+            doctor_id: "d4",
+          },
+          {
+            doctor_id: "d5",
+          },
+        ],
+      },
+    });
+    // int field
+    res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: experience, operator: notBetween, valueType: Array, value: "3,5"}, 
+        pagination: {limit: 25}) {
+          doctor_id
+          experience
+        }
+    }`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d2",
+            experience: 15,
+          },
+          {
+            doctor_id: "d5",
+            experience: 6,
+          },
+        ],
+      },
+    });
+  });
+
+  it("13. presto_doctor: sort", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
         presto_doctors(pagination: {limit:5}, order: [{field: doctor_id, order: DESC}]) {
@@ -278,7 +394,7 @@ describe("Presto - Read Access", () => {
     });
   });
 
-  it("12. presto_doctor: paginate", () => {
+  it("14. presto_doctor: paginate", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
         presto_doctorsConnection(pagination:{first:10}) {
@@ -383,7 +499,7 @@ describe("Presto - Read Access", () => {
     });
   });
 
-  it("13. presto_doctor: get the table template", () => {
+  it("15. presto_doctor: get the table template", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{csvTableTemplatePresto_doctor}`
     );
