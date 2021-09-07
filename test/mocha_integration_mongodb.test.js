@@ -284,7 +284,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
   });
 });
 
-describe("Mongodb - Operators", () => {
+describe.only("Mongodb - Operators", () => {
   before(async () => {
     let csvPath = path.join(__dirname, "integration_test_misc", "animal.csv");
     let success = await itHelpers.batch_upload_csv(
@@ -321,7 +321,8 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 4);
+    expect(resBody.data.animals.length).to.equal(4);
+
 
     res = itHelpers.request_graph_ql_post(
       `{
@@ -334,7 +335,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 2);
+    expect(resBody.data.animals.length).to.equal(2);
   });
 
   it("02. Animal: iLike, notILike", () => {
@@ -349,7 +350,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 2);
+    expect(resBody.data.animals.length).to.equal(2);
 
     res = itHelpers.request_graph_ql_post(
       `{
@@ -362,7 +363,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 4);
+    expect(resBody.data.animals.length).to.equal(4);
   });
 
   it("03. Animal: regexp, notRegexp", () => {
@@ -377,7 +378,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 2);
+    expect(resBody.data.animals.length).to.equal(2);
 
     res = itHelpers.request_graph_ql_post(
       `{
@@ -390,10 +391,38 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 4);
+    expect(resBody.data.animals.length).to.equal(4);
   });
 
-  it("04. Animal: in, notIn", () => {
+  it.only("04. Animal: iRegexp, notIRegexp", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:iRegexp value:"lLY[0-9]$"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:notIRegexp value:"lLY[0-9]$"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
+  });
+
+  it("05. Animal: in, notIn", () => {
     let res = itHelpers.request_graph_ql_post(
       `{
           animals(pagination: {limit:10} search:{field:category operator:in value:"Dog,Cat" valueType:Array}) {
@@ -405,7 +434,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 4);
+    expect(resBody.data.animals.length).to.equal(4);
 
     res = itHelpers.request_graph_ql_post(
       `{
@@ -418,10 +447,10 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 2);
+    expect(resBody.data.animals.length).to.equal(2);
   });
 
-  it("04. Animal: contains, notContains", () => {
+  it("06. Animal: contains, notContains", () => {
     let res = itHelpers.request_graph_ql_post(
       `{
           animals(pagination: {limit:10} search:{field:personality operator:contains value:"cute"}) {
@@ -433,7 +462,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 2);
+    expect(resBody.data.animals.length).to.equal(2);
 
     res = itHelpers.request_graph_ql_post(
       `{
@@ -446,7 +475,7 @@ describe("Mongodb - Operators", () => {
     );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(resBody.data.animals.length === 4);
+    expect(resBody.data.animals.length).to.equal(4);
   });
 });
 

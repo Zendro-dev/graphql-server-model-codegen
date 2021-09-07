@@ -568,6 +568,73 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
   });
 });
 
+describe("Amazon S3 / Minio - Operators", () => {
+  it("01. Reader: like, notLike ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:like value:"%ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notLike value:"%ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(3);
+  });
+
+  it("02. Reader: iLike, notILike ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:iLike value:"%Ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notILike value:"%Ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(3);
+  });
+
+  it("03. Reader: contains, notContains ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:history operator:contains value:"Critique of Pure Reason"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(1);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:history operator:notContains value:"Critique of Pure Reason"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(4);
+  });
+
+  it("04. Reader: in, notIn ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:in value:"Sally,Dom" valueType:Array}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notIn value:"Sally,Dom" valueType:Array}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(3);
+  });
+
+})
+
 describe("Amazon S3/ Minio - Distributed Data Models", () => {
   it("01. Reader: CSV bulkUpload", async () => {
     let csvPath = path.join(

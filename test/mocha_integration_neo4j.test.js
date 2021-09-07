@@ -315,6 +315,18 @@ describe("Neo4j - Operators", () => {
       "Successfully upload file"
     );
     await delay(500);
+
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        d1: addDirector(director_id:"director1" director_name:"Alfred Hitchcock"){director_id}
+        d2: addDirector(director_id:"director2" director_name:"George Lucas"){director_id}
+      }`
+    );
+    
+    expect(res.statusCode).to.equal(200);
+    await delay(500);
+
   });
 
   after(async () => {
@@ -326,6 +338,18 @@ describe("Neo4j - Operators", () => {
     for (let i = 0; i < movies.length; i++) {
       res = itHelpers.request_graph_ql_post_instance2(
         `mutation { deleteMovie (movie_id: "${movies[i].movie_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ directors(pagination:{limit:25}) {director_id} }"
+    );
+    let directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    for (let i = 0; i < directors.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDirector (director_id: "${directors[i].director_id}") }`
       );
       expect(res.statusCode).to.equal(200);
     }
@@ -363,7 +387,55 @@ describe("Neo4j - Operators", () => {
     expect(movies.length).to.equal(0);
   });
 
-  it("03. Movie: in , notIn", () => {
+  it("03. Director: regexp, notRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:regexp value:"fred"}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(1);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:regexp value:""}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(0);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:regexp value:"^Alfred Hitchcock$"}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(1);
+    
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:notRegexp value:"fred"}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(1);
+
+  });
+
+  it("04. Movie: iRegexp, notIRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:iRegexp value:"M."}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(6);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:notIRegexp value:"M."}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(0);
+  });
+  
+
+  it("05. Movie: in , notIn", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       '{ movies(pagination:{limit:25} search:{field:movie_id operator:in value:"m3,m4,m5,m6" valueType:Array}) {movie_id} }'
     );
@@ -379,7 +451,7 @@ describe("Neo4j - Operators", () => {
     expect(movies.length).to.equal(2);
   });
 
-  it("04. Movie: contains, notContains", () => {
+  it("06. Movie: contains, notContains", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       '{ movies(pagination:{limit:25} search:{field:genres operator:contains value:"horror"}) {movie_id} }'
     );
