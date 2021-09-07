@@ -246,7 +246,30 @@ describe("Mongodb - Basic CRUD Operations", () => {
     });
   });
 
-  it("10. Animal: get the table template", () => {
+  it("10. Animal: not operator", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:2}, 
+            search:{operator:not search:{field:animal_id value:"2" operator:eq}}) {
+              animal_id
+              animal_name
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        animals: [
+          { animal_id: "1", animal_name: "Sally1" },
+          { animal_id: "3", animal_name: "Milka1" },
+        ],
+      },
+    });
+  });
+
+  it("11. Animal: get the table template", () => {
     let res = itHelpers.request_graph_ql_post(`{csvTableTemplateAnimal}`);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
@@ -258,6 +281,200 @@ describe("Mongodb - Basic CRUD Operations", () => {
         ],
       },
     });
+  });
+});
+
+describe("Mongodb - Operators", () => {
+  before(async () => {
+    let csvPath = path.join(__dirname, "integration_test_misc", "animal.csv");
+    let success = await itHelpers.batch_upload_csv(
+      csvPath,
+      "mutation {bulkAddAnimalCsv}"
+    );
+    expect(success).equal(true);
+    await delay(500);
+  });
+
+  after(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      "{ animals(pagination:{limit:25}) {animal_id} }"
+    );
+    let animals = JSON.parse(res.body.toString("utf8")).data.animals;
+
+    for (let i = 0; i < animals.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteAnimal (animal_id: ${animals[i].animal_id}) }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+  });
+
+  it("01. Animal: like , notLike", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:like value:"%il%"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:notLike value:"%il%"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+  });
+
+  it("02. Animal: iLike, notILike", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:iLike value:"%AL%"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:notILike value:"%AL%"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
+  });
+
+  it("03. Animal: regexp, notRegexp", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:regexp value:"lly[0-9]$"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:notRegexp value:"lly[0-9]$"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
+  });
+
+  it("04. Animal: iRegexp, notIRegexp", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:iRegexp value:"lLY[0-9]$"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:animal_name operator:notIRegexp value:"lLY[0-9]$"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
+  });
+
+  it("05. Animal: in, notIn", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:category operator:in value:"Dog,Cat" valueType:Array}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:category operator:notIn value:"Dog,Cat" valueType:Array}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+  });
+
+  it("06. Animal: contains, notContains", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:personality operator:contains value:"cute"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{
+          animals(pagination: {limit:10} search:{field:personality operator:notContains value:"cute"}) {
+              animal_id
+              animal_name
+              personality
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.animals.length).to.equal(4);
   });
 });
 

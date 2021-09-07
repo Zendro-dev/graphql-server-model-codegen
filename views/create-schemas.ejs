@@ -149,6 +149,7 @@ type <%- nameCp -%>Edge{
     <%= key %>
 <%}-%>
   }
+  
 <%#
 /**
  * Section 4
@@ -159,7 +160,7 @@ type <%- nameCp -%>Edge{
     field: <%- name -%>Field
     value: String
     valueType: InputType
-    operator: <% if(storageType === 'cassandra'){_%>CassandraOperator<%} else {_%>Operator<%}%>
+    operator: <%-operators-%> 
     search: [search<%- nameCp-%>Input]
   }
 

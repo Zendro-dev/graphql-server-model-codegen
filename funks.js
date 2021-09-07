@@ -8,6 +8,7 @@ const ejsRenderFile = promisify(ejs.renderFile);
 const stringify_obj = require("stringify-object");
 const colors = require("colors/safe");
 const { getModelDatabase } = require("./lib/generators-aux");
+const { getOperators } = require("./lib/operators-aux");
 
 /**
  * parseFile - Parse a json file
@@ -351,43 +352,33 @@ writeSchemaCommons = function (dir_write) {
     Time
     DateTime
   }
-
-  enum Operator{
-    like
-    notLike
-    or
-    and
-    eq
-    between
-    notBetween
-    in
-    notIn
-    gt
-    gte
-    lt
-    lte
-    ne
-    regexp
-    notRegexp
-    contains
-    contained
-    not
-    all
-  }
   
-  enum CassandraOperator{
-    eq
-    lt
-    gt
-    lte
-    gte
-    in
-    contains   # CONTAINS
-    ctk    # CONTAINS KEY
-    tgt    # Token > Token
-    tget   # Token >= Token
-    and
-  }
+  enum GenericPrestoSqlOperator {
+		like notLike iLike notILike regexp notRegexp iRegexp notIRegexp
+		eq gt gte lt lte ne between notBetween
+		in notIn contains notContains
+		or and not
+	}	
+
+	enum MongodbNeo4jOperator {
+		like notLike iLike notILike regexp notRegexp iRegexp notIRegexp
+		eq gt gte lt lte ne
+		in notIn contains notContains
+		or and not
+	}	
+
+	enum CassandraOperator {
+		eq gt gte lt lte ne
+		in contains
+		and
+	}	
+
+  enum AmazonS3Operator {
+    like notLike iLike notILike
+    eq gt gte lt lte ne between notBetween
+    in notIn contains notContains
+    or and not
+  }	
 
   enum Order{
     DESC
@@ -583,6 +574,7 @@ module.exports.getOptions = function (dataModel) {
     cassandraStringAttributes: getStringAttributesInCassandraSchema(
       dataModel.attributes
     ),
+    operators: getOperators(getStorageType(dataModel))
   };
   opts["editableAttributesStr"] = attributesToString(
     getEditableAttributes(
@@ -952,6 +944,7 @@ createNameMigration = function (rootDir, migrationsDir, model_name) {
  * @param  {string} dir_write Path (including name of the file) where the generated section will be written as a file.
  */
 generateSection = async function (section, opts, filePath) {
+  // const options = section.includes("schemas") ? {...opts, getOperators: getOperators} : opts;
   let generatedSection = await module.exports.generateJs(
     "create-" + section,
     opts
