@@ -253,7 +253,7 @@ describe("Trino - Read Access", () => {
     expect(resBody.data.trino_doctors.length).equal(4);
   });
 
-  it.only("11. trino_doctor: search with between operator", () => {
+  it("11. trino_doctor: search with between operator", () => {
     // string field
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
@@ -264,8 +264,6 @@ describe("Trino - Read Access", () => {
         }
     }`);
     let resBody = JSON.parse(res.body.toString("utf8"));
-
-    console.log(JSON.stringify(resBody, null, 2))
 
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({

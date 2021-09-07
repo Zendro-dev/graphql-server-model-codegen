@@ -151,11 +151,11 @@ describe("Presto - Read Access", () => {
     expect(resBody.data.presto_doctors.length).equal(2);
   });
 
-  it("07. presto_doctor: search with in operator for array field", () => {
+  it("07. presto_doctor: search with contains operator for array field", () => {
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
       presto_doctors(
-        search:{operator:in, field:telephone, value:"152234"},
+        search:{operator:contains, field:telephone, value:"152234"},
         pagination:{limit:5}) {
           doctor_id
         }
@@ -168,7 +168,7 @@ describe("Presto - Read Access", () => {
     res = itHelpers.request_graph_ql_post_instance2(`
     {
       presto_doctors(
-        search:{operator:in, field:speciality, value:"Tinnitus"},
+        search:{operator:contains, field:speciality, value:"Tinnitus"},
         pagination:{limit:5}) {
           doctor_id
         }
@@ -179,13 +179,13 @@ describe("Presto - Read Access", () => {
     expect(resBody.data.presto_doctors.length).equal(1);
   });
 
-  it("08. presto_doctor: search with not & in operators for array field", () => {
+  it("08. presto_doctor: search with not & contains operators for array field", () => {
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
       presto_doctors(
         search:{
           operator:not,
-          search:{operator:in, field:telephone, value:"152234"}
+          search:{operator:contains, field:telephone, value:"152234"}
         },
         pagination:{limit:5}) {
           doctor_id
