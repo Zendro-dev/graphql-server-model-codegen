@@ -574,6 +574,7 @@ module.exports.getOptions = function (dataModel) {
     cassandraStringAttributes: getStringAttributesInCassandraSchema(
       dataModel.attributes
     ),
+    operators: getOperators(getStorageType(dataModel))
   };
   opts["editableAttributesStr"] = attributesToString(
     getEditableAttributes(
@@ -943,10 +944,10 @@ createNameMigration = function (rootDir, migrationsDir, model_name) {
  * @param  {string} dir_write Path (including name of the file) where the generated section will be written as a file.
  */
 generateSection = async function (section, opts, filePath) {
-  const options = section.includes("schemas") ? {...opts, getOperators: getOperators} : opts;
+  // const options = section.includes("schemas") ? {...opts, getOperators: getOperators} : opts;
   let generatedSection = await module.exports.generateJs(
     "create-" + section,
-    options
+    opts
   );
 
   const parsedPath = parse(filePath);
