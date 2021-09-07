@@ -284,7 +284,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
   });
 });
 
-describe.only("Mongodb - Operators", () => {
+describe("Mongodb - Operators", () => {
   before(async () => {
     let csvPath = path.join(__dirname, "integration_test_misc", "animal.csv");
     let success = await itHelpers.batch_upload_csv(
@@ -306,8 +306,8 @@ describe.only("Mongodb - Operators", () => {
         `mutation { deleteAnimal (animal_id: ${animals[i].animal_id}) }`
       );
       expect(res.statusCode).to.equal(200);
-    } 
-  })
+    }
+  });
 
   it("01. Animal: like , notLike", () => {
     let res = itHelpers.request_graph_ql_post(
@@ -322,7 +322,6 @@ describe.only("Mongodb - Operators", () => {
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.animals.length).to.equal(4);
-
 
     res = itHelpers.request_graph_ql_post(
       `{
@@ -394,7 +393,7 @@ describe.only("Mongodb - Operators", () => {
     expect(resBody.data.animals.length).to.equal(4);
   });
 
-  it.only("04. Animal: iRegexp, notIRegexp", () => {
+  it("04. Animal: iRegexp, notIRegexp", () => {
     let res = itHelpers.request_graph_ql_post(
       `{
           animals(pagination: {limit:10} search:{field:animal_name operator:iRegexp value:"lLY[0-9]$"}) {

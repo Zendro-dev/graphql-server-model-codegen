@@ -508,11 +508,108 @@ describe("Presto - Read Access", () => {
     expect(resBody).to.deep.equal({
       data: {
         csvTableTemplatePresto_doctor: [
-          "doctor_id,birthday,experience,rating,on_holiday,speciality,telephone",
-          "String,DateTime,Int,Float,Boolean,[String],[Int]",
+          "doctor_id,doctor_name,birthday,experience,rating,on_holiday,speciality,telephone",
+          "String,String,DateTime,Int,Float,Boolean,[String],[Int]",
         ],
       },
     });
+  });
+});
+
+describe("Presto - Operators", () => {
+  it("01. presto_doctor: like , notLike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:like value:"%asch%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notLike value:"%asch%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
+  });
+  it("02. presto_doctor: iLike, notILike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:iLike value:"%ASCH%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notILike value:"%ASCH%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
+  });
+
+  it("03. presto_doctor: regexp, notRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:regexp value:"aschet$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notRegexp value:"aschet$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
+  });
+
+  it("04. presto_doctor: iRegexp, notIRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:iRegexp value:"ASCHET$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notIRegexp value:"ASCHET$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
   });
 });
 

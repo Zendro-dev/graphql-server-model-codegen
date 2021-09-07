@@ -6,7 +6,7 @@ TEST_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
 ROOT_DIR="$(dirname ${TEST_DIR})"
 ENV_DIR="${TEST_DIR}/integration_test_env"
 
-GRAPHQL_SERVER_BRANCH=nodemon
+GRAPHQL_SERVER_BRANCH=master
 GRAPHQL_SERVER_1="${ENV_DIR}/gql_science_db_graphql_server1"
 GRAPHQL_SERVER_2="${ENV_DIR}/gql_science_db_graphql_server2"
 
