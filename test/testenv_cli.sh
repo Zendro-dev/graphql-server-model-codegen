@@ -108,7 +108,7 @@ fi
 # 1. Run the integration tests
 # 2. Perform a full cleanup (optionally disabled)
 if [[ $OPT_RUN_TESTS == "true" ]]; then
-  mocha "${TEST_DIR}/mocha_integration.test.js"
+  mocha --timeout 10000 "${TEST_DIR}/mocha_integration.test.js"
   mocha "${TEST_DIR}/mocha_integration_mongodb.test.js"
   mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
   mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"

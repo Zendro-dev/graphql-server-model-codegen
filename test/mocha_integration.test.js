@@ -1685,9 +1685,9 @@ describe("Date types test", function () {
   });
 });
 
-describe.only("Distributed Data Models", function () {
+describe("Distributed Data Models", function () {
   // The entries created in this test are used in the following ones as well
-  it.only("01. Create a person and 2 dogs", function () {
+  it("01. Create a person and 2 dogs", function () {
     let res = itHelpers.request_graph_ql_post(
       'mutation {addPerson(person_id: "instance1-01" name: "Anthony") {person_id name}}'
     );
