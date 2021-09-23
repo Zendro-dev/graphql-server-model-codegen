@@ -238,11 +238,11 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
     expect(resBody.data.readersConnection.edges.length).equal(3);
   });
 
-  it("10. Reader: search with in operator for array field", () => {
+  it("10. Reader: search with contains operator for array field", () => {
     let res = itHelpers.request_graph_ql_post(`
     {
       readersConnection(
-        search:{operator:in, field:history, value:"Critique of Pure Reason"},
+        search:{operator:contains, field:history, value:"Critique of Pure Reason"},
         pagination:{first:5}) {
           edges{
             node{
@@ -252,19 +252,18 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
         }
     }`);
     let resBody = JSON.parse(res.body.toString("utf8"));
-
     expect(res.statusCode).to.equal(200);
     expect(resBody.data.readersConnection.edges.length).equal(1);
   });
 
-  it("11. Reader: search with not & in operators for array field", () => {
+  it("11. Reader: search with not & contains operators for array field", () => {
     let res = itHelpers.request_graph_ql_post(`
     {
       readersConnection(
         search:{
           operator:not,
           search:{
-            operator:in,
+            operator:contains,
             field:history,
             value:"Critique of Pure Reason"
           }
@@ -351,7 +350,138 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
     expect(resBody.data.readersConnection.edges.length).equal(4);
   });
 
-  it("14. Reader: paginate", () => {
+  it("14. Reader: search with between operator", () => {
+    // string field
+    let res = itHelpers.request_graph_ql_post(`
+    {
+      readersConnection(
+        search: {field: reader_id, operator: between, valueType: Array, value: "3,5"},
+        pagination:{first:5}) {
+          readers {
+            reader_id
+          }
+        }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readersConnection: {
+          readers: [
+            {
+              reader_id: "3",
+            },
+            {
+              reader_id: "4",
+            },
+            {
+              reader_id: "5",
+            },
+          ],
+        },
+      },
+    });
+    // float field
+    res = itHelpers.request_graph_ql_post(`
+      {
+        readersConnection(
+          search: {field: age, operator: between, valueType: Array, value: "7,20"},
+          pagination:{first:5}) {
+            readers {
+              reader_id
+              age
+            }
+          }
+      }`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readersConnection: {
+          readers: [
+            {
+              reader_id: "1",
+              age: 15.4,
+            },
+            {
+              reader_id: "3",
+              age: 7.5,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it("15. Reader: search with notBetween operator", () => {
+    // string field
+    let res = itHelpers.request_graph_ql_post(`
+    {
+      readersConnection(
+        search: {field: reader_id, operator: notBetween, valueType: Array, value: "3,5"},
+        pagination:{first:5}) {
+          readers {
+            reader_id
+          }
+        }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readersConnection: {
+          readers: [
+            {
+              reader_id: "1",
+            },
+            {
+              reader_id: "2",
+            },
+          ],
+        },
+      },
+    });
+    // float field
+    res = itHelpers.request_graph_ql_post(`
+      {
+        readersConnection(
+          search: {field: age, operator: notBetween, valueType: Array, value: "7,20"},
+          pagination:{first:5}) {
+            readers {
+              reader_id
+              age
+            }
+          }
+      }`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readersConnection: {
+          readers: [
+            {
+              reader_id: "2",
+              age: 20.6,
+            },
+            {
+              reader_id: "4",
+              age: 30.1,
+            },
+            {
+              reader_id: "5",
+              age: 35.4,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it("16. Reader: paginate", () => {
     let res = itHelpers.request_graph_ql_post(
       `{
         readersConnection(pagination:{first:10}) {
@@ -423,7 +553,7 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
     });
   });
 
-  it("15. Reader: get the table template", () => {
+  it("17. Reader: get the table template", () => {
     let res = itHelpers.request_graph_ql_post(`{csvTableTemplateReader}`);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
@@ -437,6 +567,73 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
     });
   });
 });
+
+describe("Amazon S3 / Minio - Operators", () => {
+  it("01. Reader: like, notLike ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:like value:"%ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notLike value:"%ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(3);
+  });
+
+  it("02. Reader: iLike, notILike ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:iLike value:"%Ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notILike value:"%Ly%"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(3);
+  });
+
+  it("03. Reader: contains, notContains ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:history operator:contains value:"Critique of Pure Reason"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(1);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:history operator:notContains value:"Critique of Pure Reason"}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(4);
+  });
+
+  it("04. Reader: in, notIn ", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:in value:"Sally,Dom" valueType:Array}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notIn value:"Sally,Dom" valueType:Array}){readers{reader_id reader_name}}}`
+    )
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.readersConnection.readers.length).to.equal(3);
+  });
+
+})
 
 describe("Amazon S3/ Minio - Distributed Data Models", () => {
   it("01. Reader: CSV bulkUpload", async () => {

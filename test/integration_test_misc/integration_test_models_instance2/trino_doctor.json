@@ -3,6 +3,7 @@
     "storageType": "trino",
     "attributes": {
       "doctor_id": "String",
+      "doctor_name": "String",
       "birthday": "DateTime",
       "experience": "Int",
       "rating": "Float",

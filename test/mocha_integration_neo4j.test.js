@@ -265,7 +265,30 @@ describe("Neo4j - Basic CRUD Operations", () => {
     });
   });
 
-  it("10. Movie: get the table template", () => {
+  it("10. Movie: not operator", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          movies(pagination: {limit:2}, 
+            search:{operator:not search:{field:movie_id value:"m2" operator:eq}}) {
+              movie_id
+              runtime
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        movies: [
+          { movie_id: "m1", runtime: 130 },
+          { movie_id: "m3", runtime: 120 },
+        ],
+      },
+    });
+  });
+
+  it("11. Movie: get the table template", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{csvTableTemplateMovie}`
     );
@@ -279,6 +302,169 @@ describe("Neo4j - Basic CRUD Operations", () => {
         ],
       },
     });
+  });
+});
+
+describe("Neo4j - Operators", () => {
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "mutation {bulkAddMovieCsv}"
+    );
+
+    expect(JSON.parse(res.body.toString("utf8")).data.bulkAddMovieCsv).equal(
+      "Successfully upload file"
+    );
+    await delay(500);
+
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        d1: addDirector(director_id:"director1" director_name:"Alfred Hitchcock"){director_id}
+        d2: addDirector(director_id:"director2" director_name:"George Lucas"){director_id}
+      }`
+    );
+    
+    expect(res.statusCode).to.equal(200);
+    await delay(500);
+
+  });
+
+  after(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "{ movies(pagination:{limit:25}) {movie_id} }"
+    );
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+
+    for (let i = 0; i < movies.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteMovie (movie_id: "${movies[i].movie_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ directors(pagination:{limit:25}) {director_id} }"
+    );
+    let directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    for (let i = 0; i < directors.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDirector (director_id: "${directors[i].director_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+  });
+
+  it("01. Movie: like , notLike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field: movie_id operator:like value:"_2"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(1);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field: movie_id operator:notLike value:"_2"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(5);
+  });
+
+  it("02. Movie: iLike , notILike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:iLike value:"M_"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(6);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:notILike value:"M_"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(0);
+  });
+
+  it("03. Director: regexp, notRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:regexp value:"fred"}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(1);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:regexp value:""}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(0);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:regexp value:"^Alfred Hitchcock$"}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(1);
+    
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ directors(pagination:{limit:25} search:{field:director_name operator:notRegexp value:"fred"}) {director_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    directors = JSON.parse(res.body.toString("utf8")).data.directors;
+    expect(directors.length).to.equal(1);
+
+  });
+
+  it("04. Movie: iRegexp, notIRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:iRegexp value:"M."}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(6);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:notIRegexp value:"M."}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(0);
+  });
+  
+
+  it("05. Movie: in , notIn", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:in value:"m3,m4,m5,m6" valueType:Array}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(4);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:movie_id operator:notIn value:"m3,m4,m5,m6" valueType:Array}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(2);
+  });
+
+  it("06. Movie: contains, notContains", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:genres operator:contains value:"horror"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    let movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      '{ movies(pagination:{limit:25} search:{field:genres operator:notContains value:"horror"}) {movie_id} }'
+    );
+    expect(res.statusCode).to.equal(200);
+    movies = JSON.parse(res.body.toString("utf8")).data.movies;
+    expect(movies.length).to.equal(4);
   });
 });
 

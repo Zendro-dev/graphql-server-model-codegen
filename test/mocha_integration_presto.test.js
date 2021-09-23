@@ -151,11 +151,11 @@ describe("Presto - Read Access", () => {
     expect(resBody.data.presto_doctors.length).equal(2);
   });
 
-  it("07. presto_doctor: search with in operator for array field", () => {
+  it("07. presto_doctor: search with contains operator for array field", () => {
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
       presto_doctors(
-        search:{operator:in, field:telephone, value:"152234"},
+        search:{operator:contains, field:telephone, value:"152234"},
         pagination:{limit:5}) {
           doctor_id
         }
@@ -168,7 +168,7 @@ describe("Presto - Read Access", () => {
     res = itHelpers.request_graph_ql_post_instance2(`
     {
       presto_doctors(
-        search:{operator:in, field:speciality, value:"Tinnitus"},
+        search:{operator:contains, field:speciality, value:"Tinnitus"},
         pagination:{limit:5}) {
           doctor_id
         }
@@ -179,13 +179,13 @@ describe("Presto - Read Access", () => {
     expect(resBody.data.presto_doctors.length).equal(1);
   });
 
-  it("08. presto_doctor: search with not & in operators for array field", () => {
+  it("08. presto_doctor: search with not & contains operators for array field", () => {
     let res = itHelpers.request_graph_ql_post_instance2(`
     {
       presto_doctors(
         search:{
           operator:not,
-          search:{operator:in, field:telephone, value:"152234"}
+          search:{operator:contains, field:telephone, value:"152234"}
         },
         pagination:{limit:5}) {
           doctor_id
@@ -253,7 +253,123 @@ describe("Presto - Read Access", () => {
     expect(resBody.data.presto_doctors.length).equal(4);
   });
 
-  it("11. presto_doctor: sort", () => {
+  it("11. presto_doctor: search with between operator", () => {
+    // string field
+    let res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: doctor_id, operator: between, valueType: Array, value: "d1,d2"},
+        pagination: {limit: 25}) {
+          doctor_id
+        }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d1",
+          },
+          {
+            doctor_id: "d2",
+          },
+        ],
+      },
+    });
+    // int field
+    res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: experience, operator: between, valueType: Array, value: "3,5"}, 
+        pagination: {limit: 25}) {
+          doctor_id
+          experience
+        }
+    }
+    `);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d1",
+            experience: 3,
+          },
+          {
+            doctor_id: "d3",
+            experience: 5,
+          },
+          {
+            doctor_id: "d4",
+            experience: 4,
+          },
+        ],
+      },
+    });
+  });
+
+  it("12. presto_doctor: search with notBetween operator", () => {
+    // string field
+    let res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: doctor_id, operator: notBetween, valueType: Array, value: "d1,d2"},
+        pagination: {limit: 25}) {
+          doctor_id
+        }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d3",
+          },
+          {
+            doctor_id: "d4",
+          },
+          {
+            doctor_id: "d5",
+          },
+        ],
+      },
+    });
+    // int field
+    res = itHelpers.request_graph_ql_post_instance2(`
+    {
+      presto_doctors(
+        search: {field: experience, operator: notBetween, valueType: Array, value: "3,5"}, 
+        pagination: {limit: 25}) {
+          doctor_id
+          experience
+        }
+    }`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        presto_doctors: [
+          {
+            doctor_id: "d2",
+            experience: 15,
+          },
+          {
+            doctor_id: "d5",
+            experience: 6,
+          },
+        ],
+      },
+    });
+  });
+
+  it("13. presto_doctor: sort", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
         presto_doctors(pagination: {limit:5}, order: [{field: doctor_id, order: DESC}]) {
@@ -278,7 +394,7 @@ describe("Presto - Read Access", () => {
     });
   });
 
-  it("12. presto_doctor: paginate", () => {
+  it("14. presto_doctor: paginate", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{
         presto_doctorsConnection(pagination:{first:10}) {
@@ -383,7 +499,7 @@ describe("Presto - Read Access", () => {
     });
   });
 
-  it("13. presto_doctor: get the table template", () => {
+  it("15. presto_doctor: get the table template", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
       `{csvTableTemplatePresto_doctor}`
     );
@@ -392,11 +508,108 @@ describe("Presto - Read Access", () => {
     expect(resBody).to.deep.equal({
       data: {
         csvTableTemplatePresto_doctor: [
-          "doctor_id,birthday,experience,rating,on_holiday,speciality,telephone",
-          "String,DateTime,Int,Float,Boolean,[String],[Int]",
+          "doctor_id,doctor_name,birthday,experience,rating,on_holiday,speciality,telephone",
+          "String,String,DateTime,Int,Float,Boolean,[String],[Int]",
         ],
       },
     });
+  });
+});
+
+describe("Presto - Operators", () => {
+  it("01. presto_doctor: like , notLike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:like value:"%asch%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notLike value:"%asch%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
+  });
+  it("02. presto_doctor: iLike, notILike", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:iLike value:"%ASCH%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notILike value:"%ASCH%"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
+  });
+
+  it("03. presto_doctor: regexp, notRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:regexp value:"aschet$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notRegexp value:"aschet$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
+  });
+
+  it("04. presto_doctor: iRegexp, notIRegexp", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:iRegexp value:"ASCHET$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 2);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `{
+          presto_doctors(pagination: {limit:10} search:{field:doctor_name operator:notIRegexp value:"ASCHET$"}) {
+              doctor_id
+            }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data.presto_doctors.length === 3);
   });
 });
 
