@@ -23,14 +23,15 @@ const DataLoader = require("dataloader");
 
 /**
  * module - Creates a sequelize model
- *
- * @param  {object} sequelize Sequelize instance.
- * @param  {object} DataTypes Allowed sequelize data types.
- * @return {object}           Sequelize model with associations defined
  */
 
 module.exports = class <%- nameLc -%> extends Sequelize.Model{
-
+  /**
+    * Initialize sequelize model.
+    * @param  {object} sequelize Sequelize instance.
+    * @param  {object} DataTypes Allowed sequelize data types.
+    * @return {object}           Sequelize model with associations defined
+    */
   static init(sequelize, DataTypes){
     return super.init({
 
@@ -109,6 +110,10 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
       return record;
   }
 
+  /**
+  * Associate models.
+  * @param  {object} models  Indexed models.
+  */
   static associate(models){
     <% for(var key in associationsArguments){ -%>
       <%for(let i=0; i< associationsArguments[key].length; i++){-%>
@@ -165,10 +170,26 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
      cache: false,
    });
  
+   /**
+   * readById - The model implementation for reading a single record given by its ID
+   *
+   * Read a single record by a given ID
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
    static async readById(id) {
      return await <%- nameLc -%>.readByIdLoader.load(id);
    }<% } else 
-  {%>static async readById(id){
+  {%>/**
+  * readById - The model implementation for reading a single record given by its ID
+  *
+  * Read a single record by a given ID
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- nameLc -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
+  static async readById(id){
     let item = await <%- nameLc -%>.findByPk(id);
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
@@ -176,13 +197,30 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     item = <%- nameLc -%>.postReadCast(item)
     return validatorUtil.validateData('validateAfterRead', this, item);
   }<%}-%>
-  
+
+  /**
+  * countRecords - The model implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
   static async countRecords(search){
     let options = {}
     options['where'] = helper.searchConditionsToSequelize(search, <%- nameLc -%>.definition.attributes);
     return super.count(options);
   }
 
+  /**
+  * readAll - The model implementation for searching for records in MongoDB. This method uses limit-offset-based pagination.
+  *
+  * @param  {object} search - Search argument for filtering records
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param  {object} pagination - Offset and limit to get the records from and to respectively
+  * @param  {BenignErrorReporter} - benignErrorReporter can be used to generate the standard
+  * @return {array}  Array of records holding conditions specified by search, order and pagination argument
+  */
   static async readAll(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
@@ -194,6 +232,15 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     return validatorUtil.bulkValidateData('validateAfterRead', this, records, benignErrorReporter);
   }
 
+  /**
+  * readAllCursor - The model implementation for searching for records. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
   static async readAllCursor(search, order, pagination, benignErrorReporter){
     //use default BenignErrorReporter if no BenignErrorReporter defined
     benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
@@ -219,6 +266,13 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
+  /**
+  * addOne - The model implementation method for adding a record.
+  *
+  * @param {object} input - The input object.
+  * @return {object} The created record 
+  * @throw {Error} If the process fails, an error is thrown
+  */
   static async addOne(input){
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
@@ -237,6 +291,13 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
 
   }
 
+  /**
+  * deleteOne - The model implementation for deleting a single record, given by its ID.
+  *
+  * @param {string} id - The ID of the record to be deleted
+  * @returns {string} A success message is returned
+  * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+  */
   static  async deleteOne(id){
     //validate id
     await validatorUtil.validateData('validateForDelete', this, id);
@@ -248,6 +309,13 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     }
   }
 
+  /**
+  * updateOne - The model implementation for updating a single record.
+  *
+  * @param {object} input - The input object.
+  * @returns {object} The updated record
+  * @throw {Error} If this method fails, an error is thrown
+  */
   static async updateOne(input){
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
@@ -270,6 +338,11 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     }
   }
 
+  /**
+  * bulkAddCsv - Add records from csv file
+  *
+  * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
+  */
   static bulkAddCsv(context){
 
       let delim = context.request.body.delim;
@@ -339,14 +412,28 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
 
   <% associations_temp = associationsArguments["to_many_through_sql_cross_table"]-%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
-
+    /**
+    * <%=associations_temp[i].name%>FilterImpl - The model implementation for searching associated records. This method uses limit-offset based pagination.
+    *
+    * @param {object} search - The search condition for which records shall be fetched
+    * @param  {array} order - Type of sorting (ASC, DESC) for each field
+    * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set
+    * @return {object} The set of records
+    */
     async <%=associations_temp[i].name%>FilterImpl ({search,order,pagination}){
       // build the sequelize options object for limit-offset-based pagination
       let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute(), models.<%=associations_temp[i].target_lc-%>.definition.attributes);  
       return this.get<%- associations_temp[i].name_cp%>(options);
     }
 
-
+    /**
+    * <%=associations_temp[i].name%>ConnectionImpl - The model implementation for searching associated records. This method uses cursor based pagination.
+    *
+    * @param {object} search - The search condition for which records shall be fetched
+    * @param  {array} order - Type of sorting (ASC, DESC) for each field
+    * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set
+    * @return {object} The set of records
+    */
     async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}){
       // build the sequelize options object for cursor-based pagination
       let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, models.<%=associations_temp[i].target_lc-%>.idAttribute(), models.<%=associations_temp[i].target_lc-%>.definition.attributes);
@@ -365,6 +452,14 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
       return {edges, pageInfo,<%=associations_temp[i].target_lc_pl%>: nodes };
     }
 
+  /**
+  * countFiltered<%=associations_temp[i].name_cp%>Impl - The model implementation for counting the number of associated records
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
     countFiltered<%=associations_temp[i].name_cp%>Impl({search}){
       let options = {}
       options['where'] = helper.searchConditionsToSequelize(search);
@@ -372,104 +467,7 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     }
   <%}-%>
 
-<%# generic_to_one -%>
-  <% associations_temp = associationsArguments["generic_to_one"]-%>
-  <% for(let i=0; i < associations_temp.length; i++){ -%>
-
-    /**
-     * <%=associations_temp[i].name%>Impl - Return associated record.
-     *
-     * @param  {object} search      Search argument to match the associated record.
-     * @param  {object} context     Provided to every resolver holds contextual information like the
-     * resquest query and user info.
-     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
-     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
-     * is invoked, the server will include any so reported errors in the final response, i.e. the
-     * GraphQL response will have a non empty errors property.
-     * @return {type}   Associated record.
-     */
-    async <%=associations_temp[i].name%>Impl({search}, context, benignErrorReporter){
-      /*
-      YOUR CODE GOES HERE
-      */
-      throw new Error('<%=associations_temp[i].name%>Impl() is not implemented');
-    }
-  <%}-%>
-<%# generic_to_many -%>
-  <% associations_temp = associationsArguments["generic_to_many"]-%>
-  <% for(let i=0; i < associations_temp.length; i++){ -%>
-
-    /**
-     * <%=associations_temp[i].name%>FilterImpl - Return certain number, specified in pagination argument,
-     * of records associated with the current instance, this records should also holds the condition of search
-     * argument, all of them sorted as specified by the order argument.
-     *
-     * @param  {object} search      Search argument for filtering associated records.
-     * @param  {array} order        Type of sorting (ASC, DESC) for each field.
-     * @param  {object} pagination  Offset and limit to get the records from and to respectively.
-     * @param  {object} context     Provided to every resolver holds contextual information like the
-     * resquest query and user info.
-     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
-     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
-     * is invoked, the server will include any so reported errors in the final response, i.e. the
-     * GraphQL response will have a non empty errors property.
-     * @return {array}    Array of associated records holding conditions specified by search, order and
-     * pagination argument.
-     */
-    async <%=associations_temp[i].name%>FilterImpl({search,order,pagination}, context, benignErrorReporter){
-      /*
-      YOUR CODE GOES HERE
-      */
-      throw new Error('<%=associations_temp[i].name%>FilterImpl() is not implemented');
-    }
-
-    /**
-     * <%=associations_temp[i].name%>ConnectionImpl - Return certain number, specified in pagination argument,
-     * of records associated with the current instance, this records should also holds the condition of search
-     * argument, all of them sorted as specified by the order argument.
-     *
-     * @param  {object} search      Search argument for filtering associated records.
-     * @param  {array} order        Type of sorting (ASC, DESC) for each field.
-     * @param  {object} pagination  Cursor and first (indicatig the number of records to retrieve)
-     * arguments to apply cursor-based pagination.
-     * @param  {object} context     Provided to every resolver holds contextual information like the
-     * resquest query and user info.
-     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
-     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
-     * is invoked, the server will include any so reported errors in the final response, i.e. the
-     * GraphQL response will have a non empty errors property.
-     * @return {array}    Array of records as grapqhql connections holding conditions specified by search,
-     * order and pagination argument.
-     */
-    async <%=associations_temp[i].name%>ConnectionImpl ({search,order,pagination}, context, benignErrorReporter){
-      /*
-      YOUR CODE GOES HERE
-      */
-      throw new Error('<%=associations_temp[i].name%>ConnectionImpl() is not implemented');
-    }
-
-    /**
-     * countFiltered<%=associations_temp[i].name_cp%>Impl - Count number of associated records that
-     * holds the conditions specified in the search argument.
-     *
-     * @param  {object} {search}    Search argument for filtering associated records.
-     * @param  {object} context     Provided to every resolver holds contextual information like the
-     * resquest query and user info.
-     * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
-     * GraphQL output {error: ..., data: ...}. If the function reportError of the benignErrorReporter
-     * is invoked, the server will include any so reported errors in the final response, i.e. the
-     * GraphQL response will have a non empty errors property.
-     * @return {type}   Number of associated records that holds the conditions specified in the search
-     * argument.
-     */
-    async countFiltered<%=associations_temp[i].name_cp%>Impl({search}, context, benignErrorReporter){
-      /*
-      YOUR CODE GOES HERE
-      */
-      throw new Error('countFiltered<%- associations_temp[i].name_cp %>Impl() is not implemented');
-    }
-  <%}-%>
-
+  <%- include('./includes/create-generic-fieldResolvers'); %>
   <%- include('./includes/create-models-fieldMutations', {op: "add"}); %>
   <%- include('./includes/create-models-fieldMutations', {op: "remove"}); %>
   <%- include('./includes/create-models-fieldMutations-generic-associations', {op: "add"}); %>
@@ -512,7 +510,7 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
     return Buffer.from(cursor, 'base64').toString('utf-8');
   }
 
-    base64Enconde(){
+  base64Enconde(){
     return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
   }
 
