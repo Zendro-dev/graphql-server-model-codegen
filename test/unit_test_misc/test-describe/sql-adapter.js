@@ -122,6 +122,14 @@ static readByIdLoader = new DataLoader(peopleLocalSql.batchReadById, {
     cache: false,
 });
 
+/**
+  * readById - The adapter implementation for reading a single record given by its ID
+  *
+  * Read a single record by a given ID
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type peopleLocalSql, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
 static async readById(id) {
     return await peopleLocalSql.readByIdLoader.load(id);
 }
