@@ -4370,3 +4370,72 @@ describe("data loader for readById method", () => {
     });
   });
 });
+describe("validation API for local setup", () => {
+  it("01. validateAccessionForCreation", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateAccessionForCreation(accession_id:"12", sampling_date:"2017-12-31")
+       }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data).to.deep.equal({
+      validateAccessionForCreation: true,
+    });
+  });
+  it("02. validateAccessionForUpdating", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateAccessionForUpdating(accession_id:"12", addLocation:"1")
+       }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "A given ID has no existing record in data model Location",
+          locations: "",
+        },
+      ],
+      data: {
+        validateAccessionForUpdating: false,
+      },
+    });
+  });
+  it("03. validateAccessionForDeletion", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateAccessionForDeletion(accession_id: "1")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: 'Record with ID = "1" does not exist',
+          locations: "",
+        },
+      ],
+      data: {
+        validateAccessionForDeletion: false,
+      },
+    });
+  });
+  it("04. validateAccessionAfterReading", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateAccessionAfterReading(accession_id: "1")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      validateAccessionAfterReading: true,
+    });
+  });
+});
