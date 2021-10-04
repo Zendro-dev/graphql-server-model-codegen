@@ -23,14 +23,15 @@ const DataLoader = require("dataloader");
 
 /**
  * module - Creates a sequelize model
- *
- * @param  {object} sequelize Sequelize instance.
- * @param  {object} DataTypes Allowed sequelize data types.
- * @return {object}           Sequelize model with associations defined
  */
 
 module.exports = class <%- adapterName -%> extends Sequelize.Model{
-
+  /**
+    * Initialize sequelize model.
+    * @param  {object} sequelize Sequelize instance.
+    * @param  {object} DataTypes Allowed sequelize data types.
+    * @return {object}           Sequelize model with associations defined
+    */
   static init(sequelize, DataTypes){
     return super.init({
 
@@ -147,11 +148,27 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
    static readByIdLoader = new DataLoader(<%- adapterName -%>.batchReadById, {
      cache: false,
    });
- 
+
+   /**
+   * readById - The adapter implementation for reading a single record given by its ID
+   *
+   * Read a single record by a given ID
+   * @param {string} id - The ID of the requested record
+   * @return {object} The requested record as an object with the type <%- adapterName -%>, or an error object if the validation after reading fails
+   * @throws {Error} If the requested record does not exist
+   */
    static async readById(id) {
      return await <%- adapterName -%>.readByIdLoader.load(id);
    }<% } else 
-  {%>static async readById(id){
+  {%>/**
+  * readById - The adapter implementation for reading a single record given by its ID
+  *
+  * Read a single record by a given ID
+  * @param {string} id - The ID of the requested record
+  * @return {object} The requested record as an object with the type <%- adapterName -%>, or an error object if the validation after reading fails
+  * @throws {Error} If the requested record does not exist
+  */
+  static async readById(id){
     let item = await <%- adapterName -%>.findByPk(id);
     if (item === null) {
         throw new Error(`Record with ID = "${id}" does not exist`);
@@ -160,6 +177,14 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return item;
   }<%}-%>
 
+  /**
+  * countRecords - The adapter implementation for counting the number of records, possibly restricted by a search term
+  *
+  * This method is the implementation for counting the number of records that fulfill a given condition, or for all records in the table.
+  * @param {object} search - The search term that restricts the set of records to be counted - if undefined, all records in the table
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {number} The number of records that fulfill the condition, or of all records in the table
+  */
   static countRecords(search){
     let options = {};
 
@@ -180,6 +205,15 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return super.count(options);
   }
 
+  /**
+  * readAllCursor - The adapter implementation for searching for records. This method uses cursor based pagination.
+  *
+  * @param {object} search - The search condition for which records shall be fetched
+  * @param  {array} order - Type of sorting (ASC, DESC) for each field
+  * @param {object} pagination - The parameters for pagination, which can be used to get a subset of the requested record set.
+  * @param {BenignErrorReporter} benignErrorReporter can be used to generate the standard
+  * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
+  */
   static async readAllCursor(search, order, pagination){
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- adapterName -%>.definition.attributes);
@@ -199,6 +233,13 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return {edges, pageInfo, <%- namePl -%>: edges.map((edge) => edge.node)};
   }
 
+  /**
+  * addOne - The adapter implementation method for adding a record.
+  *
+  * @param {object} input - The input object.
+  * @return {object} The created record 
+  * @throw {Error} If the process fails, an error is thrown
+  */
   static async addOne(input){
     input = <%- adapterName -%>.preWriteCast(input)
     try{
@@ -215,6 +256,13 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
 
   }
 
+  /**
+  * deleteOne - The adapter implementation for deleting a single record, given by its ID.
+  *
+  * @param {string} id - The ID of the record to be deleted
+  * @returns {string} A success message is returned
+  * @throw {Error} If the record could not be deleted - this means a record with the ID is still present
+  */
   static async deleteOne(id){
     let destroyed = await super.destroy({where:{[this.idAttribute()] : id} });
     if(destroyed !== 0){
@@ -224,6 +272,13 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     }
   }
 
+  /**
+  * updateOne - The adapter implementation for updating a single record.
+  *
+  * @param {object} input - The input object.
+  * @returns {object} The updated record
+  * @throw {Error} If this method fails, an error is thrown
+  */
   static async updateOne(input){
     input = <%- adapterName -%>.preWriteCast(input)
     try{
@@ -255,7 +310,11 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
 
 
-
+  /**
+  * bulkAddCsv - Add records from csv file
+  *
+  * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
+  */
   static bulkAddCsv(context){
 
       let delim = context.request.body.delim;
