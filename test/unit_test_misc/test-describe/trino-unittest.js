@@ -219,7 +219,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     let edges = result.map((res) => {
         return {
             node: res,
-            cursor: res.base64Enconde(),
+            cursor: res.base64Encode(),
         };
     });
     const pageInfo = helper.buildPageInfo(edges, oppResult, pagination);

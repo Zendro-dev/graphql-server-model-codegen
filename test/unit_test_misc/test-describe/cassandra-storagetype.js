@@ -276,7 +276,7 @@ static async readAllCursor(search, pagination, benignErrorReporter, allowFilteri
       let edge = {};
       let rowAscity = new city(row);
       edge.node = rowAscity;
-      edge.cursor = rowAscity.base64Enconde();
+      edge.cursor = rowAscity.base64Encode();
       return edge;
   });
 
@@ -607,7 +607,7 @@ static async readAllCursor(search, pagination, benignErrorReporter, allowFilteri
     let edge = {};
     let rowAsDist_incident = new dist_incident_instance1(row);
     edge.node = rowAsDist_incident;
-    edge.cursor = rowAsDist_incident.base64Enconde();
+    edge.cursor = rowAsDist_incident.base64Encode();
     return edge;
   });
 

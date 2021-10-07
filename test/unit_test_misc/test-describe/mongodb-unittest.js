@@ -149,7 +149,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     let edges = docs.map(doc => {
         return {
             node: doc,
-            cursor: doc.base64Enconde(),
+            cursor: doc.base64Encode(),
         }
     });
     const pageInfo = helper.buildPageInfo(edges, oppDocuments, pagination);

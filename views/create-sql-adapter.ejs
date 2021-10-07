@@ -411,7 +411,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     return Buffer.from(cursor, 'base64').toString('utf-8');
   }
 
-    base64Enconde(){
+    base64Encode(){
     return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
   }
 

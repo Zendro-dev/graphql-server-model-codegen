@@ -169,7 +169,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
         let edges = nodes_model.map(temp_node  =>{
           return {
             node: temp_node,
-            cursor: temp_node.base64Enconde()
+            cursor: temp_node.base64Encode()
           }
         })
 

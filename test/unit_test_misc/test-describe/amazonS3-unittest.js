@@ -128,7 +128,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
   let rows = records.map( row => {
       return {
         node: row,
-        cursor: row.base64Enconde(),
+        cursor: row.base64Encode(),
       }
   })
 
