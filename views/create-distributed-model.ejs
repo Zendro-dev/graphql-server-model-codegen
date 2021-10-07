@@ -276,56 +276,6 @@ module.exports = class <%- nameLc -%>{
     });
   }
 
-  static get definition(){
-    return definition;
-  }
-
-  static base64Decode(cursor){
-    return Buffer.from(cursor, 'base64').toString('utf-8');
-  }
-
-  base64Encode(){
-    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
-  }
-
-  stripAssociations(){
-    let attributes = Object.keys(<%- nameLc -%>.definition.attributes);
-    <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
-    let data_values = _.pick(this, attributes);
-    return data_values;
-  }
-
-  /**
-   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
-   *
-   * @return {type} Name of the attribute that functions as an internalId
-   */
-
-  static idAttribute() {
-    let internalId = <%- nameLc -%>.definition.id.name;
-    return internalId;
-  }
-
-  /**
-   * idAttributeType - Return the Type of the internalId.
-   *
-   * @return {type} Type given in the JSON model
-   */
-
-  static idAttributeType() {
-    return <%- nameLc -%>.definition.id.type;
-  }
-
-  /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- nameLc -%>.
-   *
-   * @return {type} id value
-   */
-
-  getIdValue() {
-    return this[<%- nameLc -%>.idAttribute()]
-  }
-
   static assertInputHasId(input) {
     if (! input.<%- idAttribute -%>) {
       throw new Error(`Illegal argument. Provided input requires attribute '<%- idAttribute -%>'.`);
@@ -498,4 +448,5 @@ module.exports = class <%- nameLc -%>{
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
+  <%- include('./includes/create-models-functions'); %>
 }
