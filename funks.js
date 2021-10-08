@@ -145,7 +145,28 @@ attributesToJsonSchemaProperties = function (attributes) {
     "[Date]",
     "[Time]",
     "[DateTime]",
+    "[Point]",
+    "[MultiPoint]",
+    "[LineString]",
+    "[MultiLineString]",
+    "[Polygon]",
+    "[MultiPolygon]",
+    "[GeometryCollection]",
+    "[Feature]",
+    "[FeatureCollection]"
   ];
+
+  let gisTypes = [
+    "Point",
+    "MultiPoint",
+    "LineString",
+    "MultiLineString",
+    "Polygon",
+    "MultiPolygon",
+    "GeometryCollection",
+    "Feature",
+    "FeatureCollection"
+  ]
 
   for (key in jsonSchemaProps) {
     if (jsonSchemaProps[key] === "String") {
@@ -179,6 +200,10 @@ attributesToJsonSchemaProperties = function (attributes) {
     } else if (jsonSchemaProps[key] === "uuid") {
       jsonSchemaProps[key] = {
         type: ["uuid", "null"],
+      };
+    } else if (gisTypes.includes(jsonSchemaProps[key])) {
+      jsonSchemaProps[key] = {
+        type: ["object", "null"],
       };
     } else if (arrayType.includes(jsonSchemaProps[key])) {
       jsonSchemaProps[key] = {
@@ -408,6 +433,15 @@ writeSchemaCommons = function (dir_write) {
   scalar Date
   scalar Time
   scalar DateTime
+  scalar Point
+  scalar MultiPoint
+  scalar LineString
+  scalar MultiLineString
+  scalar Polygon
+  scalar MultiPolygon
+  scalar GeometryCollection
+  scalar Feature
+  scalar FeatureCollection
 \`;`;
 
   try {
