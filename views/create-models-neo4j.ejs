@@ -508,5 +508,5 @@ module.exports = class <%- nameLc -%> {
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
-  <%- include('./includes/create-models-functions'); %>
+  <%- include('./includes/create-models-functions', {model: nameLc}); %>
 };

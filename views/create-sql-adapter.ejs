@@ -373,5 +373,5 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
-  <%- include('./includes/create-models-functions'); %>
+  <%- include('./includes/create-models-functions', {model: adapterName}); %>
 }

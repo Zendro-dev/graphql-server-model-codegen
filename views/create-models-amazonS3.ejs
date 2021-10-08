@@ -364,6 +364,6 @@ module.exports = class <%- nameLc -%> {
       return helper.csvTableTemplate(definition);
   }
   
-  <%- include('./includes/create-models-functions'); %>
+  <%- include('./includes/create-models-functions', {model: nameLc}); %>
 
 }

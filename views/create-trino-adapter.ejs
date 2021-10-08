@@ -338,5 +338,5 @@ module.exports = class <%- adapterName -%> {
       return helper.csvTableTemplate(definition);
   }
 
-  <%- include('./includes/create-models-functions'); %>
+  <%- include('./includes/create-models-functions', {model: adapterName}); %>
 }

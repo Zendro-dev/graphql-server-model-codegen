@@ -321,6 +321,6 @@ module.exports = class <%- nameLc -%>{
     throw new Error('csvTableTemplate() is not implemented for model <%- nameLc -%>');
   }
 
-  <%- include('./includes/create-models-functions'); %>
+  <%- include('./includes/create-models-functions', {model: adapterName}); %>
 
 }
