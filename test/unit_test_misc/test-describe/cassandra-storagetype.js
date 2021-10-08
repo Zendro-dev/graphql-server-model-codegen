@@ -64,6 +64,10 @@ module.exports = \`
     """
     countFilteredRivers(search: searchRiverInput) : Int
 
+    """
+    @record as base64 encoded cursor for paginated connections
+    """
+    asCursor: String!
     }
 type CityConnection{
   edges: [CityEdge]
