@@ -118,6 +118,11 @@ type transcriptCount{
   individual_id: Int
 
   inDiVIdual(search: searchInDiVIdualInput): inDiVIdual
+
+  """
+  @record as base64 encoded cursor for paginated connections
+  """
+  asCursor: String!
   }
 `
 

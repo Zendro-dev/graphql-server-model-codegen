@@ -365,7 +365,7 @@ module.exports.test20_12 =
 module.exports.test20_13 =
   /staticidAttributeType\(\){returnperson_a\.definition\.id\.type;}/;
 module.exports.test20_14 =
-  /getIdValue\(\){returnthis\[person_a\.idAttribute\(\)\]}/;
+  /getIdValue\(\){returnthis\[person_a\.idAttribute\(\)\];}/;
 
 module.exports.test20_1 = `
 /**

@@ -153,7 +153,7 @@ module.exports = class <%- name -%> {
       let edge = {};
       let rowAs<%- name -%> = new <%- name -%>(row);
       edge.node = rowAs<%- name -%>;
-      edge.cursor = rowAs<%- name -%>.base64Enconde();
+      edge.cursor = rowAs<%- name -%>.base64Encode();
       return edge;
     });
 
@@ -290,97 +290,5 @@ module.exports = class <%- name -%> {
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
 
-  /**
-   * idAttribute - Check whether an attribute "internalId" is given in the JSON model. If not the standard "id" is used instead.
-   *
-   * @return {type} Name of the attribute that functions as an internalId
-   */
-
-  static idAttribute() {
-    return <%- name -%>.definition.id.name;
-  }
-
-  /**
-   * idAttributeType - Return the Type of the internalId.
-   *
-   * @return {type} Type given in the JSON model
-   */
-
-  static idAttributeType() {
-    return <%- name -%>.definition.id.type;
-  }
-
-  /**
-   * getIdValue - Get the value of the idAttribute ("id", or "internalId") for an instance of <%- name -%>.
-   *
-   * @return {type} id value
-   */
-
-  getIdValue() {
-    return this[<%- name -%>.idAttribute()]
-  }
-
-  /**
-  * definition - Getter for the attribute 'definition'
-  * @return {string} the definition string
-  */
-  static get definition(){
-    return definition;
-  }
-
-  /**
-  * base64Decode - Decode a base 64 String to UTF-8.
-  * @param {string} cursor - The cursor to be decoded into the record, given in base 64
-  * @return {string} The stringified object in UTF-8 format
-  */
-  static base64Decode(cursor){
-    return Buffer.from(cursor, 'base64').toString('utf-8');
-  }
-
-  /**
-  * base64Enconde - Encode <%- indefiniteArticle -%> <%- name -%> to a base 64 String
-  *
-  * @return {string} The <%- name -%> object, encoded in a base 64 String
-  */
-    base64Enconde(){
-    return Buffer.from(JSON.stringify(this.stripAssociations())).toString('base64');
-  }
-
-  /**
-  * stripAssociations - Instant method for getting all attributes of <%- indefiniteArticle -%> <%- name -%>.
-  *
-  * @return {object} The attributes of <%- indefiniteArticle -%> <%- name -%> in object form
-  */
-  stripAssociations(){
-    let attributes = Object.keys(<%- name -%>.definition.attributes);
-  <%if( defaultId ){-%>attributes.push('<%- idAttribute -%>'); <%}-%>
-    let data_values = _.pick(this, attributes);
-    return data_values;
-  }
-
-  /**
-  * externalIdsArray - Get all attributes of <%- indefiniteArticle -%> <%- name -%> that are marked as external IDs.
-  *
-  * @return {Array<String>} An array of all attributes of <%- indefiniteArticle -%> <%- name -%> that are marked as external IDs
-  */
-  static externalIdsArray(){
-    let externalIds = [];
-    if(definition.externalIds){
-      externalIds = definition.externalIds;
-    }
-
-    return externalIds;
-  }
-
-  /**
-  * externalIdsObject - Get all external IDs of <%- indefiniteArticle -%> <%- name -%>.
-  *
-  * @return {object} An object that has the names of the external IDs as keys and their types as values
-  */
-  static externalIdsObject(){
-    return {
-      <%for(let i=0; i < externalIds.length; i++){-%> <%=externalIds[i]-%>: '<%=attributes[ externalIds[i] ]-%>' <%if(i !== (externalIds.length -1) ){ -%>,<%}-%><%}-%>
-    };
-  }
-
+  <%- include('./includes/create-models-functions', {model: name}); %>
 }

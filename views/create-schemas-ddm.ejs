@@ -110,6 +110,10 @@ type <%- name -%>
   """
   countFiltered<%= associationsArguments.schema_attributes.generic_many[key][2]%>(search: search<%= associationsArguments.schema_attributes.generic_many[key][1] -%>Input) : Int
 <%}-%>
+  """
+  @misc-field
+  """
+  asCursor: String!
 }
 
 <%#

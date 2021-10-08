@@ -52,6 +52,11 @@ type Person{
   @count-request
   """
   countFilteredBooks(search: searchBookInput) : Int
+
+  """
+  @record as base64 encoded cursor for paginated connections
+  """
+  asCursor: String!
 }
 
 `
@@ -109,6 +114,11 @@ type Person{
   @count-request
   """
   countFilteredBooks(search: searchBookInput) : Int
+
+  """
+  @record as base64 encoded cursor for paginated connections
+  """
+  asCursor: String!
 }
 
 `

@@ -41,6 +41,11 @@ type book{
   @count-request
   """
   countFilteredAuthors(search: searchPersonInput) : Int
+
+  """
+  @record as base64 encoded cursor for paginated connections
+  """
+  asCursor: String!
 }
 
 `;

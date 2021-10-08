@@ -254,7 +254,7 @@ stripAssociations() {
 
 module.exports.getIdValue = `
 getIdValue() {
-    return this[peopleLocalSql.idAttribute()]
+    return this[peopleLocalSql.idAttribute()];
 }
 `;
 
