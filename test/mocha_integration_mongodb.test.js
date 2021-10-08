@@ -1573,3 +1573,73 @@ describe("data loader for readById method", () => {
     });
   });
 });
+
+describe("validation API for distributed models", () => {
+  it("01. validateDist_animalForCreation", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateDist_animalForCreation(animal_id:"instance1-12")
+       }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody.data).to.deep.equal({
+      validateDist_animalForCreation: true,
+    });
+  });
+  it("02. validateDist_animalForUpdating", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateDist_animalForUpdating(animal_id: "instance1-12", addDist_farm: "instance1-01")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "A given ID has no existing record in data model dist_farm",
+          locations: "",
+        },
+      ],
+      data: {
+        validateDist_animalForUpdating: false,
+      },
+    });
+  });
+  it("03. validateDist_animalForDeletion", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateDist_animalForDeletion(animal_id:"instance1-12")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: 'Record with ID = "instance1-12" does not exist',
+          locations: "",
+        },
+      ],
+      data: {
+        validateDist_animalForDeletion: false,
+      },
+    });
+  });
+  it("04. validateDist_animalAfterReading", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `{
+        validateDist_animalAfterReading(animal_id:"instance1-12")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    //check associated records
+    expect(resBody.data).to.deep.equal({
+      validateDist_animalAfterReading: true,
+    });
+  });
+});

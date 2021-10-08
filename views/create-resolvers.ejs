@@ -18,7 +18,7 @@ const resolvers = require(path.join(__dirname,'index.js'));
 const models = require(path.join(__dirname, '..', 'models', 'index.js'));
 const globals = require('../config/globals');
 const errorHelper = require('../utils/errors');
-
+const validatorUtil = require("../utils/validatorUtil");
 <%#
 /**
  * Section 2
@@ -590,6 +590,10 @@ module.exports = {
  * readOneModel()
  * countModels()
  * vueTableAccession()
+ * validateModelForCreation()
+ * validateModelForUpdating()
+ * validateModelForDeletion()
+ * validateModelAfterReading()
  */
 -%>
   /**
@@ -684,6 +688,136 @@ module.exports = {
       }
   },
 
+  /**
+  * validate<%- nameCp -%>ForCreation - Check user authorization and validate input argument for creation.
+  *
+  * @param  {object} input   Info of each field to create the new record
+  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info
+  * @return {boolean}        Validation result
+  */
+  validate<%- nameCp -%>ForCreation: async (input, context) => {
+    let authorization = await checkAuthorization(context, '<%- name -%>', 'read');
+    if (authorization === true) {
+      let inputSanitized = helper.sanitizeAssociationArguments(input, [
+        Object.keys(associationArgsDef),
+      ]);
+
+      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+      try {
+        if (!input.skipAssociationsExistenceChecks) {
+          await helper.validateAssociationArgsExistence(
+            inputSanitized,
+            context,
+            associationArgsDef
+          );
+        }
+        await validatorUtil.validateData(
+          "validateForCreate",
+          <%- nameLc -%>,
+          inputSanitized
+        );
+        return true;
+      } catch (error) {
+        benignErrorReporter.reportError(error);
+        return false;
+      }
+    } else {
+      throw new Error("You don't have authorization to perform this action");
+    }
+  },
+
+  /**
+  * validate<%- nameCp -%>ForUpdating - Check user authorization and validate input argument for updating.
+  *
+  * @param  {object} input   Info of each field to create the new record
+  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info
+  * @return {boolean}        Validation result
+  */
+  validate<%- nameCp -%>ForUpdating: async (input, context) => {
+    let authorization = await checkAuthorization(context, '<%- name -%>', 'read');
+    if (authorization === true) {
+      let inputSanitized = helper.sanitizeAssociationArguments(input, [
+        Object.keys(associationArgsDef),
+      ]);
+
+      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+      try {
+        if (!input.skipAssociationsExistenceChecks) {
+          await helper.validateAssociationArgsExistence(
+            inputSanitized,
+            context,
+            associationArgsDef
+          );
+        }
+        await validatorUtil.validateData(
+          "validateForUpdate",
+          <%- nameLc -%>,
+          inputSanitized
+        );
+        return true;
+      } catch (error) {
+        benignErrorReporter.reportError(error);
+        return false;
+      }
+    } else {
+      throw new Error("You don't have authorization to perform this action");
+    }
+  },
+
+  /**
+  * validate<%- nameCp -%>ForDeletion - Check user authorization and validate record by ID for deletion.
+  *
+  * @param  {string} {<%- idAttribute -%>} <%- idAttribute -%> of the record to be validated
+  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info
+  * @return {boolean}        Validation result
+  */
+  validate<%- nameCp -%>ForDeletion: async ({ <%- idAttribute -%> }, context) => {
+    if ((await checkAuthorization(context, '<%- name -%>', 'read')) === true) {
+      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+      try {
+        await validForDeletion(<%- idAttribute -%>, context);
+        await validatorUtil.validateData(
+          "validateForDelete",
+          <%- nameLc -%>,
+          <%- idAttribute -%>
+        );
+        return true;
+      } catch (error) {
+        benignErrorReporter.reportError(error);
+        return false;
+      }
+    } else {
+      throw new Error("You don't have authorization to perform this action");
+    }
+  },
+
+  /**
+  * validate<%- nameCp -%>AfterReading - Check user authorization and validate record by ID after reading.
+  *
+  * @param  {string} {<%- idAttribute -%>} <%- idAttribute -%> of the record to be validated
+  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info
+  * @return {boolean}        Validation result
+  */
+  validate<%- nameCp -%>AfterReading: async ({ <%- idAttribute -%> }, context) => {
+    if ((await checkAuthorization(context, '<%- name -%>', 'read')) === true) {
+      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+
+      try {
+        await validatorUtil.validateData(
+          "validateAfterRead",
+          <%- nameLc -%>,
+          <%- idAttribute -%>
+        );
+        return true;
+      } catch (error) {
+        benignErrorReporter.reportError(error);
+        return false;
+      }
+    } else {
+      throw new Error("You don't have authorization to perform this action");
+    }
+  },
 <%#
 /**
  * Section 6.b
