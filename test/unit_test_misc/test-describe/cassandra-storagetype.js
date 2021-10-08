@@ -119,8 +119,13 @@ type Query {
   cities(search: searchCityInput, order: [ orderCityInput ], pagination: paginationInput! ): [city]
   readOneCity(city_id: ID!): city
   countCities(search: searchCityInput ): Int
-  vueTableCity : VueTableCity    csvTableTemplateCity: [String]
-  citiesConnection(search:searchCityInput, order: [ orderCityInput ], pagination: paginationCursorInput!): CityConnection
+  vueTableCity : VueTableCity
+  csvTableTemplateCity: [String]
+  citiesConnection(search:searchCityInput, order: [ orderCityInput ], pagination: paginationCursorInput! ): CityConnection
+  validateCityForCreation(city_id: ID!, name: String, intArr: [Int], strArr: [String], floatArr: [Float], boolArr: [Boolean], dateTimeArr: [DateTime]   , addRivers:[ID] , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+  validateCityForUpdating(city_id: ID!, name: String, intArr: [Int], strArr: [String], floatArr: [Float], boolArr: [Boolean], dateTimeArr: [DateTime]   , addRivers:[ID], removeRivers:[ID]  , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+  validateCityForDeletion(city_id: ID!): Boolean!
+  validateCityAfterReading(city_id: ID!): Boolean!
 }
 
 type Mutation {

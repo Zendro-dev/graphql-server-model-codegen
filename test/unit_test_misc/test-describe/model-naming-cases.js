@@ -26,12 +26,17 @@ module.exports.resolvers_webservice_aminoAcid = `
 
 module.exports.schema_webservice_aminoAcid = `
 type Query {
-  aminoAcidSequences(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationInput! ): [aminoAcidSequence]
-  readOneAminoAcidSequence(id: ID!): aminoAcidSequence
-  countAminoAcidSequences(search: searchAminoAcidSequenceInput ): Int
-  vueTableAminoAcidSequence : VueTableAminoAcidSequence    csvTableTemplateAminoAcidSequence: [String]
-  aminoAcidSequencesConnection(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationCursorInput! ): AminoAcidSequenceConnection
-}
+    aminoAcidSequences(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationInput! ): [aminoAcidSequence]
+    readOneAminoAcidSequence(id: ID!): aminoAcidSequence
+    countAminoAcidSequences(search: searchAminoAcidSequenceInput ): Int
+    vueTableAminoAcidSequence : VueTableAminoAcidSequence
+    csvTableTemplateAminoAcidSequence: [String]
+    aminoAcidSequencesConnection(search:searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationCursorInput! ): AminoAcidSequenceConnection
+    validateAminoAcidSequenceForCreation( accession: String, sequence: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+    validateAminoAcidSequenceForUpdating(id: ID!, accession: String, sequence: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+    validateAminoAcidSequenceForDeletion(id: ID!): Boolean!
+    validateAminoAcidSequenceAfterReading(id: ID!): Boolean!
+  }
 `
 
 module.exports.model_webservice_aminoAcid = `

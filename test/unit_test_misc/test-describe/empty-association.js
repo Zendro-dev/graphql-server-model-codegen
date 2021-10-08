@@ -1,12 +1,16 @@
 module.exports.transcript_count_no_assoc_schema = `
 type Query {
-  transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput! ): [transcript_count]
-  readOneTranscript_count(id: ID!): transcript_count
-  countTranscript_counts(search: searchTranscript_countInput ): Int
-  vueTableTranscript_count : VueTableTranscript_count    csvTableTemplateTranscript_count: [String]
-
-  transcript_countsConnection(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput! ): Transcript_countConnection
-}
+    transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput! ): [transcript_count]
+    readOneTranscript_count(id: ID!): transcript_count
+    countTranscript_counts(search: searchTranscript_countInput ): Int
+    vueTableTranscript_count : VueTableTranscript_count
+    csvTableTemplateTranscript_count: [String]
+    transcript_countsConnection(search:searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput! ): Transcript_countConnection
+    validateTranscript_countForCreation( gene: String, variable: String, count: Float, tissue_or_condition: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+    validateTranscript_countForUpdating(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+    validateTranscript_countForDeletion(id: ID!): Boolean!
+    validateTranscript_countAfterReading(id: ID!): Boolean!
+  }
 
   type Mutation {
     addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!

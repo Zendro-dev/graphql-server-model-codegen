@@ -110,12 +110,16 @@ book.prototype.publisher = async function({
 
 module.exports.schema_person = `
 type Query {
-  people(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput! ): [Person]
-  readOnePerson(id: ID!): Person
-  countPeople(search: searchPersonInput ): Int
-  vueTablePerson : VueTablePerson    csvTableTemplatePerson: [String]
-
-  peopleConnection(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput! ): PersonConnection
+    people(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput! ): [Person]
+    readOnePerson(id: ID!): Person
+    countPeople(search: searchPersonInput ): Int
+    vueTablePerson : VueTablePerson
+    csvTableTemplatePerson: [String]
+    peopleConnection(search:searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput! ): PersonConnection
+    validatePersonForCreation( firstName: String, lastName: String, Age: Int , addCompany:ID  , addWorks:[ID] , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+    validatePersonForUpdating(id: ID!, firstName: String, lastName: String, Age: Int , addCompany:ID, removeCompany:ID   , addWorks:[ID], removeWorks:[ID]  , skipAssociationsExistenceChecks:Boolean = false): Boolean!
+    validatePersonForDeletion(id: ID!): Boolean!
+    validatePersonAfterReading(id: ID!): Boolean!
 }
 
   type Mutation {
