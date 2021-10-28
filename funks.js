@@ -574,7 +574,7 @@ module.exports.getOptions = function (dataModel) {
     cassandraStringAttributes: getStringAttributesInCassandraSchema(
       dataModel.attributes
     ),
-    operators: getOperators(getStorageType(dataModel))
+    operators: getOperators(getStorageType(dataModel)),
   };
   opts["editableAttributesStr"] = attributesToString(
     getEditableAttributes(
@@ -654,15 +654,20 @@ validateJsonFile = function (opts) {
     to_many,
     to_many_through_sql_cross_table,
     generic_to_one,
-    generic_to_many } = opts.associationsArguments;
+    generic_to_many,
+  } = opts.associationsArguments;
 
-  const parsedAssociations = to_one.concat(to_many,to_many_through_sql_cross_table, generic_to_many, generic_to_one);
+  const parsedAssociations = to_one.concat(
+    to_many,
+    to_many_through_sql_cross_table,
+    generic_to_many,
+    generic_to_one
+  );
 
   parsedAssociations.forEach((assoc) => {
-
     //check: validate if to_one assoc with foreignKey in target model exists
     //       Warn user that validation e.g. unique constraint needs to be added
-    if (assoc.holdsForeignKey === false && assoc.type.includes('to_one')) {
+    if (assoc.holdsForeignKey === false && assoc.type.includes("to_one")) {
       check.warnings.push(
         `WARNING: Association ${assoc.name} is a ${assoc.type} associations with the foreignKey in ${assoc.target}. Be sure to validate uniqueness`
       );
@@ -673,10 +678,9 @@ validateJsonFile = function (opts) {
     if (!assoc.reverseAssociation) {
       check.warnings.push(
         ` WARNING: Association ${assoc.name} does not define the reverse association name in field "reverseAssociation". This field is mandatory for the single-page-app.`
-      )
+      );
     }
-  })
-
+  });
 
   return check;
 };
@@ -706,7 +710,8 @@ getEditableAttributes = function (
 ) {
   let editable_attributes = {};
   let target_keys = parsedAssocForeignKeys.map((assoc) => {
-    if (assoc.type === 'many_to_many' && assoc.implementation === 'foreignkeys') return assoc.sourceKey;
+    if (assoc.type === "many_to_many" && assoc.implementation === "foreignkeys")
+      return assoc.sourceKey;
     return assoc.targetKey;
   });
   for (let attrib in attributes) {
@@ -745,7 +750,6 @@ module.exports.parseAssociations = function (dataModel) {
   };
   if (associations !== undefined) {
     Object.entries(associations).forEach(([name, association]) => {
-      
       const type = association.type;
       const implementation = association.implementation;
 
@@ -756,7 +760,12 @@ module.exports.parseAssociations = function (dataModel) {
       ];
       let assoc = Object.assign({}, association);
 
-      if (type !== 'one_to_one' && type !== 'one_to_many' && type !== 'many_to_one' && type !== 'many_to_many') {
+      if (
+        type !== "one_to_one" &&
+        type !== "one_to_many" &&
+        type !== "many_to_one" &&
+        type !== "many_to_many"
+      ) {
         console.error(
           colors.red("Association type " + association.type + " not supported.")
         );
@@ -776,72 +785,82 @@ module.exports.parseAssociations = function (dataModel) {
         inflection.pluralize(association.target)
       );
       assoc["reverseAssociation"] = association.reverseAssociation;
+      assoc["delete_action"] = association.deletion ?? "reject";
 
-      if (implementation !== 'generic') {
+      if (implementation !== "generic") {
         // set extra association fields
         assoc["targetKey"] = association.targetKey;
         assoc["targetKey_cp"] = capitalizeString(association.targetKey);
         assoc["keysIn_lc"] = uncapitalizeString(association.keysIn);
+        assoc["sourceKey"] = association.sourceKey;
         assoc["holdsForeignKey"] = false;
         assoc["assocThroughArray"] = false;
 
         assoc.targetStorageType = association.targetStorageType.toLowerCase();
-        association.targetStorageType = association.targetStorageType.toLowerCase();
+        association.targetStorageType =
+          association.targetStorageType.toLowerCase();
         associations_info.associations.push(association);
         associations_info.foreignKeyAssociations[name] = association.targetKey;
       } else {
-        associations_info.genericAssociations.push(association); 
+        associations_info.genericAssociations.push(association);
       }
       // switch implementation types
       switch (implementation) {
-        case 'generic':
+        case "generic":
           switch (type) {
-            case 'one_to_one':
-            case 'many_to_one':
-              associations_info.schema_attributes["generic_one"][name] = schema_attributes;
-              associations_info['generic_to_one'].push(assoc);
+            case "one_to_one":
+            case "many_to_one":
+              associations_info.schema_attributes["generic_one"][name] =
+                schema_attributes;
+              associations_info["generic_to_one"].push(assoc);
               break;
-            case 'one_to_many':
-            case 'many_to_many':
-              associations_info.schema_attributes["generic_many"][name] = schema_attributes;
-              associations_info['generic_to_many'].push(assoc);
+            case "one_to_many":
+            case "many_to_many":
+              associations_info.schema_attributes["generic_many"][name] =
+                schema_attributes;
+              associations_info["generic_to_many"].push(assoc);
               break;
             default:
               break;
           }
           break;
-        case 'sql_cross_table':
-          if (type !== 'many_to_many'
-           || association.sourceKey === undefined
-           || association.keysIn === undefined ) {
+        case "sql_cross_table":
+          if (
+            type !== "many_to_many" ||
+            association.sourceKey === undefined ||
+            association.keysIn === undefined
+          ) {
             console.error(
               colors.red(
                 `ERROR: many_to_many through crosstable only allowed for relational database types with well defined cross-table`
               )
-            );    
+            );
           }
 
           associations_info.schema_attributes["many"][name] = schema_attributes;
-          associations_info['to_many_through_sql_cross_table'].push(assoc);
+          associations_info["to_many_through_sql_cross_table"].push(assoc);
           break;
-        case 'foreignkeys':
-          associations_info.foreignKeyAssociations[name] = association.targetKey;
+        case "foreignkeys":
+          associations_info.foreignKeyAssociations[name] =
+            association.targetKey;
           switch (type) {
-            case 'one_to_one':
-            case 'many_to_one':
+            case "one_to_one":
+            case "many_to_one":
               // schema attrtibutes
-              associations_info.schema_attributes["one"][name] = schema_attributes;
+              associations_info.schema_attributes["one"][name] =
+                schema_attributes;
               // holds foreignKey ?
               if (association.keysIn === dataModel.model) {
-                assoc["holdsForeignKey"] = true; 
+                assoc["holdsForeignKey"] = true;
               }
-              associations_info['to_one'].push(assoc);
+              associations_info["to_one"].push(assoc);
               break;
-            case 'many_to_many':
+            case "many_to_many":
               assoc["assocThroughArray"] = true;
-            case 'one_to_many':
-              associations_info.schema_attributes["many"][name] = schema_attributes;
-              associations_info['to_many'].push(assoc);
+            case "one_to_many":
+              associations_info.schema_attributes["many"][name] =
+                schema_attributes;
+              associations_info["to_many"].push(assoc);
               break;
             default:
               break;
@@ -853,17 +872,15 @@ module.exports.parseAssociations = function (dataModel) {
               colors.red(
                 `ERROR: unallowed association implementation type ${implementation}.`
               )
-            ); 
+            );
           } else {
             console.error(
-              colors.red(
-                `ERROR: Please specify an implementation type.`
-              )
-            ); 
+              colors.red(`ERROR: Please specify an implementation type.`)
+            );
           }
       }
     });
-  };
+  }
   associations_info.mutations_attributes = attributesToString(
     associations_info.mutations_attributes
   );
@@ -1236,7 +1253,9 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
    * Processes each JSON file on input directory.
    */
   let json_files = fs.readdirSync(json_dir);
-  json_files = json_files.filter(file => path.extname(file).toLowerCase() === '.json')
+  json_files = json_files.filter(
+    (file) => path.extname(file).toLowerCase() === ".json"
+  );
   for (let i = 0; i < json_files.length; i++) {
     let json_file = json_files[i];
     let file_to_object = null;
