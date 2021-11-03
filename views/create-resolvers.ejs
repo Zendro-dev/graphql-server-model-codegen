@@ -607,6 +607,7 @@ const updateAssociations = async (id, context) => {
   );
   const pagi_first = globals.LIMIT_RECORDS;
   <% for(let i=0; i < associations_one.length; i++){ -%>
+  <% if (associations_one[i].delete_action==='update'){-%>
   <% if (associations_one[i].holdsForeignKey) { %>
     const <%=`${associations_one[i].name}_id`%> = <%-  nameLc  -%>_record.<%=associations_one[i].targetKey%>;
     if (<%=`${associations_one[i].name}_id`%>) {
@@ -625,10 +626,12 @@ const updateAssociations = async (id, context) => {
       );
     }
     <%}-%>
+    <%}-%>
   <%}-%>
   
   <% let associations_many = associationsArguments["to_many"]-%>
-    <% for(let i=0; i < associations_many.length; i++){ -%>
+  <% for(let i=0; i < associations_many.length; i++){ -%>
+  <% if (associations_many[i].delete_action==='update'){-%>
     <%if(associations_many[i].assocThroughArray){%>
       const <%=`${associations_many[i].name}_ids`%> = <%-  nameLc  -%>_record.<%=associations_many[i].sourceKey%>;
       if (<%=`${associations_many[i].name}_ids`%> && <%=`${associations_many[i].name}_ids`%>.length > 0) {
@@ -655,55 +658,62 @@ const updateAssociations = async (id, context) => {
         <%=associations_many[i].name%>_num -= pagi_first;
       }
     <%}-%>
-    <%}-%>
-    <% for(let i=0; i < associations_generic_many.length; i++){ -%>
-      let <%=associations_generic_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_generic_many[i].name_cp%>({}, context);
-      while (<%=associations_generic_many[i].name%>_num > 0) {
-        context.recordsLimit = globals.LIMIT_RECORDS;
-        const <%=associations_generic_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_generic_many[i].target_lc_pl%>Connection(
-          { pagination: { first: pagi_first } },
-          context
-        );
-        if (<%=associations_generic_many[i].name%>_records) {
-          const <%=associations_generic_many[i].name%>_ids = <%=associations_generic_many[i].name%>_records.<%=associations_generic_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_generic_many[i].target_lc%>.idAttribute()]);
-          await resolvers.update<%- nameCp -%>(
-            { <%- idAttribute -%>: id, remove<%=associations_generic_many[i].name_cp%>: <%=associations_generic_many[i].name%>_ids },
-            context
-          );
-        }
-        <%=associations_generic_many[i].name%>_num -= pagi_first;
-      }
-    <%}-%>
-
-    <% for(let i=0; i < associations_generic_one.length; i++){ -%>
-      const <%=`${associations_generic_one[i].name}_record`%> = await <%-  nameLc  -%>_record.<%=associations_generic_one[i].name%>({}, context);
-      if (<%=`${associations_generic_one[i].name}_record`%>) {
-        const <%=`${associations_generic_one[i].name}_id`%> = <%=`${associations_generic_one[i].name}_record`%>[models.<%=associations_generic_one[i].target_lc%>.idAttribute()];
+  <%}-%>
+  <%}-%>
+  <% for(let i=0; i < associations_generic_many.length; i++){ -%>
+  <% if (associations_generic_many[i].delete_action==='update'){-%>
+    let <%=associations_generic_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_generic_many[i].name_cp%>({}, context);
+    while (<%=associations_generic_many[i].name%>_num > 0) {
+      context.recordsLimit = globals.LIMIT_RECORDS;
+      const <%=associations_generic_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_generic_many[i].target_lc_pl%>Connection(
+        { pagination: { first: pagi_first } },
+        context
+      );
+      if (<%=associations_generic_many[i].name%>_records) {
+        const <%=associations_generic_many[i].name%>_ids = <%=associations_generic_many[i].name%>_records.<%=associations_generic_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_generic_many[i].target_lc%>.idAttribute()]);
         await resolvers.update<%- nameCp -%>(
-          { <%- idAttribute -%>: id, remove<%=associations_generic_one[i].name_cp%>: <%=`${associations_generic_one[i].name}_id`%> },
+          { <%- idAttribute -%>: id, remove<%=associations_generic_many[i].name_cp%>: <%=associations_generic_many[i].name%>_ids },
           context
         );
       }
+      <%=associations_generic_many[i].name%>_num -= pagi_first;
+    }
     <%}-%>
-    <% let associations_cross_many = associationsArguments["to_many_through_sql_cross_table"]-%>
-    <% for(let i=0; i < associations_cross_many.length; i++){ -%>
-      let <%=associations_cross_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_cross_many[i].name_cp%>({}, context);
-      while (<%=associations_cross_many[i].name%>_num > 0) {
-        context.recordsLimit = globals.LIMIT_RECORDS;
-        const <%=associations_cross_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_cross_many[i].target_lc_pl%>Connection(
-          { pagination: { first: pagi_first } },
+  <%}-%>
+
+  <% for(let i=0; i < associations_generic_one.length; i++){ -%>
+    <% if (associations_generic_one[i].delete_action==='update'){-%>
+    const <%=`${associations_generic_one[i].name}_record`%> = await <%-  nameLc  -%>_record.<%=associations_generic_one[i].name%>({}, context);
+    if (<%=`${associations_generic_one[i].name}_record`%>) {
+      const <%=`${associations_generic_one[i].name}_id`%> = <%=`${associations_generic_one[i].name}_record`%>[models.<%=associations_generic_one[i].target_lc%>.idAttribute()];
+      await resolvers.update<%- nameCp -%>(
+        { <%- idAttribute -%>: id, remove<%=associations_generic_one[i].name_cp%>: <%=`${associations_generic_one[i].name}_id`%> },
+        context
+      );
+    }
+    <%}-%>
+  <%}-%>
+  <% let associations_cross_many = associationsArguments["to_many_through_sql_cross_table"]-%>
+  <% for(let i=0; i < associations_cross_many.length; i++){ -%>
+    <% if (associations_cross_many[i].delete_action==='update'){-%>
+    let <%=associations_cross_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_cross_many[i].name_cp%>({}, context);
+    while (<%=associations_cross_many[i].name%>_num > 0) {
+      context.recordsLimit = globals.LIMIT_RECORDS;
+      const <%=associations_cross_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_cross_many[i].target_lc_pl%>Connection(
+        { pagination: { first: pagi_first } },
+        context
+      );
+      if (<%=associations_cross_many[i].name%>_records) {
+        const <%=associations_cross_many[i].name%>_ids = <%=associations_cross_many[i].name%>_records.<%=associations_cross_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_cross_many[i].target_lc%>.idAttribute()]);
+        await resolvers.update<%- nameCp -%>(
+          { <%- idAttribute -%>: id, remove<%=associations_cross_many[i].name_cp%>: <%=associations_cross_many[i].name%>_ids },
           context
         );
-        if (<%=associations_cross_many[i].name%>_records) {
-          const <%=associations_cross_many[i].name%>_ids = <%=associations_cross_many[i].name%>_records.<%=associations_cross_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_cross_many[i].target_lc%>.idAttribute()]);
-          await resolvers.update<%- nameCp -%>(
-            { <%- idAttribute -%>: id, remove<%=associations_cross_many[i].name_cp%>: <%=associations_cross_many[i].name%>_ids },
-            context
-          );
-        }
-        <%=associations_cross_many[i].name%>_num -= pagi_first;
       }
+      <%=associations_cross_many[i].name%>_num -= pagi_first;
+    }
     <%}-%>
+  <%}-%>
 
 }
 <%#

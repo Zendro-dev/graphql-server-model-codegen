@@ -100,7 +100,7 @@ static async readAll(search, order, pagination, benignErrorReporter) {
         const result = await session.run(
             \`MATCH (n:Movie) \${whereOptions} RETURN n \${orderOptions} SKIP \${offset} LIMIT \${limit} \`
         );
-        const nodes = result.records.map((res) => res.get(0).properties);
+        const nodes = result.records.map((res) => new movie(res.get(0).properties));
         return validatorUtil.bulkValidateData(
             "validateAfterRead",
             this,
@@ -255,11 +255,17 @@ static async addOne(input) {
         defaultAccessMode: neo4j.session.WRITE,
     });
     try {
-        delete input.skipAssociationsExistenceChecks;
-        input = neo4jHelper.processDateTime(input, definition.attributes);
+        const attributes = Object.keys(definition.attributes);
+        let parsed_input = {};
+        for (let key of Object.keys(input)) {
+            if (attributes.includes(key)) {
+                parsed_input[key] = input[key];
+            }
+        }
+        parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
-        const result = await session.run(\`CREATE (a:Movie $props) RETURN a\`, {
-            props: input,
+        const result = await session.run(\`CREATE (a:Movie \$props) RETURN a\`, {
+            props: parsed_input,
         });
         const singleRecord = result.records[0];
         const node = singleRecord.get(0);
@@ -270,6 +276,7 @@ static async addOne(input) {
         await session.close();
     }
 }
+
 `;
 
 module.exports.movie_deleteOne = `
@@ -311,14 +318,20 @@ static async updateOne(input) {
     });
     const id = input[this.idAttribute()];
     try {
-        delete input.skipAssociationsExistenceChecks;
         delete input[this.idAttribute()];
-        input = neo4jHelper.processDateTime(input, definition.attributes);
+        const attributes = Object.keys(definition.attributes);
+        let parsed_input = {};
+        for (let key of Object.keys(input)) {
+            if (attributes.includes(key)) {
+                parsed_input[key] = input[key];
+            }
+        }
+        parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
         const result = await session.run(
             \`MATCH (n:Movie {\${this.idAttribute()}:$id}) SET n+=$props RETURN n\`, {
                 id: id,
-                props: input
+                props: parsed_input
             }
         );
         if (result.records.length !== 1) {
@@ -334,6 +347,7 @@ static async updateOne(input) {
         await session.close();
     }
 }
+
 `;
 
 module.exports.movie_bulkAddCsv = `

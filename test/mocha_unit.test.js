@@ -622,20 +622,13 @@ describe("Model Layer", function () {
   it("Delete one resolver - book", async function () {
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.delete_one_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "No add one method found").to.have.string(
-      test_resolver
-    );
+    testCompare(generated_resolvers, data_test.delete_one_resolver);
   });
 
   it("Update one model - book", async function () {
     let opts = funks.getOptions(models.book_authors);
     let generated_model = await funks.generateJs("create-models", opts);
     testCompare(generated_model, data_test.update_one_model);
-    // let g_model = generated_model.replace(/\s/g, '');
-    // let test_model = data_test.update_one_model.replace(/\s/g, '');
-    // expect(g_model, 'No add one method found').to.have.string(test_model);
   });
 
   it("Update one resolver - book", async function () {
@@ -1357,6 +1350,7 @@ describe("Parse associations", function () {
         {
           type: "many_to_one",
           implementation: "foreignkeys",
+          delete_action: "reject",
           target: "individual",
           targetKey: "individual_id",
           targetKey_cp: "Individual_id",
@@ -1418,6 +1412,7 @@ describe("Parse associations", function () {
         {
           type: "one_to_many",
           implementation: "foreignkeys",
+          delete_action: "reject",
           target: "transcript_count",
           keysIn: "transcript_count",
           targetKey: "individual_id",
@@ -1478,6 +1473,7 @@ describe("Parse associations", function () {
         {
           type: "many_to_many",
           implementation: "sql_cross_table",
+          delete_action: "reject",
           target: "Project",
           targetKey: "projectId",
           targetKey_cp: "ProjectId",
@@ -1545,6 +1541,7 @@ describe("Parse associations", function () {
         {
           type: "one_to_many",
           implementation: "foreignkeys",
+          delete_action: "reject",
           target: "Dog",
           targetKey: "personId",
           targetKey_cp: "PersonId",
@@ -1568,6 +1565,7 @@ describe("Parse associations", function () {
         {
           type: "many_to_many",
           implementation: "sql_cross_table",
+          delete_action: "reject",
           target: "Book",
           targetKey: "bookId",
           targetKey_cp: "BookId",
@@ -1634,6 +1632,7 @@ describe("Parse associations", function () {
         {
           type: "many_to_one",
           implementation: "foreignkeys",
+          delete_action: "reject",
           target: "Person",
           targetKey: "personId",
           targetKey_cp: "PersonId",
@@ -1657,6 +1656,7 @@ describe("Parse associations", function () {
         {
           type: "many_to_one",
           implementation: "foreignkeys",
+          delete_action: "reject",
           target: "Researcher",
           targetKey: "researcherId",
           targetKey_cp: "ResearcherId",
@@ -1718,25 +1718,19 @@ describe("Refactor associations - delete", function () {
   it("count associations - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.count_associations.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.count_associations);
   });
 
   it("validate for deletion  - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.validate_for_deletion.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.validate_for_deletion);
   });
 
   it("delete resolver - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.delete_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.delete_resolver);
   });
 
   it("validate for deletion ddm - accession", async function () {
@@ -1745,9 +1739,7 @@ describe("Refactor associations - delete", function () {
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.valid_for_deletion_ddm.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.valid_for_deletion_ddm);
   });
 });
 

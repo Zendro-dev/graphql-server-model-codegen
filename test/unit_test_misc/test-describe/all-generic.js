@@ -267,15 +267,15 @@ module.exports.test16_7 =
 module.exports.test16_8 =
   /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.remove_dogsImpl\(input,benignErrorReporter\);/;
 module.exports.test16_9 =
-  /countAllAssociatedRecords.+{.+letpromises_generic_to_many=\[\];/;
+  /countAssociatedRecordsWithRejectReaction.+{.+letpromises_generic_to_many=\[\];/;
 module.exports.test16_10 =
-  /countAllAssociatedRecords.+promises_generic_to_many\.push\(person\.countFilteredDogs\({},context\)\);/;
+  /countAssociatedRecordsWithRejectReaction.+promises_generic_to_many\.push\(person\.countFilteredDogs\({},context\)\);/;
 module.exports.test16_11 =
-  /countAllAssociatedRecords.+letresult_generic_to_many=awaitPromise\.all\(promises_generic_to_many\);/;
+  /countAssociatedRecordsWithRejectReaction.+letresult_generic_to_many=awaitPromise\.all\(promises_generic_to_many\);/;
 module.exports.test16_12 =
-  /countAllAssociatedRecords.+letget_generic_to_many_associated=result_generic_to_many\.reduce\(\(accumulator,current_val\)=>accumulator\+current_val,0\);/;
+  /countAssociatedRecordsWithRejectReaction.+letget_generic_to_many_associated=result_generic_to_many\.reduce\(\(accumulator,current_val\)=>accumulator\+current_val,0\);/;
 module.exports.test16_13 =
-  /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_many_associated;/;
+  /countAssociatedRecordsWithRejectReaction.+returnget_to_one_associated\+get_to_many_associated_fk\+get_to_many_associated\+get_generic_to_many_associated;/;
 
 /**
  * 17.    generic <generic_to_one> - dog
@@ -294,15 +294,15 @@ module.exports.test17_5 =
 module.exports.test17_6 =
   /dog\.prototype\.remove_owner=asyncfunction\(input,benignErrorReporter\){.+dog\.remove_ownerImpl\(input,benignErrorReporter\);/;
 module.exports.test17_7 =
-  /countAllAssociatedRecords.+{.+letpromises_generic_to_one=\[\];/;
+  /countAssociatedRecordsWithRejectReaction.+{.+letpromises_generic_to_one=\[\];/;
 module.exports.test17_8 =
-  /countAllAssociatedRecords.+promises_generic_to_one\.push\(dog\.owner\({},context\)\);/;
+  /countAssociatedRecordsWithRejectReaction.+promises_generic_to_one\.push\(dog\.owner\({},context\)\);/;
 module.exports.test17_9 =
-  /countAllAssociatedRecords.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;
+  /countAssociatedRecordsWithRejectReaction.+letresult_generic_to_one=awaitPromise\.all\(promises_generic_to_one\);/;
 module.exports.test17_10 =
-  /countAllAssociatedRecords.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
+  /countAssociatedRecordsWithRejectReaction.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
 module.exports.test17_11 =
-  /countAllAssociatedRecords.+returnget_to_one_associated\+get_to_many_associated\+get_generic_to_one_associated;/;
+  /countAssociatedRecordsWithRejectReaction.+returnget_to_one_associated\+get_to_many_associated_fk\+get_to_many_associated\+get_generic_to_one_associated;/;
 
 /* Models */
 

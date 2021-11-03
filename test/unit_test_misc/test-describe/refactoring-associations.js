@@ -1,13 +1,13 @@
 module.exports.count_associations = `
 
 /**
- * countAllAssociatedRecords - Count records associated with another given record
+ * countAssociatedRecordsWithRejectReaction - Count associated records with reject deletion action
  *
  * @param  {ID} id      Id of the record which the associations will be counted
  * @param  {objec} context Default context by resolver
  * @return {Int}         Number of associated records
  */
-async function countAllAssociatedRecords(id, context) {
+ async function countAssociatedRecordsWithRejectReaction(id, context) {
 
     let accession = await resolvers.readOneAccession({
         accession_id: id
@@ -16,6 +16,7 @@ async function countAllAssociatedRecords(id, context) {
     if (accession === null) throw new Error(\`Record with ID = \${id} does not exist\`);
     let promises_to_many = [];
     let promises_to_one = [];
+    let get_to_many_associated_fk = 0;
 
     promises_to_many.push(accession.countFilteredIndividuals({}, context));
     promises_to_many.push(accession.countFilteredMeasurements({}, context));
@@ -27,7 +28,7 @@ async function countAllAssociatedRecords(id, context) {
     let get_to_many_associated = result_to_many.reduce((accumulator, current_val) => accumulator + current_val, 0);
     let get_to_one_associated = result_to_one.filter((r, index) => helper.isNotUndefinedAndNotNull(r)).length;
 
-    return get_to_one_associated + get_to_many_associated;
+    return get_to_one_associated + get_to_many_associated_fk + get_to_many_associated;
 }
 
 `;
@@ -41,10 +42,9 @@ module.exports.validate_for_deletion = `
  * @return {boolean}         True if it is allowed to be deleted and false otherwise
  */
 async function validForDeletion(id, context){
-  if( await countAllAssociatedRecords(id, context) > 0 ){
-    throw new Error(\`Accession with accession_id \${id} has associated records and is NOT valid for deletion. Please clean up before you delete.\`);
+  if (await countAssociatedRecordsWithRejectReaction(id, context) > 0) {
+    throw new Error(\`Accession with accession_id \${id} has associated records with 'reject' reaction and is NOT valid for deletion. Please clean up before you delete.\`);
   }
-
   return true;
 }
 `;
@@ -60,14 +60,15 @@ module.exports.delete_resolver = `
     deleteAccession: async function({
         accession_id
     }, context) {
-            if (await checkAuthorization(context, 'Accession', 'delete') === true) {
-                if (await validForDeletion(accession_id, context)) {
-                    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-                    return accession.deleteOne(accession_id, benignErrorReporter);
-                }
-            } else {
-                throw new Error("You don't have authorization to perform this action");
+        if (await checkAuthorization(context, 'Accession', 'delete') === true) {
+            if (await validForDeletion(accession_id, context)) {
+                await updateAssociations(accession_id, context);
+                let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
+                return accession.deleteOne(accession_id, benignErrorReporter);
             }
+        } else {
+            throw new Error("You don't have authorization to perform this action");
+        }
     },
 `;
 
@@ -79,9 +80,8 @@ module.exports.valid_for_deletion_ddm = `
  * @param  {object} context Default context by resolver
  * @return {boolean}         True if it is allowed to be deleted and false otherwise
  */
-async function validForDeletion(id, context){
-
-  if( await countAllAssociatedRecords(id, context) > 0 ){
+ async function validForDeletion(id, context) {
+  if (await countAssociatedRecordsWithRejectReaction(id, context) > 0) {
     throw new Error(\`Accession with accession_id \${id} has associated records and is NOT valid for deletion. Please clean up before you delete.\`);
   }
 

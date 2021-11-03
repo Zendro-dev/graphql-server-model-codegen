@@ -21,7 +21,8 @@
         "sourceKey": "country_id",
         "targetKey": "river_id",
         "keysIn": "country_to_river",
-        "targetStorageType": "sql"
+        "targetStorageType": "sql",
+        "deletion":"update"
       }
     },
     "internalId": "country_id"

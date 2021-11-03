@@ -14,7 +14,8 @@
             "targetKey": "farm_id",
             "keysIn": "animal",
             "targetStorageType": "mongodb",
-            "label": "animal_id"
+            "label": "animal_id",
+            "deletion":"update"
         }
     },
     "internalId": "farm_id",

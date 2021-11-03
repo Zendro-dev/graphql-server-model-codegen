@@ -792,7 +792,6 @@ module.exports.parseAssociations = function (dataModel) {
         assoc["targetKey"] = association.targetKey;
         assoc["targetKey_cp"] = capitalizeString(association.targetKey);
         assoc["keysIn_lc"] = uncapitalizeString(association.keysIn);
-        assoc["sourceKey"] = association.sourceKey;
         assoc["holdsForeignKey"] = false;
         assoc["assocThroughArray"] = false;
 
@@ -857,6 +856,7 @@ module.exports.parseAssociations = function (dataModel) {
               break;
             case "many_to_many":
               assoc["assocThroughArray"] = true;
+              assoc["sourceKey"] = association.sourceKey;
             case "one_to_many":
               associations_info.schema_attributes["many"][name] =
                 schema_attributes;
