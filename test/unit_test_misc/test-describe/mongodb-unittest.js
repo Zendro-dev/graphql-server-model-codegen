@@ -296,10 +296,10 @@ static bulkAddCsv(context) {
 `;
 
 module.exports.animal_fieldMutation_add_farm = `
-static async add_farm_id(animal_id, farm_id) {
+static async add_farm_id(animal_id, farm_id, benignErrorReporter) {
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const db = await this.storageHandler;
+        const collection = await db.collection("animal");
         const updatedContent = {
             farm_id: farm_id
         }
@@ -309,21 +309,24 @@ static async add_farm_id(animal_id, farm_id) {
             $set: updatedContent
         });
         if (response.result.ok !== 1) {
-            throw new Error(\`Record with ID = \${animal_id} has not been updated\`);
+            benignErrorReporter.reportError({
+                message: \`Record with ID = \${animal_id} has not been updated\`
+            });
         }
-        const document = await this.readById(animal_id);
-        return document
+        return response.modifiedCount;
     } catch (error) {
-        throw error;
+        benignErrorReporter.reportError({
+            message: error
+        });
     }
 }
 `;
 
 module.exports.animal_fieldMutation_remove_farm = `
-static async remove_farm_id(animal_id, farm_id) {
+static async remove_farm_id(animal_id, farm_id, benignErrorReporter) {
     try {
-        const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const db = await this.storageHandler;
+        const collection = await db.collection("animal");
         const updatedContent = {
             farm_id: null
         }
@@ -334,12 +337,15 @@ static async remove_farm_id(animal_id, farm_id) {
             $set: updatedContent
         });
         if (response.result.ok !== 1) {
-            throw new Error(\`Record with ID = \${animal_id} has not been updated\`);
+            benignErrorReporter.reportError({
+                message: \`Record with ID = \${animal_id} has not been updated\`
+            });
         }
-        const document = await this.readById(animal_id);
-        return document
+        return response.modifiedCount;
     } catch (error) {
-        throw error;
+        benignErrorReporter.reportError({
+            message: error
+        });
     }
 }
 `;

@@ -1,15 +1,44 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+    <% if (associationsArguments["to_one"][i].type==="one_to_one") { -%>
+      /**
+      * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
+      * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+      * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+      * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
+      */
+      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
+        try{
+          <% if (op == 'remove') { -%>
+          let updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%>}
+          if(<%- idAttribute-%>) {
+            updatedContent["<%- idAttribute-%>"] = <%- idAttribute-%>;
+          }
+          <% } else { %>
+          let updatedContent = {<%- idAttribute -%>: <%- idAttribute -%>}
+          <%}-%>
+
+          let updated = await <%- nameLc -%>.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  
+          <% if (op == 'remove') { -%>null
+          <% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: updatedContent});
+          return updated[0];
+        } catch (error) {
+          benignErrorReporter.reportError(error);
+        }
+      }
+    <% } else{-%>
     /**
     * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
     */
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
       let updated = await <%- nameLc -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
-      return updated;
+      return updated[0];
     }
+    <%} -%>
   <%} -%>
 <%}-%>
 <%for(let i=0; i < associationsArguments["to_many"].length; i++){-%>

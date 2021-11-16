@@ -25,6 +25,14 @@
         "targetKey": "capital_id",
         "keysIn": "Incident",
         "targetStorageType": "sql"
+      },
+      "lawsuit":{
+        "type":"one_to_one",
+        "implementation": "foreignkeys",
+        "target": "lawsuit",
+        "targetKey": "incident_id",
+        "keysIn": "lawsuit",
+        "targetStorageType": "cassandra"
       }
   
     },

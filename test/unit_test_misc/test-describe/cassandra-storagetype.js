@@ -412,26 +412,26 @@ static async updateOne({
 `;
 
 module.exports.cassandra_model_fieldMutation_add = `
-static async add_capital_id(incident_id, capital_id) {
+static async add_capital_id(incident_id, capital_id, benignErrorReporter) {
   const mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id = ?\`;
   await this.storageHandler.execute(mutationCql, [capital_id, incident_id], {
     prepare: true
   });
-  const checkCql = \`SELECT * FROM "incidents" WHERE incident_id = ?\`;
+  const checkCql = \`SELECT COUNT(*) FROM "incidents" WHERE incident_id = ?\`;
   let result = await this.storageHandler.execute(checkCql, [incident_id]);
-  return new Incident(result.first());
+  return parseInt(result.first()["count"]);
 }
 
 `;
 module.exports.cassandra_model_fieldMutation_remove = `
-static async remove_capital_id(incident_id, capital_id) {
+static async remove_capital_id(incident_id, capital_id, benignErrorReporter) {
   const mutationCql = \`UPDATE "incidents" SET capital_id = ? WHERE incident_id = ?\`;
   await this.storageHandler.execute(mutationCql, [null, incident_id], {
     prepare: true
   });
-  const checkCql = \`SELECT * FROM "incidents" WHERE incident_id = ?\`;
+  const checkCql = \`SELECT COUNT(*) FROM "incidents" WHERE incident_id = ?\`;
   let result = await this.storageHandler.execute(checkCql, [incident_id]);
-  return new Incident(result.first());
+  return parseInt(result.first()["count"]);
 }
 `;
 

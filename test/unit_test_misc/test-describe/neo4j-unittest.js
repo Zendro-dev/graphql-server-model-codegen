@@ -398,14 +398,14 @@ static async bulkAddCsv(context) {
 `;
 
 module.exports.movie_fieldMutation_add_director = `
-static async add_director_id(movie_id, director_id) {
+static async add_director_id(movie_id, director_id, benignErrorReporter) {
     const driver = await this.storageHandler;
     const session = driver.session({
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
     let foreignKey = \`MATCH (n:Movie ) WHERE n.movie_id = $id 
-      SET n.director_id = $target RETURN head(collect(n))\`
+      SET n.director_id = $target RETURN count(n)\`
 
     let create_relationships = \`MATCH (a:Movie), (b:Director) 
       WHERE a.movie_id = $id AND b.\${models.director.idAttribute()} = $target
@@ -419,11 +419,11 @@ static async add_director_id(movie_id, director_id) {
             id: movie_id,
             target: director_id,
         })
-        const singleRecord = result.records[0];
-        const node = singleRecord.get(0);
-        return new movie(node)
+        return result.records[0].get(0);
     } catch (error) {
-        throw error;
+        benignErrorReporter.reportError({
+            message: error
+        });
     } finally {
         await session.close();
     }
@@ -431,14 +431,14 @@ static async add_director_id(movie_id, director_id) {
 `;
 
 module.exports.movie_fieldMutation_remove_director = `
-static async remove_director_id(movie_id, director_id) {
+static async remove_director_id(movie_id, director_id, benignErrorReporter) {
     const driver = await this.storageHandler;
     const session = driver.session({
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
     let foreignKey = \`MATCH (n:Movie ) WHERE n.movie_id = $id 
-      SET n.director_id = $target RETURN head(collect(n))\`
+      SET n.director_id = $target RETURN count(n)\`
 
     let delete_relationships = \`MATCH (a:Movie)-[r:\${"director".toUpperCase() + "_EDGE"}]-> (b:Director) 
       WHERE a.movie_id = $id AND b.\${models.director.idAttribute()} = $target
@@ -452,11 +452,11 @@ static async remove_director_id(movie_id, director_id) {
             id: movie_id,
             target: director_id,
         })
-        const singleRecord = result.records[0];
-        const node = singleRecord.get(0);
-        return new movie(node)
+        return result.records[0].get(0);
     } catch (error) {
-        throw error;
+        benignErrorReporter.reportError({
+            message: error
+        });
     } finally {
         await session.close();
     }

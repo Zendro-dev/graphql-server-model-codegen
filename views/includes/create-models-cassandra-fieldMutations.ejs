@@ -1,18 +1,71 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+    <% if (associationsArguments["to_one"][i].type==="one_to_one") { -%>
     /**
     * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
     */
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
+      try {
+        <% if (op == 'add') { -%>
+        const mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+        await this.storageHandler.execute(mutationCql, [<%-associationsArguments["to_one"][i].targetKey-%>, <%- idAttribute -%>], {prepare: true});
+        const checkCql = `SELECT COUNT(*) FROM "<%- namePl -%>" WHERE <%- idAttribute-%> = ? AND <%-associationsArguments["to_one"][i].targetKey-%> = ?`;
+        let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>]);
+        return parseInt(result.first()["count"]);
+        <% } else{-%>
+        let condition = ` <%-associationsArguments["to_one"][i].targetKey-%> = ?`;
+        let param = [<%-associationsArguments["to_one"][i].targetKey-%>];
+        if (<%- idAttribute-%>) {
+          condition += ` AND <%- idAttribute-%> = ?`;
+          param.push(<%- idAttribute-%>);
+        }
+        const checkCql = `SELECT COUNT(*) FROM "<%- namePl -%>" WHERE ${condition}`;
+        let result = await this.storageHandler.execute(checkCql, param);
+        const num = parseInt(result.first()["count"]);
+        if (parseInt(result.first()["count"])) {
+          if (!<%- idAttribute-%>) {
+            const fetchCql = `SELECT <%- idAttribute-%> FROM "<%- namePl -%>" WHERE ${condition}`;
+            result = await this.storageHandler.execute(fetchCql, param);
+            param = result.rows.map((row) => row.<%- idAttribute-%>);
+            let questions = param.map((id) => "?").join(",");
+            condition = ` <%- idAttribute-%> IN (${questions})`;
+          } else {
+            condition = ` <%- idAttribute-%> = ?`;
+            param = [<%- idAttribute-%>];
+          }
+          const mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE ${condition}`;
+          await this.storageHandler.execute(mutationCql, [null].concat(param), {
+            prepare: true,
+          });
+        }
+        return num;
+        <%} -%>
+      } catch (error) {
+        benignErrorReporter.reportError({
+          message: error,
+        });
+      }
+    }
+    <% } else{-%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
+    */
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
       const mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
       await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
-      const checkCql = `SELECT * FROM "<%- namePl -%>" WHERE <%- idAttribute-%> = ?`;
+      const checkCql = `SELECT COUNT(*) FROM "<%- namePl -%>" WHERE <%- idAttribute-%> = ?`;
       let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
-      return new <%- name -%>(result.first());
+      return parseInt(result.first()["count"]);
     }
+  <%} -%>
   <%} -%>
 <%}-%>
 

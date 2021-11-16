@@ -183,9 +183,10 @@ module.exports.test11_10 =
  * 12. sql <to_one> generic - person
  */
 //to_one firms
-module.exports.test12_1 = /staticasyncadd_hometownId\(personId,hometownId\){/;
+module.exports.test12_1 =
+  /staticasyncadd_hometownId\(personId,hometownId,benignErrorReporter\){/;
 module.exports.test12_2 =
-  /staticasyncremove_hometownId\(personId,hometownId\){/;
+  /staticasyncremove_hometownId\(personId,hometownId,benignErrorReporter\){/;
 
 /**
  * 13. generic <to_many> sql - hometown

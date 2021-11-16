@@ -220,7 +220,7 @@ accession.prototype.remove_individuals = async function(input, benignErrorReport
 `;
 
 module.exports._addAssoc_to_one_fieldMutation_sql_model = `
-static async add_locationId(accession_id, locationId) {
+static async add_locationId(accession_id, locationId, benignErrorReporter) {
   let updated = await accession.update({
       locationId: locationId
   }, {
@@ -228,11 +228,11 @@ static async add_locationId(accession_id, locationId) {
           accession_id: accession_id
       }
   });
-  return updated;
+  return updated[0];
 }
 `;
 module.exports._removeAssoc_to_one_fieldMutation_sql_model = `
-static async remove_locationId(accession_id, locationId) {
+static async remove_locationId(accession_id, locationId, benignErrorReporter) {
   let updated = await accession.update({
       locationId: null
   }, {
@@ -241,7 +241,7 @@ static async remove_locationId(accession_id, locationId) {
           locationId: locationId
       }
   });
-  return updated;
+  return updated[0];
 }
 `;
 module.exports.to_one_add = `
@@ -339,7 +339,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter) {
 `;
 
 module.exports.to_one_remove_sql_adapter = `
-static async remove_locationId(accession_id, locationId) {
+static async remove_locationId(accession_id, locationId, benignErrorReporter) {
   let updated = await super.update({
       locationId: null
   }, {
@@ -353,7 +353,7 @@ static async remove_locationId(accession_id, locationId) {
 `;
 
 module.exports.to_one_add_sql_adapter = `
-static async add_locationId(accession_id, locationId) {
+static async add_locationId(accession_id, locationId, benignErrorReporter) {
   let updated = await super.update({
       locationId: locationId
   }, {

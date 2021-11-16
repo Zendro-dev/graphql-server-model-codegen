@@ -685,9 +685,7 @@ describe("Decouple association from resolvers", function () {
   it("BelongsTo implementation in model - dog", async function () {
     let opts = funks.getOptions(models.dog);
     let generated_model = await funks.generateJs("create-models", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.belongsTo_model.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.belongsTo_model);
   });
 
   it("BelongsTo implementation in resolver - dog", async function () {
@@ -1817,10 +1815,10 @@ describe("Refactor associations - add / update SQL models", function () {
   it("add_locationId- accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-models", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver =
-      data_test._addAssoc_to_one_fieldMutation_sql_model.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(
+      generated_resolver,
+      data_test._addAssoc_to_one_fieldMutation_sql_model
+    );
   });
 
   it("remove_locationId - accession", async function () {
@@ -1941,9 +1939,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
   it("add association in sql-adapter  - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession_sql_adapter);
     let generated_adapter = await funks.generateJs("create-sql-adapter", opts);
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.to_one_add_sql_adapter.replace(/\s/g, "");
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.to_one_add_sql_adapter);
   });
 
   it("remove association in sql-adapter - accession", async function () {

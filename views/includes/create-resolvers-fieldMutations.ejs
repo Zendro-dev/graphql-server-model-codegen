@@ -45,10 +45,26 @@
         this.<%-associationsArguments["to_one"][i].targetKey%> = null;
       }
     <%} else { -%>
+      <% if (associationsArguments["to_one"][i].type==="one_to_one" && (!storageType.includes("distributed"))) { -%>
+        const removed = await <%- nameLc -%>.remove_<%-associationsArguments["to_one"][i].targetKey-%>(null, input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter);
+        if (removed > 0) {
+          benignErrorReporter.reportError({
+            message: `Hint: update ${removed} existing association(s)!`,
+          });
+        }  
+      <%}-%>
       await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter);
       this.<%-associationsArguments["to_one"][i].targetKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>;
     <%}-%>
   <%} else {-%>
+    <% if (associationsArguments["to_one"][i].type==="one_to_one" && op === 'add' && (!storageType.includes("distributed"))) { -%>
+      const removed = await models.<%-associationsArguments["to_one"][i].target_lc-%>.remove_<%-associationsArguments["to_one"][i].targetKey-%>(null, this.getIdValue(), benignErrorReporter);
+      if (removed > 0) {
+        benignErrorReporter.reportError({
+          message: `Hint: update ${removed} existing association(s)!`,
+        });
+      } 
+    <%}-%>
     await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, this.getIdValue(), benignErrorReporter);
   <%}-%>
   }

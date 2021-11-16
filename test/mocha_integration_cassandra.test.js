@@ -55,6 +55,33 @@ describe("Cassandra Local", function () {
         countInstants: 0,
       },
     });
+
+    res = itHelpers.request_graph_ql_post(
+      `{lawsuitsConnection(pagination:{first:20}) {edges {node {lawsuit_id}}}}`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    edges = resBody.data.lawsuitsConnection.edges;
+    for (let edge of edges) {
+      let id = edge.node.lawsuit_id;
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteLawsuit(lawsuit_id: "${id}")}`
+      );
+      resBody = JSON.parse(res.body.toString("utf8"));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          deleteLawsuit: "Item successfully deleted",
+        },
+      });
+    }
+    res = itHelpers.request_graph_ql_post(`{countLawsuits}`);
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        countLawsuits: 0,
+      },
+    });
   });
   it("01. Incident table is empty", function () {
     let res = itHelpers.request_graph_ql_post(`{countIncidents}`);
@@ -691,33 +718,7 @@ describe("Cassandra Local", function () {
     });
   });
 
-  it("18. Delete the associations", function () {
-    let res = itHelpers.request_graph_ql_post(
-      `{instantsConnection(pagination:{first:20}, search:{field: incident_assoc_id, operator: eq, value:"incident_7"}) {edges {node{ instant_id}}}}`
-    );
-    let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(200);
-    let edges = resBody.data.instantsConnection.edges;
-    expect(edges.length).to.equal(2);
-    for (let edge of edges) {
-      let id = edge.node.instant_id;
-      res = itHelpers.request_graph_ql_post(
-        `mutation{updateInstant(instant_id: "${id}", removeIncident: "incident_7") {instant_id incident_assoc_id}}`
-      );
-      resBody = JSON.parse(res.body.toString("utf8"));
-      expect(res.statusCode).to.equal(200);
-      expect(resBody).to.deep.equal({
-        data: {
-          updateInstant: {
-            instant_id: `${id}`,
-            incident_assoc_id: null,
-          },
-        },
-      });
-    }
-  });
-
-  it("19. Get the table template", function () {
+  it("18. Get the table template", function () {
     let res = itHelpers.request_graph_ql_post(`{csvTableTemplateIncident}`);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
@@ -731,7 +732,7 @@ describe("Cassandra Local", function () {
     });
   });
 
-  it("20. Associate cassandra to sql model", function () {
+  it("19. Associate cassandra to sql model", function () {
     // create sql-capital
     let res = itHelpers.request_graph_ql_post(
       `mutation { addCapital(capital_id: "cass_assoc_capital_1", name: "London") {capital_id}}`
@@ -772,6 +773,93 @@ describe("Cassandra Local", function () {
     res = itHelpers.request_graph_ql_post(
       `mutation{deleteIncident(incident_id:"incident_8")}`
     );
+  });
+
+  it("20. Add one to one association", () => {
+    res = itHelpers.request_graph_ql_post(
+      `mutation {
+        addLawsuit(lawsuit_id:"l1", addIncident: "incident_7") {
+          incident_id
+          lawsuit_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addLawsuit: {
+          lawsuit_id: "l1",
+          incident_id: "incident_7",
+        },
+      },
+    });
+  });
+
+  it("21. Update the existing one to one association", () => {
+    res = itHelpers.request_graph_ql_post(
+      `mutation {
+        addLawsuit(lawsuit_id:"l2", addIncident: "incident_7") {
+          incident_id
+          lawsuit_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association(s)!",
+          locations: "",
+        },
+      ],
+      data: {
+        addLawsuit: {
+          lawsuit_id: "l2",
+          incident_id: "incident_7",
+        },
+      },
+    });
+  });
+
+  it("22. Delete the associations", function () {
+    let res = itHelpers.request_graph_ql_post(
+      `{instantsConnection(pagination:{first:20}, search:{field: incident_assoc_id, operator: eq, value:"incident_7"}) {edges {node{ instant_id}}}}`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    let edges = resBody.data.instantsConnection.edges;
+    expect(edges.length).to.equal(2);
+    for (let edge of edges) {
+      let id = edge.node.instant_id;
+      res = itHelpers.request_graph_ql_post(
+        `mutation{updateInstant(instant_id: "${id}", removeIncident: "incident_7") {instant_id incident_assoc_id}}`
+      );
+      resBody = JSON.parse(res.body.toString("utf8"));
+      expect(res.statusCode).to.equal(200);
+      expect(resBody).to.deep.equal({
+        data: {
+          updateInstant: {
+            instant_id: `${id}`,
+            incident_assoc_id: null,
+          },
+        },
+      });
+    }
+    res = itHelpers.request_graph_ql_post(
+      `mutation{updateLawsuit(lawsuit_id: "l2", removeIncident: "incident_7") {lawsuit_id incident_id}}`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateLawsuit: {
+          lawsuit_id: "l2",
+          incident_id: null,
+        },
+      },
+    });
   });
 });
 

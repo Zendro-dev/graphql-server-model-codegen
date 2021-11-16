@@ -885,32 +885,30 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     });
   });
 
-  it("24. one_to_one associations error", function () {
+  it("24. one_to_one associations update", function () {
     //test error
-    itHelpers.request_graph_ql_post(
+    res = itHelpers.request_graph_ql_post(
       'mutation { addCapital(capital_id:"GER_BN", name: "Bonn", addUnique_country:"GER") {capital_id} }'
     );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association(s)!",
+          locations: "",
+        },
+      ],
+      data: { addCapital: { capital_id: "GER_BN" } },
+    });
     res = itHelpers.request_graph_ql_post(
       "{ countries(pagination:{limit:10}) {country_id unique_capital{ capital_id}} }"
     );
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      errors: [
-        {
-          message:
-            'Not unique "to_one" association Error: Found > 1 capitals matching country with country_id GER. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the country model. Returning first capital.',
-          locations: "",
-        },
-      ],
       data: {
         countries: [
-          {
-            country_id: "GER",
-            unique_capital: {
-              capital_id: "GER_B",
-            },
-          },
+          { country_id: "GER", unique_capital: { capital_id: "GER_BN" } },
         ],
       },
     });

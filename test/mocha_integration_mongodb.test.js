@@ -775,8 +775,8 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("09. Animal : Tracker (1:1) - violate the unique rule", () => {
-    itHelpers.request_graph_ql_post(
+  it("09. Animal : Tracker (1:1) - update the existing association", () => {
+    res = itHelpers.request_graph_ql_post(
       `mutation{
             addTracker(tracker_id:2, location:"living room", addUnique_animal:5){
                 tracker_id
@@ -784,33 +784,16 @@ describe("Mongodb - Association", () => {
             }
         }`
     );
-    res = itHelpers.request_graph_ql_post(`
-        {
-            readOneAnimal(animal_id: "5"){
-              animal_name
-              unique_tracker {
-                tracker_id
-              }
-            }
-          }`);
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message:
-            'Not unique "to_one" association Error: Found > 1 trackers matching animal with animal_id 5. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the animal model. Returning first tracker.',
+          message: "Hint: update 1 existing association(s)!",
           locations: "",
         },
       ],
-      data: {
-        readOneAnimal: {
-          animal_name: "Lily1",
-          unique_tracker: {
-            tracker_id: "1",
-          },
-        },
-      },
+      data: { addTracker: { tracker_id: "2", animal_id: "5" } },
     });
   });
 

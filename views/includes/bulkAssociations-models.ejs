@@ -1,6 +1,6 @@
 <%# bulkAssociations functions for model-layer; paramater: op (add or remove)_%> 
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){_%>
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { _%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey && associationsArguments["to_one"][i].type!=="one_to_one") { _%>
   /**
    * bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%> - bulk<% if(op === 'remove'){ %>Dis<% } %>Associaton of given ids
    *
