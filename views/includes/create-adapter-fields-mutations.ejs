@@ -61,8 +61,28 @@
   -%>
   <%if(storageType === 'sql-adapter'){-%>
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
+    <% if (associationsArguments["to_one"][i].type==="one_to_one") { -%>
+      try{
+        <% if (op == 'remove') { -%>
+        let updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%>}
+        if(<%- idAttribute-%>) {
+          updatedContent["<%- idAttribute-%>"] = <%- idAttribute-%>;
+        }
+        <% } else { %>
+        let updatedContent = {<%- idAttribute -%>: <%- idAttribute -%>}
+        <%}-%>
+
+        let updated = await super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  
+        <% if (op == 'remove') { -%>null
+        <% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: updatedContent});
+        return updated[0];
+      } catch (error) {
+        benignErrorReporter.reportError(error);
+      }
+      <% } else{-%>
       let updated = await super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
-      return updated;
+      return updated[0];
+    <%} -%>
    }
   <%}-%>
   <%#  /*** End of the the sql-adapter case */ -%>
