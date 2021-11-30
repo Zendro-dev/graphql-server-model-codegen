@@ -21,7 +21,8 @@
             "target": "dist_farm",
             "targetKey": "farm_id",
             "keysIn": "dist_animal",
-            "targetStorageType": "distributed-data-model"
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
         }
     },
   

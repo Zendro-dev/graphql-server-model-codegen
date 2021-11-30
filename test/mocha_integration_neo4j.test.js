@@ -316,17 +316,15 @@ describe("Neo4j - Operators", () => {
     );
     await delay(500);
 
-
     res = itHelpers.request_graph_ql_post_instance2(
       `mutation {
         d1: addDirector(director_id:"director1" director_name:"Alfred Hitchcock"){director_id}
         d2: addDirector(director_id:"director2" director_name:"George Lucas"){director_id}
       }`
     );
-    
+
     expect(res.statusCode).to.equal(200);
     await delay(500);
-
   });
 
   after(async () => {
@@ -341,7 +339,6 @@ describe("Neo4j - Operators", () => {
       );
       expect(res.statusCode).to.equal(200);
     }
-
 
     res = itHelpers.request_graph_ql_post_instance2(
       "{ directors(pagination:{limit:25}) {director_id} }"
@@ -408,14 +405,13 @@ describe("Neo4j - Operators", () => {
     expect(res.statusCode).to.equal(200);
     directors = JSON.parse(res.body.toString("utf8")).data.directors;
     expect(directors.length).to.equal(1);
-    
+
     res = itHelpers.request_graph_ql_post_instance2(
       '{ directors(pagination:{limit:25} search:{field:director_name operator:notRegexp value:"fred"}) {director_id} }'
     );
     expect(res.statusCode).to.equal(200);
     directors = JSON.parse(res.body.toString("utf8")).data.directors;
     expect(directors.length).to.equal(1);
-
   });
 
   it("04. Movie: iRegexp, notIRegexp", () => {
@@ -433,7 +429,6 @@ describe("Neo4j - Operators", () => {
     movies = JSON.parse(res.body.toString("utf8")).data.movies;
     expect(movies.length).to.equal(0);
   });
-  
 
   it("05. Movie: in , notIn", () => {
     let res = itHelpers.request_graph_ql_post_instance2(
@@ -640,7 +635,8 @@ describe("Neo4j - Association", () => {
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message: `director with director_id d1 has associated records and is NOT valid for deletion. Please clean up before you delete.`,
+          message:
+            "director with director_id d1 has associated records with 'reject' reaction and is NOT valid for deletion. Please clean up before you delete.",
           locations: [
             {
               column: 12,
@@ -1301,9 +1297,15 @@ describe("data loader for readById method", () => {
         n3: deleteMovie (movie_id: "m3")
         n4: deleteDirector (director_id: "d1")
         n5: deleteDirector (director_id: "d2")
-        n6: deleteActor (actor_id: "a1")
-        n7: deleteActor (actor_id: "a2")
-        n8: deleteReview (review_id: "r1")
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        n1: deleteActor (actor_id: "a1")
+        n2: deleteActor (actor_id: "a2")
+        n3: deleteReview (review_id: "r1")
       }`
     );
     expect(res.statusCode).to.equal(200);

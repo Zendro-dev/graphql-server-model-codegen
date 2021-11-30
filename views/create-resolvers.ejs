@@ -487,48 +487,70 @@ const associationArgsDef = {
  * Section 5
  * Local helper fuctions.
  *
- * countAllAssociatedRecords()
+ * countAssociatedRecordsWithRejectReaction()
  * validForDeletion()
  */
 -%>
 
 /**
- * countAllAssociatedRecords - Count records associated with another given record
+ * countAssociatedRecordsWithRejectReaction - Count associated records with reject deletion action
  *
  * @param  {ID} id      Id of the record which the associations will be counted
  * @param  {objec} context Default context by resolver
  * @return {Int}         Number of associated records
  */
- async function countAllAssociatedRecords(id, context ){
+ async function countAssociatedRecordsWithRejectReaction(id, context ){
 
   let <%- nameLc %> = await resolvers.readOne<%- nameCp -%>({<%- idAttribute-%>: id}, context);
   //check that record actually exists
   if (<%- nameLc %> === null) throw new Error(`Record with ID = ${id} does not exist`);
   let promises_to_many = [];
   let promises_to_one = [];
-<%if(associationsArguments["generic_to_many"].length > 0) {-%>
-  let promises_generic_to_many = [];
-<%}-%>
-<%if(associationsArguments["generic_to_one"].length > 0) {-%>
-  let promises_generic_to_one = [];
+  let get_to_many_associated_fk = 0;
+  <%if(associationsArguments["generic_to_many"].length > 0) {-%>
+    let promises_generic_to_many = [];
   <%}-%>
-
+  <%if(associationsArguments["generic_to_one"].length > 0) {-%>
+    let promises_generic_to_one = [];
+  <%}-%>
+  <%if(associationsArguments["to_many_through_sql_cross_table"].length > 0){%>
+    let promises_cross_to_many = [];
+  <%}-%>
   <%# check associations to_one and to_many are counted in diferent variable -%>
   <%associations_temp = associationsArguments["to_many"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
-    promises_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+    <% if (associations_temp[i].delete_action==='reject'){-%>
+      <%if(associations_temp[i].assocThroughArray){%>
+        get_to_many_associated_fk += Array.isArray(<%- nameLc %>.<%=associations_temp[i].sourceKey%>) ? <%- nameLc %>.<%=associations_temp[i].sourceKey%>.length : 0;
+      <%}else{-%>
+        promises_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+      <%}-%>
+    <%}-%>
   <%}-%>
   <%associations_temp = associationsArguments["to_one"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <% if (associations_temp[i].delete_action==='reject'){-%>
     promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+    <%}-%>
   <%}-%>
+  
   <%associations_temp = associationsArguments["generic_to_many"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <% if (associations_temp[i].delete_action==='reject'){-%>
     promises_generic_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+    <%}-%>
   <%}-%>
   <%associations_temp = associationsArguments["generic_to_one"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <% if (associations_temp[i].delete_action==='reject'){-%>
     promises_generic_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+    <%}-%>
+  <%}-%>
+  <%associations_temp = associationsArguments["to_many_through_sql_cross_table"] -%>
+  <% for(let i=0; i < associations_temp.length; i++){ -%>
+    <% if (associations_temp[i].delete_action==='reject'){-%>
+    promises_cross_to_many.push(<%- nameLc %>.countFiltered<%=associations_temp[i].name_cp%>({}, context) );
+    <%}-%>
   <%}-%>
 
   let result_to_many = await Promise.all(promises_to_many);
@@ -539,17 +561,23 @@ const associationArgsDef = {
 <%if(associationsArguments["generic_to_one"].length > 0) {-%>
   let result_generic_to_one = await Promise.all(promises_generic_to_one);
 <%}-%>
+<%if(associationsArguments["to_many_through_sql_cross_table"].length > 0) {-%>
+  let result_cross_to_many = await Promise.all(promises_cross_to_many);
+<%}-%>
 
   let get_to_many_associated = result_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
   let get_to_one_associated = result_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
-<%if(associationsArguments["generic_to_many"].length > 0) {-%>
+  <%if(associationsArguments["generic_to_many"].length > 0) {-%>
   let get_generic_to_many_associated = result_generic_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
-<%}-%>
-<%if(associationsArguments["generic_to_one"].length > 0) {-%>
+  <%}-%>
+  <%if(associationsArguments["generic_to_one"].length > 0) {-%>
   let get_generic_to_one_associated = result_generic_to_one.filter( (r, index) => helper.isNotUndefinedAndNotNull(r) ).length;
-<%}-%>
+  <%}-%>
+  <%if(associationsArguments["to_many_through_sql_cross_table"].length > 0) {-%>
+  let get_cross_to_many_associated = result_cross_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
+  <%}-%>
 
-  return get_to_one_associated + get_to_many_associated <%if(associationsArguments["generic_to_many"].length > 0) {%>+ get_generic_to_many_associated<%}-%><%if(associationsArguments["generic_to_one"].length > 0) {%> + get_generic_to_one_associated<%}%>;
+  return get_to_one_associated + get_to_many_associated_fk + get_to_many_associated <%if(associationsArguments["generic_to_many"].length > 0) {%>+ get_generic_to_many_associated<%}-%><%if(associationsArguments["generic_to_one"].length > 0) {%> + get_generic_to_one_associated<%}%><%if(associationsArguments["to_many_through_sql_cross_table"].length > 0) {%>+ get_cross_to_many_associated<%}-%>;
 }
 
 /**
@@ -559,13 +587,135 @@ const associationArgsDef = {
  * @param  {object} context Default context by resolver
  * @return {boolean}         True if it is allowed to be deleted and false otherwise
  */
-  async function validForDeletion(id, context){
-  if( await countAllAssociatedRecords(id, context) > 0 ){
-    throw new Error(`<%- name %> with <%- idAttribute -%> ${id} has associated records and is NOT valid for deletion. Please clean up before you delete.`);
+async function validForDeletion(id, context){
+  if( await countAssociatedRecordsWithRejectReaction(id, context) > 0 ){
+    throw new Error(`<%- name %> with <%- idAttribute -%> ${id} has associated records with 'reject' reaction and is NOT valid for deletion. Please clean up before you delete.`);
   }
   return true;
 }
 
+/**
+ * updateAssociations - update associations for a given record
+ *
+ * @param  {ID} id      Id of record
+ * @param  {object} context Default context by resolver
+ */
+const updateAssociations = async (id, context) => {
+  const <%-  nameLc  -%>_record = await resolvers.readOne<%- nameCp -%>(
+    { <%- idAttribute -%>: id },
+    context
+  );
+  const pagi_first = globals.LIMIT_RECORDS;
+  <% for(let i=0; i < associations_one.length; i++){ -%>
+  <% if (associations_one[i].delete_action==='update'){-%>
+  <% if (associations_one[i].holdsForeignKey) { %>
+    const <%=`${associations_one[i].name}_id`%> = <%-  nameLc  -%>_record.<%=associations_one[i].targetKey%>;
+    if (<%=`${associations_one[i].name}_id`%>) {
+      await resolvers.update<%- nameCp -%>(
+        { <%- idAttribute -%>: id, remove<%=associations_one[i].name_cp%>: <%=`${associations_one[i].name}_id`%> },
+        context
+      );
+    }
+  <%}else{-%>
+    const <%=`${associations_one[i].name}_record`%> = await <%-  nameLc  -%>_record.<%=associations_one[i].name%>({}, context);
+    if (<%=`${associations_one[i].name}_record`%>) {
+      const <%=`${associations_one[i].name}_id`%> = <%=`${associations_one[i].name}_record`%>[models.<%=associations_one[i].target_lc%>.idAttribute()];
+      await resolvers.update<%- nameCp -%>(
+        { <%- idAttribute -%>: id, remove<%=associations_one[i].name_cp%>: <%=`${associations_one[i].name}_id`%> },
+        context
+      );
+    }
+    <%}-%>
+    <%}-%>
+  <%}-%>
+  
+  <% let associations_many = associationsArguments["to_many"]-%>
+  <% for(let i=0; i < associations_many.length; i++){ -%>
+  <% if (associations_many[i].delete_action==='update'){-%>
+    <%if(associations_many[i].assocThroughArray){%>
+      const <%=`${associations_many[i].name}_ids`%> = <%-  nameLc  -%>_record.<%=associations_many[i].sourceKey%>;
+      if (<%=`${associations_many[i].name}_ids`%> && <%=`${associations_many[i].name}_ids`%>.length > 0) {
+        await resolvers.update<%- nameCp -%>(
+          { <%- idAttribute -%>: id, remove<%=associations_many[i].name_cp%>: <%=`${associations_many[i].name}_ids`%> },
+          context
+        );
+      }
+    <%}else{-%>
+      let <%=associations_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_many[i].name_cp%>({}, context);
+      while (<%=associations_many[i].name%>_num > 0) {
+        context.recordsLimit = globals.LIMIT_RECORDS;
+        const <%=associations_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_many[i].target_lc_pl%>Connection(
+          { pagination: { first: pagi_first } },
+          context
+        );
+        if (<%=associations_many[i].name%>_records) {
+          const <%=associations_many[i].name%>_ids = <%=associations_many[i].name%>_records.<%=associations_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_many[i].target_lc%>.idAttribute()]);
+          await resolvers.update<%- nameCp -%>(
+            { <%- idAttribute -%>: id, remove<%=associations_many[i].name_cp%>: <%=associations_many[i].name%>_ids },
+            context
+          );
+        }
+        <%=associations_many[i].name%>_num -= pagi_first;
+      }
+    <%}-%>
+  <%}-%>
+  <%}-%>
+  <% for(let i=0; i < associations_generic_many.length; i++){ -%>
+  <% if (associations_generic_many[i].delete_action==='update'){-%>
+    let <%=associations_generic_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_generic_many[i].name_cp%>({}, context);
+    while (<%=associations_generic_many[i].name%>_num > 0) {
+      context.recordsLimit = globals.LIMIT_RECORDS;
+      const <%=associations_generic_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_generic_many[i].target_lc_pl%>Connection(
+        { pagination: { first: pagi_first } },
+        context
+      );
+      if (<%=associations_generic_many[i].name%>_records) {
+        const <%=associations_generic_many[i].name%>_ids = <%=associations_generic_many[i].name%>_records.<%=associations_generic_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_generic_many[i].target_lc%>.idAttribute()]);
+        await resolvers.update<%- nameCp -%>(
+          { <%- idAttribute -%>: id, remove<%=associations_generic_many[i].name_cp%>: <%=associations_generic_many[i].name%>_ids },
+          context
+        );
+      }
+      <%=associations_generic_many[i].name%>_num -= pagi_first;
+    }
+    <%}-%>
+  <%}-%>
+
+  <% for(let i=0; i < associations_generic_one.length; i++){ -%>
+    <% if (associations_generic_one[i].delete_action==='update'){-%>
+    const <%=`${associations_generic_one[i].name}_record`%> = await <%-  nameLc  -%>_record.<%=associations_generic_one[i].name%>({}, context);
+    if (<%=`${associations_generic_one[i].name}_record`%>) {
+      const <%=`${associations_generic_one[i].name}_id`%> = <%=`${associations_generic_one[i].name}_record`%>[models.<%=associations_generic_one[i].target_lc%>.idAttribute()];
+      await resolvers.update<%- nameCp -%>(
+        { <%- idAttribute -%>: id, remove<%=associations_generic_one[i].name_cp%>: <%=`${associations_generic_one[i].name}_id`%> },
+        context
+      );
+    }
+    <%}-%>
+  <%}-%>
+  <% let associations_cross_many = associationsArguments["to_many_through_sql_cross_table"]-%>
+  <% for(let i=0; i < associations_cross_many.length; i++){ -%>
+    <% if (associations_cross_many[i].delete_action==='update'){-%>
+    let <%=associations_cross_many[i].name%>_num = await <%-  nameLc  -%>_record.countFiltered<%=associations_cross_many[i].name_cp%>({}, context);
+    while (<%=associations_cross_many[i].name%>_num > 0) {
+      context.recordsLimit = globals.LIMIT_RECORDS;
+      const <%=associations_cross_many[i].name%>_records = await <%-  nameLc  -%>_record.<%=associations_cross_many[i].target_lc_pl%>Connection(
+        { pagination: { first: pagi_first } },
+        context
+      );
+      if (<%=associations_cross_many[i].name%>_records) {
+        const <%=associations_cross_many[i].name%>_ids = <%=associations_cross_many[i].name%>_records.<%=associations_cross_many[i].target_lc_pl%>.map((x) => x[models.<%=associations_cross_many[i].target_lc%>.idAttribute()]);
+        await resolvers.update<%- nameCp -%>(
+          { <%- idAttribute -%>: id, remove<%=associations_cross_many[i].name_cp%>: <%=associations_cross_many[i].name%>_ids },
+          context
+        );
+      }
+      <%=associations_cross_many[i].name%>_num -= pagi_first;
+    }
+    <%}-%>
+  <%}-%>
+
+}
 <%#
 /**
  * Section 6
@@ -885,6 +1035,7 @@ module.exports = {
   delete<%- nameCp -%>: async function({<%- idAttribute -%>}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'delete') === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
+            await updateAssociations(<%- idAttribute -%>, context);
             let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
             return <%- nameLc -%>.deleteOne(<%- idAttribute -%>, benignErrorReporter);
         }

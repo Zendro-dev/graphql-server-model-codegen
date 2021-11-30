@@ -16,7 +16,8 @@
       "sourceKey": "river_id",
       "targetKey": "country_id",
       "keysIn": "country_to_river",
-      "targetStorageType": "sql"
+      "targetStorageType": "sql",
+      "deletion":"update"
     },
     "cities": {
       "type": "many_to_many",

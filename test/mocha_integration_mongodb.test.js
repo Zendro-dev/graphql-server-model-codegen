@@ -629,30 +629,7 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("03. Animal : Farm (n:1) - deleting the farm record with associations fails", () => {
-    let res = itHelpers.request_graph_ql_post(
-      `mutation { deleteFarm (farm_id: 1) }`
-    );
-    let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(500);
-    expect(resBody).to.deep.equal({
-      errors: [
-        {
-          message: `farm with farm_id 1 has associated records and is NOT valid for deletion. Please clean up before you delete.`,
-          locations: [
-            {
-              column: 12,
-              line: 1,
-            },
-          ],
-          path: ["deleteFarm"],
-        },
-      ],
-      data: null,
-    });
-  });
-
-  it("04. Animal : Farm (n:1) - delete the associations in the farm record", () => {
+  it("03. Animal : Farm (n:1) - delete the associations in the farm record", () => {
     let res = itHelpers.request_graph_ql_post(
       `mutation{updateFarm(farm_id: 1, removeAnimals: [1, 2]) {
           farm_name
@@ -683,7 +660,7 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("05. Animal : Food (n:n) - add animals to food", () => {
+  it("04. Animal : Food (n:n) - add animals to food", () => {
     for (let i = 1; i < 3; i++) {
       let res = itHelpers.request_graph_ql_post(
         `mutation{
@@ -707,7 +684,7 @@ describe("Mongodb - Association", () => {
     }
   });
 
-  it("06. Animal : Food (n:n) - read one associated animal", () => {
+  it("05. Animal : Food (n:n) - read one associated animal", () => {
     let res = itHelpers.request_graph_ql_post(`
       {
         readOneAnimal(animal_id: "3"){
@@ -728,7 +705,7 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("07. Animal : Food (n:n) - delete the associations in the food records", () => {
+  it("06. Animal : Food (n:n) - delete the associations in the food records", () => {
     for (let i = 1; i < 3; i++) {
       let res = itHelpers.request_graph_ql_post(
         `mutation{
@@ -751,7 +728,7 @@ describe("Mongodb - Association", () => {
     }
   });
 
-  it("08. Animal : Tracker (1:1) - add animal to tracker", () => {
+  it("07. Animal : Tracker (1:1) - add animal to tracker", () => {
     let res = itHelpers.request_graph_ql_post(
       `mutation{
           addTracker(tracker_id:1, location:"garden", addUnique_animal:5){
@@ -773,7 +750,7 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("09. Animal : Tracker (1:1) - read one associated animal", () => {
+  it("08. Animal : Tracker (1:1) - read one associated animal", () => {
     let res = itHelpers.request_graph_ql_post(`
       {
         readOneAnimal(animal_id: "5"){
@@ -798,7 +775,7 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("10. Animal : Tracker (1:1) - violate the unique rule", () => {
+  it("09. Animal : Tracker (1:1) - violate the unique rule", () => {
     itHelpers.request_graph_ql_post(
       `mutation{
             addTracker(tracker_id:2, location:"living room", addUnique_animal:5){
@@ -837,7 +814,7 @@ describe("Mongodb - Association", () => {
     });
   });
 
-  it("11. Animal : Tracker (1:1) - delete the associations in the tracker record", () => {
+  it("10. Animal : Tracker (1:1) - delete the associations in the tracker record", () => {
     for (let i = 1; i < 3; i++) {
       let res = itHelpers.request_graph_ql_post(
         `mutation{
@@ -1641,5 +1618,213 @@ describe("validation API for distributed models", () => {
     expect(resBody.data).to.deep.equal({
       validateDist_animalAfterReading: true,
     });
+  });
+});
+
+describe("Mongodb - Update Deletion Action", () => {
+  // set up the environment
+  before(async () => {
+    let res;
+    for (let i of [1, 2, 3]) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation{
+            addAnimal(animal_id:"${i}")
+            {
+                animal_id
+            }
+        }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countAnimals");
+    expect(cnt).to.equal(3);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation {
+          addFarm(farm_id: 1, addAnimals: [1, 2, 3]) {
+            farm_id
+          }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    cnt = await itHelpers.count_all_records("countFarms");
+    expect(cnt).to.equal(1);
+
+    for (let i of [1, 2]) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation {
+          addFood(food_id: ${i}, addAnimals: [1, 2]) {
+            food_id
+            animal_ids
+          }
+        }`
+      );
+      expect(res.statusCode).to.equal(200);
+
+      res = itHelpers.request_graph_ql_post(
+        `mutation {
+          addTracker(tracker_id: ${i}, addUnique_animal: ${i}) {
+            tracker_id
+            animal_id
+          }
+        }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countFood");
+    expect(cnt).to.equal(2);
+    cnt = await itHelpers.count_all_records("countTrackers");
+    expect(cnt).to.equal(2);
+
+    res = await itHelpers.request_graph_ql_post(
+      `mutation {
+        addUser(email:"x@zen.dro", password:"zendro"){
+            email
+          }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    res = itHelpers.request_graph_ql_post(
+      "{ users(pagination:{limit:25}) {id} }"
+    );
+    let users = JSON.parse(res.body.toString("utf8")).data.users;
+    res = await itHelpers.request_graph_ql_post(
+      `mutation {
+        addRole(name:"test_role", addUsers:[${users[users.length - 1].id}]){
+            name
+          }
+        }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    for (let i of [1, 2]) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation {
+          addDist_animal(animal_id: "instance1-${i}")
+          {
+            animal_id
+          }
+        }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countDist_animals");
+    expect(cnt).to.equal(2);
+
+    res = itHelpers.request_graph_ql_post(
+      `mutation {
+        addDist_farm(farm_id: "instance1-f1", farm_name: "Dogs' Home", addDist_animals: ["instance1-1", "instance1-2"]) {
+          farm_id
+          farm_name
+        }
+      }`
+    );
+    expect(res.statusCode).to.equal(200);
+    cnt = await itHelpers.count_all_records("countDist_farms");
+    expect(cnt).to.equal(1);
+  });
+
+  // clean up records
+  after(async () => {
+    // Delete all animals
+    let res = itHelpers.request_graph_ql_post(
+      "{ animals(pagination:{limit:25}) {animal_id} }"
+    );
+    let animals = JSON.parse(res.body.toString("utf8")).data.animals;
+
+    for (let i = 0; i < animals.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteAnimal (animal_id: ${animals[i].animal_id}) }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countAnimals");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Animal : Farm (n:1)", async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation { deleteAnimal (animal_id: 3) }`
+    );
+    expect(res.statusCode).to.equal(200);
+    res = itHelpers.request_graph_ql_post(
+      `mutation { deleteFarm (farm_id: 1) }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    let cnt = await itHelpers.count_all_records("countFarms");
+    expect(cnt).to.equal(0);
+  });
+
+  it("02. Animal : Food (n:n)", async () => {
+    for (let i = 1; i < 3; i++) {
+      let res = itHelpers.request_graph_ql_post(
+        `mutation { deleteFood (food_id: ${i}) }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countFood");
+    expect(cnt).to.equal(0);
+  });
+
+  it("03. Animal : Tracker (1:1)", async () => {
+    for (let i = 1; i < 3; i++) {
+      let res = itHelpers.request_graph_ql_post(
+        `mutation { deleteTracker (tracker_id: ${i}) }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countTrackers");
+    expect(cnt).to.equal(0);
+  });
+
+  it("04. User : Role (n:n)", async () => {
+    let res = itHelpers.request_graph_ql_post(
+      "{ users(pagination:{limit:25}) {id} }"
+    );
+    let users = JSON.parse(res.body.toString("utf8")).data.users;
+    res = itHelpers.request_graph_ql_post(
+      `mutation { deleteUser (id: ${users[users.length - 1].id}) }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    let cnt = await itHelpers.count_all_records("countUsers");
+    expect(cnt).to.equal(0);
+
+    res = itHelpers.request_graph_ql_post(
+      "{ roles(pagination:{limit:25}) {id} }"
+    );
+    let roles = JSON.parse(res.body.toString("utf8")).data.roles;
+    res = itHelpers.request_graph_ql_post(
+      `mutation { deleteRole (id: ${roles[roles.length - 1].id}) }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    cnt = await itHelpers.count_all_records("countRoles");
+    expect(cnt).to.equal(0);
+  });
+
+  it("05. Dist_animal : Dist_farm (n:1)", async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation { deleteDist_farm (farm_id: "instance1-f1") }`
+    );
+    expect(res.statusCode).to.equal(200);
+
+    let cnt = await itHelpers.count_all_records("countFarms");
+    expect(cnt).to.equal(0);
+    for (let i of [1, 2]) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_animal (animal_id: "instance1-${i}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
   });
 });

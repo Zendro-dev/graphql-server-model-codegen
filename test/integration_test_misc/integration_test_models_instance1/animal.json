@@ -21,7 +21,8 @@
             "targetKey": "farm_id",
             "keysIn": "animal",
             "targetStorageType": "mongodb",
-            "label": "farm_name"
+            "label": "farm_name",
+            "deletion":"update"
         },
         "food": {
             "type": "many_to_many",
@@ -30,7 +31,8 @@
             "targetKey": "animal_ids",
             "sourceKey": "food_ids",
             "keysIn": "animal",
-            "targetStorageType": "mongodb"
+            "targetStorageType": "mongodb",
+            "deletion":"update"
         },
         "unique_tracker": {
             "type": "one_to_one",
@@ -38,7 +40,8 @@
             "target": "tracker",
             "targetKey": "animal_id",
             "keysIn": "tracker",
-            "targetStorageType": "mongodb"
+            "targetStorageType": "mongodb",
+            "deletion":"update"
         }
     },
     "internalId": "animal_id",

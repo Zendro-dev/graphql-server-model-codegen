@@ -186,7 +186,7 @@ module.exports = class <%- nameLc -%> {
       const result = await session.run(
         `MATCH (n:<%- nameCp -%>) ${whereOptions} RETURN n ${orderOptions} SKIP ${offset} LIMIT ${limit} `
       );
-      const nodes = result.records.map((res) => res.get(0).properties);
+      const nodes = result.records.map((res) => new <%- nameLc -%>(res.get(0).properties));
       return validatorUtil.bulkValidateData(
         "validateAfterRead",
         this,
@@ -349,11 +349,17 @@ module.exports = class <%- nameLc -%> {
       defaultAccessMode: neo4j.session.WRITE,
     });
     try {
-      delete input.skipAssociationsExistenceChecks;
-      input = neo4jHelper.processDateTime(input, definition.attributes);
+      const attributes = Object.keys(definition.attributes);
+      let parsed_input = {};
+      for (let key of Object.keys(input)) {
+        if (attributes.includes(key)) {
+          parsed_input[key] = input[key];
+        }
+      }
+      parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
       const result = await session.run(`CREATE (a:<%- nameCp -%> $props) RETURN a`, {
-        props: input,
+        props: parsed_input,
       });
       const singleRecord = result.records[0];
       const node = singleRecord.get(0);
@@ -414,13 +420,19 @@ module.exports = class <%- nameLc -%> {
     });
     const id = input[this.idAttribute()];
     try {
-      delete input.skipAssociationsExistenceChecks;
       delete input[this.idAttribute()];
-      input = neo4jHelper.processDateTime(input, definition.attributes);
+      const attributes = Object.keys(definition.attributes);
+      let parsed_input = {};
+      for (let key of Object.keys(input)) {
+        if (attributes.includes(key)) {
+          parsed_input[key] = input[key];
+        }
+      }
+      parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
       const result = await session.run(
         `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) SET n+=$props RETURN n`,
-        { id: id, props: input }
+        { id: id, props: parsed_input }
       );
       if (result.records.length !== 1) {
         throw new Error(`Record with ID = ${id} has not been updated!`);

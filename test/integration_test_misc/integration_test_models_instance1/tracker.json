@@ -13,7 +13,8 @@
         "target": "animal",
         "targetKey": "animal_id",
         "keysIn": "tracker",
-        "targetStorageType": "mongodb"
+        "targetStorageType": "mongodb",
+        "deletion":"update"
       }
     },
     "internalId": "tracker_id",

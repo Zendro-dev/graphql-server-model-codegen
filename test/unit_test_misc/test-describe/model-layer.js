@@ -151,6 +151,7 @@ module.exports.delete_one_resolver = `
     }, context) {
         if (await checkAuthorization(context, 'Book', 'delete') === true) {
             if (await validForDeletion(id, context)) {
+                await updateAssociations(id, context);
                 let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
                 return book.deleteOne(id, benignErrorReporter);
             }

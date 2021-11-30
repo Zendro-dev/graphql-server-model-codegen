@@ -667,7 +667,7 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message: `transcript_count with id ${idValue} has associated records and is NOT valid for deletion. Please clean up before you delete.`,
+          message: `transcript_count with id ${idValue} has associated records with 'reject' reaction and is NOT valid for deletion. Please clean up before you delete.`,
           locations: [
             {
               column: 12,

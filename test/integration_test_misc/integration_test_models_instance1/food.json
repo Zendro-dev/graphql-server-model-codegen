@@ -15,7 +15,8 @@
         "targetKey": "food_ids",
         "sourceKey": "animal_ids",
         "keysIn": "food",
-        "targetStorageType": "mongodb"
+        "targetStorageType": "mongodb",
+        "deletion":"update"
       }
     },
 

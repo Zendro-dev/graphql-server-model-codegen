@@ -168,16 +168,20 @@ static async addOne(input) {
     try {
         const db = await this.storageHandler;
         const collection = await db.collection("animal");
-        // remove skipAssociationsExistenceChecks
-        delete input.skipAssociationsExistenceChecks;
-        const result = await collection.insertOne(input);
+        const attributes = Object.keys(definition.attributes);
+        let parsed_input = {};
+        for (let key of Object.keys(input)) {
+            if (attributes.includes(key)) {
+                parsed_input[key] = input[key];
+            }
+        }
+        const result = await collection.insertOne(parsed_input);
         const id_name = this.idAttribute();
         const document = await this.readById(input[id_name]);
         return document;
     } catch (error) {
         throw error;
     }
-
 }
 `;
 
@@ -210,11 +214,10 @@ static async updateOne(input) {
     try {
         const db = await this.storageHandler;
         const collection = await db.collection("animal");
-        // remove skipAssociationsExistenceChecks
-        delete input.skipAssociationsExistenceChecks;
+        const attributes = Object.keys(definition.attributes);
         const updatedContent = {};
         for (let key of Object.keys(input)) {
-            if (key !== "id") {
+            if (key !== "id" && attributes.includes(key)) {
                 updatedContent[key] = input[key];
             }
         }
