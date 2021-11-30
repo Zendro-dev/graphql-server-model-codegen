@@ -41,13 +41,15 @@
           // NO ERROR as such has been detected by the server (Express)
           // check if data was send
           if(response && response.data && response.data.data) {
-            return response.data.data.update<%- nameCp -%>;
+            return 1;
           } else {
-            throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
+            benignErrorReporter.reportError({
+              message: `Remote zendro-server (${remoteZendroURL}) did not respond with data.`,
+            });
           }
         } catch(error) {
           //handle caught errors
-          errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+          benignErrorReporter.reportError(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
         }
       }
   <%}-%>
@@ -61,28 +63,14 @@
   -%>
   <%if(storageType === 'sql-adapter'){-%>
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
-    <% if (associationsArguments["to_one"][i].type==="one_to_one") { -%>
-      try{
-        <% if (op == 'remove') { -%>
-        let updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%>}
-        if(<%- idAttribute-%>) {
-          updatedContent["<%- idAttribute-%>"] = <%- idAttribute-%>;
-        }
-        <% } else { %>
-        let updatedContent = {<%- idAttribute -%>: <%- idAttribute -%>}
-        <%}-%>
-
-        let updated = await super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  
-        <% if (op == 'remove') { -%>null
-        <% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: updatedContent});
-        return updated[0];
-      } catch (error) {
-        benignErrorReporter.reportError(error);
-      }
-      <% } else{-%>
+    try{  
       let updated = await super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
       return updated[0];
-    <%} -%>
+    } catch (error) {
+      benignErrorReporter.reportError({
+        message:error
+      });
+    }
    }
   <%}-%>
   <%#  /*** End of the the sql-adapter case */ -%>
@@ -93,7 +81,7 @@
    */
   -%>
   <%if(storageType === 'mongodb-adapter'){-%>
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
       try {
         const db = await this.storageHandler
         const collection = await db.collection("<%- nameLc -%>")
@@ -102,12 +90,15 @@
         const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
         {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
         if (response.result.ok !== 1){
-          throw new Error(`Record with ID = ${<%- idAttribute-%>} has not been updated`);
+          benignErrorReporter.reportError({
+            message:`Record with ID = ${<%- idAttribute-%>} has not been updated`
+          });
         }
-        const document = await this.readById(<%- idAttribute-%>);
-        return document
+        return response.modifiedCount;
       } catch (error) {
-        throw error;
+        benignErrorReporter.reportError({
+          message:error
+        });
       }
     }
   <%}-%>
@@ -119,14 +110,14 @@
    */
   -%>
   <%if(storageType === 'neo4j-adapter'){-%>
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
       const driver = await this.storageHandler;
         const session = driver.session({
           database: config.database,
           defaultAccessMode: neo4j.session.WRITE,
         });
         let foreignKey = `MATCH (n:<%- nameCp -%>) WHERE n.<%-idAttribute%> = $id 
-          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN head(collect(n))`
+          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN count(n)`
         
         <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- nameCp -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
@@ -142,11 +133,11 @@
             id: <%-idAttribute%>,
             target: <%-associationsArguments["to_one"][i].targetKey-%>,
           })
-          const singleRecord = result.records[0];
-          const node = singleRecord.get(0);
-          return new <%- adapterName -%>(node)
+          return result.records[0].get(0);
         } catch (error) {
-          throw error;
+          benignErrorReporter.reportError({
+            message:error
+          });
         } finally {
           await session.close();
         }
@@ -160,12 +151,18 @@
    */
   -%>
   <%if(storageType === 'cassandra-adapter'){-%>
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
-      const mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
-      await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
-      const checkCql = `SELECT * FROM <%- namePl -%> WHERE <%- idAttribute-%> = ?`;
-      let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
-      return new <%- adapterName -%>(result.first());
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
+      try{  
+        const mutationCql = `UPDATE <%- namePl -%> SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+        await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
+        const checkCql = `SELECT COUNT(*) FROM <%- namePl -%> WHERE <%- idAttribute-%> = ?`;
+        let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
+        return parseInt(result.first()["count"]);
+      } catch (error) {
+        benignErrorReporter.reportError({
+          message: error,
+        });
+      }
     }
   <%}-%>
    <%#  /*** End of the the cassandra-adapter case */ -%>

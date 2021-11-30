@@ -1161,9 +1161,7 @@ describe("Extend api model layer associations", function () {
   it("Add to-one association foreign key in source", async function () {
     let opts = funks.getOptions(models.transcript_count);
     let generated_model = await funks.generateJs("create-models", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.to_add_individual.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.to_add_individual);
   });
 
   it("Remove to-one association foreign key in source", async function () {
@@ -1895,9 +1893,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-distributed-model",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.add_assoc_ddm_model.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.add_assoc_ddm_model);
   });
 
   it("remove association model layer - accession", async function () {
@@ -1906,9 +1902,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-distributed-model",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.remove_assoc_ddm_model.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.remove_assoc_ddm_model);
   });
 
   it("add association in zendro-webservice-adapter  - accession", async function () {
@@ -1917,9 +1911,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.to_one_add_zendro_adapter.replace(/\s/g, "");
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.to_one_add_zendro_adapter);
   });
 
   it("remove association in zendro-webservice-adapter - accession", async function () {

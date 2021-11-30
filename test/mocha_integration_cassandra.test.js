@@ -810,7 +810,7 @@ describe("Cassandra Local", function () {
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message: "Hint: update 1 existing association(s)!",
+          message: "Hint: update 1 existing association!",
           locations: "",
         },
       ],

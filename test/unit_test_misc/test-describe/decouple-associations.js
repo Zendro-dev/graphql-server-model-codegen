@@ -37,14 +37,20 @@ dog.prototype.researcher = async function({
 
 module.exports.belongsTo_model = `
 static async add_researcherId(id, researcherId, benignErrorReporter) {
-  let updated = await dog.update({
-      researcherId: researcherId
-  }, {
-      where: {
-          id: id
-      }
-  });
-  return updated[0];
+    try {
+        let updated = await dog.update({
+            researcherId: researcherId
+        }, {
+            where: {
+                id: id
+            }
+        });
+        return updated[0];
+    } catch (error) {
+        benignErrorReporter.reportError({
+            message: error
+        });
+    }
 }
 `;
 

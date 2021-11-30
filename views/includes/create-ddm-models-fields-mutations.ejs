@@ -1,5 +1,5 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-    <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
   /**
   * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
   *
@@ -9,33 +9,8 @@
   */
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
     try {
-      <% if (associationsArguments["to_one"][i].type==="one_to_one") { -%>
-      <% if (op == 'add') { -%>
-        const removed = await this.remove_<%-associationsArguments["to_one"][i].targetKey-%>(null, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
-        if (removed > 0) {
-          benignErrorReporter.reportError({
-            message: `Hint: update ${removed} existing association(s)!`,
-          });
-        }  
-        let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-        return await adapters[responsibleAdapter].add_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
-      <% } else{-%>
-        if (<%- idAttribute-%>) {
-          let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-          return await adapters[responsibleAdapter].remove_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter
-          );
-        } else {
-          let num = 0;
-          for (let responsibleAdapter of registry) {
-            num += await adapters[responsibleAdapter].remove_<%-associationsArguments["to_one"][i].targetKey-%>(null, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
-          }
-          return num;
-        }
-      <%} -%>
-      <% } else{-%>
       let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
       return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
-      <%} -%>
     } catch (error) {
       benignErrorReporter.reportError({
         message: error,

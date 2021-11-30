@@ -894,7 +894,7 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message: "Hint: update 1 existing association(s)!",
+          message: "Hint: update 1 existing association!",
           locations: "",
         },
       ],
@@ -2403,7 +2403,7 @@ describe("Distributed Data Models", function () {
     });
   });
 
-  it("12. one_to_one ddm associations error", function () {
+  it("12. one_to_one ddm association update", function () {
     //test error
     itHelpers.request_graph_ql_post_instance2(
       'mutation { addParrot(parrot_id:"instance2-parrot02", addUnique_person:"instance1-person01") {parrot_id} }'
@@ -2414,13 +2414,6 @@ describe("Distributed Data Models", function () {
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
-      errors: [
-        {
-          message:
-            'Not unique "to_one" association Error: Found > 1 parrots matching person with person_id instance1-person01. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the person model. Returning first parrot.',
-          locations: "",
-        },
-      ],
       data: {
         peopleConnection: {
           edges: [
@@ -2428,7 +2421,7 @@ describe("Distributed Data Models", function () {
               node: {
                 person_id: "instance1-person01",
                 unique_parrot: {
-                  parrot_id: "instance2-parrot01",
+                  parrot_id: "instance2-parrot02",
                 },
               },
             },

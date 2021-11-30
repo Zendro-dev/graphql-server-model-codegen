@@ -1,13 +1,19 @@
 module.exports.to_add_individual = `
 static async add_individual_id(id, individual_id, benignErrorReporter) {
-  let updated = await transcript_count.update({
-      individual_id: individual_id
-  }, {
-      where: {
-          id: id
-      }
-  });
-  return updated[0];
+  try {
+    let updated = await transcript_count.update({
+        individual_id: individual_id
+    }, {
+        where: {
+            id: id
+        }
+    });
+    return updated[0];
+  } catch (error) {
+      benignErrorReporter.reportError({
+          message: error
+      });
+  }
 }
 `;
 
@@ -45,15 +51,21 @@ async _addAuthors(ids){
 
 module.exports.remove_individual = `
 static async remove_individual_id(id, individual_id, benignErrorReporter) {
-  let updated = await transcript_count.update({
-      individual_id: null
-  }, {
-      where: {
-          id: id,
-          individual_id: individual_id
-      }
-  });
-  return updated[0];
+  try {
+    let updated = await transcript_count.update({
+        individual_id: null
+    }, {
+        where: {
+            id: id,
+            individual_id: individual_id
+        }
+    });
+    return updated[0];
+  } catch (error) {
+      benignErrorReporter.reportError({
+          message: error
+      });
+  }
 }
 `;
 

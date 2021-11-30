@@ -814,7 +814,7 @@ describe("Neo4j - Association", () => {
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message: "Hint: update 1 existing association(s)!",
+          message: "Hint: update 1 existing association!",
           locations: "",
         },
       ],
