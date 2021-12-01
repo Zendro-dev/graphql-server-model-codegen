@@ -21,7 +21,7 @@ program
     "Show detailed messages about the results of running code generation process"
   )
   .option("-m, --migrations", "generate migrations", false)
-  .option("-b, --basicCode", "generate basic code", true)
+  .option("-b, --noBasicCode", "does not generate basic code", false)
   .parse(process.argv);
 
 //check input JSON files
@@ -44,5 +44,10 @@ console.log("Output directory: ", colors.dim(path.resolve(directory)));
 //op: verbose, migrations
 let verbose = program.verbose !== undefined ? true : false;
 let migrations = program.migrations;
+let basicCode = !program.noBasicCode;
 //run codegen
-funks.generateCode(program.jsonFiles, directory, { verbose, migrations });
+funks.generateCode(program.jsonFiles, directory, {
+  verbose,
+  migrations,
+  basicCode,
+});

@@ -1213,37 +1213,44 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       ? options.verbose
       : false;
   let migrations = options.migrations;
-  let basic_code = options.basic_code ?? true;
+  let basic_code = options.basicCode;
   /**
    * Create sections dirs
    */
-  //msg
-  if (verbose)
-    console.log(colors.white("\n@@ Creating required directories..."));
-  sectionsDirsA.forEach((section) => {
-    let dir = dir_write + "/" + section;
-    if (!fs.existsSync(dir)) {
-      try {
-        fs.mkdirSync(dir);
-        //msg
-        if (verbose) console.log("@@@ dir created: ", colors.dim(dir));
-      } catch (e) {
-        //err
-        console.log(
-          colors.red("! mkdir.error: "),
-          "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS"
-        );
-        console.log(colors.red("!@ mkdir.error: "), e);
-        console.log(colors.red("done"));
-        process.exit(1);
-      }
-    } else {
-      //msg
-      if (verbose) console.log("@@@ dir already exists: ", colors.dim(dir));
+  if (basic_code) {
+    //msg
+    if (verbose) {
+      console.log(colors.white("\n@@ Creating required directories..."));
     }
-  });
-  //msg
-  if (verbose) console.log("@@ ", colors.green("done"));
+    sectionsDirsA.forEach((section) => {
+      let dir = dir_write + "/" + section;
+      if (!fs.existsSync(dir)) {
+        try {
+          fs.mkdirSync(dir);
+          //msg
+          if (verbose) console.log("@@@ dir created: ", colors.dim(dir));
+        } catch (e) {
+          //err
+          console.log(
+            colors.red("! mkdir.error: "),
+            "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS"
+          );
+          console.log(colors.red("!@ mkdir.error: "), e);
+          console.log(colors.red("done"));
+          process.exit(1);
+        }
+      } else {
+        //msg
+        if (verbose) {
+          console.log("@@@ dir already exists: ", colors.dim(dir));
+        }
+      }
+    });
+    //msg
+    if (verbose) {
+      console.log("@@ ", colors.green("done"));
+    }
+  }
 
   let totalFiles = 0;
   let totalExcludedFiles = 0;
@@ -1757,21 +1764,24 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       models.push([opts.name, opts.namePl, opts.nameLc]);
     }
   }
-  //msg
-  console.log("@@ Generating code for... ", colors.blue("commons & index's"));
-  //generate commons & index's
-  await writeCommons(dir_write, models, adapters)
-    .then(() => {
-      //success
-      //msg
-      console.log("@@ ", colors.green("done"));
-    })
-    .catch((e) => {
-      //error
-      //msg
-      console.log("@@ ", colors.red("done"));
-      totalGenErrors++;
-    });
+
+  if (basic_code) {
+    //msg
+    console.log("@@ Generating code for... ", colors.blue("commons & index's"));
+    //generate commons & index's
+    await writeCommons(dir_write, models, adapters)
+      .then(() => {
+        //success
+        //msg
+        console.log("@@ ", colors.green("done"));
+      })
+      .catch((e) => {
+        //error
+        //msg
+        console.log("@@ ", colors.red("done"));
+        totalGenErrors++;
+      });
+  }
 
   //Final report
   //msg
