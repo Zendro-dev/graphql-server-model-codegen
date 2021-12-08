@@ -1027,6 +1027,8 @@ generateSections = async function (sections, opts, dir_write) {
       //migrations
       case "migrations":
       case "migrations-cassandra":
+      case "migrations-mongodb":
+      case "migrations-neo4j":
         file_name = createNameMigration(
           dir_write,
           section.dir,
@@ -1470,6 +1472,13 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
             { dir: "patches", template: "patches", fileName: opts.nameLc },
           ];
         }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-mongodb",
+            fileName: opts.nameLc,
+          });
+        }
         break;
 
       case "cassandra":
@@ -1578,6 +1587,13 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
             { dir: "patches", template: "patches", fileName: opts.nameLc },
           ];
         }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-neo4j",
+            fileName: opts.nameLc,
+          });
+        }
         break;
 
       case "zendro-webservice-adapter":
@@ -1649,6 +1665,13 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
             },
             { dir: "patches", template: "patches", fileName: opts.adapterName },
           ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-mongodb",
+            fileName: opts.nameLc,
+          });
         }
         break;
 
@@ -1722,6 +1745,13 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
             },
             { dir: "patches", template: "patches", fileName: opts.adapterName },
           ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-neo4j",
+            fileName: opts.nameLc,
+          });
         }
         break;
 

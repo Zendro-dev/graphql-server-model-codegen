@@ -1,0 +1,47 @@
+'use strict';
+const { DOWN_MIGRATION } = require('../config/globals');
+/**
+ * @module - Migrations for mongodb.
+ */
+module.exports = {
+
+  /**
+   * up - Creates indices.
+   *
+   * @param  {object} zendro initialized zendro object
+   */
+  up: async (zendro) => {
+    try{
+      const db = await zendro.models.<%-nameLc-%>.storageHandler;
+      const collection = await db.collection("<%-nameLc-%>");
+      await collection.createIndex({ <%- idAttribute -%>: 1 });
+      <%if(indices){ for(let i=0; i< indices.length; i++){-%>
+      await collection.createIndex({ <%= indices[i] %>: 1 });
+      <%}-%>   
+      <%}-%>
+    } catch (error){
+      throw new Error(error);
+    }
+  },
+
+  /**
+   * down - Drop the collection.
+   *
+   * @param  {object} zendro initialized zendro object
+   */
+  down: async (zendro) => {
+    try{
+    const db = await zendro.models.<%-nameLc-%>.storageHandler;
+    const collection = await db.collection("<%-nameLc-%>");
+    const recordsExists = await collection.countDocuments(); 
+    if (recordsExists && !DOWN_MIGRATION) { 
+        throw new Error(`You are trying to delete all records of <%-nameLc-%> and its associations. 
+            If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
+            and re-execute this down-migration.`); 
+    }
+    await collection.drop();
+    } catch (error){
+      throw new Error(error);
+    }
+  }
+};

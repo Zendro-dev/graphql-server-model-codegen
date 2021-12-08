@@ -1,65 +1,77 @@
 'use strict';
-const dict = require('../../utils/graphql-sequelize-types');
-
+const dict = require('../utils/graphql-sequelize-types');
+const { Sequelize } = require("sequelize");
+const { DOWN_MIGRATION } = require('../config/globals');
 /**
- * @module - Migrations to create and to undo a table correpondant to a sequelize model.
+ * @module - Migrations to create or to drop a table correpondant to a sequelize model.
  */
 module.exports = {
 
   /**
    * up - Creates a table with the fields specified in the the createTable function.
    *
-   * @param  {object} queryInterface Used to modify the table in the database.
-   * @param  {object} Sequelize      Sequelize instance with data types included
-   * @return {promise}                Resolved if the table was created successfully, rejected otherwise.
+   * @param  {object} zendro initialized zendro object
    */
-  up: function(queryInterface, Sequelize){
-    return queryInterface.createTable('<%-namePl-%>', {
+  up: async (zendro) => {
+    try{
+      await zendro.models.<%-nameLc-%>.storageHandler.getQueryInterface()
+        .createTable('<%-namePl-%>', {
+        <%- idAttribute -%>: {
+          type: Sequelize<%if(idAttributeType === 'String'){%>.STRING<%}else{%>[ dict['<%= idAttributeType %>'] ]<%}-%>,
+          primaryKey: true<%if(defaultId){-%>,
+          autoIncrement: true
+          <%}-%>
+        },
 
-      <%- idAttribute -%>: {
-        type: Sequelize<%if(idAttributeType === 'String'){%>.STRING<%}else{%>[ dict['<%= idAttributeType %>'] ]<%}-%>,
-        primaryKey: true<%if(defaultId){-%>,
-        autoIncrement: true
+        createdAt: {
+          type: Sequelize.DATE
+        },
+
+        updatedAt: {
+          type: Sequelize.DATE
+        },
+
+        <% let keys = Object.keys(attributes) -%>
+        <%for (let i=0; i< keys.length; i++) {-%>
+          <% let type_seq =  attributes[ keys[i] ] -%>
+          <% let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']-%>
+          <%=  keys[i] %>: {
+              type: Sequelize[ dict['<%= type_seq %>'] ]<%if(externalIds.includes(keys[i])){-%>,
+              allowNull: false,
+              unique: true
+              <%}-%><% if( arrayType.includes(type_seq)){-%>,
+              defaultValue: '[]'
+              <%}-%>
+          }
+          <%if(i !== (keys.length -1) ){ -%>,<%}-%>
         <%}-%>
-      },
 
-      createdAt: {
-        type: Sequelize.DATE
-      },
-
-      updatedAt: {
-        type: Sequelize.DATE
-      },
-
-      <% let keys = Object.keys(attributes) -%>
-      <%for (let i=0; i< keys.length; i++) {-%>
-        <% let type_seq =  attributes[ keys[i] ] -%>
-        <% let arrayType = ['[String]', '[Int]', '[Float]', '[Boolean]', '[Date]', '[Time]', '[DateTime]']-%>
-        <%=  keys[i] %>: {
-            type: Sequelize[ dict['<%= type_seq %>'] ]<%if(externalIds.includes(keys[i])){-%>,
-            allowNull: false,
-            unique: true
-            <%}-%><% if( arrayType.includes(type_seq)){-%>,
-            defaultValue: '[]'
-            <%}-%>
-        }
-        <%if(i !== (keys.length -1) ){ -%>,<%}-%>
-      <%}-%>
-
-    })<%if(indices!==undefined){ for(let i=0; i< indices.length; i++){-%>
-    .then(()=> {queryInterface.addIndex('<%-namePl-%>', ['<%= indices[i] %>'] )})
-      <%}-%>   <%}-%>;
+      })
+      <%if(indices){ for(let i=0; i< indices.length; i++){-%>
+      await zendro.models.<%-nameLc-%>.storageHandler.getQueryInterface().addIndex('<%-namePl-%>', ['<%= indices[i] %>']);
+      <%}-%>   
+      <%}-%>;
+    } catch (error){
+      throw new Error(error);
+    }
   },
 
   /**
-   * down - Deletes a table.
+   * down - Drop a table.
    *
-   * @param  {object} queryInterface Used to modify the table in the database.
-   * @param  {object} Sequelize      Sequelize instance with data types included
-   * @return {promise}                Resolved if the table was deleted successfully, rejected otherwise.
+   * @param  {object} zendro initialized zendro object
    */
-  down: function(queryInterface, Sequelize){
-    return queryInterface.dropTable('<%-namePl-%>');
+  down: async (zendro) => {
+    try{
+      const recordsExists = await zendro.models.<%-nameLc-%>.count();
+      if (recordsExists && !DOWN_MIGRATION) { 
+        throw new Error(`You are trying to delete all records of <%-nameLc-%> and its associations. 
+            If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
+            and re-execute this down-migration.`); 
+      }
+      await zendro.models.<%-nameLc-%>.storageHandler.getQueryInterface().dropTable('<%-namePl-%>');
+    } catch (error){
+      throw new Error(error);
+    }
   }
-
 };
