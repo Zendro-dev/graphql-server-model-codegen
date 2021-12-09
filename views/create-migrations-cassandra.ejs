@@ -13,7 +13,11 @@ module.exports = {
   up: async (zendro) => {
     try{
       // get the default cassandra storage handler
+      <% if(storageType === 'cassandra'){-%>
       const cassandraStorageHandler = await zendro.models.<%-nameLc-%>.storageHandler;
+      <% } else { %>
+      const cassandraStorageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
+      <%}-%>
       let createString = 'CREATE TABLE "<%-namePl-%>"(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY';
       let indices = [];
 
@@ -42,17 +46,21 @@ module.exports = {
    * @param  {object} zendro initialized zendro object
    */
   down: async (zendro) => {
-    try{
+    try{ 
+      // get the default cassandra storage handler
+      <% if(storageType === 'cassandra'){-%>
+      const cassandraStorageHandler = await zendro.models.<%-nameLc-%>.storageHandler;
+      <% } else { %>
+      const cassandraStorageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
+      <%}-%>
       const query = 'SELECT COUNT(*) AS count FROM "<%- namePl -%>";' ;
-      let queryResult = await zendro.models.<%-nameLc-%>.storageHandler.execute(query);
+      let queryResult = await cassandraStorageHandler.execute(query);
       const recordsExists = parseInt(queryResult.first()['count']);
       if (recordsExists && !DOWN_MIGRATION) { 
         throw new Error(`You are trying to delete all records of <%-nameLc-%> and its associations. 
             If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
             and re-execute this down-migration.`); 
       }
-      // get the default cassandra storage handler
-      const cassandraStorageHandler = await zendro.models.<%-nameLc-%>.storageHandler;
       await cassandraStorageHandler.execute('DROP TABLE IF EXISTS "<%-namePl-%>"');
     } catch (error){
       throw new Error(error);

@@ -212,9 +212,7 @@ describe("Migrations", function () {
   it("Migration - Person", async function () {
     let opts = funks.getOptions(models.person_indices);
     let generated_resolvers = await funks.generateJs("create-migrations", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.person_indices_migration.replace(/\s/g, "");
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.person_indices_migration);
   });
 
   it("Migration - Array", async () => {
@@ -352,9 +350,7 @@ describe("Indices", function () {
   it("Migration - Person", async function () {
     let opts = funks.getOptions(models.person_indices);
     let generated_migration = await funks.generateJs("create-migrations", opts);
-    let g_migration = generated_migration.replace(/\s/g, "");
-    let test_migration = data_test.person_indices_migration.replace(/\s/g, "");
-    expect(g_migration).to.have.string(test_migration);
+    testCompare(generated_migration, data_test.person_indices_migration);
   });
 
   it("Model - Person", async function () {

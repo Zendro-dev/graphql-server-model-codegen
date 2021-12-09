@@ -945,13 +945,7 @@ generateAssociationsMigrations = function (opts, dir_write) {
  * @return {string}            Path where generated file will be written.
  */
 createNameMigration = function (rootDir, migrationsDir, model_name) {
-  let date = new Date();
-  // date = date
-  //   .toISOString()
-  //   .slice(0, 19)
-  //   .replace(/[^0-9]/g, "");
-  date = date.toISOString();
-  //return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
+  let date = new Date().toISOString();
   return join(rootDir, migrationsDir, `<${date}>-${model_name}.js`);
 };
 

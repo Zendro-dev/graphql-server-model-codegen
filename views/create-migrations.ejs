@@ -14,7 +14,12 @@ module.exports = {
    */
   up: async (zendro) => {
     try{
-      await zendro.models.<%-nameLc-%>.storageHandler.getQueryInterface()
+      <% if(storageType === 'sql'){-%>
+      const storageHandler = await zendro.models.<%-nameLc-%>.storageHandler;
+      <% } else { %>
+      const storageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
+      <%}-%>
+      await storageHandler.getQueryInterface()
         .createTable('<%-namePl-%>', {
         <%- idAttribute -%>: {
           type: Sequelize<%if(idAttributeType === 'String'){%>.STRING<%}else{%>[ dict['<%= idAttributeType %>'] ]<%}-%>,
@@ -48,7 +53,7 @@ module.exports = {
 
       })
       <%if(indices){ for(let i=0; i< indices.length; i++){-%>
-      await zendro.models.<%-nameLc-%>.storageHandler.getQueryInterface().addIndex('<%-namePl-%>', ['<%= indices[i] %>']);
+      await storageHandler.getQueryInterface().addIndex('<%-namePl-%>', ['<%= indices[i] %>']);
       <%}-%>   
       <%}-%>;
     } catch (error){
@@ -63,13 +68,19 @@ module.exports = {
    */
   down: async (zendro) => {
     try{
+      <% if(storageType === 'sql'){-%>
+      const storageHandler = await zendro.models.<%-nameLc-%>.storageHandler;
       const recordsExists = await zendro.models.<%-nameLc-%>.count();
+      <% } else { %>
+      const storageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
+      const recordsExists = await zendro.adapters.<%-adapterName-%>.count();
+      <%}-%>
       if (recordsExists && !DOWN_MIGRATION) { 
         throw new Error(`You are trying to delete all records of <%-nameLc-%> and its associations. 
             If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
             and re-execute this down-migration.`); 
       }
-      await zendro.models.<%-nameLc-%>.storageHandler.getQueryInterface().dropTable('<%-namePl-%>');
+      await storageHandler.getQueryInterface().dropTable('<%-namePl-%>');
     } catch (error){
       throw new Error(error);
     }

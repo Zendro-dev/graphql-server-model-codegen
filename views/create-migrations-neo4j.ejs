@@ -14,7 +14,11 @@ module.exports = {
   up: async (zendro) => {
     let session;
     try{
+        <% if(storageType === 'neo4j'){-%>
         const driver = await zendro.models.<%-nameLc-%>.storageHandler;
+        <% } else { %>
+        const driver = await zendro.adapters.<%-adapterName-%>.storageHandler;
+        <%}-%>
         session = driver.session({database: config[`default-neo4j`].database});
         await session.run(`CREATE INDEX IF NOT EXISTS FOR (n:<%- nameCp -%>) ON (n.<%- idAttribute -%>)`);
         <%if(indices){ for(let i=0; i< indices.length; i++){-%>
@@ -36,7 +40,11 @@ module.exports = {
   down: async (zendro) => {
     let session;
     try{
+        <% if(storageType === 'neo4j'){-%>
         const driver = await zendro.models.<%-nameLc-%>.storageHandler;
+        <% } else { %>
+        const driver = await zendro.adapters.<%-adapterName-%>.storageHandler;
+        <%}-%>
         session = driver.session({database: config[`default-neo4j`].database});
         const result = await session.run(`MATCH (n:<%- nameCp -%>) RETURN COUNT(n)`); 
         const recordsExists = result.records[0].get(0);

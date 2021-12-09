@@ -12,7 +12,11 @@ module.exports = {
    */
   up: async (zendro) => {
     try{
+      <% if(storageType === 'mongodb'){-%>
       const db = await zendro.models.<%-nameLc-%>.storageHandler;
+      <% } else { %>
+      const db = await zendro.adapters.<%-adapterName-%>.storageHandler;
+      <%}-%>
       const collection = await db.collection("<%-nameLc-%>");
       await collection.createIndex({ <%- idAttribute -%>: 1 });
       <%if(indices){ for(let i=0; i< indices.length; i++){-%>
@@ -31,7 +35,11 @@ module.exports = {
    */
   down: async (zendro) => {
     try{
+    <% if(storageType === 'mongodb'){-%>
     const db = await zendro.models.<%-nameLc-%>.storageHandler;
+    <% } else { %>
+    const db = await zendro.adapters.<%-adapterName-%>.storageHandler;
+    <%}-%>
     const collection = await db.collection("<%-nameLc-%>");
     const recordsExists = await collection.countDocuments(); 
     if (recordsExists && !DOWN_MIGRATION) { 
