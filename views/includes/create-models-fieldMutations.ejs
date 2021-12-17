@@ -5,10 +5,17 @@
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
     */
-    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
-      let updated = await <%- nameLc -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
-      return updated;
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
+      try{
+        let updated = await <%- nameLc -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
+        return updated[0];
+      } catch (error) {
+        benignErrorReporter.reportError({
+          message:error
+        });
+      }
     }
   <%} -%>
 <%}-%>

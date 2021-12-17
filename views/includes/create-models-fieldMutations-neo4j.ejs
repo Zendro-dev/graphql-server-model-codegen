@@ -5,15 +5,16 @@
       *
       * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
       * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+      * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
       */
-      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
         const driver = await this.storageHandler;
         const session = driver.session({
           database: config.database,
           defaultAccessMode: neo4j.session.WRITE,
         });
         let foreignKey = `MATCH (n:<%- nameCp -%> ) WHERE n.<%-idAttribute%> = $id 
-          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN head(collect(n))`
+          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN count(n)`
         
         <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- nameCp -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
@@ -29,11 +30,11 @@
             id: <%-idAttribute%>,
             target: <%-associationsArguments["to_one"][i].targetKey-%>,
           })
-          const singleRecord = result.records[0];
-          const node = singleRecord.get(0);
-          return new <%- name -%>(node)
+          return result.records[0].get(0);
         } catch (error) {
-          throw error;
+          benignErrorReporter.reportError({
+            message:error
+          });
         } finally {
           await session.close();
         }

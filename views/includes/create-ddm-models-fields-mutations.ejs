@@ -1,5 +1,5 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-    <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
   /**
   * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
   *
@@ -8,8 +8,14 @@
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
   */
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
-    let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
+    try {
+      let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
+      return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
+    } catch (error) {
+      benignErrorReporter.reportError({
+        message: error,
+      });
+    }
   }
   <%}-%>
 <%}-%>

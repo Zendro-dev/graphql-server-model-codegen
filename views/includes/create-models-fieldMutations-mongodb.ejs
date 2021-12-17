@@ -1,28 +1,32 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
     <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
-      /**
-      * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
-      *
-      * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
-      * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
-      */
-      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>) {
+    /**
+    * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
+    */
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
         try {
-            const db = await this.storageHandler
-            const collection = await db.collection("<%- nameLc -%>")
+            const db = await this.storageHandler;
+            const collection = await db.collection("<%- nameLc -%>");
             const updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <% if (op === 'remove') 
             { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>}
             const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
             {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
             if (response.result.ok !== 1){
-                throw new Error(`Record with ID = ${<%- idAttribute-%>} has not been updated`);
+                benignErrorReporter.reportError({
+                    message: `Record with ID = ${<%- idAttribute-%>} has not been updated`
+                });
             }
-            const document = await this.readById(<%- idAttribute-%>);
-            return document
+            return response.modifiedCount;
         } catch (error) {
-            throw error;
+            benignErrorReporter.reportError({
+                message:error
+            });
         }
-      }
+    }
     <%} -%>
 <%}-%>
   

@@ -1,0 +1,21 @@
+{
+    "model": "lawsuit",
+    "storageType": "cassandra",
+    "attributes": {
+      "lawsuit_id": "String",
+      "incident_id": "String"
+    },
+  
+    "associations": {
+      "incident": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "Incident",
+        "targetKey": "incident_id",
+        "keysIn": "lawsuit",
+        "targetStorageType": "cassandra"
+      }
+    },
+  
+    "internalId": "lawsuit_id"
+}

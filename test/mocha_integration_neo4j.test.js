@@ -800,22 +800,12 @@ describe("Neo4j - Association", () => {
     });
   });
 
-  it("10. Movie : Review (1:1) - violate the unique rule", () => {
-    itHelpers.request_graph_ql_post_instance2(
+  it("10. Movie : Review (1:1) - update the existing association", () => {
+    res = itHelpers.request_graph_ql_post_instance2(
       `mutation{
             addReview(review_id:"r2", rating:3.5, addUnique_movie:"m5"){
                 review_id
                 movie_id
-            }
-        }`
-    );
-    res = itHelpers.request_graph_ql_post_instance2(
-      `{
-            readOneMovie(movie_id: "m5"){
-                movie_id
-                unique_review {
-                    review_id
-                }
             }
         }`
     );
@@ -824,19 +814,11 @@ describe("Neo4j - Association", () => {
     expect(resBody).to.deep.equal({
       errors: [
         {
-          message:
-            'Not unique "to_one" association Error: Found > 1 reviews matching movie with movie_id m5. Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the movie model. Returning first review.',
+          message: "Hint: update 1 existing association!",
           locations: "",
         },
       ],
-      data: {
-        readOneMovie: {
-          movie_id: "m5",
-          unique_review: {
-            review_id: "r1",
-          },
-        },
-      },
+      data: { addReview: { review_id: "r2", movie_id: "m5" } },
     });
   });
 

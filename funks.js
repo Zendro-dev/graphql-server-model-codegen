@@ -772,6 +772,7 @@ module.exports.parseAssociations = function (dataModel) {
       }
 
       // set default association fields
+      assoc["type"] = type;
       assoc["name"] = name;
       assoc["name_lc"] = uncapitalizeString(name);
       assoc["name_cp"] = capitalizeString(name);
