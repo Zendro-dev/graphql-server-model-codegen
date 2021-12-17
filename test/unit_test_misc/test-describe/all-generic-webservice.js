@@ -113,7 +113,6 @@ type Query {
     people(search: searchPersonInput, order: [ orderPersonInput ], pagination: paginationInput! ): [Person]
     readOnePerson(id: ID!): Person
     countPeople(search: searchPersonInput ): Int
-    vueTablePerson : VueTablePerson
     csvTableTemplatePerson: [String]
     peopleConnection(search:searchPersonInput, order: [ orderPersonInput ], pagination: paginationCursorInput! ): PersonConnection
     validatePersonForCreation( firstName: String, lastName: String, Age: Int , addCompany:ID  , addWorks:[ID] , skipAssociationsExistenceChecks:Boolean = false): Boolean!

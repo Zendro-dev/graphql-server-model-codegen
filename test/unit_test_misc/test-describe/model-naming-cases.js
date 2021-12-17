@@ -22,14 +22,13 @@ module.exports.resolvers_webservice_aminoAcid = `
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
 
 module.exports.schema_webservice_aminoAcid = `
 type Query {
     aminoAcidSequences(search: searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationInput! ): [aminoAcidSequence]
     readOneAminoAcidSequence(id: ID!): aminoAcidSequence
     countAminoAcidSequences(search: searchAminoAcidSequenceInput ): Int
-    vueTableAminoAcidSequence : VueTableAminoAcidSequence
     csvTableTemplateAminoAcidSequence: [String]
     aminoAcidSequencesConnection(search:searchAminoAcidSequenceInput, order: [ orderAminoAcidSequenceInput ], pagination: paginationCursorInput! ): AminoAcidSequenceConnection
     validateAminoAcidSequenceForCreation( accession: String, sequence: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
@@ -37,13 +36,13 @@ type Query {
     validateAminoAcidSequenceForDeletion(id: ID!): Boolean!
     validateAminoAcidSequenceAfterReading(id: ID!): Boolean!
   }
-`
+`;
 
 module.exports.model_webservice_aminoAcid = `
 module.exports = class aminoAcidSequence
-`
+`;
 
-module.exports.individual_resolvers_camelcase =`
+module.exports.individual_resolvers_camelcase = `
 /**
  * inDiVIdual.prototype.transcriptCountsFilter - Check user authorization and return certain number, specified in pagination argument, of records
  * associated with the current instance, this records should also
@@ -74,7 +73,7 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
           pagination: pagination
       }, context);
 }
-`
+`;
 
 module.exports.individual_schema_camelcase = `
 type Mutation {
@@ -84,13 +83,13 @@ updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscr
 
 deleteInDiVIdual(id: ID!): String!
 bulkAddInDiVIdualCsv: String! }
-`
+`;
 
 module.exports.individual_model_camelcase = `
 module.exports = class inDiVIdual extends Sequelize.Model
-`
+`;
 
-module.exports.transcriptCount_schema_camelcase=`
+module.exports.transcriptCount_schema_camelcase = `
 type transcriptCount{
   """
   @original-field
@@ -129,9 +128,9 @@ type transcriptCount{
   """
   asCursor: String!
   }
-`
+`;
 
-module.exports.transcriptCount_resolvers_camelcase=`
+module.exports.transcriptCount_resolvers_camelcase = `
 /**
      * readOneTranscriptCount - Check user authorization and return one record with the specified id in the id argument.
      *
@@ -150,4 +149,4 @@ module.exports.transcriptCount_resolvers_camelcase=`
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
