@@ -739,7 +739,6 @@ module.exports = {
  * modelsConnection()
  * readOneModel()
  * countModels()
- * vueTableAccession()
  * validateModelForCreation()
  * validateModelForUpdating()
  * validateModelForDeletion()
@@ -818,21 +817,6 @@ module.exports = {
         let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         <% if(storageType === 'cassandra'){_%>let allowFiltering = await checkAuthorization(context, '<%- name -%>', 'search');<%}_%>
         return await <%- nameLc -%>.countRecords(search, benignErrorReporter<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
-      } else {
-        throw new Error("You don't have authorization to perform this action");
-      }
-  },
-
-  /**
-   * vueTable<%- nameCp-%> - Return table of records as needed for displaying a vuejs table
-   *
-   * @param  {string} _       First parameter is not used
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-   * @return {object}         Records with format as needed for displaying a vuejs table
-   */
-  vueTable<%- nameCp-%>: async function(_,context){
-      if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-        return helper.vueTable(context.request, <%- nameLc -%>, <%-  JSON.stringify(arrayAttributeString) -%>  );
       } else {
         throw new Error("You don't have authorization to perform this action");
       }

@@ -80,17 +80,6 @@ type CityEdge{
   node: city!
 }
 
-type VueTableCity{
-  data : [city]
-  total: Int
-  per_page: Int
-  current_page: Int
-  last_page: Int
-  prev_page_url: String
-  next_page_url: String
-  from: Int
-  to: Int
-}
 enum cityField {
   city_id
   name
@@ -119,7 +108,6 @@ type Query {
   cities(search: searchCityInput, order: [ orderCityInput ], pagination: paginationInput! ): [city]
   readOneCity(city_id: ID!): city
   countCities(search: searchCityInput ): Int
-  vueTableCity : VueTableCity
   csvTableTemplateCity: [String]
   citiesConnection(search:searchCityInput, order: [ orderCityInput ], pagination: paginationCursorInput! ): CityConnection
   validateCityForCreation(city_id: ID!, name: String, intArr: [Int], strArr: [String], floatArr: [Float], boolArr: [Boolean], dateTimeArr: [DateTime]   , addRivers:[ID] , skipAssociationsExistenceChecks:Boolean = false): Boolean!

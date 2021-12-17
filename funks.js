@@ -945,13 +945,8 @@ generateAssociationsMigrations = function (opts, dir_write) {
  * @return {string}            Path where generated file will be written.
  */
 createNameMigration = function (rootDir, migrationsDir, model_name) {
-  let date = new Date();
-  date = date
-    .toISOString()
-    .slice(0, 19)
-    .replace(/[^0-9]/g, "");
-  //return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
-  return join(rootDir, migrationsDir, `${date}-${model_name}.js`);
+  let date = new Date().toISOString();
+  return join(rootDir, migrationsDir, `<${date}>-${model_name}.js`);
 };
 
 /**
@@ -1026,6 +1021,8 @@ generateSections = async function (sections, opts, dir_write) {
       //migrations
       case "migrations":
       case "migrations-cassandra":
+      case "migrations-mongodb":
+      case "migrations-neo4j":
         file_name = createNameMigration(
           dir_write,
           section.dir,
@@ -1212,36 +1209,44 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       ? options.verbose
       : false;
   let migrations = options.migrations;
+  let basic_code = options.basicCode;
   /**
    * Create sections dirs
    */
-  //msg
-  if (verbose)
-    console.log(colors.white("\n@@ Creating required directories..."));
-  sectionsDirsA.forEach((section) => {
-    let dir = dir_write + "/" + section;
-    if (!fs.existsSync(dir)) {
-      try {
-        fs.mkdirSync(dir);
-        //msg
-        if (verbose) console.log("@@@ dir created: ", colors.dim(dir));
-      } catch (e) {
-        //err
-        console.log(
-          colors.red("! mkdir.error: "),
-          "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS"
-        );
-        console.log(colors.red("!@ mkdir.error: "), e);
-        console.log(colors.red("done"));
-        process.exit(1);
-      }
-    } else {
-      //msg
-      if (verbose) console.log("@@@ dir already exists: ", colors.dim(dir));
+  if (basic_code) {
+    //msg
+    if (verbose) {
+      console.log(colors.white("\n@@ Creating required directories..."));
     }
-  });
-  //msg
-  if (verbose) console.log("@@ ", colors.green("done"));
+    sectionsDirsA.forEach((section) => {
+      let dir = dir_write + "/" + section;
+      if (!fs.existsSync(dir)) {
+        try {
+          fs.mkdirSync(dir);
+          //msg
+          if (verbose) console.log("@@@ dir created: ", colors.dim(dir));
+        } catch (e) {
+          //err
+          console.log(
+            colors.red("! mkdir.error: "),
+            "A problem occured while trying to create a required directory, please ensure you have the sufficient privileges to create directories and that you have a recent version of NodeJS"
+          );
+          console.log(colors.red("!@ mkdir.error: "), e);
+          console.log(colors.red("done"));
+          process.exit(1);
+        }
+      } else {
+        //msg
+        if (verbose) {
+          console.log("@@@ dir already exists: ", colors.dim(dir));
+        }
+      }
+    });
+    //msg
+    if (verbose) {
+      console.log("@@ ", colors.green("done"));
+    }
+  }
 
   let totalFiles = 0;
   let totalExcludedFiles = 0;
@@ -1354,21 +1359,23 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
 
     //set sections
     let sections = []; //schemas, resolvers, models, migrations, validations, patches
-    const migrationsDir = join("migrations", opts.database);
+    const migrationsDir = "migrations";
 
     switch (opts.storageType) {
       case "sql":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          { dir: "models/sql", template: "models", fileName: opts.nameLc },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            { dir: "models/sql", template: "models", fileName: opts.nameLc },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         if (migrations) {
           sections.push({
             dir: migrationsDir,
@@ -1379,96 +1386,113 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         break;
 
       case "zendro-server":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/zendro-server",
-            template: "models-zendro",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/zendro-server",
+              template: "models-zendro",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         break;
 
       case "distributed-data-model":
-        sections = [
-          { dir: "schemas", template: "schemas-ddm", fileName: opts.nameLc },
-          {
-            dir: "resolvers",
-            template: "resolvers-ddm",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "models/distributed",
-            template: "distributed-model",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas-ddm", fileName: opts.nameLc },
+            {
+              dir: "resolvers",
+              template: "resolvers-ddm",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "models/distributed",
+              template: "distributed-model",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+          ];
+        }
         break;
 
       case "generic":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/generic",
-            template: "models-generic",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/generic",
+              template: "models-generic",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         break;
 
       case "mongodb":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/mongodb",
-            template: "models-mongodb",
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/mongodb",
+              template: "models-mongodb",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-mongodb",
             fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+          });
+        }
         break;
 
       case "cassandra":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/cassandra",
-            template: "models-cassandra",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/cassandra",
+              template: "models-cassandra",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         if (migrations) {
           sections.push({
             dir: migrationsDir,
@@ -1480,191 +1504,249 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         break;
 
       case "amazon-s3":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/amazonS3",
-            template: "models-amazonS3",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/amazonS3",
+              template: "models-amazonS3",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         break;
 
       case "trino":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/trino",
-            template: "models-trino",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/trino",
+              template: "models-trino",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         break;
 
       case "presto":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/presto",
-            template: "models-trino",
-            fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/presto",
+              template: "models-trino",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
         break;
 
       case "neo4j":
-        sections = [
-          { dir: "schemas", template: "schemas", fileName: opts.nameLc },
-          { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
-          {
-            dir: "models/neo4j",
-            template: "models-neo4j",
+        if (basic_code) {
+          sections = [
+            { dir: "schemas", template: "schemas", fileName: opts.nameLc },
+            { dir: "resolvers", template: "resolvers", fileName: opts.nameLc },
+            {
+              dir: "models/neo4j",
+              template: "models-neo4j",
+              fileName: opts.nameLc,
+            },
+            {
+              dir: "validations",
+              template: "validations",
+              fileName: opts.nameLc,
+            },
+            { dir: "patches", template: "patches", fileName: opts.nameLc },
+          ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-neo4j",
             fileName: opts.nameLc,
-          },
-          {
-            dir: "validations",
-            template: "validations",
-            fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.nameLc },
-        ];
+          });
+        }
         break;
 
       case "zendro-webservice-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "zendro-adapters",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "zendro-adapters",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
         break;
 
       case "ddm-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "zendro-adapters",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "zendro-adapters",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
         break;
 
       case "sql-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "sql-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: migrationsDir, template: "migrations", fileName: opts.nameLc },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "sql-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations",
+            fileName: opts.nameLc,
+          });
+        }
         break;
 
       case "generic-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "generic-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "generic-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
         break;
 
       case "mongodb-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "mongodb-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "mongodb-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-mongodb",
+            fileName: opts.nameLc,
+          });
+        }
         break;
 
       case "cassandra-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "cassandra-adapter",
-            fileName: opts.adapterName,
-          },
-          {
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "cassandra-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
+
+        if (migrations) {
+          sections.push({
             dir: migrationsDir,
             template: "migrations-cassandra",
             fileName: opts.nameLc,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+          });
+        }
         break;
 
       case "amazon-s3-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "amazonS3-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "amazonS3-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
         break;
 
       case "trino-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "trino-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "trino-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
         break;
 
       case "presto-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "trino-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "trino-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
         break;
 
       case "neo4j-adapter":
-        sections = [
-          {
-            dir: "models/adapters",
-            template: "neo4j-adapter",
-            fileName: opts.adapterName,
-          },
-          { dir: "patches", template: "patches", fileName: opts.adapterName },
-        ];
+        if (basic_code) {
+          sections = [
+            {
+              dir: "models/adapters",
+              template: "neo4j-adapter",
+              fileName: opts.adapterName,
+            },
+            { dir: "patches", template: "patches", fileName: opts.adapterName },
+          ];
+        }
+        if (migrations) {
+          sections.push({
+            dir: migrationsDir,
+            template: "migrations-neo4j",
+            fileName: opts.nameLc,
+          });
+        }
         break;
 
       default:
@@ -1698,6 +1780,7 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
         "amazon-s3-adapter",
         "trino-adapter",
         "presto-adapter",
+        "neo4j-adapter",
       ].includes(opts.storageType)
     ) {
       adapters.push(opts.adapterName);
@@ -1705,21 +1788,24 @@ module.exports.generateCode = async function (json_dir, dir_write, options) {
       models.push([opts.name, opts.namePl, opts.nameLc]);
     }
   }
-  //msg
-  console.log("@@ Generating code for... ", colors.blue("commons & index's"));
-  //generate commons & index's
-  await writeCommons(dir_write, models, adapters)
-    .then(() => {
-      //success
-      //msg
-      console.log("@@ ", colors.green("done"));
-    })
-    .catch((e) => {
-      //error
-      //msg
-      console.log("@@ ", colors.red("done"));
-      totalGenErrors++;
-    });
+
+  if (basic_code) {
+    //msg
+    console.log("@@ Generating code for... ", colors.blue("commons & index's"));
+    //generate commons & index's
+    await writeCommons(dir_write, models, adapters)
+      .then(() => {
+        //success
+        //msg
+        console.log("@@ ", colors.green("done"));
+      })
+      .catch((e) => {
+        //error
+        //msg
+        console.log("@@ ", colors.red("done"));
+        totalGenErrors++;
+      });
+  }
 
   //Final report
   //msg

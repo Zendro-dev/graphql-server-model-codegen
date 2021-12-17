@@ -157,25 +157,6 @@ describe("Count functionality", function () {
   });
 });
 
-describe("VueTable - tableTemplate", function () {
-  let data_test = require("./unit_test_misc/test-describe/vuetable-template");
-  it("GraphQL Schema - book", async function () {
-    let opts = funks.getOptions(models.book);
-    let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.book_schema.replace(/\s/g, "");
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
-  });
-
-  it("Resolvers - book", async function () {
-    let opts = funks.getOptions(models.book);
-    let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.book_resolvers.replace(/\s/g, "");
-    expect(g_resolvers, "Incorrect resolvers").to.have.string(test_resolvers);
-  });
-});
-
 describe("Associations in query and resolvers", function () {
   let data_test = require("./unit_test_misc/test-describe/associations-in-query-and-resolver");
   it("GraphQL Schema - person", async function () {
@@ -212,9 +193,7 @@ describe("Migrations", function () {
   it("Migration - Person", async function () {
     let opts = funks.getOptions(models.person_indices);
     let generated_resolvers = await funks.generateJs("create-migrations", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.person_indices_migration.replace(/\s/g, "");
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.person_indices_migration);
   });
 
   it("Migration - Array", async () => {
@@ -352,9 +331,7 @@ describe("Indices", function () {
   it("Migration - Person", async function () {
     let opts = funks.getOptions(models.person_indices);
     let generated_migration = await funks.generateJs("create-migrations", opts);
-    let g_migration = generated_migration.replace(/\s/g, "");
-    let test_migration = data_test.person_indices_migration.replace(/\s/g, "");
-    expect(g_migration).to.have.string(test_migration);
+    testCompare(generated_migration, data_test.person_indices_migration);
   });
 
   it("Model - Person", async function () {

@@ -1,10 +1,7 @@
 module.exports.person_indices_migration = `
-.then(()=>{
-  queryInterface.addIndex('people', ['email'])
-}).then(()=>{
-  queryInterface.addIndex('people', ['phone'])
-});
-`
+await storageHandler.getQueryInterface().addIndex('people', ['email']);
+await storageHandler.getQueryInterface().addIndex('people', ['phone']);
+`;
 
 module.exports.person_indices_model = `
 {
@@ -13,4 +10,4 @@ module.exports.person_indices_model = `
     tableName: "people",
     sequelize
 }
-`
+`;

@@ -131,17 +131,6 @@ type <%- nameCp -%>Edge{
   node: <%- name -%>!
 }
 
-  type VueTable<%- nameCp -%>{
-    data : [<%- name -%>]
-    total: Int
-    per_page: Int
-    current_page: Int
-    last_page: Int
-    prev_page_url: String
-    next_page_url: String
-    from: Int
-    to: Int
-  }
 <%#
 /**
  * Section 3
@@ -190,7 +179,6 @@ type <%- nameCp -%>Edge{
     <%- namePl -%>(search: search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationInput! ): [<%- name -%>]
     readOne<%- nameCp -%>(<%- idAttribute -%>: ID!): <%- name %>
     count<%- namePlCp -%>(search: search<%- nameCp -%>Input ): Int
-    vueTable<%- nameCp -%> : VueTable<%- nameCp %>
     csvTableTemplate<%- nameCp -%>: [String]
     <%- namePl -%>Connection(search:search<%- nameCp -%>Input, order: [ order<%- nameCp -%>Input ], pagination: paginationCursorInput! ): <%- nameCp -%>Connection
     validate<%- nameCp -%>ForCreation(<%if(!defaultId){-%><%- idAttribute -%>: ID!,<%}-%> <%- editableAttributesStr -%> <%for(var key in associationsArguments.schema_attributes.one){-%>, add<%= associationsArguments.schema_attributes.one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.generic_one){-%>, add<%= associationsArguments.schema_attributes.generic_one[key][2]%>:ID<%}-%> <%for(var key in associationsArguments.schema_attributes.many){-%>, add<%= associationsArguments.schema_attributes.many[key][2]%>:[ID]<%}-%> <%for(var key in associationsArguments.schema_attributes.generic_many){-%>, add<%= associationsArguments.schema_attributes.generic_many[key][2]%>:[ID]<%}-%>, skipAssociationsExistenceChecks:Boolean = false): Boolean!

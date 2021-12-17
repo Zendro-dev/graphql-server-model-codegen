@@ -3,7 +3,6 @@ type Query {
     transcript_counts(search: searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationInput! ): [transcript_count]
     readOneTranscript_count(id: ID!): transcript_count
     countTranscript_counts(search: searchTranscript_countInput ): Int
-    vueTableTranscript_count : VueTableTranscript_count
     csvTableTemplateTranscript_count: [String]
     transcript_countsConnection(search:searchTranscript_countInput, order: [ orderTranscript_countInput ], pagination: paginationCursorInput! ): Transcript_countConnection
     validateTranscript_countForCreation( gene: String, variable: String, count: Float, tissue_or_condition: String , addIndividual:ID   , skipAssociationsExistenceChecks:Boolean = false): Boolean!
@@ -16,7 +15,7 @@ type Query {
     addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String,  addIndividual:ID, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!
   updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, addIndividual:ID, removeIndividual: ID, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!
 
-`
+`;
 
 module.exports.individual_resolvers_association = `
 /**
@@ -49,7 +48,7 @@ individual.prototype.transcript_countsFilter = function({
         pagination: pagination
     }, context);
 }
-`
+`;
 
 module.exports.individual_model_attributes = `
 static init(sequelize, DataTypes){
@@ -66,7 +65,7 @@ static init(sequelize, DataTypes){
     sequelize
   });
 }
-`
+`;
 
 module.exports.individual_model_associations = `
 static associate(models) {
@@ -76,4 +75,4 @@ static associate(models) {
         foreignKey: 'individual_id'
     });
 }
-`
+`;

@@ -99,6 +99,10 @@ fi
 # 2. Re-start the docker containers
 if [[ $OPT_RESTART_DOCKER == "true" ]]; then
   UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_log.json"
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_state.json"
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server2/zendro_migration_log.json"
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server2/zendro_migration_state.json"
   bash "${TEST_DIR}/testenv_docker_up.sh"
   exit 0
 fi
@@ -134,6 +138,10 @@ fi
 # 5. Perform a full cleanup (optionally disabled)
 if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
   UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_log.json"
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_state.json"
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server2/zendro_migration_log.json"
+  rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server2/zendro_migration_state.json"
   bash "${TEST_DIR}/testenv_generate_code.sh"
   bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
