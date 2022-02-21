@@ -24,9 +24,6 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
         searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
     let promises = authAdapters.map(adapter => {
         /**
          * Differentiated cases:
@@ -64,7 +61,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
         return results.reduce((total, current) => {
             //check if current is Error
             if (current.status === 'rejected') {
-                benignErrorReporter.reportError(current.reason);
+                benignErrorReporter.push(current.reason);
             }
             //check current result
             else if (current.status === 'fulfilled') {
@@ -101,10 +98,6 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
     if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
         searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
-
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
 
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authAdapters.map(adapter => {
@@ -147,7 +140,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
         return results.reduce((total, current) => {
             //check if current is Error
             if (current.status === 'rejected') {
-                benignErrorReporter.reportError(current.reason);
+                benignErrorReporter.push(current.reason);
             }
             //check current
             else if (current.status === 'fulfilled') {
@@ -216,8 +209,6 @@ dogsConnection: async function({
   let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
   helper.checkCountAndReduceRecordsLimit(limit, context, "dogsConnection");
 
-  //construct benignErrors reporter with context
-  let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
     //check: adapters
     let registeredAdapters = Object.values(dog.registeredAdapters);
     if (registeredAdapters.length === 0) {
@@ -235,10 +226,10 @@ dogsConnection: async function({
     if (authorizationCheck.authorizedAdapters.length > 0) {
         //check adapter authorization Errors
         if (authorizationCheck.authorizationErrors.length > 0) {
-            context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
+            context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, benignErrorReporter, searchAuthorizationCheck.authorizedAdapters);
+        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -255,9 +246,6 @@ module.exports.count_dogs_resolver_ddm = `
 countDogs: async function({
     search
 }, context) {
-    //construct benignErrors reporter with context
-    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-
     //check: adapters
     let registeredAdapters = Object.values(dog.registeredAdapters);
     if (registeredAdapters.length === 0) {
@@ -275,10 +263,10 @@ countDogs: async function({
     if (authorizationCheck.authorizedAdapters.length > 0) {
         //check adapter authorization Errors
         if (authorizationCheck.authorizationErrors.length > 0) {
-            context.benignErrors = context.benignErrors.concat(authorizationCheck.authorizationErrors);
+            context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, benignErrorReporter, searchAuthorizationCheck.authorizedAdapters);
+        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -303,7 +291,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
       let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)

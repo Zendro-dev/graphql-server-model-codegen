@@ -18,7 +18,7 @@ static async readById(iri, benignErrorReporter) {
               let response = await axios.post(remoteZendroURL, {query:query});
               //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
               if(helper.isNonEmptyArray(response.data.errors)) {
-                benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+                benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
               }
               // STATUS-CODE is 200
               // NO ERROR as such has been detected by the server (Express)
@@ -47,7 +47,7 @@ static async countRecords(search, benignErrorReporter) {
 
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+          benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
 
         // STATUS-CODE is 200
@@ -77,7 +77,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
           let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
           }
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
@@ -108,8 +108,6 @@ static readById(id, benignErrorReporter) {
   }else if(responsibleAdapter.length === 0){
     throw new Error("IRI has no match WS");
   }
-  //use default BenignErrorReporter if no BenignErrorReporter defined
-  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
   return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
     let item  = new book(result);
     return validatorUtil.validateData('validateAfterRead', this, item);
@@ -143,9 +141,6 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
   if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
       searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
   }
-
-  //use default BenignErrorReporter if no BenignErrorReporter defined
-  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
 
   let promises = authAdapters.map(adapter => {
       /**
@@ -184,7 +179,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
       return results.reduce((total, current) => {
           //check if current is Error
           if (current.status === 'rejected') {
-              benignErrorReporter.reportError(current.reason);
+              benignErrorReporter.push(current.reason);
           }
           //check current result
           else if (current.status === 'fulfilled') {
@@ -220,10 +215,6 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
   if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
       searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
   }
-
-  //use default BenignErrorReporter if no BenignErrorReporter defined
-  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
 
   let isForwardPagination = !pagination || !(pagination.last != undefined);
   let promises = authAdapters.map(adapter => {
@@ -266,7 +257,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
           return results.reduce((total, current) => {
               //check if current is Error
               if (current.status === 'rejected') {
-                  benignErrorReporter.reportError(current.reason);
+                  benignErrorReporter.push(current.reason);
               }
               //check current
               else if (current.status === 'fulfilled') {

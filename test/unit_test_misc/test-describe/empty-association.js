@@ -38,8 +38,7 @@ module.exports.individual_no_assoc_resolvers = `
   }, context) {
       if (await checkAuthorization(context, 'individual', 'read') === true) {
           helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "individuals");
-          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-          return await individual.readAll(search, order, pagination, benignErrorReporter);
+          return await individual.readAll(search, order, pagination, context.benignErrors);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }

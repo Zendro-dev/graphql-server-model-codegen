@@ -222,8 +222,6 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
   * @return {array}  Array of records holding conditions specified by search, order and pagination argument
   */
   static async readAll(search, order, pagination, benignErrorReporter){
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
     let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), <%- nameLc -%>.definition.attributes);  
     let records = await super.findAll(options);
@@ -242,9 +240,6 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
   * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
   */
   static async readAllCursor(search, order, pagination, benignErrorReporter){
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), <%- nameLc -%>.definition.attributes);
     let records = await super.findAll(options);

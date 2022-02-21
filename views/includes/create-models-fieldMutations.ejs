@@ -12,7 +12,7 @@
         let updated = await <%- nameLc -%> .update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
         return updated[0];
       } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
           message:error
         });
       }

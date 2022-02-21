@@ -27,8 +27,7 @@ module.exports.count_in_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await dog.countRecords(search, benignErrorReporter);
+            return await dog.countRecords(search, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -36,8 +35,6 @@ module.exports.count_in_resolvers = `
 `;
 module.exports.read_all = `
 static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the sequelize options object for limit-offset-based pagination
     let options = helper.buildLimitOffsetSequelizeOptions(search, order, pagination, this.idAttribute(), dog.definition.attributes);
     let records = await super.findAll(options);
@@ -65,8 +62,7 @@ module.exports.read_all_resolver = `
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
             helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "dogs");
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await dog.readAll(search, order, pagination, benignErrorReporter);
+            return await dog.readAll(search, order, pagination, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -115,9 +111,8 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            let createdBook = await book.addOne(inputSanitized, benignErrorReporter);
-            await createdBook.handleAssociations(inputSanitized, benignErrorReporter);
+            let createdBook = await book.addOne(inputSanitized, context.benignErrors);
+            await createdBook.handleAssociations(inputSanitized, context.benignErrors);
             return createdBook;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -152,8 +147,7 @@ module.exports.delete_one_resolver = `
         if (await checkAuthorization(context, 'Book', 'delete') === true) {
             if (await validForDeletion(id, context)) {
                 await updateAssociations(id, context);
-                let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-                return book.deleteOne(id, benignErrorReporter);
+                return book.deleteOne(id, context.benignErrors);
             }
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -203,9 +197,8 @@ updateBook: async function(input, context) {
         if(!input.skipAssociationsExistenceChecks) {
             await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
         }
-        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-        let updatedBook = await book.updateOne(inputSanitized, benignErrorReporter);
-        await updatedBook.handleAssociations(inputSanitized, benignErrorReporter);
+        let updatedBook = await book.updateOne(inputSanitized, context.benignErrors);
+        await updatedBook.handleAssociations(inputSanitized, context.benignErrors);
         return updatedBook;
     } else {
         throw new Error("You don't have authorization to perform this action");
@@ -276,8 +269,7 @@ module.exports.bulk_add_resolver = `
      */
     bulkAddBookCsv: async function(_, context) {
         if (await checkAuthorization(context, 'Book', 'create') === true) {
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return book.bulkAddCsv(context, benignErrorReporter);
+            return book.bulkAddCsv(context, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -299,8 +291,7 @@ module.exports.table_template_resolver = `
      */
     csvTableTemplateIndividual: async function(_, context) {
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return individual.csvTableTemplate(benignErrorReporter);
+            return individual.csvTableTemplate(context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

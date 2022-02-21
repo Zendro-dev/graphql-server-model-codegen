@@ -58,8 +58,6 @@ static async countRecords(search) {
 
 module.exports.animal_readAll = `
 static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the filter object for limit-offset-based pagination
     const filter = mongoDbHelper.searchConditionsToMongoDb(search);
     const sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
@@ -79,8 +77,6 @@ static async readAll(search, order, pagination, benignErrorReporter) {
 
 module.exports.animal_readAllCursor = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the filter object.
     let filter = mongoDbHelper.searchConditionsToMongoDb(search);
@@ -309,13 +305,13 @@ static async add_farm_id(animal_id, farm_id, benignErrorReporter) {
             $set: updatedContent
         });
         if (response.result.ok !== 1) {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
                 message: \`Record with ID = \${animal_id} has not been updated\`
             });
         }
         return response.modifiedCount;
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     }
@@ -337,13 +333,13 @@ static async remove_farm_id(animal_id, farm_id, benignErrorReporter) {
             $set: updatedContent
         });
         if (response.result.ok !== 1) {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
                 message: \`Record with ID = \${animal_id} has not been updated\`
             });
         }
         return response.modifiedCount;
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     }

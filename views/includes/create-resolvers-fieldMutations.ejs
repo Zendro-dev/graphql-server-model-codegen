@@ -66,14 +66,14 @@
         const num = associated.<%- namePl %>.length;
         if (num > 0) {
           if (num > 1) {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
               message: `Please manually fix inconsistent data! Record has been added without association!`,
             });
             return 0;
           } else {
             const <%- idAttribute -%> = associated.<%- namePl %>[0].<%- idAttribute -%>;
             const removed = await <%- nameLc %>.remove_<%-associationsArguments["to_one"][i].targetKey%>(<%- idAttribute -%>, input.add<%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter);
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
               message: `Hint: update ${removed} existing association!`,
             });
           }

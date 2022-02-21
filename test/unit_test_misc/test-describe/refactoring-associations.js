@@ -63,8 +63,7 @@ module.exports.delete_resolver = `
         if (await checkAuthorization(context, 'Accession', 'delete') === true) {
             if (await validForDeletion(accession_id, context)) {
                 await updateAssociations(accession_id, context);
-                let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-                return accession.deleteOne(accession_id, benignErrorReporter);
+                return accession.deleteOne(accession_id, context.benignErrors);
             }
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -83,10 +82,6 @@ module.exports.valid_for_deletion_ddm = `
  async function validForDeletion(id, context) {
   if (await countAssociatedRecordsWithRejectReaction(id, context) > 0) {
     throw new Error(\`Accession with accession_id \${id} has associated records and is NOT valid for deletion. Please clean up before you delete.\`);
-  }
-
-  if (context.benignErrors.length > 0) {
-    throw new Error('Errors occurred when counting associated records. No deletion permitted for reasons of security.');
   }
 
   return true;
@@ -231,7 +226,7 @@ static async add_locationId(accession_id, locationId, benignErrorReporter) {
     });
     return updated[0];
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error
       });
   }
@@ -250,7 +245,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter) {
     });
     return updated[0];
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error
       });
   }
@@ -335,7 +330,7 @@ static async add_locationId(accession_id, locationId, benignErrorReporter) {
         let responsibleAdapter = this.adapterForIri(accession_id);
         return await adapters[responsibleAdapter].add_locationId(accession_id, locationId, benignErrorReporter);
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error,
         });
     }
@@ -355,7 +350,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter) {
         let responsibleAdapter = this.adapterForIri(accession_id);
         return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId, benignErrorReporter);
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error,
         });
     }
@@ -375,7 +370,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter) {
     });
     return updated[0];
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error
       });
   }
@@ -394,7 +389,7 @@ static async add_locationId(accession_id, locationId, benignErrorReporter) {
     });
     return updated[0];
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error
       });
   }
@@ -428,7 +423,7 @@ let query = \`
       let response = await axios.post(remoteZendroURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
 
       // STATUS-CODE is 200
@@ -437,13 +432,13 @@ let query = \`
       if(response && response.data && response.data.data) {
           return 1;
       } else {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
           message: \`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`,
         });
       }
     } catch(error) {
       //handle caught errors
-      benignErrorReporter.reportError(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
+      benignErrorReporter.push(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
     }
 }
 `;
@@ -475,7 +470,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       let response = await axios.post(remoteZendroURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -483,13 +478,13 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
       if(response && response.data && response.data.data) {
         return 1;
       } else {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
           message: \`Remote zendro-server (\${remoteZendroURL}) did not respond with data.\`,
         });
       }
     } catch(error) {
       //handle caught errors
-      benignErrorReporter.reportError(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
+      benignErrorReporter.push(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
     }
 }
 `;
@@ -515,10 +510,8 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            //construct benignErrors reporter with context
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-           let createdRecord = await accession.addOne(inputSanitized, benignErrorReporter);
-           await createdRecord.handleAssociations(inputSanitized, benignErrorReporter);
+           let createdRecord = await accession.addOne(inputSanitized, context.benignErrors);
+           await createdRecord.handleAssociations(inputSanitized, context.benignErrors);
            return createdRecord;
          } else { //adapter not auth
              throw new Error("You don't have authorization to perform this action on adapter");
@@ -548,10 +541,8 @@ module.exports.update_one_resolver = `
               if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
               }
-              //construct benignErrors reporter with context
-              let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-               let updatedRecord = await accession.updateOne(inputSanitized, benignErrorReporter);
-               await updatedRecord.handleAssociations(inputSanitized, benignErrorReporter);
+               let updatedRecord = await accession.updateOne(inputSanitized, context.benignErrors);
+               await updatedRecord.handleAssociations(inputSanitized, context.benignErrors);
                return updatedRecord;
            } else {//adapter not auth
                throw new Error("You don't have authorization to perform this action on adapter");
@@ -585,7 +576,7 @@ static async addOne(input, benignErrorReporter) {
       let response = await axios.post(remoteZendroURL, {query:query,variables: input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.addAccession;
@@ -627,7 +618,7 @@ static async updateOne(input, benignErrorReporter) {
       let response = await axios.post(remoteZendroURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.updateAccession;

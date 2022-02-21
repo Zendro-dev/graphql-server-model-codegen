@@ -42,15 +42,12 @@ module.exports = class <%- nameLc -%>{
       <%=key %>
     <%}-%> } }`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -73,15 +70,12 @@ module.exports = class <%- nameLc -%>{
       count<%- namePlCp -%>(search: $search)
     }`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query, variables:{search: search}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -103,15 +97,12 @@ module.exports = class <%- nameLc -%>{
          <%=key %>
        <%}-%> } }`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -134,15 +125,12 @@ module.exports = class <%- nameLc -%>{
       <%- namePl -%>Connection(search:$search pagination:$pagination order:$order){ edges{cursor node{  <%- idAttribute -%> <%for(var key in attributes){-%> <%=key %>
        <%}-%>} } pageInfo{startCursor endCursor hasPreviousPage hasNextPage  } } }`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -194,15 +182,12 @@ module.exports = class <%- nameLc -%>{
               }
             }`;
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -228,15 +213,12 @@ module.exports = class <%- nameLc -%>{
                   delete<%- nameCp -%>(
                     <%- idAttribute -%>: "${id}" )}`;
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query: query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -270,15 +252,12 @@ module.exports = class <%- nameLc -%>{
                 }
               }`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -297,9 +276,6 @@ module.exports = class <%- nameLc -%>{
   static async bulkAddCsv(context, benignErrorReporter){
     let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
       let query = `mutation {bulkAdd<%- nameCp -%>Csv}`;
@@ -312,7 +288,7 @@ module.exports = class <%- nameLc -%>{
       });
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       return response.data.data.bulkAdd<%- nameCp -%>Csv;
 
@@ -333,14 +309,12 @@ module.exports = class <%- nameLc -%>{
    */
   static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     try {
       let response = await axios.post(remoteZendroURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       return response.data.data.csvTableTemplate<%- nameCp-%>;
     } catch(error) {

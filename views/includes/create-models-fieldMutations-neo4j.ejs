@@ -32,7 +32,7 @@
           })
           return result.records[0].get(0);
         } catch (error) {
-          benignErrorReporter.reportError({
+          benignErrorReporter.push({
             message:error
           });
         } finally {

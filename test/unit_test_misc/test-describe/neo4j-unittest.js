@@ -74,9 +74,6 @@ static async countRecords(search) {
 
 module.exports.movie_readAll = `
 static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter =
-        errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the filter object for limit-offset-based pagination
     const whereOptions = neo4jHelper.searchConditionsToNeo4j(
         search,
@@ -117,9 +114,6 @@ static async readAll(search, order, pagination, benignErrorReporter) {
 
 module.exports.movie_readAllCursor = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter =
-        errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the whereOptions.
     let filter = neo4jHelper.searchConditionsToNeo4j(search, definition);
@@ -421,7 +415,7 @@ static async add_director_id(movie_id, director_id, benignErrorReporter) {
         })
         return result.records[0].get(0);
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     } finally {
@@ -454,7 +448,7 @@ static async remove_director_id(movie_id, director_id, benignErrorReporter) {
         })
         return result.records[0].get(0);
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     } finally {

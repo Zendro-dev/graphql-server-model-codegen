@@ -47,7 +47,7 @@ static async add_researcherId(id, researcherId, benignErrorReporter) {
         });
         return updated[0];
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     }

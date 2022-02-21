@@ -21,8 +21,7 @@
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
       helper.checkCountAndReduceRecordsLimit(1, context, "<%=associations_generic_one[i].name%>");
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.<%=associations_generic_one[i].name%>Impl({search}, context, benignErrorReporter);
+      return await this.<%=associations_generic_one[i].name%>Impl({search}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -57,8 +56,7 @@
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
       helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "<%=associations_generic_many[i].name%>Filter");
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, benignErrorReporter);
+      return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -74,8 +72,7 @@
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context, benignErrorReporter);
+      return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -97,8 +94,7 @@
       helper.checkCursorBasedPaginationArgument(pagination);
       let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
       helper.checkCountAndReduceRecordsLimit(limit, context, "<%=associations_generic_many[i].name%>Connection");
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
+      return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }

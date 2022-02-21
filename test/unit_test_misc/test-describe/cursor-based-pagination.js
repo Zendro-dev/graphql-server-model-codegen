@@ -17,9 +17,6 @@ booksConnection(search: searchBookInput, order: [orderBookInput], pagination: pa
 
 module.exports.model_read_all_connection = `
 static async readAllCursor(search, order, pagination, benignErrorReporter){
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
     // build the sequelize options object for cursor-based pagination
     let options = helper.buildCursorBasedSequelizeOptions(search, order, pagination, this.idAttribute(), book.definition.attributes);
     let records = await super.findAll(options);
@@ -62,8 +59,7 @@ module.exports.resolver_read_all_connection = `
             helper.checkCursorBasedPaginationArgument(pagination);
             let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
             helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await book.readAllCursor(search, order, pagination, benignErrorReporter);
+            return await book.readAllCursor(search, order, pagination, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -144,15 +140,12 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
           publisher_id
          } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
       // Send an HTTP request to the remote server
       let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       // STATUS-CODE is 200
       // NO ERROR as such has been detected by the server (Express)
@@ -201,16 +194,13 @@ static async updateOne(input, benignErrorReporter){
         }
     }\`
 
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
     try {
 
         // Send an HTTP request to the remote server
         let response = await axios.post(remoteZendroURL, {query:query, variables:input});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
 
         // STATUS-CODE is 200

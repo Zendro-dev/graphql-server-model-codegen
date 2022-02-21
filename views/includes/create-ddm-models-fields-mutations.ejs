@@ -12,7 +12,7 @@
       let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
       return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter);
     } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
         message: error,
       });
     }

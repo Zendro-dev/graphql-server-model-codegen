@@ -160,9 +160,6 @@ module.exports = class <%- nameLc -%> {
    * @return {array}  Array of records holding conditions specified by search, order and pagination argument
    */
   static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter =
-      errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the filter object for limit-offset-based pagination
     const whereOptions = neo4jHelper.searchConditionsToNeo4j(
       search,
@@ -210,9 +207,6 @@ module.exports = class <%- nameLc -%> {
    * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
    */
   static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter =
-      errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the whereOptions.
     let filter = neo4jHelper.searchConditionsToNeo4j(search, definition);

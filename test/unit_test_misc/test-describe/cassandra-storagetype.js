@@ -135,9 +135,8 @@ citiesConnection: async function({
       helper.checkCursorBasedPaginationArgument(pagination);
       let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
       helper.checkCountAndReduceRecordsLimit(limit, context, "citiesConnection");
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       let allowFiltering = await checkAuthorization(context, 'city', 'search');
-      return await city.readAllCursor(search, pagination, benignErrorReporter, allowFiltering);
+      return await city.readAllCursor(search, pagination, context.benignErrors, allowFiltering);
   } else {
       throw new Error("You don't have authorization to perform this action");
   }
@@ -149,9 +148,8 @@ countCities: async function({
   search
 }, context) {
   if (await checkAuthorization(context, 'city', 'read') === true) {
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       let allowFiltering = await checkAuthorization(context, 'city', 'search');
-      return await city.countRecords(search, benignErrorReporter, allowFiltering);
+      return await city.countRecords(search, context.benignErrors, allowFiltering);
   } else {
       throw new Error("You don't have authorization to perform this action");
   }
@@ -410,7 +408,7 @@ static async add_capital_id(incident_id, capital_id, benignErrorReporter) {
     let result = await this.storageHandler.execute(checkCql, [incident_id]);
     return parseInt(result.first()["count"]);
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error,
       });
   }
@@ -428,7 +426,7 @@ static async remove_capital_id(incident_id, capital_id, benignErrorReporter) {
     let result = await this.storageHandler.execute(checkCql, [incident_id]);
     return parseInt(result.first()["count"]);
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error,
       });
   }
@@ -500,10 +498,6 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
     searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
   }
 
-  //use default BenignErrorReporter if no BenignErrorReporter defined
-  benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
-
-
   let isForwardPagination = !pagination || !(pagination.last != undefined);
   let promises = authAdapters.map(adapter => {
     /**
@@ -545,7 +539,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
       return results.reduce((total, current) => {
         //check if current is Error
         if (current.status === 'rejected') {
-          benignErrorReporter.reportError(current.reason);
+          benignErrorReporter.push(current.reason);
         }
         //check current
         else if (current.status === 'fulfilled') {

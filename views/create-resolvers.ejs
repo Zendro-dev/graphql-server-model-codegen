@@ -378,8 +378,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_one[i].name%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_one[i].target -%>', 'read') === true) {
         helper.checkCountAndReduceRecordsLimit(1, context, "<%=associations_generic_one[i].name%>");
-        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-        return await this.<%=associations_generic_one[i].name%>Impl({search}, context, benignErrorReporter);
+        return await this.<%=associations_generic_one[i].name%>Impl({search}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -416,8 +415,7 @@ const associationArgsDef = {
   <%- nameLc -%>.prototype.<%=associations_generic_many[i].name%>Filter = async function({search,order,pagination}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
       helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "<%=associations_generic_many[i].name%>Filter");
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, benignErrorReporter);
+      return await this.<%=associations_generic_many[i].name%>FilterImpl({search, order, pagination}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -433,8 +431,7 @@ const associationArgsDef = {
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_generic_many[i].name_cp%> = async function({search}, context){
     if (await checkAuthorization(context, '<%- associations_generic_many[i].target -%>', 'read') === true) {
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context, benignErrorReporter);
+      return await this.countFiltered<%=associations_generic_many[i].name_cp%>Impl({search}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -456,8 +453,7 @@ const associationArgsDef = {
       helper.checkCursorBasedPaginationArgument(pagination);
       let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
       helper.checkCountAndReduceRecordsLimit(limit, context, "<%=associations_generic_many[i].name%>Connection");
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-      return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, benignErrorReporter);
+      return await this.<%=associations_generic_many[i].name%>ConnectionImpl({search, order, pagination}, context, context.benignErrors);
     } else {
         throw new Error("You don't have authorization to perform this action");
     }
@@ -758,8 +754,7 @@ module.exports = {
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
           helper.checkCountAndReduceRecordsLimit(pagination.limit, context,  "<%- namePl -%>");
-          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-          return await <%- nameLc -%>.readAll(search, order, pagination, benignErrorReporter);
+          return await <%- nameLc -%>.readAll(search, order, pagination, context.benignErrors);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -780,9 +775,8 @@ module.exports = {
           helper.checkCursorBasedPaginationArgument(pagination);
           let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
           helper.checkCountAndReduceRecordsLimit(limit, context, "<%- namePl -%>Connection");
-          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
           <% if(storageType === 'cassandra'){_%>let allowFiltering = await checkAuthorization(context, '<%- name -%>', 'search');<%}_%>
-          return await <%- nameLc -%>.readAllCursor(search, <% if(storageType !== 'cassandra'){_%>order,<%}_%> pagination, benignErrorReporter<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
+          return await <%- nameLc -%>.readAllCursor(search, <% if(storageType !== 'cassandra'){_%>order,<%}_%> pagination, context.benignErrors<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }
@@ -798,8 +792,7 @@ module.exports = {
   readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
         helper.checkCountAndReduceRecordsLimit(1, context, "readOne<%- nameCp -%>");
-        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-        return await <%- nameLc -%>.readById(<%- idAttribute -%>, benignErrorReporter);
+        return await <%- nameLc -%>.readById(<%- idAttribute -%>, context.benignErrors);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -814,9 +807,8 @@ module.exports = {
    */
   count<%-namePlCp-%>: async function({search}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
         <% if(storageType === 'cassandra'){_%>let allowFiltering = await checkAuthorization(context, '<%- name -%>', 'search');<%}_%>
-        return await <%- nameLc -%>.countRecords(search, benignErrorReporter<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
+        return await <%- nameLc -%>.countRecords(search, context.benignErrors<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
@@ -835,8 +827,6 @@ module.exports = {
       let inputSanitized = helper.sanitizeAssociationArguments(input, [
         Object.keys(associationArgsDef),
       ]);
-
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       try {
         if (!input.skipAssociationsExistenceChecks) {
           await helper.validateAssociationArgsExistence(
@@ -852,7 +842,7 @@ module.exports = {
         );
         return true;
       } catch (error) {
-        benignErrorReporter.reportError(error);
+        context.benignErrors.push(error);
         return false;
       }
     } else {
@@ -873,8 +863,6 @@ module.exports = {
       let inputSanitized = helper.sanitizeAssociationArguments(input, [
         Object.keys(associationArgsDef),
       ]);
-
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
       try {
         if (!input.skipAssociationsExistenceChecks) {
           await helper.validateAssociationArgsExistence(
@@ -890,7 +878,7 @@ module.exports = {
         );
         return true;
       } catch (error) {
-        benignErrorReporter.reportError(error);
+        context.benignErrors.push(error);
         return false;
       }
     } else {
@@ -907,8 +895,6 @@ module.exports = {
   */
   validate<%- nameCp -%>ForDeletion: async ({ <%- idAttribute -%> }, context) => {
     if ((await checkAuthorization(context, '<%- name -%>', 'read')) === true) {
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-
       try {
         await validForDeletion(<%- idAttribute -%>, context);
         await validatorUtil.validateData(
@@ -918,7 +904,7 @@ module.exports = {
         );
         return true;
       } catch (error) {
-        benignErrorReporter.reportError(error);
+        context.benignErrors.push(error);
         return false;
       }
     } else {
@@ -935,8 +921,6 @@ module.exports = {
   */
   validate<%- nameCp -%>AfterReading: async ({ <%- idAttribute -%> }, context) => {
     if ((await checkAuthorization(context, '<%- name -%>', 'read')) === true) {
-      let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-
       try {
         await validatorUtil.validateData(
           "validateAfterRead",
@@ -945,7 +929,7 @@ module.exports = {
         );
         return true;
       } catch (error) {
-        benignErrorReporter.reportError(error);
+        context.benignErrors.push(error);
         return false;
       }
     } else {
@@ -985,9 +969,8 @@ module.exports = {
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized, benignErrorReporter);
-            await created<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
+            let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized, context.benignErrors);
+            await created<%- nameCp -%>.handleAssociations(inputSanitized, context.benignErrors);
             return created<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -1002,8 +985,7 @@ module.exports = {
    */
   bulkAdd<%- nameCp -%>Csv: async function(_, context) {
       if (await checkAuthorization(context, '<%- name -%>', 'create') === true) {
-        let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-        return <%- nameLc -%>.bulkAddCsv(context, benignErrorReporter);
+        return <%- nameLc -%>.bulkAddCsv(context, context.benignErrors);
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
@@ -1020,8 +1002,7 @@ module.exports = {
       if (await checkAuthorization(context, '<%- name -%>', 'delete') === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
             await updateAssociations(<%- idAttribute -%>, context);
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return <%- nameLc -%>.deleteOne(<%- idAttribute -%>, benignErrorReporter);
+            return <%- nameLc -%>.deleteOne(<%- idAttribute -%>, context.benignErrors);
         }
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -1046,9 +1027,8 @@ module.exports = {
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized, benignErrorReporter);
-            await updated<%- nameCp -%>.handleAssociations(inputSanitized, benignErrorReporter);
+            let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized, context.benignErrors);
+            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context.benignErrors);
             return updated<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -1067,8 +1047,7 @@ module.exports = {
    */
   csvTableTemplate<%- nameCp-%>: async function(_, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-          return <%- nameLc -%>.csvTableTemplate(benignErrorReporter);
+          return <%- nameLc -%>.csvTableTemplate(context.benignErrors);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }

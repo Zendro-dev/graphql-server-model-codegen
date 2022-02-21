@@ -35,7 +35,7 @@
           let response = await axios.post(remoteZendroURL, {query:query});
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
           }
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
@@ -43,13 +43,13 @@
           if(response && response.data && response.data.data) {
             return 1;
           } else {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
               message: `Remote zendro-server (${remoteZendroURL}) did not respond with data.`,
             });
           }
         } catch(error) {
           //handle caught errors
-          benignErrorReporter.reportError(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
+          benignErrorReporter.push(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
         }
       }
   <%}-%>
@@ -67,7 +67,7 @@
       let updated = await super.update({ <%-associationsArguments["to_one"][i].targetKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}});
       return updated[0];
     } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
         message:error
       });
     }
@@ -90,13 +90,13 @@
         const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
         {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
         if (response.result.ok !== 1){
-          benignErrorReporter.reportError({
+          benignErrorReporter.push({
             message:`Record with ID = ${<%- idAttribute-%>} has not been updated`
           });
         }
         return response.modifiedCount;
       } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
           message:error
         });
       }
@@ -135,7 +135,7 @@
           })
           return result.records[0].get(0);
         } catch (error) {
-          benignErrorReporter.reportError({
+          benignErrorReporter.push({
             message:error
           });
         } finally {
@@ -159,7 +159,7 @@
         let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
         return parseInt(result.first()["count"]);
       } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
           message: error,
         });
       }
@@ -293,7 +293,7 @@
             let response = await axios.post(remoteZendroURL, {query:query});
             //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
             if(helper.isNonEmptyArray(response.data.errors)) {
-              benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+              benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
             }
             // STATUS-CODE is 200
             // NO ERROR as such has been detected by the server (Express)
