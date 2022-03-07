@@ -946,7 +946,11 @@ generateAssociationsMigrations = function (opts, dir_write) {
  */
 createNameMigration = function (rootDir, migrationsDir, model_name) {
   let date = new Date().toISOString();
-  return join(rootDir, migrationsDir, `<${date}>-${model_name}.js`);
+  return join(
+    rootDir,
+    migrationsDir,
+    `${date.replace(":", "_")}#${model_name}.js`
+  );
 };
 
 /**
