@@ -1,19 +1,6 @@
 <% let modelsAndAdapters = models.concat(adapters) -%>
 module.exports = {
   aclRules: [
-    //administrator role permission
-    {
-      roles: 'administrator',
-      allows: [{
-        resources: [
-<%for( let i=0; i<adminModels.length; i++ ){-%>
-          '<%- adminModels[i] _%>',
-<%}-%>
-        ],
-        permissions: '*'
-      }]
-    },
-    
     // model and adapter permissions
     {
       roles: 'editor',

@@ -1662,27 +1662,27 @@ describe("Mongodb - Update Deletion Action", () => {
     cnt = await itHelpers.count_all_records("countTrackers");
     expect(cnt).to.equal(2);
 
-    res = await itHelpers.request_graph_ql_post(
-      `mutation {
-        addUser(email:"x@zen.dro", password:"zendro"){
-            email
-          }
-        }`
-    );
-    expect(res.statusCode).to.equal(200);
+    // res = await itHelpers.request_graph_ql_post(
+    //   `mutation {
+    //     addUser(email:"x@zen.dro", password:"zendro"){
+    //         email
+    //       }
+    //     }`
+    // );
+    // expect(res.statusCode).to.equal(200);
 
-    res = itHelpers.request_graph_ql_post(
-      "{ users(pagination:{limit:25}) {id} }"
-    );
-    let users = JSON.parse(res.body.toString("utf8")).data.users;
-    res = await itHelpers.request_graph_ql_post(
-      `mutation {
-        addRole(name:"test_role", addUsers:[${users[users.length - 1].id}]){
-            name
-          }
-        }`
-    );
-    expect(res.statusCode).to.equal(200);
+    // res = itHelpers.request_graph_ql_post(
+    //   "{ users(pagination:{limit:25}) {id} }"
+    // );
+    // let users = JSON.parse(res.body.toString("utf8")).data.users;
+    // res = await itHelpers.request_graph_ql_post(
+    //   `mutation {
+    //     addRole(name:"test_role", addUsers:[${users[users.length - 1].id}]){
+    //         name
+    //       }
+    //     }`
+    // );
+    // expect(res.statusCode).to.equal(200);
 
     for (let i of [1, 2]) {
       res = itHelpers.request_graph_ql_post(
@@ -1769,31 +1769,31 @@ describe("Mongodb - Update Deletion Action", () => {
     expect(cnt).to.equal(0);
   });
 
-  it("04. User : Role (n:n)", async () => {
-    let res = itHelpers.request_graph_ql_post(
-      "{ users(pagination:{limit:25}) {id} }"
-    );
-    let users = JSON.parse(res.body.toString("utf8")).data.users;
-    res = itHelpers.request_graph_ql_post(
-      `mutation { deleteUser (id: ${users[users.length - 1].id}) }`
-    );
-    expect(res.statusCode).to.equal(200);
+  // it("04. User : Role (n:n)", async () => {
+  //   let res = itHelpers.request_graph_ql_post(
+  //     "{ users(pagination:{limit:25}) {id} }"
+  //   );
+  //   let users = JSON.parse(res.body.toString("utf8")).data.users;
+  //   res = itHelpers.request_graph_ql_post(
+  //     `mutation { deleteUser (id: ${users[users.length - 1].id}) }`
+  //   );
+  //   expect(res.statusCode).to.equal(200);
 
-    let cnt = await itHelpers.count_all_records("countUsers");
-    expect(cnt).to.equal(0);
+  //   let cnt = await itHelpers.count_all_records("countUsers");
+  //   expect(cnt).to.equal(0);
 
-    res = itHelpers.request_graph_ql_post(
-      "{ roles(pagination:{limit:25}) {id} }"
-    );
-    let roles = JSON.parse(res.body.toString("utf8")).data.roles;
-    res = itHelpers.request_graph_ql_post(
-      `mutation { deleteRole (id: ${roles[roles.length - 1].id}) }`
-    );
-    expect(res.statusCode).to.equal(200);
+  //   res = itHelpers.request_graph_ql_post(
+  //     "{ roles(pagination:{limit:25}) {id} }"
+  //   );
+  //   let roles = JSON.parse(res.body.toString("utf8")).data.roles;
+  //   res = itHelpers.request_graph_ql_post(
+  //     `mutation { deleteRole (id: ${roles[roles.length - 1].id}) }`
+  //   );
+  //   expect(res.statusCode).to.equal(200);
 
-    cnt = await itHelpers.count_all_records("countRoles");
-    expect(cnt).to.equal(0);
-  });
+  //   cnt = await itHelpers.count_all_records("countRoles");
+  //   expect(cnt).to.equal(0);
+  // });
 
   it("05. Dist_animal : Dist_farm (n:1)", async () => {
     let res = itHelpers.request_graph_ql_post(
