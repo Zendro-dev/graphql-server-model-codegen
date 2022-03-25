@@ -948,7 +948,7 @@ createNameMigration = function (rootDir, migrationsDir, model_name) {
   return join(
     rootDir,
     migrationsDir,
-    `${date.replaceAll(":", "_")}#${model_name}.js`
+    `${date.replace(/:/g, "_")}#${model_name}.js`
   );
 };
 
