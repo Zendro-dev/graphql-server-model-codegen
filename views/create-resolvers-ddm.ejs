@@ -585,21 +585,6 @@ module.exports = {
       }
   },
 
-
-  /**
-   * bulkAdd<%- nameCp -%>Csv - Load csv file of records
-   *
-   * @param  {string} _       First parameter is not used
-   * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
-   */
-  bulkAdd<%- nameCp -%>Csv: async function(_, context) {
-      if (await checkAuthorization(context, '<%- name -%>', 'create') === true) {
-        return <%- nameLc -%>.bulkAddCsv(context, context.benignErrors);
-      } else {
-          throw new Error("You don't have authorization to perform this action");
-      }
-  },
-
   /**
    * delete<%- nameCp -%> - Check user authorization and delete a record with the specified <%- idAttribute -%> in the <%- idAttribute -%> argument.
    *
