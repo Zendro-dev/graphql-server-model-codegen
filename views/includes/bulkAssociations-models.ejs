@@ -77,7 +77,7 @@
         let collection;
         try {
             const db = await this.storageHandler
-            collection = await db.collection("<%-nameLc-%>")
+            collection = await db.collection("<%-model_name_in_storage-%>")
         } catch (error) {
             throw error;
         }
@@ -103,13 +103,13 @@
           database: config.database,
           defaultAccessMode: neo4j.session.WRITE,
         });
-        let foreignKey = `MATCH (n:<%- nameCp -%>) WHERE n.<%-idAttribute%> IN $id 
+        let foreignKey = `MATCH (n:<%- model_name_in_storage -%>) WHERE n.<%-idAttribute%> IN $id 
           SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target`
 
-        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- nameCp -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
           WHERE a.<%-idAttribute%> IN $id AND b.<%-associationsArguments["to_one"][i].targetKey-%> = $target
           DELETE r`<% } 
-        else { %>let create_relationships = `MATCH (a:<%- nameCp -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
           WHERE a.<%-idAttribute%> IN $id AND b.<%-associationsArguments["to_one"][i].targetKey-%> = $target
           CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
         
@@ -135,7 +135,7 @@
       static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
         let mappedForeignKeys = helper.mapForeignKeysToPrimaryKeyArray(bulkAssociationInput, "<%-idAttribute%>", "<%-associationsArguments["to_one"][i].targetKey%>");
         let promises = [];
-        let mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%-idAttribute%> IN ?`
+        let mutationCql = `UPDATE "<%- model_name_in_storage -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%-idAttribute%> IN ?`
         mappedForeignKeys.forEach(({
             <%-associationsArguments["to_one"][i].targetKey-%>,
             <%-idAttribute%>

@@ -18,7 +18,7 @@ module.exports = {
       <% } else { %>
       const cassandraStorageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
       <%}-%>
-      let createString = 'CREATE TABLE "<%-namePl-%>"(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY';
+      let createString = 'CREATE TABLE "<%-model_name_in_storage-%>"(<%- idAttribute -%> <%= cassandraIdAttributeType %> PRIMARY KEY';
       let indices = [];
 
       <% let keys = Object.keys(cassandraAttributesWithConvertedTypes) -%>
@@ -32,7 +32,7 @@ module.exports = {
       await cassandraStorageHandler.execute(createString);
 
       let indexCreationPromises = indices.map(async (i) =>  
-        await cassandraStorageHandler.execute('CREATE INDEX IF NOT EXISTS <%-namePl-%>_' + i + '_index ON "<%-namePl-%>" ("' + i + '");'));
+        await cassandraStorageHandler.execute('CREATE INDEX IF NOT EXISTS <%-model_name_in_storage-%>_' + i + '_index ON "<%-model_name_in_storage-%>" ("' + i + '");'));
 
       await Promise.allSettled(indexCreationPromises);
     } catch (error){
@@ -53,7 +53,7 @@ module.exports = {
       <% } else { %>
       const cassandraStorageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
       <%}-%>
-      const query = 'SELECT COUNT(*) AS count FROM "<%- namePl -%>";' ;
+      const query = 'SELECT COUNT(*) AS count FROM "<%- model_name_in_storage -%>";' ;
       let queryResult = await cassandraStorageHandler.execute(query);
       const recordsExists = parseInt(queryResult.first()['count']);
       if (recordsExists && !DOWN_MIGRATION) { 
@@ -61,7 +61,7 @@ module.exports = {
             If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
             and re-execute this down-migration.`); 
       }
-      await cassandraStorageHandler.execute('DROP TABLE IF EXISTS "<%-namePl-%>"');
+      await cassandraStorageHandler.execute('DROP TABLE IF EXISTS "<%-model_name_in_storage-%>"');
     } catch (error){
       throw new Error(error);
     }

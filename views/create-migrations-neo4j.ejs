@@ -20,9 +20,9 @@ module.exports = {
         const driver = await zendro.adapters.<%-adapterName-%>.storageHandler;
         <%}-%>
         session = driver.session({database: config[`default-neo4j`].database});
-        await session.run(`CREATE INDEX IF NOT EXISTS FOR (n:<%- nameCp -%>) ON (n.<%- idAttribute -%>)`);
+        await session.run(`CREATE INDEX IF NOT EXISTS FOR (n:<%- model_name_in_storage -%>) ON (n.<%- idAttribute -%>)`);
         <%if(indices){ for(let i=0; i< indices.length; i++){-%>
-        await session.run(`CREATE INDEX IF NOT EXISTS FOR (n:<%- nameCp -%>) ON (n.<%= indices[i] %>)`);
+        await session.run(`CREATE INDEX IF NOT EXISTS FOR (n:<%- model_name_in_storage -%>) ON (n.<%= indices[i] %>)`);
         <%}-%>   
         <%}-%>
     } catch (error){
@@ -46,17 +46,17 @@ module.exports = {
         const driver = await zendro.adapters.<%-adapterName-%>.storageHandler;
         <%}-%>
         session = driver.session({database: config[`default-neo4j`].database});
-        const result = await session.run(`MATCH (n:<%- nameCp -%>) RETURN COUNT(n)`); 
+        const result = await session.run(`MATCH (n:<%- model_name_in_storage -%>) RETURN COUNT(n)`); 
         const recordsExists = result.records[0].get(0);
         if (recordsExists && !DOWN_MIGRATION) { 
             throw new Error(`You are trying to delete all records of <%-nameLc-%> and its associations. 
                 If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
                 and re-execute this down-migration.`); 
         }
-        await session.run(`MATCH (n:<%- nameCp -%>) DETACH DELETE n`);
-        await session.run(`DROP INDEX ON :<%- nameCp -%>(<%- idAttribute -%>)`);
+        await session.run(`MATCH (n:<%- model_name_in_storage -%>) DETACH DELETE n`);
+        await session.run(`DROP INDEX ON :<%- model_name_in_storage -%>(<%- idAttribute -%>)`);
         <%if(indices){ for(let i=0; i< indices.length; i++){-%>
-        await session.run(`DROP INDEX ON :<%- nameCp -%>(<%= indices[i] %> )`);
+        await session.run(`DROP INDEX ON :<%- model_name_in_storage -%>(<%= indices[i] %> )`);
         <%}-%>  
         <%}-%> 
     } catch (error){

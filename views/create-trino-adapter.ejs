@@ -130,7 +130,7 @@ module.exports = class <%- adapterName -%> {
    * @throws {Error} If the requested record does not exist
    */
   static async readById(id){
-    const query = `SELECT * FROM <%- namePl -%> WHERE ${this.idAttribute()} = '${id}'`;
+    const query = `SELECT * FROM <%- model_name_in_storage -%> WHERE ${this.idAttribute()} = '${id}'`;
     let item = null;
     try {
       const client = await this.storageHandler;
@@ -161,7 +161,7 @@ module.exports = class <%- adapterName -%> {
       search,
       definition
     );
-    const query = `SELECT COUNT(*) AS num FROM <%- namePl -%> ${whereOptions}`;
+    const query = `SELECT COUNT(*) AS num FROM <%- model_name_in_storage -%> ${whereOptions}`;
     let num = null;
     try {
       const client = await this.storageHandler;
@@ -219,7 +219,7 @@ module.exports = class <%- adapterName -%> {
         : undefined;
     }
 
-    let query = `SELECT * FROM <%- namePl -%> ${filter} ${sort}`;
+    let query = `SELECT * FROM <%- model_name_in_storage -%> ${filter} ${sort}`;
     query += limit ? ` LIMIT ${limit}` : '';
     let result = [];
 
@@ -275,7 +275,7 @@ module.exports = class <%- adapterName -%> {
           ? oppPagination.last + 1
           : undefined;
       }
-      query = `SELECT * FROM <%- namePl -%> ${oppFilter} ${oppSort}`;
+      query = `SELECT * FROM <%- model_name_in_storage -%> ${oppFilter} ${oppSort}`;
       query += oppLimit ? ` LIMIT ${limit}` : '';
       oppResult = await prestoHelper.queryData(query, client);
       oppResult = <%- adapterName -%>.postReadCast(oppResult);

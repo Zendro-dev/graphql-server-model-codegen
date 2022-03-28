@@ -67,7 +67,7 @@ module.exports = class <%- adapterName -%> extends Sequelize.Model{
     },{ <%if(indices !== undefined){let string_indices = indices.map(x => { return "'" + x + "'" }) -%>
       indexes: [<%- string_indices.join() -%> ], <%}-%>
       modelName: "<%- nameLc -%>",
-      tableName: "<%-namePl-%>",
+      tableName: "<%-model_name_in_storage-%>",
       sequelize
      } );
   }

@@ -543,6 +543,9 @@ module.exports.getOptions = function (dataModel) {
     nameLc: uncapitalizeString(dataModel.model),
     namePl: inflection.pluralize(uncapitalizeString(dataModel.model)),
     namePlCp: inflection.pluralize(capitalizeString(dataModel.model)),
+    model_name_in_storage: dataModel.model_name_in_storage
+      ? dataModel.model_name_in_storage
+      : inflection.pluralize(uncapitalizeString(dataModel.model)),
     attributes: getOnlyTypeAttributes(dataModel.attributes),
     useDataLoader: dataModel.useDataLoader ?? true,
     cassandraAttributes: getOnlyCassandraTypeAttributes(

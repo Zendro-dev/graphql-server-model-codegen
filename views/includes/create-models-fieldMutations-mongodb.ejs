@@ -10,7 +10,7 @@
     static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
         try {
             const db = await this.storageHandler;
-            const collection = await db.collection("<%- nameLc -%>");
+            const collection = await db.collection("<%- model_name_in_storage -%>");
             const updatedContent = {<%-associationsArguments["to_one"][i].targetKey-%>: <% if (op === 'remove') 
             { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>}
             const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
@@ -50,7 +50,7 @@
 
             try {
                 const db = await this.storageHandler
-                const collection = await db.collection("<%- nameLc -%>")
+                const collection = await db.collection("<%- model_name_in_storage -%>")
                 let record = await this.readById(<%- idAttribute-%>);
                 if (record!==null){
                     let updated_ids = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(record.<%-associationsArguments["to_many"][i].sourceKey-%>, <%-associationsArguments["to_many"][i].sourceKey-%>);
