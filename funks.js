@@ -408,6 +408,7 @@ writeSchemaCommons = function (dir_write) {
   scalar Date
   scalar Time
   scalar DateTime
+  scalar GraphQLJSONObject
 \`;`;
 
   try {

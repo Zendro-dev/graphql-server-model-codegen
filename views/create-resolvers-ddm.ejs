@@ -710,6 +710,21 @@ module.exports = {
   },
 
   /**
+  * <%- namePl -%>ZendroDefinition - Return data model definition
+  *
+  * @param  {string} _       First parameter is not used
+  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
+  * @return {GraphQLJSONObject}        Data model definition
+  */
+  <%- namePl -%>ZendroDefinition: async function (_, context) {
+    if ((await checkAuthorization(context, "<%- name -%>", "read")) === true) {
+      return <%- nameLc -%>.definition;
+    } else {
+      throw new Error("You don't have authorization to perform this action");
+    }
+  },
+
+  /**
   * validate<%- nameCp -%>ForCreation - Check user authorization and validate input argument for creation.
   *
   * @param  {object} input   Info of each field to create the new record
