@@ -1,5 +1,6 @@
 {
     "model": "country",
+    "model_name_in_storage": "Land",
     "storageType": "SQL",
     "attributes": {
       "name": "String",

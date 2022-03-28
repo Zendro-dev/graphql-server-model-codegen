@@ -1,6 +1,7 @@
 {
     "model": "animal",
     "storageType": "mongodb",
+    "model_name_in_storage": "animalia",
     "attributes": {
         "animal_id": "String",
         "category": "String",

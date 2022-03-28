@@ -1,5 +1,6 @@
 {
     "model": "Incident",
+    "model_name_in_storage": "cassandra_incidents",
     "storageType": "cassandra",
     "attributes": {
       "incident_id": "String",

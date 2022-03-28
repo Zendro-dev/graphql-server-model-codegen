@@ -1,5 +1,6 @@
 {
     "model" : "movie",
+    "model_name_in_storage": "movie",
     "storageType" : "neo4j",
     "attributes" : {
         "movie_id": "String",
