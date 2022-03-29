@@ -186,7 +186,7 @@ module.exports = class <%- nameLc -%> {
     const limit = pagination.limit;
     const offset = pagination.offset ? pagination.offset : 0;
 
-    let query = `SELECT * FROM (SELECT row_number() over() AS rn, * FROM trino_doctors) `;
+    let query = `SELECT * FROM (SELECT row_number() over() AS rn, * FROM <%- model_name_in_storage -%>) `;
     query +=
       whereOptions !== ""
         ? `${whereOptions} AND (rn BETWEEN ${offset + 1} AND ${offset + limit})`

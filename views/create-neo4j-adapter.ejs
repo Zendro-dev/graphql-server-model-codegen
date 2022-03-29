@@ -428,7 +428,7 @@ module.exports = class <%- adapterName -%> {
       defaultAccessMode: neo4j.session.WRITE,
     });
     try {
-      let query = `LOAD CSV WITH HEADERS FROM 'file:///<%- adapterName-%>.csv' AS line FIELDTERMINATOR '${field_delim}' CREATE (:Movie {`;
+      let query = `LOAD CSV WITH HEADERS FROM 'file:///<%- adapterName-%>.csv' AS line FIELDTERMINATOR '${field_delim}' CREATE (:<%- model_name_in_storage -%> {`;
       for (let attr of Object.keys(definition.attributes)) {
         let type = definition.attributes[attr].replace(/\s+/g, "");
         if (type[0] === "[") {
