@@ -129,20 +129,32 @@ describe("Mongodb - Basic CRUD Operations", () => {
     expect(cnt).to.equal(0);
   });
 
-  it("07. Animal: CSV bulkUpload", async () => {
-    let csvPath = path.join(__dirname, "integration_test_misc", "animal.csv");
-
+  it("07. Animal: add multiple records", async () => {
     let cnt1 = await itHelpers.count_all_records("countAnimals");
-
-    // batch_upload_csv start new background, there is no way to test the actual result
-    // without explicit delay. The test may fail if delay is too small, just check the
-    // resulting DB table to be sure that all records from file individual_valid.csv were added.
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddAnimalCsv}"
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: addAnimal(animal_id:"1", animal_name:"Sally1", category:"Dog", age:3, weight:5.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["energetic","enthusiastic"])
+          {animal_id}
+        n1: addAnimal(animal_id:"2", animal_name:"Sally2", category:"Dog", age:3, weight:5.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["energetic","enthusiastic"])
+          {animal_id}
+        n2: addAnimal(animal_id:"3", animal_name:"Milka1", category:"Cat", age:2, weight:3.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["cute","optimistic"])
+          {animal_id}
+        n3: addAnimal(animal_id:"4", animal_name:"Milka2", category:"Cat", age:2, weight:3.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["cute","optimistic"])
+          {animal_id}
+        n4: addAnimal(animal_id:"5", animal_name:"Lily1", category:"Pig", age:1, weight:10.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["forgetful","funny"])
+          {animal_id}
+        n5: addAnimal(animal_id:"6", animal_name:"Lily2", category:"Pig", age:1, weight:10.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["forgetful","funny"])
+          {animal_id}
+      }`
     );
-    expect(success).equal(true);
-    await delay(500);
+
+    expect(res.statusCode).to.equal(200);
 
     let cnt2 = await itHelpers.count_all_records("countAnimals");
     expect(cnt2 - cnt1).to.equal(6);
@@ -282,17 +294,97 @@ describe("Mongodb - Basic CRUD Operations", () => {
       },
     });
   });
+
+  it("12. Animal: get data model definition", () => {
+    let res = itHelpers.request_graph_ql_post(`{animalsZendroDefinition}`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        animalsZendroDefinition: {
+          model: "animal",
+          storageType: "mongodb",
+          attributes: {
+            animal_id: "String",
+            category: "String",
+            animal_name: "String",
+            age: "Int",
+            weight: "Float",
+            health: "Boolean",
+            birthday: "DateTime",
+            personality: "[String]",
+            farm_id: "String",
+            food_ids: "[String]",
+          },
+          associations: {
+            farm: {
+              type: "many_to_one",
+              implementation: "foreignkeys",
+              target: "farm",
+              targetKey: "farm_id",
+              keysIn: "animal",
+              targetStorageType: "mongodb",
+              label: "farm_name",
+              deletion: "update",
+            },
+            food: {
+              type: "many_to_many",
+              implementation: "foreignkeys",
+              target: "food",
+              targetKey: "animal_ids",
+              sourceKey: "food_ids",
+              keysIn: "animal",
+              targetStorageType: "mongodb",
+              deletion: "update",
+            },
+            unique_tracker: {
+              type: "one_to_one",
+              implementation: "foreignkeys",
+              target: "tracker",
+              targetKey: "animal_id",
+              keysIn: "tracker",
+              targetStorageType: "mongodb",
+              deletion: "update",
+            },
+          },
+          internalId: "animal_id",
+          id: {
+            name: "animal_id",
+            type: "String",
+          },
+          useDataLoader: true,
+        },
+      },
+    });
+  });
 });
 
 describe("Mongodb - Operators", () => {
   before(async () => {
-    let csvPath = path.join(__dirname, "integration_test_misc", "animal.csv");
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddAnimalCsv}"
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: addAnimal(animal_id:"1", animal_name:"Sally1", category:"Dog", age:3, weight:5.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["energetic","enthusiastic"])
+          {animal_id}
+        n1: addAnimal(animal_id:"2", animal_name:"Sally2", category:"Dog", age:3, weight:5.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["energetic","enthusiastic"])
+          {animal_id}
+        n2: addAnimal(animal_id:"3", animal_name:"Milka1", category:"Cat", age:2, weight:3.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["cute","optimistic"])
+          {animal_id}
+        n3: addAnimal(animal_id:"4", animal_name:"Milka2", category:"Cat", age:2, weight:3.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["cute","optimistic"])
+          {animal_id}
+        n4: addAnimal(animal_id:"5", animal_name:"Lily1", category:"Pig", age:1, weight:10.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["forgetful","funny"])
+          {animal_id}
+        n5: addAnimal(animal_id:"6", animal_name:"Lily2", category:"Pig", age:1, weight:10.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["forgetful","funny"])
+          {animal_id}
+      }`
     );
-    expect(success).equal(true);
-    await delay(500);
+
+    expect(res.statusCode).to.equal(200);
   });
 
   after(async () => {
@@ -481,13 +573,30 @@ describe("Mongodb - Operators", () => {
 describe("Mongodb - Association", () => {
   // set up the environment
   before(async () => {
-    let csvPath = path.join(__dirname, "integration_test_misc", "animal.csv");
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddAnimalCsv}"
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: addAnimal(animal_id:"1", animal_name:"Sally1", category:"Dog", age:3, weight:5.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["energetic","enthusiastic"])
+          {animal_id}
+        n1: addAnimal(animal_id:"2", animal_name:"Sally2", category:"Dog", age:3, weight:5.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["energetic","enthusiastic"])
+          {animal_id}
+        n2: addAnimal(animal_id:"3", animal_name:"Milka1", category:"Cat", age:2, weight:3.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["cute","optimistic"])
+          {animal_id}
+        n3: addAnimal(animal_id:"4", animal_name:"Milka2", category:"Cat", age:2, weight:3.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["cute","optimistic"])
+          {animal_id}
+        n4: addAnimal(animal_id:"5", animal_name:"Lily1", category:"Pig", age:1, weight:10.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["forgetful","funny"])
+          {animal_id}
+        n5: addAnimal(animal_id:"6", animal_name:"Lily2", category:"Pig", age:1, weight:10.5, 
+          health:true, birthday:"2017-12-03T10:15:30Z", personality:["forgetful","funny"])
+          {animal_id}
+      }`
     );
-    expect(success).equal(true);
-    await delay(500);
+
+    expect(res.statusCode).to.equal(200);
   });
 
   // clean up records
@@ -1662,28 +1771,6 @@ describe("Mongodb - Update Deletion Action", () => {
     cnt = await itHelpers.count_all_records("countTrackers");
     expect(cnt).to.equal(2);
 
-    // res = await itHelpers.request_graph_ql_post(
-    //   `mutation {
-    //     addUser(email:"x@zen.dro", password:"zendro"){
-    //         email
-    //       }
-    //     }`
-    // );
-    // expect(res.statusCode).to.equal(200);
-
-    // res = itHelpers.request_graph_ql_post(
-    //   "{ users(pagination:{limit:25}) {id} }"
-    // );
-    // let users = JSON.parse(res.body.toString("utf8")).data.users;
-    // res = await itHelpers.request_graph_ql_post(
-    //   `mutation {
-    //     addRole(name:"test_role", addUsers:[${users[users.length - 1].id}]){
-    //         name
-    //       }
-    //     }`
-    // );
-    // expect(res.statusCode).to.equal(200);
-
     for (let i of [1, 2]) {
       res = itHelpers.request_graph_ql_post(
         `mutation {
@@ -1769,33 +1856,7 @@ describe("Mongodb - Update Deletion Action", () => {
     expect(cnt).to.equal(0);
   });
 
-  // it("04. User : Role (n:n)", async () => {
-  //   let res = itHelpers.request_graph_ql_post(
-  //     "{ users(pagination:{limit:25}) {id} }"
-  //   );
-  //   let users = JSON.parse(res.body.toString("utf8")).data.users;
-  //   res = itHelpers.request_graph_ql_post(
-  //     `mutation { deleteUser (id: ${users[users.length - 1].id}) }`
-  //   );
-  //   expect(res.statusCode).to.equal(200);
-
-  //   let cnt = await itHelpers.count_all_records("countUsers");
-  //   expect(cnt).to.equal(0);
-
-  //   res = itHelpers.request_graph_ql_post(
-  //     "{ roles(pagination:{limit:25}) {id} }"
-  //   );
-  //   let roles = JSON.parse(res.body.toString("utf8")).data.roles;
-  //   res = itHelpers.request_graph_ql_post(
-  //     `mutation { deleteRole (id: ${roles[roles.length - 1].id}) }`
-  //   );
-  //   expect(res.statusCode).to.equal(200);
-
-  //   cnt = await itHelpers.count_all_records("countRoles");
-  //   expect(cnt).to.equal(0);
-  // });
-
-  it("05. Dist_animal : Dist_farm (n:1)", async () => {
+  it("04. Dist_animal : Dist_farm (n:1)", async () => {
     let res = itHelpers.request_graph_ql_post(
       `mutation { deleteDist_farm (farm_id: "instance1-f1") }`
     );

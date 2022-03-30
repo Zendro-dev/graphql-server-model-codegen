@@ -1438,67 +1438,6 @@ describe("Web service model", function () {
   });
 });
 
-describe("Batch Upload", function () {
-  // For now, only individuals are present in this section
-  after(async function () {
-    let res = itHelpers.request_graph_ql_post(
-      "{ individuals(pagination:{limit:25}) {id} }"
-    );
-    let individuals = JSON.parse(res.body.toString("utf8")).data.individuals;
-
-    for (let i = 0; i < individuals.length; i++) {
-      res = itHelpers.request_graph_ql_post(
-        `mutation { deleteIndividual (id: ${individuals[i].id}) }`
-      );
-      expect(res.statusCode).to.equal(200);
-    }
-
-    let cnt = await itHelpers.count_all_records("countIndividuals");
-    expect(cnt).to.equal(0);
-
-    res = itHelpers.request_graph_ql_post(
-      "{ transcript_counts(pagination:{limit:25}) {id} }"
-    );
-    let transcript_counts = JSON.parse(res.body.toString("utf8")).data
-      .transcript_counts;
-
-    for (let i = 0; i < transcript_counts.length; i++) {
-      res = itHelpers.request_graph_ql_post(
-        `mutation { deleteTranscript_count (id: ${transcript_counts[i].id}) }`
-      );
-      expect(res.statusCode).to.equal(200);
-    }
-
-    cnt = await itHelpers.count_all_records("countTranscript_counts");
-    expect(cnt).to.equal(0);
-  });
-
-  it("01. CSV individual batch upload", async function () {
-    let csvPath = path.join(
-      __dirname,
-      "integration_test_misc",
-      "individual_valid.csv"
-    );
-
-    // count records before upload
-    let cnt1 = await itHelpers.count_all_records("countIndividuals");
-
-    // batch_upload_csv start new background, there is no way to test the actual result
-    // without explicit delay. The test may fail if delay is too small, just check the
-    // resulting DB table to be sure that all records from file individual_valid.csv were added.
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddIndividualCsv}"
-    );
-    expect(success).equal(true);
-    await delay(500);
-
-    // count records before upload
-    let cnt2 = await itHelpers.count_all_records("countIndividuals");
-    expect(cnt2 - cnt1).to.equal(4);
-  });
-});
-
 describe("Generic async validation tests", function () {
   after(async function () {
     let res = itHelpers.request_graph_ql_post(
@@ -1584,56 +1523,6 @@ describe("Generic async validation tests", function () {
       `mutation { updateIndividual (id: ${indiId} name:"Another") {id} }`
     );
     resBody = JSON.parse(res.body.toString("utf8"));
-  });
-
-  it("04. Validate CSV individual batch upload", async function () {
-    let csvPath = path.join(
-      __dirname,
-      "integration_test_misc",
-      "individual_invalid.csv"
-    );
-
-    // count records before upload
-    let cnt1 = await itHelpers.count_all_records("countIndividuals");
-
-    // batch_upload_csv start new background, it returns a response without
-    // an error independently if there are validation errors during batch add or not.
-    // These errors will be sent to the user's e-mail.
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddIndividualCsv}"
-    );
-    expect(success).equal(true);
-    await delay(500);
-
-    // count records before upload
-    let cnt2 = await itHelpers.count_all_records("countIndividuals");
-    expect(cnt2 - cnt1).to.equal(0);
-  });
-
-  it("05. CSV with explicit Null values", async function () {
-    let csvPath = path.join(
-      __dirname,
-      "integration_test_misc",
-      "transcript_count_nulls.csv"
-    );
-
-    // count records before upload
-    let cnt1 = await itHelpers.count_all_records("countTranscript_counts");
-
-    // batch_upload_csv start new background, it returns a response without
-    // an error independently if there are validation errors during batch add or not.
-    // These errors will be sent to the user's e-mail.
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation { bulkAddTranscript_countCsv }"
-    );
-    expect(success).equal(true);
-    await delay(500);
-
-    // count records before upload
-    let cnt2 = await itHelpers.count_all_records("countTranscript_counts");
-    expect(cnt2 - cnt1).to.equal(1);
   });
 });
 
@@ -2932,12 +2821,12 @@ describe("Zendro Webservice Data Models", function () {
 
     expect(res.data).to.equal(
       "accession_id,collectors_name,collectors_initials,sampling_date,locationId\n" +
-        "a-instance1,aa,NULL,NULL,NULL\n" +
-        "b-instance1,bb,NULL,NULL,NULL\n" +
-        "c-instance1,cc,NULL,NULL,NULL\n" +
-        "d-instance1,dd,NULL,NULL,NULL\n" +
-        "zendro-2-accession,NULL,NULL,NULL,NULL\n" +
-        "zendro-3-accession,NULL,NULL,NULL,NULL\n"
+        '"a-instance1","aa","NULL","NULL","NULL"\n' +
+        '"b-instance1","bb","NULL","NULL","NULL"\n' +
+        '"c-instance1","cc","NULL","NULL","NULL"\n' +
+        '"d-instance1","dd","NULL","NULL","NULL"\n' +
+        '"zendro-2-accession","NULL","NULL","NULL","NULL"\n' +
+        '"zendro-3-accession","NULL","NULL","NULL","NULL"\n'
     );
   });
 

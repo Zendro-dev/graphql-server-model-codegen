@@ -191,7 +191,7 @@ type Query {
   validate<%- nameCp -%>ForDeletion(<%- idAttribute -%>: ID!): Boolean!
   validate<%- nameCp -%>AfterReading(<%- idAttribute -%>: ID!): Boolean!
   """
-  %- namePl -%>ZendroDefinition would return the static Zendro data model definition
+  <%- namePl -%>ZendroDefinition would return the static Zendro data model definition
   """
   <%- namePl -%>ZendroDefinition: GraphQLJSONObject
 }

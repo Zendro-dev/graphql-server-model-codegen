@@ -443,57 +443,6 @@ module.exports = class <%- nameLc -%> {
   }
 
   /**
-   * bulkAddCsv - Add records from csv file
-   *
-   * @param  {object} context - contextual information, e.g. csv file, record delimiter and column names.
-   */
-  static async bulkAddCsv(context) {
-    let field_delim = config.fieldDelimiter ?? ",";
-    let array_delim = config.arrayDelimiter ?? ";";
-
-    const driver = await this.storageHandler;
-    const session = driver.session({
-      database: config.database,
-      defaultAccessMode: neo4j.session.WRITE,
-    });
-    try {
-      let query = `LOAD CSV WITH HEADERS FROM 'file:///<%- nameLc -%>.csv' AS line FIELDTERMINATOR '${field_delim}' CREATE (:Movie {`;
-      for (let attr of Object.keys(definition.attributes)) {
-        let type = definition.attributes[attr].replace(/\s+/g, "");
-        if (type[0] === "[") {
-          type = type.slice(1, type.length - 1);
-          if (type === "Int") {
-            query += `${attr}: [i in split(line.${attr}, "${array_delim}") | toInteger(i)], `;
-          } else if (type === "Boolean") {
-            query += `${attr}: [i in split(line.${attr}, "${array_delim}") | toBoolean(i)], `;
-          } else if (type === "Float") {
-            query += `${attr}: [i in split(line.${attr}, "${array_delim}") | toFloat(i)], `;
-          } else {
-            query += `${attr}: split(line.${attr}, "${array_delim}"), `;
-          }
-        } else {
-          if (type === "Int") {
-            query += `${attr}: toInteger(line.${attr}), `;
-          } else if (type === "Boolean") {
-            query += `${attr}: toBoolean(line.${attr}), `;
-          } else if (type === "Float") {
-            query += `${attr}: toFloat(line.${attr}), `;
-          } else {
-            query += `${attr}: line.${attr}, `;
-          }
-        }
-      }
-      query = query.slice(0, query.length - 2) + "})";
-      const result = await session.run(query);
-      return `Successfully upload file`;
-    } catch (e) {
-      throw new Error(e);
-    } finally {
-      await session.close();
-    }
-  }
-
-  /**
    * csvTableTemplate - Allows the user to download a template in CSV format with the
    * properties and types of this model.
    *
