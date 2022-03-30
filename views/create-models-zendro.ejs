@@ -273,31 +273,6 @@ module.exports = class <%- nameLc -%>{
     }
   }
 
-  static async bulkAddCsv(context, benignErrorReporter){
-    let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
-
-    try {
-      let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
-      let query = `mutation {bulkAdd<%- nameCp -%>Csv}`;
-      let formData = new FormData();
-      formData.append('csv_file', fs.createReadStream(tmpFile));
-      formData.append('query', query);
-
-      let response = await axios.post(remoteZendroURL, formData,  {
-        headers: formData.getHeaders()
-      });
-      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
-      if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
-      }
-      return response.data.data.bulkAdd<%- nameCp -%>Csv;
-
-    } catch(error) {
-      //handle caught errors
-      errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
-    }
-  }
-
   /**
    * csvTableTemplate - Allows the user to download a template in CSV format with the
    * properties and types of this model.

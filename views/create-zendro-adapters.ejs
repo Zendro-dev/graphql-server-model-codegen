@@ -225,11 +225,6 @@ module.exports = class <%- adapterName -%>{
   <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
   <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
 
-
-  static bulkAddCsv(context) {
-    throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
-  }
-
   static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
 

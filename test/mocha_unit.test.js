@@ -40,9 +40,7 @@ describe("Lower-case models", function () {
   it("Check correct queries and mutations in GraphQL Schema - transcript_count", async function () {
     let opts = funks.getOptions(models.transcript_count);
     let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.transcript_count_schema.replace(/\s/g, "");
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
+    testCompare(generated_schema, data_test.transcript_count_schema);
   });
 
   it("Check correct association name in resolver - individual", async function () {
@@ -79,12 +77,7 @@ describe("Empty associations", function () {
   it("Check correct queries and mutations in GraphQL Schema - transcript_count (no assoc)", async function () {
     let opts = funks.getOptions(models.transcript_count_no_assoc);
     let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.transcript_count_no_assoc_schema.replace(
-      /\s/g,
-      ""
-    );
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
+    testCompare(generated_schema, data_test.transcript_count_no_assoc_schema);
   });
 
   it("Check no association in resolvers - individual (no assoc)", async function () {
@@ -176,17 +169,6 @@ describe("Associations in query and resolvers", function () {
   });
 });
 
-describe("Stream upload file", function () {
-  let data_test = require("./unit_test_misc/test-describe/stream-upload-file");
-  it("Resolver - dog", async function () {
-    let opts = funks.getOptions(models.dog);
-    let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.dog_resolvers.replace(/\s/g, "");
-    expect(g_resolvers).to.have.string(test_resolvers);
-  });
-});
-
 describe("Migrations", function () {
   let data_test = require("./unit_test_misc/test-describe/migrations");
 
@@ -214,9 +196,7 @@ describe("Model naming cases ", function () {
   it("GraphQL Schema - aminoAcidSequence", async function () {
     let opts = funks.getOptions(models.aminoAcidSequence);
     let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.schema_webservice_aminoAcid.replace(/\s/g, "");
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
+    testCompare(generated_schema, data_test.schema_webservice_aminoAcid);
   });
 
   it("Model - aminoAcidSequence", async function () {
@@ -241,9 +221,7 @@ describe("Model naming cases ", function () {
   it("GraphQL Schema - inDiVIdual", async function () {
     let opts = funks.getOptions(models.inDiVIdual_camelcase);
     let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.individual_schema_camelcase.replace(/\s/g, "");
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
+    testCompare(generated_schema, data_test.individual_schema_camelcase);
   });
 
   it("Model - inDiVIdual", async function () {
@@ -397,9 +375,7 @@ describe("All webservice (generic) models", function () {
   it("GraphQL Schema - person", async function () {
     let opts = funks.getOptions(models_generic_webservice.person);
     let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.schema_person.replace(/\s/g, "");
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
+    testCompare(generated_schema, data_test.schema_person);
   });
 
   it("Resolvers - person", async function () {
@@ -618,24 +594,6 @@ describe("Model Layer", function () {
     );
   });
 
-  it("Bulk Add model - book", async function () {
-    let opts = funks.getOptions(models.book_authors);
-    let generated_model = await funks.generateJs("create-models", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.bulk_add_model.replace(/\s/g, "");
-    expect(g_model, "No add one method found").to.have.string(test_model);
-  });
-
-  it("Bulk Add resolver - book", async function () {
-    let opts = funks.getOptions(models.book_authors);
-    let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.bulk_add_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "No add one method found").to.have.string(
-      test_resolver
-    );
-  });
-
   it("Table template model - individual", async function () {
     let opts = funks.getOptions(models.individual);
     let generated_model = await funks.generateJs("create-models", opts);
@@ -647,11 +605,7 @@ describe("Model Layer", function () {
   it("Table template resolver - individual", async function () {
     let opts = funks.getOptions(models.individual);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.table_template_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "No add one method found").to.have.string(
-      test_resolver
-    );
+    testCompare(generated_resolvers, data_test.table_template_resolver);
   });
 });
 
@@ -843,14 +797,6 @@ describe("Zendro servers", function () {
     let generated_model = await funks.generateJs("create-models-zendro", opts);
     let g_model = generated_model.replace(/\s/g, "");
     let test_model = data_test.csv_template.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
-  });
-
-  it("bulkAddCsv  - book", async function () {
-    let opts = funks.getOptions(models_zendro.book);
-    let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.bulk_add_csv.replace(/\s/g, "");
     expect(g_model, "No method found").to.have.string(test_model);
   });
 
@@ -2881,12 +2827,6 @@ describe("MongoDb Unit Test", function () {
     testCompare(generated_model, data_test.animal_updateOne);
   });
 
-  it("mongodb model - animal bulkAddCsv", async function () {
-    let opts = funks.getOptions(models_mongodb.animal);
-    let generated_model = await funks.generateJs("create-models-mongodb", opts);
-    testCompare(generated_model, data_test.animal_bulkAddCsv);
-  });
-
   it("mongodb model - fieldMutations toOne - add farm to animal", async function () {
     let opts = funks.getOptions(models_mongodb.animal);
     let generated_model = await funks.generateJs("create-models-mongodb", opts);
@@ -2976,15 +2916,6 @@ describe("Amazon S3/ Minio Unit Test", function () {
       opts
     );
     testCompare(generated_model, data_test.reader_readAllCursor);
-  });
-
-  it("Amazon S3 model - reader bulkAddCsv", async function () {
-    let opts = funks.getOptions(models_amazonS3.reader);
-    let generated_model = await funks.generateJs(
-      "create-models-amazonS3",
-      opts
-    );
-    testCompare(generated_model, data_test.reader_bulkAddCsv);
   });
 
   it("Amazon S3 adapter - dist_reader_instance1 readById ", async function () {
@@ -3086,12 +3017,6 @@ describe("Neo4j Unit Test", function () {
     let opts = funks.getOptions(models_neo4j.movie);
     let generated_model = await funks.generateJs("create-models-neo4j", opts);
     testCompare(generated_model, data_test.movie_updateOne);
-  });
-
-  it("neo4j model - movie bulkAddCsv", async function () {
-    let opts = funks.getOptions(models_neo4j.movie);
-    let generated_model = await funks.generateJs("create-models-neo4j", opts);
-    testCompare(generated_model, data_test.movie_bulkAddCsv);
   });
 
   it("neo4j model - fieldMutations toOne - add director to movie", async function () {

@@ -2,8 +2,7 @@ module.exports.bulkAssociation_schema_mutation = `
 type Mutation {                                                                                                                                                                                                  
   addBook(internalBookId: ID!, title: String, genre: String , addAuthor:ID   , skipAssociationsExistenceChecks:Boolean = false): Book!                                                                           
   updateBook(internalBookId: ID!, title: String, genre: String , addAuthor:ID, removeAuthor:ID    , skipAssociationsExistenceChecks:Boolean = false): Book!                                                      
-  deleteBook(internalBookId: ID!): String!                                                                                                                                                                       
-  bulkAddBookCsv: String!                                                                                                                                                                                        
+  deleteBook(internalBookId: ID!): String!                                                                                                                                                                                                                                                                                                                                                            
   bulkAssociateBookWithInternalPersonId(bulkAssociationInput: [bulkAssociationBookWithInternalPersonIdInput], skipAssociationsExistenceChecks:Boolean = false): String!                                                              
   bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput: [bulkAssociationBookWithInternalPersonIdInput], skipAssociationsExistenceChecks:Boolean = false): String!                                                           
 } 

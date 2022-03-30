@@ -344,53 +344,6 @@ static async updateOne(input) {
 
 `;
 
-module.exports.movie_bulkAddCsv = `
-static async bulkAddCsv(context) {
-    let field_delim = config.fieldDelimiter ?? ",";
-    let array_delim = config.arrayDelimiter ?? ";";
-
-    const driver = await this.storageHandler;
-    const session = driver.session({
-        database: config.database,
-        defaultAccessMode: neo4j.session.WRITE,
-    });
-    try {
-        let query = \`LOAD CSV WITH HEADERS FROM 'file:///movie.csv' AS line FIELDTERMINATOR '\${field_delim}' CREATE (:Movie {\`;
-        for (let attr of Object.keys(definition.attributes)) {
-            let type = definition.attributes[attr].replace(/\\s+/g, "");
-            if (type[0] === "[") {
-                type = type.slice(1, type.length - 1);
-                if (type === "Int") {
-                    query += \`\${attr}: [i in split(line.\${attr}, "\${array_delim}") | toInteger(i)], \`;
-                } else if (type === "Boolean") {
-                    query += \`\${attr}: [i in split(line.\${attr}, "\${array_delim}") | toBoolean(i)], \`;
-                } else if (type === "Float") {
-                    query += \`\${attr}: [i in split(line.\${attr}, "\${array_delim}") | toFloat(i)], \`;
-                } else {
-                    query += \`\${attr}: split(line.\${attr}, "\${array_delim}"), \`;
-                }
-            } else {
-                if (type === "Int") {
-                    query += \`\${attr}: toInteger(line.\${attr}), \`;
-                } else if (type === "Boolean") {
-                    query += \`\${attr}: toBoolean(line.\${attr}), \`;
-                } else if (type === "Float") {
-                    query += \`\${attr}: toFloat(line.\${attr}), \`;
-                } else {
-                    query += \`\${attr}: line.\${attr}, \`;
-                }
-            }
-        }
-        query = query.slice(0, query.length - 2) + "})";
-        const result = await session.run(query);
-        return \`Successfully upload file\`;
-    } catch (e) {
-        throw new Error(e);
-    } finally {
-        await session.close();
-    }
-`;
-
 module.exports.movie_fieldMutation_add_director = `
 static async add_director_id(movie_id, director_id, benignErrorReporter) {
     const driver = await this.storageHandler;

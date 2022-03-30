@@ -198,32 +198,6 @@ static async csvTableTemplate(benignErrorReporter){
   }
 }
 `;
-module.exports.bulk_add_csv = `
-static async bulkAddCsv(context, benignErrorReporter){
-  let tmpFile = path.join(os.tmpdir(), uuidv4()+'.csv');
-
-  try {
-    let csvRequestMv = await context.request.files.csv_file.mv(tmpFile);
-    let query = \`mutation {bulkAddBookCsv}\`;
-    let formData = new FormData();
-    formData.append('csv_file', fs.createReadStream(tmpFile));
-    formData.append('query', query);
-
-    let response = await axios.post(remoteZendroURL, formData,  {
-      headers: formData.getHeaders()
-    });
-    //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
-    if(helper.isNonEmptyArray(response.data.errors)) {
-      benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
-    }
-    return response.data.data.bulkAddBookCsv;
-
-  } catch(error) {
-    //handle caught errors
-    errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
-  }
-}
-`;
 
 module.exports.many_to_many_association = `
 const definition = {

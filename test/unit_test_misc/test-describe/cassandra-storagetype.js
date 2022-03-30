@@ -114,13 +114,16 @@ type Query {
   validateCityForUpdating(city_id: ID!, name: String, intArr: [Int], strArr: [String], floatArr: [Float], boolArr: [Boolean], dateTimeArr: [DateTime]   , addRivers:[ID], removeRivers:[ID]  , skipAssociationsExistenceChecks:Boolean = false): Boolean!
   validateCityForDeletion(city_id: ID!): Boolean!
   validateCityAfterReading(city_id: ID!): Boolean!
+  """
+  citiesZendroDefinition would return the static Zendro data model definition
+  """
+  citiesZendroDefinition: GraphQLJSONObject
 }
 
 type Mutation {
   addCity(city_id: ID!, name: String, intArr: [Int], strArr: [String], floatArr: [Float], boolArr: [Boolean], dateTimeArr: [DateTime]   , addRivers:[ID] , skipAssociationsExistenceChecks:Boolean = false): city!
   updateCity(city_id: ID!, name: String, intArr: [Int], strArr: [String], floatArr: [Float], boolArr: [Boolean], dateTimeArr: [DateTime]   , addRivers:[ID], removeRivers:[ID]  , skipAssociationsExistenceChecks:Boolean = false): city!
   deleteCity(city_id: ID!): String!
-  bulkAddCityCsv: String!
 }
 \`;
 `;

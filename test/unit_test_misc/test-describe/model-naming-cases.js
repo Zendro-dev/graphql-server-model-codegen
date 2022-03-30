@@ -34,6 +34,10 @@ type Query {
     validateAminoAcidSequenceForUpdating(id: ID!, accession: String, sequence: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
     validateAminoAcidSequenceForDeletion(id: ID!): Boolean!
     validateAminoAcidSequenceAfterReading(id: ID!): Boolean!
+    """
+    aminoAcidSequencesZendroDefinition would return the static Zendro data model definition
+    """
+    aminoAcidSequencesZendroDefinition: GraphQLJSONObject
   }
 `;
 
@@ -77,11 +81,9 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
 module.exports.individual_schema_camelcase = `
 type Mutation {
   addInDiVIdual( name: String , addTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
-updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
-
-
-deleteInDiVIdual(id: ID!): String!
-bulkAddInDiVIdualCsv: String! }
+  updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
+  deleteInDiVIdual(id: ID!): String!
+}
 `;
 
 module.exports.individual_model_camelcase = `
