@@ -303,6 +303,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
       data: {
         animalsZendroDefinition: {
           model: "animal",
+          model_name_in_storage: "animalia",
           storageType: "mongodb",
           attributes: {
             animal_id: "String",
