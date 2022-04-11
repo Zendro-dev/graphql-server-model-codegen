@@ -58,8 +58,6 @@ static async countRecords(search) {
 
 module.exports.animal_readAll = `
 static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     // build the filter object for limit-offset-based pagination
     const filter = mongoDbHelper.searchConditionsToMongoDb(search);
     const sort = mongoDbHelper.orderConditionsToMongoDb(order, this.idAttribute(), true);
@@ -79,8 +77,6 @@ static async readAll(search, order, pagination, benignErrorReporter) {
 
 module.exports.animal_readAllCursor = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the filter object.
     let filter = mongoDbHelper.searchConditionsToMongoDb(search);
@@ -239,62 +235,6 @@ static async updateOne(input) {
 }
 `;
 
-module.exports.animal_bulkAddCsv = `
-static bulkAddCsv(context) {
-    let delim = context.request.body.delim;
-    let arrayDelim = ";"
-    let cols = context.request.body.cols;
-    let tmpFile = path.join(os.tmpdir(), uuidv4() + '.csv');
-
-    context.request.files.csv_file.mv(tmpFile).then(() => {
-
-        fileTools.parseCsvStream(tmpFile, this, delim, cols, "mongodb", arrayDelim).then((addedZipFilePath) => {
-            try {
-                console.log(\`Sending \${addedZipFilePath} to the user.\`);
-
-                let attach = [];
-                attach.push({
-                    filename: path.basename("added_data.zip"),
-                    path: addedZipFilePath
-                });
-
-                email.sendEmail(helpersAcl.getTokenFromContext(context).email,
-                    'ScienceDB batch add',
-                    'Your data has been successfully added to the database.',
-                    attach).then(function(info) {
-                    fileTools.deleteIfExists(addedZipFilePath);
-                    console.log(info);
-                }).catch(function(err) {
-                    fileTools.deleteIfExists(addedZipFilePath);
-                    console.error(err);
-                });
-
-            } catch (error) {
-                console.error(error.message);
-            }
-
-            fs.unlinkSync(tmpFile);
-        }).catch((error) => {
-            email.sendEmail(helpersAcl.getTokenFromContext(context).email,
-                'ScienceDB batch add', \`\${error.message}\`).then(function(info) {
-                console.error(info);
-            }).catch(function(err) {
-                console.error(err);
-            });
-
-            fs.unlinkSync(tmpFile);
-        });
-
-
-
-    }).catch((error) => {
-        throw new Error(error);
-    });
-
-    return \`Bulk import of user records started. You will be send an email to \${helpersAcl.getTokenFromContext(context).email} informing you about success or errors\`;
-}
-`;
-
 module.exports.animal_fieldMutation_add_farm = `
 static async add_farm_id(animal_id, farm_id, benignErrorReporter) {
     try {
@@ -309,13 +249,13 @@ static async add_farm_id(animal_id, farm_id, benignErrorReporter) {
             $set: updatedContent
         });
         if (response.result.ok !== 1) {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
                 message: \`Record with ID = \${animal_id} has not been updated\`
             });
         }
         return response.modifiedCount;
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     }
@@ -337,13 +277,13 @@ static async remove_farm_id(animal_id, farm_id, benignErrorReporter) {
             $set: updatedContent
         });
         if (response.result.ok !== 1) {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
                 message: \`Record with ID = \${animal_id} has not been updated\`
             });
         }
         return response.modifiedCount;
     } catch (error) {
-        benignErrorReporter.reportError({
+        benignErrorReporter.push({
             message: error
         });
     }

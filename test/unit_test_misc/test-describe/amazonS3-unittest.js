@@ -153,27 +153,6 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
   }
 `;
 
-module.exports.reader_bulkAddCsv = `
-static async bulkAddCsv(context){
-  let tmpFile = path.join(os.tmpdir(), uuidv4() + ".csv");
-  try {
-    await context.request.files.csv_file.mv(tmpFile);
-    let file_param = {
-      Bucket: config.bucket,
-      Key: "reader.csv",
-      Body: fs.createReadStream(tmpFile),
-    };
-    const s3 = await this.storageHandler;
-    await s3.upload(file_param).promise();
-    fs.unlinkSync(tmpFile);
-  } catch (e) {
-    fs.unlinkSync(tmpFile);
-    throw new Error(e);
-  }
-  return \`Successfully upload file\`;
-  }
-`;
-
 module.exports.amazonS3_adapter_readById = `
 /**
  * Batch function for readById method.

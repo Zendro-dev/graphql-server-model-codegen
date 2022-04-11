@@ -2,20 +2,18 @@ module.exports.bulkAssociation_schema_mutation = `
 type Mutation {                                                                                                                                                                                                  
   addBook(internalBookId: ID!, title: String, genre: String , addAuthor:ID   , skipAssociationsExistenceChecks:Boolean = false): Book!                                                                           
   updateBook(internalBookId: ID!, title: String, genre: String , addAuthor:ID, removeAuthor:ID    , skipAssociationsExistenceChecks:Boolean = false): Book!                                                      
-  deleteBook(internalBookId: ID!): String!                                                                                                                                                                       
-  bulkAddBookCsv: String!                                                                                                                                                                                        
+  deleteBook(internalBookId: ID!): String!                                                                                                                                                                                                                                                                                                                                                            
   bulkAssociateBookWithInternalPersonId(bulkAssociationInput: [bulkAssociationBookWithInternalPersonIdInput], skipAssociationsExistenceChecks:Boolean = false): String!                                                              
   bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput: [bulkAssociationBookWithInternalPersonIdInput], skipAssociationsExistenceChecks:Boolean = false): String!                                                           
 } 
-`
+`;
 
 module.exports.bulkAssociation_schema_inputType = `
 input bulkAssociationBookWithInternalPersonIdInput{
   internalBookId: ID!
   internalPersonId: ID!
 }
-`
-
+`;
 
 module.exports.bulkAssociation_resolver_add = `
 /**
@@ -26,7 +24,6 @@ module.exports.bulkAssociation_resolver_add = `
  * @return {string} returns message on success
  */
 bulkAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
-    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
     //if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
@@ -36,9 +33,9 @@ bulkAssociateBookWithInternalPersonId: async function(bulkAssociationInput, cont
             internalBookId
         }) => internalBookId)), book);
     }
-    return await book.bulkAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, benignErrorReporter);
+    return await book.bulkAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, context.benignErrors);
 }
-`
+`;
 
 module.exports.bulkAssociation_resolver_remove = `
 /**
@@ -49,7 +46,6 @@ module.exports.bulkAssociation_resolver_remove = `
  * @return {string} returns message on success
  */
 bulkDisAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
-    let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
     // if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
@@ -59,9 +55,9 @@ bulkDisAssociateBookWithInternalPersonId: async function(bulkAssociationInput, c
             internalBookId
         }) => internalBookId)), book);
     }
-    return await book.bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, benignErrorReporter);
+    return await book.bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, context.benignErrors);
 }
-`
+`;
 
 module.exports.bulkAssociation_model_sql_add = `
 /**
@@ -89,8 +85,8 @@ static async bulkAssociateBookWithInternalPersonId(bulkAssociationInput) {
     await Promise.all(promises);
     return "Records successfully updated!"
 }
-`
-module.exports.bulkAssociation_model_sql_remove= `
+`;
+module.exports.bulkAssociation_model_sql_remove = `
 /**
  * bulkDisAssociateBookWithInternalPersonId - bulkDisAssociaton of given ids
  *
@@ -117,7 +113,7 @@ static async bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput) {
   await Promise.all(promises);
   return "Records successfully updated!"
 }
-`
+`;
 
 module.exports.bulkAssociation_model_zendro_ddm_adapter_add = `
 /**
@@ -141,7 +137,7 @@ static async bulkAssociateDogWithVeterinarianId(bulkAssociationInput, benignErro
         });
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if (helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
@@ -157,7 +153,7 @@ static async bulkAssociateDogWithVeterinarianId(bulkAssociationInput, benignErro
         errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;
 
 module.exports.bulkAssociation_model_zendro_ddm_adapter_remove = `
 /**
@@ -181,7 +177,7 @@ static async bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput, benignE
         });
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if (helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
@@ -197,7 +193,7 @@ static async bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput, benignE
         errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
     }
 }
-`
+`;
 
 module.exports.bulkAssociation_model_ddm_add = `
 /**
@@ -216,7 +212,7 @@ static async bulkAssociateDogWithPersonId(bulkAssociationInput, benignErrorRepor
   await Promise.all(promises);
   return "Records successfully updated!";
 }
-`
+`;
 
 module.exports.bulkAssociation_model_ddm_remove = `
 /**
@@ -235,7 +231,7 @@ static async bulkDisAssociateDogWithPersonId(bulkAssociationInput, benignErrorRe
     await Promise.all(promises);
     return "Records successfully updated!";
 }
-`
+`;
 module.exports.bulkAssociation_mapBulkAssociationInputToAdapters = `
 /**
  * mapBulkAssociationInputToAdapters - maps the input of a bulkAssociate to the responsible adapters 
@@ -252,4 +248,4 @@ bulkAssociationInput.map((idMap) => {
 });
 return mappedInput;
 }
-`
+`;

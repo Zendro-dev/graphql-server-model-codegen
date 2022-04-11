@@ -64,10 +64,6 @@ static async countRecords(search, benignErrorReporter) {
 `;
 module.exports.doctor_readAll = `
 static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(
-      benignErrorReporter
-    );
     // build the whereOptions for limit-offset-based pagination
     const whereOptions = prestoHelper.searchConditionsToTrino(
       search,
@@ -82,7 +78,7 @@ static async readAll(search, order, pagination, benignErrorReporter) {
     const limit = pagination.limit;
     const offset = pagination.offset ? pagination.offset : 0;
 
-    let query = \`SELECT * FROM (SELECT row_number() over() AS rn, * FROM trino_doctors) \`;
+    let query = \`SELECT * FROM (SELECT row_number() over() AS rn, * FROM doctors) \`;
     query +=
       whereOptions !== ""
         ? \`\${whereOptions} AND (rn BETWEEN \${offset + 1} AND \${offset + limit})\`
@@ -109,10 +105,6 @@ static async readAll(search, order, pagination, benignErrorReporter) {
 
 module.exports.doctor_readAllCursor = `
 static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(
-        benignErrorReporter
-    );
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the whereOptions.
     let filter = prestoHelper.searchConditionsToTrino(search, definition);

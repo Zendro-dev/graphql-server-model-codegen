@@ -2,15 +2,29 @@ const { expect } = require("chai");
 const delay = require("delay");
 const path = require("path");
 const itHelpers = require("./integration_test_misc/integration_test_helpers");
+const AWS = require("aws-sdk");
+const fs = require("fs");
 
 describe("Amazon S3/ Minio - Upload/Read Operations", () => {
   it("01. Reader: CSV bulkUpload", async () => {
-    let csvPath = path.join(__dirname, "integration_test_misc", "reader.csv");
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddReaderCsv}"
-    );
-    expect(success).equal(true);
+    let csvPath = __dirname + "/integration_test_misc/minio/reader.csv";
+    try {
+      const s3 = new AWS.S3({
+        accessKeyId: "sciencedb",
+        secretAccessKey: "sciencedb",
+        endpoint: `http://127.0.0.1:9000`,
+        s3ForcePathStyle: true,
+        signatureVersion: "v4",
+      });
+      let file_param = {
+        Bucket: "sciencedb-development",
+        Key: "reader.csv",
+        Body: fs.createReadStream(csvPath),
+      };
+      await s3.upload(file_param).promise();
+    } catch (e) {
+      throw new Error(e);
+    }
     await delay(500);
 
     let cnt = await itHelpers.count_all_records("countReaders");
@@ -572,14 +586,14 @@ describe("Amazon S3 / Minio - Operators", () => {
   it("01. Reader: like, notLike ", () => {
     let res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:reader_name operator:like value:"%ly%"}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(2);
 
     res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notLike value:"%ly%"}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(3);
@@ -588,14 +602,14 @@ describe("Amazon S3 / Minio - Operators", () => {
   it("02. Reader: iLike, notILike ", () => {
     let res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:reader_name operator:iLike value:"%Ly%"}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(2);
 
     res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notILike value:"%Ly%"}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(3);
@@ -604,14 +618,14 @@ describe("Amazon S3 / Minio - Operators", () => {
   it("03. Reader: contains, notContains ", () => {
     let res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:history operator:contains value:"Critique of Pure Reason"}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(1);
 
     res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:history operator:notContains value:"Critique of Pure Reason"}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(4);
@@ -620,33 +634,40 @@ describe("Amazon S3 / Minio - Operators", () => {
   it("04. Reader: in, notIn ", () => {
     let res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:reader_name operator:in value:"Sally,Dom" valueType:Array}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     let resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(2);
 
     res = itHelpers.request_graph_ql_post(
       `{readersConnection(pagination: {first:10} search:{field:reader_name operator:notIn value:"Sally,Dom" valueType:Array}){readers{reader_id reader_name}}}`
-    )
+    );
     expect(res.statusCode).to.equal(200);
     resBody = JSON.parse(res.body.toString("utf8"));
     expect(resBody.data.readersConnection.readers.length).to.equal(3);
   });
-
-})
+});
 
 describe("Amazon S3/ Minio - Distributed Data Models", () => {
   it("01. Reader: CSV bulkUpload", async () => {
-    let csvPath = path.join(
-      __dirname,
-      "integration_test_misc",
-      "dist_reader.csv"
-    );
-    let success = await itHelpers.batch_upload_csv(
-      csvPath,
-      "mutation {bulkAddDist_readerCsv}"
-    );
-    expect(success).equal(true);
+    let csvPath = __dirname + "/integration_test_misc/minio/dist_reader.csv";
+    try {
+      const s3 = new AWS.S3({
+        accessKeyId: "sciencedb",
+        secretAccessKey: "sciencedb",
+        endpoint: `http://127.0.0.1:9000`,
+        s3ForcePathStyle: true,
+        signatureVersion: "v4",
+      });
+      let file_param = {
+        Bucket: "sciencedb-development",
+        Key: "dist_reader.csv",
+        Body: fs.createReadStream(csvPath),
+      };
+      await s3.upload(file_param).promise();
+    } catch (e) {
+      throw new Error(e);
+    }
     await delay(500);
 
     let cnt = await itHelpers.count_all_records("countDist_readers");

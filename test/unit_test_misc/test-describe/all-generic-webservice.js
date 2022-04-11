@@ -119,16 +119,17 @@ type Query {
     validatePersonForUpdating(id: ID!, firstName: String, lastName: String, Age: Int , addCompany:ID, removeCompany:ID   , addWorks:[ID], removeWorks:[ID]  , skipAssociationsExistenceChecks:Boolean = false): Boolean!
     validatePersonForDeletion(id: ID!): Boolean!
     validatePersonAfterReading(id: ID!): Boolean!
+    """
+    peopleZendroDefinition would return the static Zendro data model definition
+    """
+    peopleZendroDefinition: GraphQLJSONObject
 }
 
   type Mutation {
     addPerson( firstName: String, lastName: String, Age: Int,  addCompany: ID, addWorks:[ID], skipAssociationsExistenceChecks:Boolean = false): Person!
-  updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, addCompany: ID, removeCompany: ID, addWorks:[ID], removeWorks:[ID], skipAssociationsExistenceChecks:Boolean = false): Person!
-
-
-deletePerson(id: ID!): String!
-bulkAddPersonCsv: String!
-bulkAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String!
+    updatePerson(id: ID!, firstName: String, lastName: String, Age: Int, addCompany: ID, removeCompany: ID, addWorks:[ID], removeWorks:[ID], skipAssociationsExistenceChecks:Boolean = false): Person!
+    deletePerson(id: ID!): String!
+    bulkAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String!
     bulkDisAssociatePersonWithCompanyId(bulkAssociationInput: [bulkAssociationPersonWithCompanyIdInput], skipAssociationsExistenceChecks:Boolean = false): String! }
 
 `;

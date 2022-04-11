@@ -171,8 +171,6 @@ module.exports = class <%- nameLc -%>{
    * @return { edges, pageInfo } Object with edges and pageInfo.
    */
   static async readAllCursor(search, order, pagination, benignErrorReporter){
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(benignErrorReporter);
     let options = helper.buildCursorBasedGenericOptions(search, order, pagination, this.idAttribute());
     let records = await <%- nameLc -%>.readAll(options['search'], options['order'], options['pagination'], benignErrorReporter);
     // get the first record (if exists) in the opposite direction to determine pageInfo.

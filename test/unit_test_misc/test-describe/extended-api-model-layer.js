@@ -10,7 +10,7 @@ static async add_individual_id(id, individual_id, benignErrorReporter) {
     });
     return updated[0];
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error
       });
   }
@@ -62,7 +62,7 @@ static async remove_individual_id(id, individual_id, benignErrorReporter) {
     });
     return updated[0];
   } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
           message: error
       });
   }

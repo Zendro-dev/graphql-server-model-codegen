@@ -42,7 +42,7 @@ module.exports = class <%- adapterName -%>{
         let response = await axios.post(remoteZendroURL, {query:query});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+          benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
@@ -70,7 +70,7 @@ module.exports = class <%- adapterName -%>{
 
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+          benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
         // STATUS-CODE is 200
         // NO ERROR as such has been detected by the server (Express)
@@ -103,7 +103,7 @@ module.exports = class <%- adapterName -%>{
           let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
-            benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
           }
           // STATUS-CODE is 200
           // NO ERROR as such has been detected by the server (Express)
@@ -141,7 +141,7 @@ module.exports = class <%- adapterName -%>{
         let response = await axios.post(remoteZendroURL, {query:query,variables: input});
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
-          benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+          benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
         }
         if (response && response.data && response.data.data) {
           return response.data.data.add<%- nameCp -%>;
@@ -167,7 +167,7 @@ module.exports = class <%- adapterName -%>{
       let response = await axios.post(remoteZendroURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
@@ -202,7 +202,7 @@ module.exports = class <%- adapterName -%>{
       let response = await axios.post(remoteZendroURL, {query:query, variables:input});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       if (response && response.data && response.data.data) {
         return response.data.data.update<%- nameCp -%>;
@@ -225,11 +225,6 @@ module.exports = class <%- adapterName -%>{
   <%- include('./includes/create-adapter-fields-mutations', {op: "add"}); %>
   <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
 
-
-  static bulkAddCsv(context) {
-    throw new Error("<%- name -%>.bulkAddCsv is not implemented.")
-  }
-
   static async csvTableTemplate(benignErrorReporter){
     let query = `query { csvTableTemplate<%- nameCp-%> }`;
 
@@ -237,7 +232,7 @@ module.exports = class <%- adapterName -%>{
       let response = await axios.post(remoteZendroURL, {query:query});
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
-        benignErrorReporter.reportError(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
       }
       return response.data.data.csvTableTemplate<%- nameCp-%>;
     } catch(error) {
