@@ -99,7 +99,7 @@ module.exports = class <%- adapterName -%> {
   */
   static async readById(id){
     const db = await this.storageHandler;
-    const collection = await db.collection("<%- nameLc -%>");
+    const collection = await db.collection("<%- model_name_in_storage -%>");
     const id_name = this.idAttribute();
     let item = await collection.findOne({[id_name] : id});
     if (item === null) {
@@ -121,7 +121,7 @@ module.exports = class <%- adapterName -%> {
   static async countRecords(search){
     const filter = mongoDbHelper.searchConditionsToMongoDb(search);
     const db = await this.storageHandler;
-    const collection = await db.collection("<%- nameLc -%>");
+    const collection = await db.collection("<%- model_name_in_storage -%>");
     const number = await collection.countDocuments(filter);
     return number;
   }
@@ -157,7 +157,7 @@ module.exports = class <%- adapterName -%> {
     }
 
     const db = await this.storageHandler;
-    const collection = await db.collection("<%- nameLc -%>");
+    const collection = await db.collection("<%- model_name_in_storage -%>");
     let documents = limit
       ? await collection.find(filter).limit(limit).sort(sort).toArray()
       : await collection.find(filter).sort(sort).toArray();
@@ -219,7 +219,7 @@ module.exports = class <%- adapterName -%> {
     await validatorUtil.validateData('validateForCreate', this, input);
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("<%- nameLc -%>");
+        const collection = await db.collection("<%- model_name_in_storage -%>");
         const attributes = Object.keys(definition.attributes);
         let parsed_input = {};
         for (let key of Object.keys(input)) {
@@ -248,7 +248,7 @@ module.exports = class <%- adapterName -%> {
     await validatorUtil.validateData('validateForDelete', this, id);
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("<%- nameLc -%>");
+        const collection = await db.collection("<%- model_name_in_storage -%>");
         const id_name = this.idAttribute();
         const response = await collection.deleteOne({[id_name]: id});
         if (response.result.ok !== 1){
@@ -273,7 +273,7 @@ module.exports = class <%- adapterName -%> {
     await validatorUtil.validateData('validateForUpdate', this, input);
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("<%- nameLc -%>");
+        const collection = await db.collection("<%- model_name_in_storage -%>");
         const attributes = Object.keys(definition.attributes);
         const updatedContent = {};
         for (let key of Object.keys(input)) {

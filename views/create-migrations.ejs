@@ -20,7 +20,7 @@ module.exports = {
       const storageHandler = await zendro.adapters.<%-adapterName-%>.storageHandler;
       <%}-%>
       await storageHandler.getQueryInterface()
-        .createTable('<%-namePl-%>', {
+        .createTable('<%-model_name_in_storage-%>', {
         <%- idAttribute -%>: {
           type: Sequelize<%if(idAttributeType === 'String'){%>.STRING<%}else{%>[ dict['<%= idAttributeType %>'] ]<%}-%>,
           primaryKey: true<%if(defaultId){-%>,
@@ -53,7 +53,7 @@ module.exports = {
 
       })
       <%if(indices){ for(let i=0; i< indices.length; i++){-%>
-      await storageHandler.getQueryInterface().addIndex('<%-namePl-%>', ['<%= indices[i] %>']);
+      await storageHandler.getQueryInterface().addIndex('<%-model_name_in_storage-%>', ['<%= indices[i] %>']);
       <%}-%>   
       <%}-%>;
     } catch (error){
@@ -80,7 +80,7 @@ module.exports = {
             If you are sure about this, set environment variable 'DOWN_MIGRATION' to 'true' 
             and re-execute this down-migration.`); 
       }
-      await storageHandler.getQueryInterface().dropTable('<%-namePl-%>');
+      await storageHandler.getQueryInterface().dropTable('<%-model_name_in_storage-%>');
     } catch (error){
       throw new Error(error);
     }
