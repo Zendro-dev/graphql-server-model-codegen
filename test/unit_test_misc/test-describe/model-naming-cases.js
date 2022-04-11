@@ -16,8 +16,7 @@ module.exports.resolvers_webservice_aminoAcid = `
     }, context) {
         if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
             helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "aminoAcidSequences");
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await aminoAcidSequence.readAll(search, order, pagination, benignErrorReporter);
+            return await aminoAcidSequence.readAll(search, order, pagination, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -35,6 +34,10 @@ type Query {
     validateAminoAcidSequenceForUpdating(id: ID!, accession: String, sequence: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
     validateAminoAcidSequenceForDeletion(id: ID!): Boolean!
     validateAminoAcidSequenceAfterReading(id: ID!): Boolean!
+    """
+    aminoAcidSequencesZendroDefinition would return the static Zendro data model definition
+    """
+    aminoAcidSequencesZendroDefinition: GraphQLJSONObject
   }
 `;
 
@@ -78,11 +81,9 @@ inDiVIdual.prototype.transcriptCountsFilter = function({
 module.exports.individual_schema_camelcase = `
 type Mutation {
   addInDiVIdual( name: String , addTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
-updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
-
-
-deleteInDiVIdual(id: ID!): String!
-bulkAddInDiVIdualCsv: String! }
+  updateInDiVIdual(id: ID!, name: String , addTranscriptCounts:[ID], removeTranscriptCounts:[ID], skipAssociationsExistenceChecks:Boolean = false ): inDiVIdual!
+  deleteInDiVIdual(id: ID!): String!
+}
 `;
 
 module.exports.individual_model_camelcase = `
@@ -143,8 +144,7 @@ module.exports.transcriptCount_resolvers_camelcase = `
     }, context) {
         if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
             helper.checkCountAndReduceRecordsLimit(1, context, "readOneTranscriptCount");
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await transcriptCount.readById(id, benignErrorReporter);
+            return await transcriptCount.readById(id, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

@@ -1,6 +1,6 @@
 module.exports.individual_schema = `
 countIndividuals(search: searchIndividualInput ): Int
-`
+`;
 
 module.exports.individual_resolvers = `
 /**
@@ -14,13 +14,12 @@ module.exports.individual_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await individual.countRecords(search, benignErrorReporter);
+            return await individual.countRecords(search, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;
 
 module.exports.specie_resolvers = `
 /**
@@ -34,10 +33,9 @@ module.exports.specie_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'Specie', 'read') === true) {
-            let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-            return await specie.countRecords(search, benignErrorReporter);
+            return await specie.countRecords(search, context.benignErrors);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
     },
-`
+`;

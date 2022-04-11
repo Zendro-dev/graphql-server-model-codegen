@@ -79,8 +79,6 @@ module.exports = class <%- nameLc -%>{
         throw new Error("IRI has no match WS");
       }
 
-      //use default BenignErrorReporter if no BenignErrorReporter defined
-      benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
       return adapters[responsibleAdapter[0]].readById(id, benignErrorReporter).then(result => {
         let item = new <%- nameLc -%>(result);
         return validatorUtil.validateData('validateAfterRead', this, item);
@@ -111,9 +109,6 @@ module.exports = class <%- nameLc -%>{
     if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
       searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
-
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
 
     let promises = authAdapters.map( adapter => {
       /**
@@ -152,7 +147,7 @@ module.exports = class <%- nameLc -%>{
         return results.reduce((total, current) => {
             //check if current is Error
             if (current.status === 'rejected') {
-                benignErrorReporter.reportError(current.reason);
+                benignErrorReporter.push(current.reason);
             }
             //check current result
             else if (current.status === 'fulfilled') {
@@ -186,10 +181,6 @@ module.exports = class <%- nameLc -%>{
     if (helper.isNotUndefinedAndNotNull(searchAuthorizedAdapters)) {
       searchAuthAdapters = Array.from(searchAuthorizedAdapters).filter(adapter => adapter.adapterType === 'cassandra-adapter').map(adapter => adapter.adapterName);
     }
-
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
-
 
     let isForwardPagination = !pagination || !(pagination.last != undefined);
     let promises = authAdapters.map(adapter => {
@@ -232,7 +223,7 @@ module.exports = class <%- nameLc -%>{
       return results.reduce( (total, current)=> {
         //check if current is Error
         if (current.status === 'rejected') {
-            benignErrorReporter.reportError(current.reason);
+            benignErrorReporter.push(current.reason);
         }
         //check current
         else if (current.status === 'fulfilled') {
@@ -288,8 +279,6 @@ module.exports = class <%- nameLc -%>{
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
     return adapters[responsibleAdapter].addOne(input, benignErrorReporter).then(result => new <%- nameLc -%>(result));
   }
 
@@ -297,8 +286,6 @@ module.exports = class <%- nameLc -%>{
     //validate input
     await validatorUtil.validateData('validateForDelete', this, id);
     let responsibleAdapter = this.adapterForIri(id);
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
     return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter);
   }
 
@@ -307,8 +294,6 @@ module.exports = class <%- nameLc -%>{
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef( benignErrorReporter );
     return adapters[responsibleAdapter].updateOne(input, benignErrorReporter).then(result => new <%- nameLc -%>(result));
 
   }

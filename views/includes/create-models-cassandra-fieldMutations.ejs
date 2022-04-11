@@ -15,7 +15,7 @@
       let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
       return parseInt(result.first()["count"]);
     } catch (error) {
-      benignErrorReporter.reportError({
+      benignErrorReporter.push({
         message: error,
       });
     }

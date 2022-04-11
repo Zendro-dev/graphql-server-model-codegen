@@ -148,16 +148,23 @@ describe("Neo4j - Basic CRUD Operations", () => {
   it("07. Movie: CSV bulkUpload", async () => {
     let res = itHelpers.request_graph_ql_post_instance2("{ countMovies }");
     let cnt1 = JSON.parse(res.body.toString("utf8")).data.countMovies;
-
     res = itHelpers.request_graph_ql_post_instance2(
-      "mutation {bulkAddMovieCsv}"
+      `mutation{
+        n0: addMovie(movie_id:"m1", release:"2008-12-03T10:15:30Z", runtime:130, box_office:17845632.32, 
+            is_adult:true, genres:["action","thriller"], votes: [50,200,140,1200,150]) {movie_id}
+        n1: addMovie(movie_id:"m2", release:"2008-12-03T10:15:30Z", runtime:110, box_office:15645632.32, 
+            is_adult:true, genres:["comedy"], votes: [1,2,14,1200,15000]) {movie_id}
+        n2: addMovie(movie_id:"m3", release:"2008-12-03T10:15:30Z", runtime:120, box_office:12345632.32, 
+            is_adult:false, genres:["crime","horror"], votes: [10,21,40,1000,10000]) {movie_id}
+        n3: addMovie(movie_id:"m4", release:"2008-12-03T10:15:30Z", runtime:120, box_office:15645632.32, 
+            is_adult:false, genres:["crime","horror"], votes: [1,2,14,1000,15000]) {movie_id}
+        n4: addMovie(movie_id:"m5", release:"2008-12-03T10:15:30Z", runtime:100, box_office:145632.32, 
+            is_adult:false, genres:["action","mystery"], votes: [5,20,150,1300,1500]) {movie_id}
+        n5: addMovie(movie_id:"m6", release:"2008-12-03T10:15:30Z", runtime:109, box_office:175632.32, 
+            is_adult:true, genres:["wuxia","mystery"], votes: [2,50,140,800,14000]) {movie_id}
+      }`
     );
-
-    expect(JSON.parse(res.body.toString("utf8")).data.bulkAddMovieCsv).equal(
-      "Successfully upload file"
-    );
-    await delay(500);
-
+    expect(res.statusCode).to.equal(200);
     res = itHelpers.request_graph_ql_post_instance2("{ countMovies }");
     let cnt2 = JSON.parse(res.body.toString("utf8")).data.countMovies;
     expect(cnt2 - cnt1).to.equal(6);
@@ -308,13 +315,22 @@ describe("Neo4j - Basic CRUD Operations", () => {
 describe("Neo4j - Operators", () => {
   before(async () => {
     let res = itHelpers.request_graph_ql_post_instance2(
-      "mutation {bulkAddMovieCsv}"
+      `mutation{
+        n0: addMovie(movie_id:"m1", release:"2008-12-03T10:15:30Z", runtime:130, box_office:17845632.32, 
+            is_adult:true, genres:["action","thriller"], votes: [50,200,140,1200,150]) {movie_id}
+        n1: addMovie(movie_id:"m2", release:"2008-12-03T10:15:30Z", runtime:110, box_office:15645632.32, 
+            is_adult:true, genres:["comedy"], votes: [1,2,14,1200,15000]) {movie_id}
+        n2: addMovie(movie_id:"m3", release:"2008-12-03T10:15:30Z", runtime:120, box_office:12345632.32, 
+            is_adult:false, genres:["crime","horror"], votes: [10,21,40,1000,10000]) {movie_id}
+        n3: addMovie(movie_id:"m4", release:"2008-12-03T10:15:30Z", runtime:120, box_office:15645632.32, 
+            is_adult:false, genres:["crime","horror"], votes: [1,2,14,1000,15000]) {movie_id}
+        n4: addMovie(movie_id:"m5", release:"2008-12-03T10:15:30Z", runtime:100, box_office:145632.32, 
+            is_adult:false, genres:["action","mystery"], votes: [5,20,150,1300,1500]) {movie_id}
+        n5: addMovie(movie_id:"m6", release:"2008-12-03T10:15:30Z", runtime:109, box_office:175632.32, 
+            is_adult:true, genres:["wuxia","mystery"], votes: [2,50,140,800,14000]) {movie_id}
+      }`
     );
-
-    expect(JSON.parse(res.body.toString("utf8")).data.bulkAddMovieCsv).equal(
-      "Successfully upload file"
-    );
-    await delay(500);
+    expect(res.statusCode).to.equal(200);
 
     res = itHelpers.request_graph_ql_post_instance2(
       `mutation {
@@ -467,13 +483,22 @@ describe("Neo4j - Association", () => {
   // set up the environment
   before(async () => {
     let res = itHelpers.request_graph_ql_post_instance2(
-      "mutation {bulkAddMovieCsv}"
+      `mutation{
+        n0: addMovie(movie_id:"m1", release:"2008-12-03T10:15:30Z", runtime:130, box_office:17845632.32, 
+            is_adult:true, genres:["action","thriller"], votes: [50,200,140,1200,150]) {movie_id}
+        n1: addMovie(movie_id:"m2", release:"2008-12-03T10:15:30Z", runtime:110, box_office:15645632.32, 
+            is_adult:true, genres:["comedy"], votes: [1,2,14,1200,15000]) {movie_id}
+        n2: addMovie(movie_id:"m3", release:"2008-12-03T10:15:30Z", runtime:120, box_office:12345632.32, 
+            is_adult:false, genres:["crime","horror"], votes: [10,21,40,1000,10000]) {movie_id}
+        n3: addMovie(movie_id:"m4", release:"2008-12-03T10:15:30Z", runtime:120, box_office:15645632.32, 
+            is_adult:false, genres:["crime","horror"], votes: [1,2,14,1000,15000]) {movie_id}
+        n4: addMovie(movie_id:"m5", release:"2008-12-03T10:15:30Z", runtime:100, box_office:145632.32, 
+            is_adult:false, genres:["action","mystery"], votes: [5,20,150,1300,1500]) {movie_id}
+        n5: addMovie(movie_id:"m6", release:"2008-12-03T10:15:30Z", runtime:109, box_office:175632.32, 
+            is_adult:true, genres:["wuxia","mystery"], votes: [2,50,140,800,14000]) {movie_id}
+      }`
     );
-
-    expect(JSON.parse(res.body.toString("utf8")).data.bulkAddMovieCsv).equal(
-      "Successfully upload file"
-    );
-    await delay(500);
+    expect(res.statusCode).to.equal(200);
   });
 
   // clean up records

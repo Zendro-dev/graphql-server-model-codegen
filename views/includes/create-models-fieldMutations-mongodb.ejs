@@ -16,13 +16,13 @@
             const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
             {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
             if (response.result.ok !== 1){
-                benignErrorReporter.reportError({
+                benignErrorReporter.push({
                     message: `Record with ID = ${<%- idAttribute-%>} has not been updated`
                 });
             }
             return response.modifiedCount;
         } catch (error) {
-            benignErrorReporter.reportError({
+            benignErrorReporter.push({
                 message:error
             });
         }

@@ -163,15 +163,11 @@ module.exports = class <%- nameLc -%> {
   }
 
   /**
-   * readAll - Limit-offset based pagination is not offered by Trino, and this method is left here only as information
-   * to the user / developer. Use *readAllCursor* instead, which relies on cursor based pagination.
+   * readAll - Limit-offset based pagination is not originally offered by Trino, and this method is implemented
+   * via SQL window.
    * @throw {Error} If this method is used at all, an Error is thrown
    */
   static async readAll(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(
-      benignErrorReporter
-    );
     // build the whereOptions for limit-offset-based pagination
     const whereOptions = prestoHelper.searchConditionsToTrino(
       search,
@@ -218,10 +214,6 @@ module.exports = class <%- nameLc -%> {
    * @return {object} The set of records, possibly constrained by pagination, with full cursor information for all records
    */
   static async readAllCursor(search, order, pagination, benignErrorReporter) {
-    //use default BenignErrorReporter if no BenignErrorReporter defined
-    benignErrorReporter = errorHelper.getDefaultBenignErrorReporterIfUndef(
-      benignErrorReporter
-    );
     let isForwardPagination = helper.isForwardPagination(pagination);
     // build the whereOptions.
     let filter = prestoHelper.searchConditionsToTrino(search, definition);

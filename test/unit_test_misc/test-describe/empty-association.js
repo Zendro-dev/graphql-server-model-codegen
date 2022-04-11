@@ -9,15 +9,17 @@ type Query {
     validateTranscript_countForUpdating(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
     validateTranscript_countForDeletion(id: ID!): Boolean!
     validateTranscript_countAfterReading(id: ID!): Boolean!
+    """
+    transcript_countsZendroDefinition would return the static Zendro data model definition
+    """
+    transcript_countsZendroDefinition: GraphQLJSONObject
   }
 
   type Mutation {
     addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!
-  updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, skipAssociationsExistenceChecks:Boolean = false ): transcript_count!
-
-
-deleteTranscript_count(id: ID!): String!
-bulkAddTranscript_countCsv: String! }
+    updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, skipAssociationsExistenceChecks:Boolean = false ): transcript_count!
+    deleteTranscript_count(id: ID!): String!
+}
 `;
 
 module.exports.individual_no_assoc_resolvers = `
@@ -38,8 +40,7 @@ module.exports.individual_no_assoc_resolvers = `
   }, context) {
       if (await checkAuthorization(context, 'individual', 'read') === true) {
           helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "individuals");
-          let benignErrorReporter = new errorHelper.BenignErrorReporter(context);
-          return await individual.readAll(search, order, pagination, benignErrorReporter);
+          return await individual.readAll(search, order, pagination, context.benignErrors);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }

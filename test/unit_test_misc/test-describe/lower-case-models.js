@@ -9,12 +9,15 @@ type Query {
     validateTranscript_countForUpdating(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String , addIndividual:ID, removeIndividual:ID    , skipAssociationsExistenceChecks:Boolean = false): Boolean!
     validateTranscript_countForDeletion(id: ID!): Boolean!
     validateTranscript_countAfterReading(id: ID!): Boolean!
+    """
+    transcript_countsZendroDefinition would return the static Zendro data model definition
+    """
+    transcript_countsZendroDefinition: GraphQLJSONObject
   }
 
   type Mutation {
     addTranscript_count( gene: String, variable: String, count: Float, tissue_or_condition: String,  addIndividual:ID, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!
-  updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, addIndividual:ID, removeIndividual: ID, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!
-
+    updateTranscript_count(id: ID!, gene: String, variable: String, count: Float, tissue_or_condition: String, addIndividual:ID, removeIndividual: ID, skipAssociationsExistenceChecks:Boolean = false  ): transcript_count!
 `;
 
 module.exports.individual_resolvers_association = `
