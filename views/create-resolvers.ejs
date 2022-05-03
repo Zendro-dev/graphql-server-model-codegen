@@ -754,7 +754,7 @@ module.exports = {
   <%- namePl -%>: async function({search, order, pagination}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read' )=== true) {
           helper.checkCountAndReduceRecordsLimit(pagination.limit, context,  "<%- namePl -%>");
-          return await <%- nameLc -%>.readAll(search, order, pagination, context.benignErrors);
+          return await <%- nameLc -%>.readAll(search, order, pagination, context.benignErrors, context.request.headers.authorization);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -776,7 +776,7 @@ module.exports = {
           let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
           helper.checkCountAndReduceRecordsLimit(limit, context, "<%- namePl -%>Connection");
           <% if(storageType === 'cassandra'){_%>let allowFiltering = await checkAuthorization(context, '<%- name -%>', 'search');<%}_%>
-          return await <%- nameLc -%>.readAllCursor(search, <% if(storageType !== 'cassandra'){_%>order,<%}_%> pagination, context.benignErrors<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
+          return await <%- nameLc -%>.readAllCursor(search, <% if(storageType !== 'cassandra'){_%>order,<%}_%> pagination, context.benignErrors<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>, context.request.headers.authorization);
        } else {
            throw new Error("You don't have authorization to perform this action");
        }
@@ -792,7 +792,7 @@ module.exports = {
   readOne<%- nameCp -%>: async function({<%- idAttribute -%> }, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
         helper.checkCountAndReduceRecordsLimit(1, context, "readOne<%- nameCp -%>");
-        return await <%- nameLc -%>.readById(<%- idAttribute -%>, context.benignErrors);
+        return await <%- nameLc -%>.readById(<%- idAttribute -%>, context.benignErrors, context.request.headers.authorization);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
@@ -808,7 +808,7 @@ module.exports = {
   count<%-namePlCp-%>: async function({search}, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
         <% if(storageType === 'cassandra'){_%>let allowFiltering = await checkAuthorization(context, '<%- name -%>', 'search');<%}_%>
-        return await <%- nameLc -%>.countRecords(search, context.benignErrors<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>);
+        return await <%- nameLc -%>.countRecords(search, context.benignErrors<% if(storageType === 'cassandra'){_%>,allowFiltering<%}_%>, context.request.headers.authorization);
       } else {
         throw new Error("You don't have authorization to perform this action");
       }
@@ -969,8 +969,8 @@ module.exports = {
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized, context.benignErrors);
-            await created<%- nameCp -%>.handleAssociations(inputSanitized, context.benignErrors);
+            let created<%- nameCp -%> = await  <%- nameLc -%>.addOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+            await created<%- nameCp -%>.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
             return created<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -988,7 +988,7 @@ module.exports = {
       if (await checkAuthorization(context, '<%- name -%>', 'delete') === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
             await updateAssociations(<%- idAttribute -%>, context);
-            return <%- nameLc -%>.deleteOne(<%- idAttribute -%>, context.benignErrors);
+            return <%- nameLc -%>.deleteOne(<%- idAttribute -%>, context.benignErrors, context.request.headers.authorization);
         }
       } else {
         throw new Error("You don't have authorization to perform this action");
@@ -1013,8 +1013,8 @@ module.exports = {
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized, context.benignErrors);
-            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context.benignErrors);
+            let updated<%- nameCp -%> = await  <%- nameLc -%>.updateOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+            await updated<%- nameCp -%>.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
             return updated<%- nameCp -%>;
         } else {
             throw new Error("You don't have authorization to perform this action");

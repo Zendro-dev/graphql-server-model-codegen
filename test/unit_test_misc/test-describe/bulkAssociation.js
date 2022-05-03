@@ -24,16 +24,17 @@ module.exports.bulkAssociation_resolver_add = `
  * @return {string} returns message on success
  */
 bulkAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
+    const token = context.request.headers.authorization;
     //if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
             internalPersonId
-        }) => internalPersonId)), models.person);
+        }) => internalPersonId)), models.person, token);
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
             internalBookId
-        }) => internalBookId)), book);
+        }) => internalBookId)), book, token);
     }
-    return await book.bulkAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, context.benignErrors);
+    return await book.bulkAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, context.benignErrors, token);
 }
 `;
 
@@ -46,16 +47,17 @@ module.exports.bulkAssociation_resolver_remove = `
  * @return {string} returns message on success
  */
 bulkDisAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
+    const token = context.request.headers.authorization;
     // if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
             internalPersonId
-        }) => internalPersonId)), models.person);
+        }) => internalPersonId)), models.person, token);
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
             internalBookId
-        }) => internalBookId)), book);
+        }) => internalBookId)), book, token);
     }
-    return await book.bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, context.benignErrors);
+    return await book.bulkDisAssociateBookWithInternalPersonId(bulkAssociationInput.bulkAssociationInput, context.benignErrors, token);
 }
 `;
 
@@ -121,20 +123,32 @@ module.exports.bulkAssociation_model_zendro_ddm_adapter_add = `
  *
  * @param  {array} bulkAssociationInput Array of associations to add
  * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param  {string} token The token used for authorization
  * @return {string} returns message on success
  */
-static async bulkAssociateDogWithVeterinarianId(bulkAssociationInput, benignErrorReporter) {
+static async bulkAssociateDogWithVeterinarianId(bulkAssociationInput, benignErrorReporter, token) {
     let query = \`mutation  bulkAssociateDogWithVeterinarianId($bulkAssociationInput: [bulkAssociationDogWithVeterinarianIdInput]){
       bulkAssociateDogWithVeterinarianId(bulkAssociationInput: $bulkAssociationInput, skipAssociationsExistenceChecks: true) 
     }\`
     try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteZendroURL, {
-            query: query,
-            variables: {
-                bulkAssociationInput: bulkAssociationInput
-            }
-        });
+        let opts = {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/graphql",
+            },
+          };
+          if (token) {
+            opts.headers["authorization"] = token;
+          }
+          let response = await axios.post(
+            remoteZendroURL, 
+            {
+              query: query,
+              variables: {bulkAssociationInput: bulkAssociationInput},
+            },
+            opts
+        );  
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if (helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -161,20 +175,32 @@ module.exports.bulkAssociation_model_zendro_ddm_adapter_remove = `
  *
  * @param  {array} bulkAssociationInput Array of associations to remove
  * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param  {string} token The token used for authorization 
  * @return {string} returns message on success
  */
-static async bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput, benignErrorReporter) {
+static async bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput, benignErrorReporter, token) {
     let query = \`mutation  bulkDisAssociateDogWithVeterinarianId($bulkAssociationInput: [bulkAssociationDogWithVeterinarianIdInput]){
       bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput: $bulkAssociationInput, skipAssociationsExistenceChecks: true) 
     }\`
     try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteZendroURL, {
-            query: query,
-            variables: {
-                bulkAssociationInput: bulkAssociationInput
-            }
-        });
+        let opts = {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/graphql",
+            },
+          };
+          if (token) {
+            opts.headers["authorization"] = token;
+          }
+          let response = await axios.post(
+            remoteZendroURL, 
+            {
+              query: query,
+              variables: {bulkAssociationInput: bulkAssociationInput},
+            },
+            opts
+        );
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if (helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -201,13 +227,14 @@ module.exports.bulkAssociation_model_ddm_add = `
  *
  * @param  {array} bulkAssociationInput Array of associations to add
  * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param  {string} token The token used for authorization 
  * @return {string} returns message on success
  */
-static async bulkAssociateDogWithPersonId(bulkAssociationInput, benignErrorReporter) {
+static async bulkAssociateDogWithPersonId(bulkAssociationInput, benignErrorReporter, token) {
   let mappedBulkAssociateInputToAdapters = this.mapBulkAssociationInputToAdapters(bulkAssociationInput);
   var promises = [];
   Object.keys(mappedBulkAssociateInputToAdapters).forEach(responsibleAdapter => {
-      promises.push(adapters[responsibleAdapter].bulkAssociateDogWithPersonId(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter))
+      promises.push(adapters[responsibleAdapter].bulkAssociateDogWithPersonId(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter, token))
   });
   await Promise.all(promises);
   return "Records successfully updated!";
@@ -220,13 +247,14 @@ module.exports.bulkAssociation_model_ddm_remove = `
  *
  * @param  {array} bulkAssociationInput Array of associations to remove
  * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param  {string} token The token used for authorization 
  * @return {string} returns message on success
  */
-static async bulkDisAssociateDogWithPersonId(bulkAssociationInput, benignErrorReporter) {
+static async bulkDisAssociateDogWithPersonId(bulkAssociationInput, benignErrorReporter, token) {
     let mappedBulkAssociateInputToAdapters = this.mapBulkAssociationInputToAdapters(bulkAssociationInput);
     var promises = [];
     Object.keys(mappedBulkAssociateInputToAdapters).forEach(responsibleAdapter => {
-        promises.push(adapters[responsibleAdapter].bulkDisAssociateDogWithPersonId(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter))
+        promises.push(adapters[responsibleAdapter].bulkDisAssociateDogWithPersonId(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter, token))
     });
     await Promise.all(promises);
     return "Records successfully updated!";

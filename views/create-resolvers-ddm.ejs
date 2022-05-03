@@ -302,7 +302,7 @@ const associationArgsDef = {
  * @param  {objec} context Default context by resolver
  * @return {Int}         Number of associated records
  */
-async function countAssociatedRecordsWithRejectReaction(id, context ){
+async function countAssociatedRecordsWithRejectReaction(id, context){
 
   let <%- nameLc %> = await resolvers.readOne<%- nameCp -%>({<%- idAttribute-%>: id}, context);
   //check that record actually exists
@@ -523,7 +523,7 @@ module.exports = {
         context.benignErrors.push(authorizationCheck.authorizationErrors);
       }
       let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-      return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters);
+      return await <%- nameLc _%>.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, context.request.headers.authorization);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -548,7 +548,7 @@ module.exports = {
       if (authorizationCheck === true) {
         helper.checkCountAndReduceRecordsLimit(1, context, "readOne<%- nameCp -%>");
 
-        return <%- nameLc _%>.readById(<%- idAttribute _%>, context.benignErrors);
+        return <%- nameLc _%>.readById(<%- idAttribute _%>, context.benignErrors, context.request.headers.authorization);
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
       }
@@ -577,8 +577,8 @@ module.exports = {
            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
          }
 
-          let createdRecord = await <%- nameLc _%>.addOne(inputSanitized, context.benignErrors);
-          await createdRecord.handleAssociations(inputSanitized, context.benignErrors);
+          let createdRecord = await <%- nameLc _%>.addOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+          await createdRecord.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
           return createdRecord;
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
@@ -598,7 +598,7 @@ module.exports = {
       if (authorizationCheck === true) {
         if(await validForDeletion(<%- idAttribute -%>, context) ){
           await updateAssociations(<%- idAttribute -%>, context);
-          return <%- nameLc _%>.deleteOne(<%- idAttribute _%>, context.benignErrors);
+          return <%- nameLc _%>.deleteOne(<%- idAttribute _%>, context.benignErrors, context.request.headers.authorization);
         }
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
@@ -627,8 +627,8 @@ module.exports = {
          if(!input.skipAssociationsExistenceChecks) {
            await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
          }
-         let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized, context.benignErrors);
-         await updatedRecord.handleAssociations(inputSanitized, context.benignErrors);
+         let updatedRecord = await <%- nameLc _%>.updateOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+         await updatedRecord.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
          return updatedRecord;
       } else {//adapter not auth
         throw new Error("You don't have authorization to perform this action on adapter");
@@ -665,7 +665,7 @@ module.exports = {
           context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        return await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters);
+        return await <%- nameLc -%>.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, context.request.headers.authorization);
       } else { //adapters not auth || errors
           // else new Error
           if (authorizationCheck.authorizationErrors.length > 0) {
@@ -687,11 +687,11 @@ module.exports = {
    * @return {Array}         Strings, one for header and one columns types
    */
   csvTableTemplate<%- nameCp-%>: async function(_, context){
-        if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-            return <%- nameLc -%>.csvTableTemplate(context.benignErrors);
-        } else {
-            throw new Error("You don't have authorization to perform this action");
-        }
+    if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
+      return <%- nameLc -%>.csvTableTemplate(context.benignErrors);
+    } else {
+      throw new Error("You don't have authorization to perform this action");
+    }
   },
 
   /**

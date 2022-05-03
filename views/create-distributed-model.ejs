@@ -69,7 +69,7 @@ module.exports = class <%- nameLc -%>{
     return mappedInput;
   }
 
-  static readById(id, benignErrorReporter) {
+  static readById(id, benignErrorReporter, token) {
     if(id!==null){
       let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -79,14 +79,14 @@ module.exports = class <%- nameLc -%>{
         throw new Error("IRI has no match WS");
       }
 
-      return adapters[responsibleAdapter[0]].readById(id, benignErrorReporter).then(result => {
+      return adapters[responsibleAdapter[0]].readById(id, benignErrorReporter, token).then(result => {
         let item = new <%- nameLc -%>(result);
         return validatorUtil.validateData('validateAfterRead', this, item);
       });
     }
   }
 
-  static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters){
+  static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters, token){
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -125,7 +125,7 @@ module.exports = class <%- nameLc -%>{
         case 'ddm-adapter':
         case 'generic-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.countRecords(nsearch, benignErrorReporter);
+          return adapter.countRecords(nsearch, benignErrorReporter, token);
 
         case 'sql-adapter':
         case 'mongodb-adapter':
@@ -133,8 +133,9 @@ module.exports = class <%- nameLc -%>{
         case 'trino-adapter':
         case 'presto-adapter':
         case 'neo4j-adapter':
-        case 'zendro-webservice-adapter':
           return adapter.countRecords(search, benignErrorReporter);
+        case 'zendro-webservice-adapter':
+          return adapter.countRecords(search, benignErrorReporter, token);
         case 'cassandra-adapter':
           return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
@@ -158,7 +159,7 @@ module.exports = class <%- nameLc -%>{
     });
   }
 
-  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+  static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters, token) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -197,8 +198,7 @@ module.exports = class <%- nameLc -%>{
       switch(adapter.adapterType) {
         case 'ddm-adapter':
           let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
-
+          return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter, token);
         case 'generic-adapter':
         case 'sql-adapter':
         case 'mongodb-adapter':
@@ -206,8 +206,9 @@ module.exports = class <%- nameLc -%>{
         case 'trino-adapter':
         case 'presto-adapter':
         case 'neo4j-adapter':
-        case 'zendro-webservice-adapter':
           return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+        case 'zendro-webservice-adapter': 
+          return adapter.readAllCursor(search, order, pagination, benignErrorReporter, token);
         case 'cassandra-adapter':
           return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
@@ -274,38 +275,28 @@ module.exports = class <%- nameLc -%>{
     return true;
   }
 
-  static async addOne(input, benignErrorReporter) {
+  static async addOne(input, benignErrorReporter, token) {
     this.assertInputHasId(input);
     //validate input
     await validatorUtil.validateData('validateForCreate', this, input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-    return adapters[responsibleAdapter].addOne(input, benignErrorReporter).then(result => new <%- nameLc -%>(result));
+    return adapters[responsibleAdapter].addOne(input, benignErrorReporter, token).then(result => new <%- nameLc -%>(result));
   }
 
-  static async deleteOne(id, benignErrorReporter) {
+  static async deleteOne(id, benignErrorReporter, token) {
     //validate input
     await validatorUtil.validateData('validateForDelete', this, id);
     let responsibleAdapter = this.adapterForIri(id);
-    return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter);
+    return adapters[responsibleAdapter].deleteOne(id, benignErrorReporter, token);
   }
 
-  static async updateOne(input, benignErrorReporter) {
+  static async updateOne(input, benignErrorReporter, token) {
     this.assertInputHasId(input);
     //validate input
     await validatorUtil.validateData('validateForUpdate', this, input);
     let responsibleAdapter = this.adapterForIri(input.<%- idAttribute -%>);
-    return adapters[responsibleAdapter].updateOne(input, benignErrorReporter).then(result => new <%- nameLc -%>(result));
+    return adapters[responsibleAdapter].updateOne(input, benignErrorReporter, token).then(result => new <%- nameLc -%>(result));
 
-  }
-
-  static bulkAddCsv(context) {
-    let responsibleAdapter = registry.filter(adapter => adapters[adapter].adapterType!=="ddm-adapter");
-    if (responsibleAdapter.length > 1) {
-      throw new Error("match more than one adapter");
-    } else if (responsibleAdapter.length === 0) {
-      throw new Error("doesn't match an adapter");
-    }
-    return adapters[responsibleAdapter[0]].bulkAddCsv(context);
   }
 
   /**

@@ -85,15 +85,15 @@ author.prototype.countFilteredBooks = function({search}, context){
 `;
 
 module.exports.resolver_add_association = `
-author.prototype.add_books = async function(input, benignErrorReporter){
-  await author.add_book_ids(this.getIdValue(), input.addBooks, benignErrorReporter);
+author.prototype.add_books = async function(input, benignErrorReporter, token){
+  await author.add_book_ids(this.getIdValue(), input.addBooks, benignErrorReporter, token);
   this.book_ids =  helper.unionIds(this.book_ids, input.addBooks);
 }
 `;
 
 module.exports.resolver_remove_association = `
-author.prototype.remove_books = async function(input, benignErrorReporter){
-  await author.remove_book_ids(this.getIdValue(), input.removeBooks, benignErrorReporter);
+author.prototype.remove_books = async function(input, benignErrorReporter, token){
+  await author.remove_book_ids(this.getIdValue(), input.removeBooks, benignErrorReporter, token);
   this.book_ids = helper.differenceIds(this.book_ids, input.removeBooks);
 }
 `;
@@ -139,7 +139,7 @@ module.exports.model_remove_association = `
  `;
 
 module.exports.remote_model_add_association = `
- static async add_book_ids(id, book_ids,benignErrorReporter) {
+ static async add_book_ids(id, book_ids,benignErrorReporter, token) {
 
    let query = \`
          mutation
@@ -155,7 +155,22 @@ module.exports.remote_model_add_association = `
 
    try {
      // Send an HTTP request to the remote server
-     let response = await axios.post(remoteZendroURL, {query:query});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+        },
+        opts
+      );
      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
      if(helper.isNonEmptyArray(response.data.errors)) {
        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -178,7 +193,7 @@ module.exports.remote_model_add_association = `
  `;
 
 module.exports.remote_model_remove_association = `
- static async remove_book_ids(id, book_ids,benignErrorReporter) {
+ static async remove_book_ids(id, book_ids,benignErrorReporter, token) {
 
    let query = \`
          mutation
@@ -194,7 +209,22 @@ module.exports.remote_model_remove_association = `
 
    try {
      // Send an HTTP request to the remote server
-     let response = await axios.post(remoteZendroURL, {query:query});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+        },
+        opts
+      );
      //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
      if(helper.isNonEmptyArray(response.data.errors)) {
        benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -216,9 +246,9 @@ module.exports.remote_model_remove_association = `
  `;
 
 module.exports.ddm_model_add = `
-static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true) {
+static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true, token) {
   let responsibleAdapter = this.adapterForIri(id);
-  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter, handle_inverse);
+  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter, handle_inverse, token);
 
 }
 
@@ -247,7 +277,7 @@ static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = tr
 `;
 
 module.exports.zendro_adapter_remove = `
-static async remove_book_ids(id, book_ids, benignErrorReporter) {
+static async remove_book_ids(id, book_ids, benignErrorReporter, token) {
     let query = \`
             mutation
               updateSq_author{
@@ -261,9 +291,22 @@ static async remove_book_ids(id, book_ids, benignErrorReporter) {
 
     try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteZendroURL, {
-            query: query
-        });
+        let opts = {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/graphql",
+          },
+        };
+        if (token) {
+          opts.headers["authorization"] = token;
+        }
+        let response = await axios.post(
+          remoteZendroURL, 
+          {
+            query: query,
+          },
+          opts
+        );
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if (helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));

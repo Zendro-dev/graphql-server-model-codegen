@@ -5,6 +5,11 @@ const csvExportUrl = "http://0.0.0.0:3000/export";
 const metaqueryUrl = "http://0.0.0.0:3000/meta_query";
 const srvUrl = "http://0.0.0.0:3344";
 const graphqlUrlInstance2 = "http://0.0.0.0:3030/graphql";
+const tokenUri =
+  "http://10.5.0.11:8081/auth/realms/zendro/protocol/openid-connect/token";
+const clientId = "zendro_graphql-server";
+const username = "zendro-admin";
+const password = "admin";
 
 /**
  * request_graph_ql_post - Send "POST" request to the local GraphQL server
@@ -32,6 +37,78 @@ module.exports.request_graph_ql_post_instance2 = function (query) {
       query: `${query}`,
     },
   });
+};
+
+/**
+ * get_token - get token for authorization
+ *
+ * @return {string}          token
+ */
+module.exports.get_token = async () => {
+  const res = await axios({
+    method: "post",
+    url: tokenUri,
+    data: `username=${username}&password=${password}&grant_type=password&client_id=${clientId}`,
+    headers: {
+      "content-type": "application/x-www-form-urlencoded;charset=utf-8",
+    },
+  });
+  if (res && res.data) {
+    return res.data.access_token;
+  } else {
+    throw new Error("No token found");
+  }
+};
+/**
+ * axios_graph_ql_post - Send "POST" request to the local GraphQL server 1 with token
+ *
+ * @param  {query} {string}  Any query string in GraphQL format
+ * @param  {string} token    The token used for authorization
+ * @return {object}          Request response
+ */
+module.exports.axios_graph_ql_post = async (query, token) => {
+  try {
+    const response = await axios.post(
+      graphqlUrl,
+      { query: query },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+          authorization: "Bearer " + token,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+/**
+ * axios_graph_ql_post_instance2 - Send "POST" request to the local GraphQL server 2 with token
+ *
+ * @param  {query} {string}  Any query string in GraphQL format
+ * @param  {string} token    The token used for authorization
+ * @return {object}          Request response
+ */
+module.exports.axios_graph_ql_post_instance2 = async (query, token) => {
+  try {
+    const response = await axios.post(
+      graphqlUrlInstance2,
+      { query: query },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+          authorization: "Bearer " + token,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    return error;
+  }
 };
 
 /**

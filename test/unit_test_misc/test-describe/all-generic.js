@@ -100,13 +100,13 @@ module.exports.test7_2 = /person\.prototype\.dogsFilter=function\({/;
 module.exports.test7_3 = /person\.prototype\.countFilteredDogs=function\({/;
 module.exports.test7_4 = /person\.prototype\.dogsConnection=function\({/;
 module.exports.test7_5 =
-  /promises_add\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
+  /promises_add\.push\(this\.add_dogs\(input,benignErrorReporter,token\)\);/;
 module.exports.test7_6 =
-  /promises_remove\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
+  /promises_remove\.push\(this\.remove_dogs\(input,benignErrorReporter,token\)\);/;
 module.exports.test7_7 =
-  /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){/;
+  /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter,token\){/;
 module.exports.test7_8 =
-  /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter\){/;
+  /person\.prototype\.remove_dogs=asyncfunction\(input,benignErrorReporter,token\){/;
 
 /**
  * 8. generic <to_one> sql - dog
@@ -115,9 +115,9 @@ module.exports.test7_8 =
 module.exports.test8_1 = /.+constassociationArgsDef={'addOwner':'person'}/;
 module.exports.test8_2 = /dog\.prototype\.owner=asyncfunction\({/;
 module.exports.test8_3 =
-  /dog\.prototype\.add_owner=asyncfunction\(input,benignErrorReporter\){/;
+  /dog\.prototype\.add_owner=asyncfunction\(input,benignErrorReporter,token\){/;
 module.exports.test8_4 =
-  /dog\.prototype\.remove_owner=asyncfunction\(input,benignErrorReporter\){/;
+  /dog\.prototype\.remove_owner=asyncfunction\(input,benignErrorReporter,token\){/;
 
 /* Models */
 
@@ -260,9 +260,9 @@ module.exports.test16_3 =
 module.exports.test16_4 =
   /person\.prototype\.dogsConnection=asyncfunction\({.+this\.dogsConnectionImpl\({/;
 module.exports.test16_5 =
-  /promises_add\.push\(this\.add_dogs\(input,benignErrorReporter\)\);/;
+  /promises_add\.push\(this\.add_dogs\(input,benignErrorReporter,token\)\);/;
 module.exports.test16_6 =
-  /promises_remove\.push\(this\.remove_dogs\(input,benignErrorReporter\)\);/;
+  /promises_remove\.push\(this\.remove_dogs\(input,benignErrorReporter,token\)\);/;
 module.exports.test16_7 =
   /person\.prototype\.add_dogs=asyncfunction\(input,benignErrorReporter\){.+person\.add_dogsImpl\(input,benignErrorReporter\);/;
 module.exports.test16_8 =
@@ -287,9 +287,9 @@ module.exports.test17_1 = /constassociationArgsDef={'addOwner':'person'}/;
 module.exports.test17_2 =
   /dog\.prototype\.owner=asyncfunction\({.+this\.ownerImpl\({/;
 module.exports.test17_3 =
-  /promises_add\.push\(this\.add_owner\(input,benignErrorReporter\)\);/;
+  /promises_add\.push\(this\.add_owner\(input,benignErrorReporter,token\)\);/;
 module.exports.test17_4 =
-  /promises_remove\.push\(this\.remove_owner\(input,benignErrorReporter\)\);/;
+  /promises_remove\.push\(this\.remove_owner\(input,benignErrorReporter,token\)\);/;
 module.exports.test17_5 =
   /dog\.prototype\.add_owner=asyncfunction\(input,benignErrorReporter\){.+dog\.add_ownerImpl\(input,benignErrorReporter\);/;
 module.exports.test17_6 =

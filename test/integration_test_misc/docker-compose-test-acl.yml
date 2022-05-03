@@ -1,0 +1,237 @@
+version: "3.8"
+
+services:
+  gql_keycloak_postgres:
+    container_name: pgdb_keycloak
+    image: postgres
+    volumes:
+      - keycloak_pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    networks:
+      instance1:
+      instance2:
+
+  gql_keycloak:
+    container_name: zendro_keycloak
+    image: quay.io/keycloak/keycloak:15.0.2
+    command: ["-Djboss.http.port=8081"]
+    ports:
+      - 8082:8081
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: gql_keycloak_postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    depends_on:
+      - gql_keycloak_postgres
+    networks:
+      instance1:
+        ipv4_address: 10.5.0.11
+
+  gql_postgres1:
+    container_name: postgres1
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    ports:
+     - 1234:5432
+    networks:
+     - instance1
+
+  gql_mongodb1:
+    image: mongo
+    container_name: mongodb1
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=sciencedb
+      - MONGO_INITDB_ROOT_PASSWORD=sciencedb
+      - MONGO_INITDB_DATABASE=sciencedb_development
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    ports:
+      - 27017:27017
+    networks:
+      - instance1
+
+  gql_cassandra1:
+    container_name: cassandra1
+    build:
+      context: .
+      dockerfile: Dockerfile.cassandra
+    volumes: 
+      - ./docker-entrypoint.sh.cassandra:/docker-entrypoint.sh
+      - ./cassandra-keyspace.cql:/docker-entrypoint-initdb.d/cassandra-keyspace.cql
+    ports: 
+      - 9042:9042
+    environment: 
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=128M
+    networks: 
+      - instance1
+      
+  gql_minio1:
+    image: minio/minio
+    container_name: minio1
+    environment:
+      MINIO_ROOT_USER: sciencedb
+      MINIO_ROOT_PASSWORD: sciencedb
+    ports:
+      - 9000:9000
+    command: server /data
+    networks:
+      - instance1
+
+  gql_science_db_graphql_server1:
+    container_name: server1
+    depends_on:
+      - gql_postgres1
+      - gql_mongodb1
+      - gql_cassandra1
+      - gql_minio1
+    build:
+      context: .
+      dockerfile: Dockerfile.graphql_server
+    volumes:
+      - ../integration_test_env/gql_science_db_graphql_server1:/usr/src/app
+      - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
+      - ./.env.acl:/usr/src/app/.env
+      - ./migrateDbAndStartServer_acl.sh:/usr/src/app/migrateDbAndStartServer_acl.sh
+      - ./2021-12-08T17_37_17.804Z#keycloak.js:/usr/src/app/migrations/2021-12-08T17_37_17.804Z#keycloak.js
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      REQUIRE_SIGN_IN: "true"
+      LIMIT_RECORDS: 25
+      JQ_PATH: /usr/bin/jq
+    networks:
+      - integrationtest
+      - instance1
+    command:
+      - /bin/sh
+      - -c
+      - |
+        chmod u+x ./migrateDbAndStartServer_acl.sh
+        ./migrateDbAndStartServer_acl.sh
+
+  gql_ncbi_sim_srv1:
+    container_name: gql_ncbi_sim_srv
+    depends_on:
+      - gql_postgres1
+      - gql_science_db_graphql_server1
+    build:
+      context: .
+      dockerfile: Dockerfile.ncbi_sim_srv
+    volumes:
+      - ./ncbi_sim_srv:/usr/src/app
+    ports:
+      - "3344:3344"
+    environment:
+        PORT: 3344
+        BASE_URL: /aminoAcidSequence
+    networks:
+      - instance1
+    command:
+      - /bin/sh
+      - -c
+      - |
+        npm install
+        npm start
+
+  gql_postgres2:
+    container_name: postgres2
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres2
+    ports:
+     - 1235:5432
+    networks:
+     - instance2
+
+  gql_presto:
+    image: ahanaio/prestodb-sandbox
+    container_name: presto1
+    depends_on:
+      - gql_postgres2
+    volumes: 
+      - ./postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
+    ports:
+      - 8081:8080
+    networks:
+      - instance2
+
+  gql_trino:
+    image: trinodb/trino 
+    container_name: trino1
+    depends_on:
+      - gql_postgres2
+    volumes: 
+      - ./postgresql.properties:/etc/trino/catalog/postgresql.properties
+    ports:
+      - 8080:8080
+    networks:
+      - instance2
+
+  gql_neo4j:
+    image: neo4j
+    container_name: neo4j1
+    user: ${UID_GID}
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./import:/var/lib/neo4j/import
+    environment:
+      NEO4J_AUTH: neo4j/sciencedb
+    networks:
+      - instance2
+
+  gql_science_db_graphql_server2:
+    container_name: server2
+    depends_on:
+      - gql_postgres2
+      - gql_presto
+      - gql_trino
+      - gql_neo4j
+    build:
+      context: .
+      dockerfile: Dockerfile.graphql_server
+    volumes:
+      - ../integration_test_env/gql_science_db_graphql_server2:/usr/src/app
+      - ./data_models_storage_config2.json:/usr/src/app/config/data_models_storage_config.json
+      - ./.env.acl:/usr/src/app/.env
+      - ./migrateDbAndStartServer_acl.sh:/usr/src/app/migrateDbAndStartServer_acl.sh
+    ports:
+      - "3030:3030"
+    environment:
+      PORT: 3030
+      REQUIRE_SIGN_IN: "true"
+      LIMIT_RECORDS: 26
+      JQ_PATH: /usr/bin/jq
+    networks:
+      - integrationtest
+      - instance2
+    command:
+      - /bin/sh
+      - -c
+      - |
+        chmod u+x ./migrateDbAndStartServer_acl.sh
+        ./migrateDbAndStartServer_acl.sh
+
+volumes:
+  keycloak_pg_data:
+
+networks:
+  instance1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/24
+  instance2:
+  integrationtest:

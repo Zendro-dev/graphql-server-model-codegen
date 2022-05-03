@@ -63,7 +63,7 @@ module.exports.delete_resolver = `
         if (await checkAuthorization(context, 'Accession', 'delete') === true) {
             if (await validForDeletion(accession_id, context)) {
                 await updateAssociations(accession_id, context);
-                return accession.deleteOne(accession_id, context.benignErrors);
+                return accession.deleteOne(accession_id, context.benignErrors, context.request.headers.authorization);
             }
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -94,29 +94,30 @@ module.exports.handleAssociations = `
  *
  * @param {object} input   Info of each field to create the new record
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.handleAssociations = async function(input, benignErrorReporter) {
+accession.prototype.handleAssociations = async function(input, benignErrorReporter, token) {
       let promises_add = [];
       if (helper.isNonEmptyArray(input.addIndividuals)) {
-          promises_add.push(this.add_individuals(input, benignErrorReporter));
+          promises_add.push(this.add_individuals(input, benignErrorReporter, token));
       }
       if (helper.isNonEmptyArray(input.addMeasurements)) {
-          promises_add.push(this.add_measurements(input, benignErrorReporter));
+          promises_add.push(this.add_measurements(input, benignErrorReporter, token));
       }
       if (helper.isNotUndefinedAndNotNull(input.addLocation)) {
-          promises_add.push(this.add_location(input, benignErrorReporter));
+          promises_add.push(this.add_location(input, benignErrorReporter, token));
       }
       await Promise.all(promises_add);
 
       let promises_remove = [];
       if (helper.isNonEmptyArray(input.removeIndividuals)) {
-          promises_remove.push(this.remove_individuals(input, benignErrorReporter));
+          promises_remove.push(this.remove_individuals(input, benignErrorReporter, token));
       }
       if (helper.isNonEmptyArray(input.removeMeasurements)) {
-          promises_remove.push(this.remove_measurements(input, benignErrorReporter));
+          promises_remove.push(this.remove_measurements(input, benignErrorReporter, token));
       }
       if (helper.isNotUndefinedAndNotNull(input.removeLocation)) {
-          promises_remove.push(this.remove_location(input, benignErrorReporter));
+          promises_remove.push(this.remove_location(input, benignErrorReporter, token));
       }
       await Promise.all(promises_remove);
 
@@ -129,9 +130,10 @@ module.exports.add_assoc_to_one_fieldMutation_resolver = `
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.add_location = async function(input, benignErrorReporter) {
-    await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter);
+accession.prototype.add_location = async function(input, benignErrorReporter, token) {
+    await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter, token);
     this.locationId = input.addLocation;
 }
 `;
@@ -142,10 +144,11 @@ module.exports.remove_assoc_to_one_fieldMutation_resolver = `
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
- */
-accession.prototype.remove_location = async function(input, benignErrorReporter) {
+ * @param {string} token The token used for authorization
+*/
+accession.prototype.remove_location = async function(input, benignErrorReporter, token) {
     if (input.removeLocation == this.locationId) {
-        await accession.remove_locationId(this.getIdValue(), input.removeLocation, benignErrorReporter);
+        await accession.remove_locationId(this.getIdValue(), input.removeLocation, benignErrorReporter, token);
         this.locationId = null;
     }
 }
@@ -156,9 +159,10 @@ module.exports.add_assoc_to_one_fieldMutation_resolver_fK_in_target = `
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-researcher.prototype.add_dog = async function(input, benignErrorReporter) {
-    await models.dog.add_researcherId(input.addDog, this.getIdValue(), benignErrorReporter);
+researcher.prototype.add_dog = async function(input, benignErrorReporter, token) {
+    await models.dog.add_researcherId(input.addDog, this.getIdValue(), benignErrorReporter, token);
 }
 
 `;
@@ -169,9 +173,10 @@ module.exports.remove_assoc_to_one_fieldMutation_resolver_fK_in_target = `
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-researcher.prototype.remove_dog = async function(input, benignErrorReporter) {
-    await models.dog.remove_researcherId(input.removeDog, this.getIdValue(), benignErrorReporter);
+researcher.prototype.remove_dog = async function(input, benignErrorReporter, token) {
+    await models.dog.remove_researcherId(input.removeDog, this.getIdValue(), benignErrorReporter, token);
 }
 
 `;
@@ -183,15 +188,16 @@ module.exports.add_assoc_to_many_fieldMutation_resolver = `
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.add_individuals = async function(input, benignErrorReporter) {
+accession.prototype.add_individuals = async function(input, benignErrorReporter, token) {
     let bulkAssociationInput = input.addIndividuals.map(associatedRecordId => {
         return {
             accessionId: this.getIdValue(),
             [models.individual.idAttribute()]: associatedRecordId
         }
     });
-    await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
+    await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter, token);
 }
 `;
 
@@ -202,15 +208,16 @@ module.exports.remove_assoc_to_many_fieldMutation_resolver = `
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.remove_individuals = async function(input, benignErrorReporter) {
+accession.prototype.remove_individuals = async function(input, benignErrorReporter, token) {
     let bulkAssociationInput = input.removeIndividuals.map(associatedRecordId => {
         return {
             accessionId: this.getIdValue(),
             [models.individual.idAttribute()]: associatedRecordId
         }
     });
-    await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
+    await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter, token);
 }
 `;
 
@@ -257,9 +264,10 @@ module.exports.to_one_add = `
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.add_location = async function(input, benignErrorReporter) {
-    await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter);
+accession.prototype.add_location = async function(input, benignErrorReporter, token) {
+    await accession.add_locationId(this.getIdValue(), input.addLocation, benignErrorReporter, token);
     this.locationId = input.addLocation;
 }
 `;
@@ -270,10 +278,11 @@ module.exports.to_one_remove = `
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.remove_location = async function(input, benignErrorReporter) {
+accession.prototype.remove_location = async function(input, benignErrorReporter, token) {
    if (input.removeLocation == this.locationId) {
-      await accession.remove_locationId(this.getIdValue(), input.removeLocation, benignErrorReporter);
+      await accession.remove_locationId(this.getIdValue(), input.removeLocation, benignErrorReporter, token);
       this.locationId = null;
     }
 }
@@ -286,15 +295,16 @@ module.exports.to_many_add = `
  *
  * @param {object} input   Info of input Ids to add  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.add_individuals = async function(input, benignErrorReporter) {
+accession.prototype.add_individuals = async function(input, benignErrorReporter, token) {
     let bulkAssociationInput = input.addIndividuals.map(associatedRecordId => {
         return {
             accessionId: this.getIdValue(),
             [models.individual.idAttribute()]: associatedRecordId
         }
     });
-    await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
+    await models.individual.bulkAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter, token);
 }
 `;
 
@@ -305,15 +315,16 @@ module.exports.to_many_remove = `
  *
  * @param {object} input   Info of input Ids to remove  the association
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-accession.prototype.remove_individuals = async function(input, benignErrorReporter) {
+accession.prototype.remove_individuals = async function(input, benignErrorReporter, token) {
     let bulkAssociationInput = input.removeIndividuals.map(associatedRecordId => {
         return {
             accessionId: this.getIdValue(),
             [models.individual.idAttribute()]: associatedRecordId
         }
     });
-    await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter);
+    await models.individual.bulkDisAssociateIndividualWithAccessionId(bulkAssociationInput, benignErrorReporter, token);
 }
 `;
 
@@ -324,11 +335,12 @@ module.exports.add_assoc_ddm_model = `
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-static async add_locationId(accession_id, locationId, benignErrorReporter) {
+static async add_locationId(accession_id, locationId, benignErrorReporter, token) {
     try {
         let responsibleAdapter = this.adapterForIri(accession_id);
-        return await adapters[responsibleAdapter].add_locationId(accession_id, locationId, benignErrorReporter);
+        return await adapters[responsibleAdapter].add_locationId(accession_id, locationId, benignErrorReporter, token);
     } catch (error) {
         benignErrorReporter.push({
             message: error,
@@ -344,11 +356,12 @@ module.exports.remove_assoc_ddm_model = `
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-static async remove_locationId(accession_id, locationId, benignErrorReporter) {
+static async remove_locationId(accession_id, locationId, benignErrorReporter, token) {
     try {
         let responsibleAdapter = this.adapterForIri(accession_id);
-        return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId, benignErrorReporter);
+        return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId, benignErrorReporter, token);
     } catch (error) {
         benignErrorReporter.push({
             message: error,
@@ -403,8 +416,9 @@ module.exports.to_one_add_zendro_adapter = `
 * @param {Id}   accession_id   IdAttribute of the root model to be updated
 * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
 * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+* @param {string} token The token used for authorization
 */
-static async add_locationId(accession_id, locationId, benignErrorReporter){
+static async add_locationId(accession_id, locationId, benignErrorReporter, token){
 let query = \`
   mutation
     updateAccession{
@@ -420,7 +434,22 @@ let query = \`
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteZendroURL, {query:query});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+        },
+        opts
+      );
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -450,8 +479,9 @@ module.exports.to_one_remove_zendro_adapter = `
  * @param {Id}   accession_id   IdAttribute of the root model to be updated
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+ * @param {string} token The token used for authorization
  */
-static async remove_locationId(accession_id, locationId, benignErrorReporter){
+static async remove_locationId(accession_id, locationId, benignErrorReporter, token){
   let query = \`
     mutation
       updateAccession{
@@ -467,7 +497,22 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter){
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteZendroURL, {query:query});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+        },
+        opts
+      );
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -510,8 +555,8 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
               await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-           let createdRecord = await accession.addOne(inputSanitized, context.benignErrors);
-           await createdRecord.handleAssociations(inputSanitized, context.benignErrors);
+           let createdRecord = await accession.addOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+           await createdRecord.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
            return createdRecord;
          } else { //adapter not auth
              throw new Error("You don't have authorization to perform this action on adapter");
@@ -541,8 +586,8 @@ module.exports.update_one_resolver = `
               if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
               }
-               let updatedRecord = await accession.updateOne(inputSanitized, context.benignErrors);
-               await updatedRecord.handleAssociations(inputSanitized, context.benignErrors);
+               let updatedRecord = await accession.updateOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+               await updatedRecord.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
                return updatedRecord;
            } else {//adapter not auth
                throw new Error("You don't have authorization to perform this action on adapter");
@@ -551,7 +596,7 @@ module.exports.update_one_resolver = `
 `;
 
 module.exports.add_one_zendro_adapter = `
-static async addOne(input, benignErrorReporter) {
+static async addOne(input, benignErrorReporter, token) {
     let query = \`
     mutation addAccession(
       $accession_id:ID!
@@ -573,7 +618,23 @@ static async addOne(input, benignErrorReporter) {
     }\`;
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteZendroURL, {query:query,variables: input});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+          variables: input,
+        },
+        opts
+      );
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -592,7 +653,7 @@ static async addOne(input, benignErrorReporter) {
 `;
 
 module.exports.update_one_zendro_adapter = `
-static async updateOne(input, benignErrorReporter) {
+static async updateOne(input, benignErrorReporter, token) {
     let query = \`
       mutation
         updateAccession(
@@ -615,7 +676,23 @@ static async updateOne(input, benignErrorReporter) {
         }\`
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteZendroURL, {query:query, variables:input});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+          variables: input,
+        },
+        opts
+      );
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));

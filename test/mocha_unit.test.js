@@ -83,12 +83,7 @@ describe("Empty associations", function () {
   it("Check no association in resolvers - individual (no assoc)", async function () {
     let opts = funks.getOptions(models.individual_no_assoc);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.individual_no_assoc_resolvers.replace(
-      /\s/g,
-      ""
-    );
-    expect(g_resolvers, "Incorrect resolvers").to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.individual_no_assoc_resolvers);
   });
 
   it("Check no associations in model - transcript_count (no assoc)", async function () {
@@ -117,9 +112,7 @@ describe("Better name for search argument", function () {
   it("Check search argument in resolvers - researcher", async function () {
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.researcher_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "Incorrect resolvers").to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.researcher_resolver);
   });
 });
 
@@ -128,25 +121,19 @@ describe("Count functionality", function () {
   it("GraphQL Schema - individual", async function () {
     let opts = funks.getOptions(models.individual);
     let generated_schema = await funks.generateJs("create-schemas", opts);
-    let g_schema = generated_schema.replace(/\s/g, "");
-    let test_schema = data_test.individual_schema.replace(/\s/g, "");
-    expect(g_schema, "Incorrect schema").to.have.string(test_schema);
+    testCompare(generated_schema, data_test.individual_schema);
   });
 
   it("Resolvers - individual", async function () {
     let opts = funks.getOptions(models.individual);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.individual_resolvers.replace(/\s/g, "");
-    expect(g_resolvers, "Incorrect resolvers").to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.individual_resolvers);
   });
 
   it("Resolvers - specie", async function () {
     let opts = funks.getOptions(models.specie);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.specie_resolvers.replace(/\s/g, "");
-    expect(g_resolvers, "Incorrect resolvers").to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.specie_resolvers);
   });
 });
 
@@ -527,9 +514,7 @@ describe("Model Layer", function () {
   it("Count resolver - dog", async function () {
     let opts = funks.getOptions(models.dog);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.count_in_resolvers.replace(/\s/g, "");
-    expect(g_resolvers, "No count method found").to.have.string(test_resolver);
+    testCompare(generated_resolvers, data_test.count_in_resolvers);
   });
 
   it("Read all model - dog", async function () {
@@ -541,11 +526,7 @@ describe("Model Layer", function () {
   it("Read all resolver - dog", async function () {
     let opts = funks.getOptions(models.dog);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.read_all_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "No read all method found").to.have.string(
-      test_resolver
-    );
+    testCompare(generated_resolvers, data_test.read_all_resolver);
   });
 
   it("Add one model - book", async function () {
@@ -557,11 +538,7 @@ describe("Model Layer", function () {
   it("Add one resolver - book", async function () {
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.add_one_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "No add one method found").to.have.string(
-      test_resolver
-    );
+    testCompare(generated_resolvers, data_test.add_one_resolver);
   });
 
   it("Delete one model - book", async function () {
@@ -587,11 +564,7 @@ describe("Model Layer", function () {
   it("Update one resolver - book", async function () {
     let opts = funks.getOptions(models.book_authors);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver = data_test.update_one_resolver.replace(/\s/g, "");
-    expect(g_resolvers, "No add one method found").to.have.string(
-      test_resolver
-    );
+    testCompare(generated_resolvers, data_test.update_one_resolver);
   });
 
   it("Table template model - individual", async function () {
@@ -747,94 +720,69 @@ describe("Zendro servers", function () {
   it("Read by id  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.read_by_id.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.read_by_id);
   });
 
   it("Read all  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.read_all.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.read_all);
   });
 
   it("Count Records  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.count_records.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.count_records);
   });
 
   it("AddOne  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.add_one.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.add_one);
   });
 
   it("Delete by id  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.delete_by_id.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.delete_by_id);
   });
 
   it("UpdateOne  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.update_one.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.update_one);
   });
 
   it("csvTemplate  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.csv_template.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.csv_template);
   });
 
   // Check for changes!
   it("Many to many association  - person", async function () {
     let opts = funks.getOptions(models_zendro.person);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.many_to_many_association.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.many_to_many_association);
   });
 
   // Check for changes!
   it("Many to many count association  - person", async function () {
     let opts = funks.getOptions(models_zendro.person);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.many_to_many_association_count.replace(
-      /\s/g,
-      ""
-    );
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.many_to_many_association_count);
   });
 
   it("add_personId - Dog", async function () {
     let opts = funks.getOptions(models_zendro.dog_one_assoc);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.add_personId.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.add_personId);
   });
 
   it("remove_personId - Dog", async function () {
     let opts = funks.getOptions(models_zendro.dog_one_assoc);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.remove_personId.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.remove_personId);
   });
 });
 
@@ -891,22 +839,17 @@ describe("Cursor based pagination", function () {
   it("Read all connection in zendro server  - book", async function () {
     let opts = funks.getOptions(models_zendro.book);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model = data_test.read_all_zendro_server.replace(/\s/g, "");
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(generated_model, data_test.read_all_zendro_server);
   });
 
   // Check for changes!
   it("Many to many association connection in zendro server  - person-book", async function () {
     let opts = funks.getOptions(models_zendro.person);
     let generated_model = await funks.generateJs("create-models-zendro", opts);
-    let g_model = generated_model.replace(/\s/g, "");
-    let test_model =
-      data_test.many_to_many_association_connection_zendro_server.replace(
-        /\s/g,
-        ""
-      );
-    expect(g_model, "No method found").to.have.string(test_model);
+    testCompare(
+      generated_model,
+      data_test.many_to_many_association_connection_zendro_server
+    );
   });
 });
 
@@ -918,9 +861,7 @@ describe("Distributed data models", function () {
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.book_adapter_readById.replace(/\s/g, "");
-    expect(g_adapter, "Incorrect adapter").to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.book_adapter_readById);
   });
 
   it("Count Records adapter- book", async function () {
@@ -929,9 +870,7 @@ describe("Distributed data models", function () {
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.book_adapter_count.replace(/\s/g, "");
-    expect(g_adapter, "Incorrect adapter").to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.book_adapter_count);
   });
 
   it("Read All Records adapter- book", async function () {
@@ -962,11 +901,7 @@ describe("Distributed data models", function () {
       "create-distributed-model",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.book_ddm_readById.replace(/\s/g, "");
-    expect(g_adapter, "Incorrect distributed data model").to.have.string(
-      test_adapter
-    );
+    testCompare(generated_adapter, data_test.book_ddm_readById);
   });
 
   it("Count distributed data model- book", async function () {
@@ -1668,69 +1603,61 @@ describe("Refactor associations - add / update SQL models", function () {
   it("handleAssociations - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.handleAssociations.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.handleAssociations);
   });
 
   it("add_location to_one - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver =
-      data_test.add_assoc_to_one_fieldMutation_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(
+      generated_resolver,
+      data_test.add_assoc_to_one_fieldMutation_resolver
+    );
   });
 
   it("remove_location to_one - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver =
-      data_test.remove_assoc_to_one_fieldMutation_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(
+      generated_resolver,
+      data_test.remove_assoc_to_one_fieldMutation_resolver
+    );
   });
 
   it("add_dog to_one fK in target - accession", async function () {
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver =
-      data_test.add_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(
-        /\s/g,
-        ""
-      );
-    expect(g_resolvers).to.have.string(test_resolver);
+    testCompare(
+      generated_resolvers,
+      data_test.add_assoc_to_one_fieldMutation_resolver_fK_in_target
+    );
   });
 
   it("remove_dog to_one fK in target - accession", async function () {
     let opts = funks.getOptions(models.researcher);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolver =
-      data_test.remove_assoc_to_one_fieldMutation_resolver_fK_in_target.replace(
-        /\s/g,
-        ""
-      );
-    expect(g_resolvers).to.have.string(test_resolver);
+    testCompare(
+      generated_resolvers,
+      data_test.remove_assoc_to_one_fieldMutation_resolver_fK_in_target
+    );
   });
 
   it("add_individuals to_many - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver =
-      data_test.add_assoc_to_many_fieldMutation_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(
+      generated_resolver,
+      data_test.add_assoc_to_many_fieldMutation_resolver
+    );
   });
 
   it("remove_individuals to_many - accession", async function () {
     let opts = funks.getOptions(models_refactoring.accession);
     let generated_resolver = await funks.generateJs("create-resolvers", opts);
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver =
-      data_test.remove_assoc_to_many_fieldMutation_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(
+      generated_resolver,
+      data_test.remove_assoc_to_many_fieldMutation_resolver
+    );
   });
 
   it("add_locationId- accession", async function () {
@@ -1772,9 +1699,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.to_one_add.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.to_one_add);
   });
 
   it("remove to-one association - accession", async function () {
@@ -1783,9 +1708,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.to_one_remove.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.to_one_remove);
   });
 
   it("add to-many association - accession", async function () {
@@ -1794,9 +1717,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.to_many_add.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.to_many_add);
   });
 
   it("remove to-many association - accession", async function () {
@@ -1805,9 +1726,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.to_many_remove.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.to_many_remove);
   });
 
   it("add association model layer - accession", async function () {
@@ -1843,12 +1762,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.to_one_remove_zendro_adapter.replace(
-      /\s/g,
-      ""
-    );
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.to_one_remove_zendro_adapter);
   });
 
   it("add association in sql-adapter  - accession", async function () {
@@ -1871,9 +1785,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.add_one_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.add_one_resolver);
   });
 
   it("update one resolver - accession", async function () {
@@ -1882,9 +1794,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-resolvers-ddm",
       opts
     );
-    let g_resolver = generated_resolver.replace(/\s/g, "");
-    let test_resolver = data_test.update_one_resolver.replace(/\s/g, "");
-    expect(g_resolver).to.have.string(test_resolver);
+    testCompare(generated_resolver, data_test.update_one_resolver);
   });
 
   it("add one in zendro-webservice-adapter - accession", async function () {
@@ -1893,9 +1803,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.add_one_zendro_adapter.replace(/\s/g, "");
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.add_one_zendro_adapter);
   });
 
   it("update one in zendro-webservice-adapter - accession", async function () {
@@ -1904,9 +1812,7 @@ describe("Refactor associations in distributed data case - add - remove", functi
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.update_one_zendro_adapter.replace(/\s/g, "");
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.update_one_zendro_adapter);
   });
 });
 
@@ -2420,12 +2326,7 @@ describe("Handle Errors in DDM", function () {
       "create-zendro-adapters",
       opts
     );
-    let g_adapter = generated_adapter.replace(/\s/g, "");
-    let test_adapter = data_test.readAllCursor_dogs_adapter_ddm.replace(
-      /\s/g,
-      ""
-    );
-    expect(g_adapter).to.have.string(test_adapter);
+    testCompare(generated_adapter, data_test.readAllCursor_dogs_adapter_ddm);
   });
 });
 
