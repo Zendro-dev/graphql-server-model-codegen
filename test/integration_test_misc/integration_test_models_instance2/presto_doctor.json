@@ -1,5 +1,6 @@
 {
     "model": "presto_doctor",
+    "model_name_in_storage": "doctor_presto",
     "storageType": "presto",
     "attributes": {
       "doctor_id": "String",

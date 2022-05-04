@@ -23,7 +23,7 @@ INSERT INTO trino_doctors (doctor_id, doctor_name, birthday, experience, rating,
     ('d4', 'Konrad Adenauer', '1988-12-03T10:15:30.000Z', 4, 4.9, false, '["Child Psychiatry","Adolescent Psychiatry"]', '[192234,197584]'),
     ('d5', 'Lina Laschet', '1986-12-03T10:15:30.000Z', 6, 4.7, true, '["Neurology"]', '[122234,187584]');
 
-CREATE TABLE presto_doctors (
+CREATE TABLE doctor_presto (
   doctor_id varchar(255) PRIMARY KEY,
   doctor_name varchar(255),
   birthday timestamp,
@@ -33,7 +33,7 @@ CREATE TABLE presto_doctors (
   speciality text,
   telephone text
 );
-INSERT INTO presto_doctors (doctor_id, doctor_name, birthday, experience, rating, on_holiday, speciality, telephone) VALUES
+INSERT INTO doctor_presto (doctor_id, doctor_name, birthday, experience, rating, on_holiday, speciality, telephone) VALUES
     ('d1', 'Janzen Gehre', '1989-12-03T10:15:30.000Z', 3, 4.9, false, '["Tinnitus","Allergology"]', '[152234,137584]'),
     ('d2', 'Annelena Spellerberg', '1977-12-03T10:15:30.000Z', 15, 5.0, false, '["Cardiology","Cardiothoracic Surgery"]', '[142234,127584]'),
     ('d3', 'Philipp Laschet', '1987-12-03T10:15:30.000Z', 5, 4.8, true, '["Dermatology","Allergology"]', '[162234,177584]'),

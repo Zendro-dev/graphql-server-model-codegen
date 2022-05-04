@@ -59,7 +59,7 @@ static async countRecords(search) {
     });
     try {
         const result = await session.run(
-            \`MATCH (n:Movie) \${whereOptions} RETURN COUNT(n)\`
+            \`MATCH (n:movies) \${whereOptions} RETURN COUNT(n)\`
         );
         const singleRecord = result.records[0];
         const num = singleRecord.get(0);
@@ -95,7 +95,7 @@ static async readAll(search, order, pagination, benignErrorReporter) {
     });
     try {
         const result = await session.run(
-            \`MATCH (n:Movie) \${whereOptions} RETURN n \${orderOptions} SKIP \${offset} LIMIT \${limit} \`
+            \`MATCH (n:movies) \${whereOptions} RETURN n \${orderOptions} SKIP \${offset} LIMIT \${limit} \`
         );
         const nodes = result.records.map((res) => new movie(res.get(0).properties));
         return validatorUtil.bulkValidateData(
@@ -154,7 +154,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     });
     let nodes = [];
     try {
-        let query = \`MATCH (n:Movie) \${filter} RETURN n \${sort}\`
+        let query = \`MATCH (n:movies) \${filter} RETURN n \${sort}\`
         query += limit ? \` LIMIT \${limit}\` : "";
         const result = await session.run(query);
         nodes = result.records.map((res) => new movie(res.get(0).properties));
@@ -210,7 +210,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
                 undefined;
         }
         try {
-            let query = \`MATCH (n:Movie) \${oppFilter} RETURN n \${oppSort}\`;
+            let query = \`MATCH (n:movies) \${oppFilter} RETURN n \${oppSort}\`;
             query += limit ? \` LIMIT \${oppLimit}\` : "";
             const oppResult = await session.run(query);
             oppNodes = oppResult.records.map(
@@ -258,7 +258,7 @@ static async addOne(input) {
         }
         parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
-        const result = await session.run(\`CREATE (a:Movie \$props) RETURN a\`, {
+        const result = await session.run(\`CREATE (a:movies \$props) RETURN a\`, {
             props: parsed_input,
         });
         const singleRecord = result.records[0];
@@ -284,7 +284,7 @@ static async deleteOne(id) {
     });
     try {
         const result = await session.run(
-            \`MATCH (n:Movie {\${this.idAttribute()}:$id}) DELETE n\`, {
+            \`MATCH (n:movies {\${this.idAttribute()}:$id}) DELETE n\`, {
                 id: id
             }
         );
@@ -323,7 +323,7 @@ static async updateOne(input) {
         parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
         const result = await session.run(
-            \`MATCH (n:Movie {\${this.idAttribute()}:$id}) SET n+=$props RETURN n\`, {
+            \`MATCH (n:movies {\${this.idAttribute()}:$id}) SET n+=$props RETURN n\`, {
                 id: id,
                 props: parsed_input
             }
@@ -351,10 +351,11 @@ static async add_director_id(movie_id, director_id, benignErrorReporter) {
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
-    let foreignKey = \`MATCH (n:Movie ) WHERE n.movie_id = $id 
-      SET n.director_id = $target RETURN count(n)\`
+    let foreignKey = \`MATCH (n:movies ) WHERE n.movie_id = $id 
+      SET n.director_id = $target RETURN count(n)\`;
+    const target_model = models.director.definition.model_name_in_storage ?? "directors";
 
-    let create_relationships = \`MATCH (a:Movie), (b:Director) 
+    let create_relationships = \`MATCH (a:movies), (b:\${target_model}) 
       WHERE a.movie_id = $id AND b.\${models.director.idAttribute()} = $target
       CREATE (a)-[r:\${"director".toUpperCase() + "_EDGE"}]->(b)\`
     try {
@@ -384,10 +385,11 @@ static async remove_director_id(movie_id, director_id, benignErrorReporter) {
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
-    let foreignKey = \`MATCH (n:Movie ) WHERE n.movie_id = $id 
-      SET n.director_id = $target RETURN count(n)\`
+    let foreignKey = \`MATCH (n:movies ) WHERE n.movie_id = $id 
+      SET n.director_id = $target RETURN count(n)\`;
+    const target_model = models.director.definition.model_name_in_storage ?? "directors";
 
-    let delete_relationships = \`MATCH (a:Movie)-[r:\${"director".toUpperCase() + "_EDGE"}]-> (b:Director) 
+    let delete_relationships = \`MATCH (a:movies)-[r:\${"director".toUpperCase() + "_EDGE"}]-> (b:\${target_model}) 
       WHERE a.movie_id = $id AND b.\${models.director.idAttribute()} = $target
       DELETE r\`
     try {
@@ -426,10 +428,11 @@ static async add_actor_ids(movie_id, actor_ids, benignErrorReporter, handle_inve
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
-    let foreignKey = \`MATCH (n:Movie ) WHERE n.movie_id = $id 
-      SET n.actor_ids = $updated_ids\`
+    let foreignKey = \`MATCH (n:movies ) WHERE n.movie_id = $id 
+      SET n.actor_ids = $updated_ids\`;
+    const target_model = models.actor.definition.model_name_in_storage ?? "actors";
 
-    let create_relationships = \`MATCH (a:Movie), (b:Actor) 
+    let create_relationships = \`MATCH (a:movies), (b:\${target_model}) 
       WHERE a.movie_id = $id AND b.\${models.actor.idAttribute()} IN $source
       CREATE (a)-[r:\${"actor".toUpperCase() + "_EDGE"}]->(b)\`
     try {
@@ -471,10 +474,11 @@ static async remove_actor_ids(movie_id, actor_ids, benignErrorReporter, handle_i
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
-    let foreignKey = \`MATCH (n:Movie ) WHERE n.movie_id = $id 
-      SET n.actor_ids = $updated_ids\`
+    let foreignKey = \`MATCH (n:movies ) WHERE n.movie_id = $id 
+      SET n.actor_ids = $updated_ids\`;
+    const target_model = models.actor.definition.model_name_in_storage ?? "actors";
 
-    let delete_relationships = \`MATCH (a:Movie)-[r:\${"actor".toUpperCase() + "_EDGE"}]-> (b:Actor) 
+    let delete_relationships = \`MATCH (a:movies)-[r:\${"actor".toUpperCase() + "_EDGE"}]-> (b:\${target_model}) 
       WHERE a.movie_id = $id AND b.\${models.actor.idAttribute()} IN $source
       DELETE r\`
     try {
@@ -509,11 +513,12 @@ static async bulkAssociateMovieWithDirector_id(bulkAssociationInput, benignError
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
-    let foreignKey = \`MATCH (n:Movie) WHERE n.movie_id IN $id 
-      SET n.director_id = $target\`
+    let foreignKey = \`MATCH (n:movies) WHERE n.movie_id IN \$id 
+      SET n.director_id = \$target\`;
+    const target_model = models.director.definition.model_name_in_storage ?? "directors";
 
-    let create_relationships = \`MATCH (a:Movie), (b:Director) 
-      WHERE a.movie_id IN $id AND b.director_id = $target
+    let create_relationships = \`MATCH (a:movies), (b:\${target_model}) 
+      WHERE a.movie_id IN \$id AND b.director_id = \$target
       CREATE (a)-[r:\${"director".toUpperCase() + "_EDGE"}]->(b)\`
     try {
         for (let {
@@ -547,10 +552,11 @@ static async bulkDisAssociateMovieWithDirector_id(bulkAssociationInput, benignEr
         database: config.database,
         defaultAccessMode: neo4j.session.WRITE,
     });
-    let foreignKey = \`MATCH (n:Movie) WHERE n.movie_id IN $id 
-      SET n.director_id = $target\`
+    let foreignKey = \`MATCH (n:movies) WHERE n.movie_id IN \$id 
+      SET n.director_id = \$target\`;
+    const target_model = models.director.definition.model_name_in_storage ?? "directors";
 
-    let delete_relationships = \`MATCH (a:Movie)-[r:\${"director".toUpperCase() + "_EDGE"}]-> (b:Director) 
+    let delete_relationships = \`MATCH (a:movies)-[r:\${"director".toUpperCase() + "_EDGE"}]-> (b:\${target_model}) 
       WHERE a.movie_id IN $id AND b.director_id = $target
       DELETE r\`
     try {

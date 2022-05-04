@@ -17,7 +17,7 @@ module.exports = {
       <% } else { %>
       const db = await zendro.adapters.<%-adapterName-%>.storageHandler;
       <%}-%>
-      const collection = await db.collection("<%-nameLc-%>");
+      const collection = await db.collection("<%-model_name_in_storage-%>");
       await collection.createIndex({ <%- idAttribute -%>: 1 });
       <%if(indices){ for(let i=0; i< indices.length; i++){-%>
       await collection.createIndex({ <%= indices[i] %>: 1 });
@@ -40,7 +40,7 @@ module.exports = {
     <% } else { %>
     const db = await zendro.adapters.<%-adapterName-%>.storageHandler;
     <%}-%>
-    const collection = await db.collection("<%-nameLc-%>");
+    const collection = await db.collection("<%-model_name_in_storage-%>");
     const recordsExists = await collection.countDocuments(); 
     if (recordsExists && !DOWN_MIGRATION) { 
         throw new Error(`You are trying to delete all records of <%-nameLc-%> and its associations. 

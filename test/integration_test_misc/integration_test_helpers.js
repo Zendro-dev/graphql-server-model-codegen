@@ -131,6 +131,26 @@ module.exports.request_metaquery_post = async function (query, jq, jsonPath) {
   });
 };
 
+/**
+ * request_metaquery_post - Send "POST" request to meta_query route. Either jq or jsonPath must be non-null.
+ *
+ * @param {query} {string}  Any queries to GraphQL as a string
+ * @param {jq} {string}       A jq command
+ * @param {jsonPath} {string} A jsonPath command
+ * @return {object}           Request response
+ */
+module.exports.request_metaquery_post = async function (query, jq, jsonPath) {
+  return await request("POST", metaqueryUrl, {
+    json: {
+      query: `${query}`,
+    },
+    headers: {
+      ...(jq && { jq: `${jq}` }),
+      ...(jsonPath && { jsonPath: `${jsonPath}` }),
+    },
+  });
+};
+
 module.exports.request_export = async function (model) {
   return await axios.get(csvExportUrl + "?model=" + model);
 };

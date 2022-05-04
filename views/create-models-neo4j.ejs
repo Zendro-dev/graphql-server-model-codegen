@@ -97,7 +97,7 @@ module.exports = class <%- nameLc -%> {
     });
     try {
       const result = await session.run(
-        `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) RETURN n`,
+        `MATCH (n:<%- model_name_in_storage -%> {${this.idAttribute()}:$id}) RETURN n`,
         { id: id }
       );
       if (result.records.length === 0) {
@@ -138,7 +138,7 @@ module.exports = class <%- nameLc -%> {
     });
     try {
       const result = await session.run(
-        `MATCH (n:<%- nameCp -%>) ${whereOptions} RETURN COUNT(n)`
+        `MATCH (n:<%- model_name_in_storage -%>) ${whereOptions} RETURN COUNT(n)`
       );
       const singleRecord = result.records[0];
       const num = singleRecord.get(0);
@@ -181,7 +181,7 @@ module.exports = class <%- nameLc -%> {
     });
     try {
       const result = await session.run(
-        `MATCH (n:<%- nameCp -%>) ${whereOptions} RETURN n ${orderOptions} SKIP ${offset} LIMIT ${limit} `
+        `MATCH (n:<%- model_name_in_storage -%>) ${whereOptions} RETURN n ${orderOptions} SKIP ${offset} LIMIT ${limit} `
       );
       const nodes = result.records.map((res) => new <%- nameLc -%>(res.get(0).properties));
       return validatorUtil.bulkValidateData(
@@ -247,7 +247,7 @@ module.exports = class <%- nameLc -%> {
     });
     let nodes = [];
     try {
-      let query = `MATCH (n:<%- nameCp -%>) ${filter} RETURN n ${sort}`
+      let query = `MATCH (n:<%- model_name_in_storage -%>) ${filter} RETURN n ${sort}`
       query += limit? ` LIMIT ${limit}` : "";
       const result = await session.run(query);
       nodes = result.records.map((res) => new <%- nameLc -%>(res.get(0).properties));
@@ -303,7 +303,7 @@ module.exports = class <%- nameLc -%> {
           : undefined;
       }
       try {
-        let query = `MATCH (n:<%- nameCp -%>) ${oppFilter} RETURN n ${oppSort}`;
+        let query = `MATCH (n:<%- model_name_in_storage -%>) ${oppFilter} RETURN n ${oppSort}`;
         query += limit? ` LIMIT ${oppLimit}` : "";
         const oppResult = await session.run(query);
         oppNodes = oppResult.records.map(
@@ -352,7 +352,7 @@ module.exports = class <%- nameLc -%> {
       }
       parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
-      const result = await session.run(`CREATE (a:<%- nameCp -%> $props) RETURN a`, {
+      const result = await session.run(`CREATE (a:<%- model_name_in_storage -%> $props) RETURN a`, {
         props: parsed_input,
       });
       const singleRecord = result.records[0];
@@ -382,7 +382,7 @@ module.exports = class <%- nameLc -%> {
     });
     try {
       const result = await session.run(
-        `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) DELETE n`,
+        `MATCH (n:<%- model_name_in_storage -%> {${this.idAttribute()}:$id}) DELETE n`,
         { id: id }
       );
       if (result.records.length !== 0) {
@@ -425,7 +425,7 @@ module.exports = class <%- nameLc -%> {
       parsed_input = neo4jHelper.processDateTime(parsed_input, definition.attributes);
 
       const result = await session.run(
-        `MATCH (n:<%- nameCp -%> {${this.idAttribute()}:$id}) SET n+=$props RETURN n`,
+        `MATCH (n:<%- model_name_in_storage -%> {${this.idAttribute()}:$id}) SET n+=$props RETURN n`,
         { id: id, props: parsed_input }
       );
       if (result.records.length !== 1) {

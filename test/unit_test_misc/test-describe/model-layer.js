@@ -222,7 +222,7 @@ module.exports.table_template_resolver = `
      */
     csvTableTemplateIndividual: async function(_, context) {
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            return individual.csvTableTemplate(context.benignErrors);
+            return individual.csvTableTemplate(context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

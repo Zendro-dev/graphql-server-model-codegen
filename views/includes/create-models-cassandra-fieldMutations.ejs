@@ -9,9 +9,9 @@
   */
   static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
     try {
-      const mutationCql = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+      const mutationCql = `UPDATE "<%- model_name_in_storage -%>" SET <%-associationsArguments["to_one"][i].targetKey-%> = ? WHERE <%- idAttribute -%> = ?`;
       await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
-      const checkCql = `SELECT COUNT(*) FROM "<%- namePl -%>" WHERE <%- idAttribute-%> = ?`;
+      const checkCql = `SELECT COUNT(*) FROM "<%- model_name_in_storage -%>" WHERE <%- idAttribute-%> = ?`;
       let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
       return parseInt(result.first()["count"]);
     } catch (error) {
@@ -41,7 +41,7 @@
         await Promise.all(promises);
       }
 
-      let mutation = `UPDATE "<%- namePl -%>" SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
+      let mutation = `UPDATE "<%- model_name_in_storage -%>" SET <%-associationsArguments["to_many"][i].sourceKey-%> = <%-associationsArguments["to_many"][i].sourceKey-%> <% if(op == 'remove'){-%>-<% }else{ %>+<%}-%> ? WHERE <%- idAttribute-%> = ?`
       await this.storageHandler.execute(mutation, [<%-associationsArguments["to_many"][i].sourceKey-%>, <%- idAttribute-%>],{
           prepare: true
       });

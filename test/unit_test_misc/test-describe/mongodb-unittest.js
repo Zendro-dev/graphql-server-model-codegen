@@ -50,7 +50,7 @@ module.exports.animal_countRecords = `
 static async countRecords(search) {
     const filter = mongoDbHelper.searchConditionsToMongoDb(search);
     const db = await this.storageHandler;
-    const collection = await db.collection("animal");
+    const collection = await db.collection("animals");
     const number = await collection.countDocuments(filter);
     return number;
 }
@@ -66,7 +66,7 @@ static async readAll(search, order, pagination, benignErrorReporter) {
     const offset = pagination.offset ? pagination.offset : 0;
 
     const db = await this.storageHandler;
-    const collection = await db.collection("animal");
+    const collection = await db.collection("animals");
     let documents = await collection.find(filter).skip(offset).limit(limit).sort(sort).toArray();
     documents = documents.map(doc => new animal(doc));
     // validationCheck after read
@@ -98,7 +98,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
     }
 
     const db = await this.storageHandler;
-    const collection = await db.collection("animal");
+    const collection = await db.collection("animals");
     let documents = limit ?
         await collection.find(filter).limit(limit).sort(sort).toArray() :
         await collection.find(filter).sort(sort).toArray();
@@ -163,7 +163,7 @@ static async addOne(input) {
     await validatorUtil.validateData('validateForCreate', this, input);
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("animal");
+        const collection = await db.collection("animals");
         const attributes = Object.keys(definition.attributes);
         let parsed_input = {};
         for (let key of Object.keys(input)) {
@@ -187,7 +187,7 @@ static async deleteOne(id) {
     await validatorUtil.validateData('validateForDelete', this, id);
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("animal");
+        const collection = await db.collection("animals");
         const id_name = this.idAttribute();
         const response = await collection.deleteOne({
             [id_name]: id
@@ -209,7 +209,7 @@ static async updateOne(input) {
     await validatorUtil.validateData('validateForUpdate', this, input);
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("animal");
+        const collection = await db.collection("animals");
         const attributes = Object.keys(definition.attributes);
         const updatedContent = {};
         for (let key of Object.keys(input)) {
@@ -239,7 +239,7 @@ module.exports.animal_fieldMutation_add_farm = `
 static async add_farm_id(animal_id, farm_id, benignErrorReporter) {
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("animal");
+        const collection = await db.collection("animals");
         const updatedContent = {
             farm_id: farm_id
         }
@@ -266,7 +266,7 @@ module.exports.animal_fieldMutation_remove_farm = `
 static async remove_farm_id(animal_id, farm_id, benignErrorReporter) {
     try {
         const db = await this.storageHandler;
-        const collection = await db.collection("animal");
+        const collection = await db.collection("animals");
         const updatedContent = {
             farm_id: null
         }
@@ -303,7 +303,7 @@ static async add_food_ids(animal_id, food_ids, benignErrorReporter, handle_inver
 
     try {
         const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const collection = await db.collection("animals")
         let record = await this.readById(animal_id);
         if (record !== null) {
             let updated_ids = helper.unionIds(record.food_ids, food_ids);
@@ -334,7 +334,7 @@ static async remove_food_ids(animal_id, food_ids, benignErrorReporter, handle_in
 
     try {
         const db = await this.storageHandler
-        const collection = await db.collection("animal")
+        const collection = await db.collection("animals")
         let record = await this.readById(animal_id);
         if (record !== null) {
             let updated_ids = helper.differenceIds(record.food_ids, food_ids);
@@ -358,7 +358,7 @@ static async bulkAssociateAnimalWithFarm_id(bulkAssociationInput, benignErrorRep
     let collection;
     try {
         const db = await this.storageHandler
-        collection = await db.collection("animal")
+        collection = await db.collection("animals")
     } catch (error) {
         throw error;
     }
@@ -387,7 +387,7 @@ static async bulkDisAssociateAnimalWithFarm_id(bulkAssociationInput, benignError
     let collection;
     try {
         const db = await this.storageHandler
-        collection = await db.collection("animal")
+        collection = await db.collection("animals")
     } catch (error) {
         throw error;
     }

@@ -28,7 +28,7 @@
     "username": "sciencedb",
     "password": "sciencedb",
     "bucket": "sciencedb-development",
-    "host": "gql_minio1",
+    "host": "minio1",
     "port": "9000",
     "fileHeaderInfo": "USE",
     "recordDelimiter": "\n",

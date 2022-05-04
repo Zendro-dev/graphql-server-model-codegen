@@ -81,7 +81,7 @@ services:
       - /bin/sh
       - -c
       - |
-        ./migrateDbAndStartServer.sh
+        ./migrateDbAndStartServer.sh dev
 
   gql_ncbi_sim_srv1:
     container_name: gql_ncbi_sim_srv
@@ -183,7 +183,7 @@ services:
       - /bin/sh
       - -c
       - |
-        ./migrateDbAndStartServer.sh
+        ./migrateDbAndStartServer.sh dev
 
 networks:
   instance1:

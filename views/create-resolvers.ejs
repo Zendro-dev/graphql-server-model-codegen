@@ -1033,7 +1033,7 @@ module.exports = {
    */
   csvTableTemplate<%- nameCp-%>: async function(_, context){
       if (await checkAuthorization(context, '<%- name -%>', 'read') === true) {
-          return <%- nameLc -%>.csvTableTemplate(context.benignErrors);
+          return <%- nameLc -%>.csvTableTemplate(context.benignErrors, context.request.headers.authorization);
       } else {
           throw new Error("You don't have authorization to perform this action");
       }
