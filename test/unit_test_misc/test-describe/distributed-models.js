@@ -1,5 +1,5 @@
 module.exports.book_adapter_readById = `
-static async readById(iri, benignErrorReporter) {
+static async readById(iri, benignErrorReporter, token) {
         let query = \`
           query
             readOneBook
@@ -15,7 +15,22 @@ static async readById(iri, benignErrorReporter) {
 
             try {
               // Send an HTTP request to the remote server
-              let response = await axios.post(remoteZendroURL, {query:query});
+              let opts = {
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/graphql",
+                },
+              };
+              if (token) {
+                opts.headers["authorization"] = token;
+              }
+              let response = await axios.post(
+                remoteZendroURL, 
+                {
+                  query: query,
+                },
+                opts
+              );
               //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
               if(helper.isNonEmptyArray(response.data.errors)) {
                 benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -36,14 +51,30 @@ static async readById(iri, benignErrorReporter) {
 `;
 
 module.exports.book_adapter_count = `
-static async countRecords(search, benignErrorReporter) {
+static async countRecords(search, benignErrorReporter, token) {
         let query = \`
       query countBooks($search: searchBookInput){
         countBooks(search: $search)
       }\`
       try {
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteZendroURL, {query:query,variables: {search: search}});
+        let opts = {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/graphql",
+          },
+        };
+        if (token) {
+          opts.headers["authorization"] = token;
+        }
+        let response = await axios.post(
+          remoteZendroURL, 
+          {
+            query: query,
+            variables: {search: search},
+          },
+          opts
+        );
 
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
@@ -66,7 +97,7 @@ static async countRecords(search, benignErrorReporter) {
 `;
 
 module.exports.book_adapter_read_all = `
-static async readAllCursor(search, order, pagination, benignErrorReporter) {
+static async readAllCursor(search, order, pagination, benignErrorReporter, token) {
         let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput! $order: [orderBookInput]){
       booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
          genre
@@ -74,7 +105,23 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
         } } pageInfo{ startCursor endCursor hasPreviousPage hasNextPage } } }\`
         try {
           // Send an HTTP request to the remote server
-          let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+          let opts = {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/graphql",
+            },
+          };
+          if (token) {
+            opts.headers["authorization"] = token;
+          }
+          let response = await axios.post(
+            remoteZendroURL, 
+            {
+              query: query,
+              variables: {search: search, order:order, pagination: pagination},
+            },
+            opts
+          );
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -99,7 +146,7 @@ module.exports.book_ddm_registry = `
 `;
 
 module.exports.book_ddm_readById = `
-static readById(id, benignErrorReporter) {
+static readById(id, benignErrorReporter, token) {
   if(id!==null){
   let responsibleAdapter = registry.filter( adapter => adapters[adapter].recognizeId(id));
 
@@ -108,7 +155,7 @@ static readById(id, benignErrorReporter) {
   }else if(responsibleAdapter.length === 0){
     throw new Error("IRI has no match WS");
   }
-  return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter).then(result => {
+  return adapters[responsibleAdapter[0] ].readById(id, benignErrorReporter, token).then(result => {
     let item  = new book(result);
     return validatorUtil.validateData('validateAfterRead', this, item);
 
@@ -118,7 +165,7 @@ static readById(id, benignErrorReporter) {
 `;
 
 module.exports.book_ddm_count = `
-static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters, token) {
   let authAdapters = [];
   /**
    * Differentiated cases:
@@ -157,7 +204,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
           case 'ddm-adapter':
           case 'generic-adapter':
               let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-              return adapter.countRecords(nsearch, benignErrorReporter);
+              return adapter.countRecords(nsearch, benignErrorReporter, token);
 
           case 'sql-adapter':
           case 'mongodb-adapter':
@@ -165,8 +212,9 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
           case 'trino-adapter':
           case 'presto-adapter':
           case 'neo4j-adapter':
-          case 'zendro-webservice-adapter':
               return adapter.countRecords(search, benignErrorReporter);
+          case 'zendro-webservice-adapter':
+              return adapter.countRecords(search, benignErrorReporter, token);
           case 'cassandra-adapter':
               return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
@@ -192,7 +240,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
 `;
 
 module.exports.book_ddm_read_all = `
-static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters, token) {
   let authAdapters = [];
   /**
    * Differentiated cases:
@@ -231,7 +279,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
       switch (adapter.adapterType) {
           case 'ddm-adapter':
               let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-              return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
+              return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter, token);
 
           case 'generic-adapter':
           case 'sql-adapter':
@@ -240,8 +288,9 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
           case 'trino-adapter':
           case 'presto-adapter':
           case 'neo4j-adapter':
-          case 'zendro-webservice-adapter':
               return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+          case 'zendro-webservice-adapter':
+              return adapter.readAllCursor(search, order, pagination, benignErrorReporter, token);
           case 'cassandra-adapter':
               return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 

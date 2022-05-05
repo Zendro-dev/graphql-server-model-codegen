@@ -7,6 +7,7 @@
   * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
   <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+  * @param {string} token The token used for authorization
   <% } _%>
   */
 
@@ -16,7 +17,7 @@
       */
     -%>
     <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
-      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter) {
+      static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter, token) {
         let query = `
               mutation
                 update<%- nameCp-%>{
@@ -32,7 +33,22 @@
 
         try {
           // Send an HTTP request to the remote server
-          let response = await axios.post(remoteZendroURL, {query:query});
+          let opts = {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/graphql",
+            },
+          };
+          if (token) {
+            opts.headers["authorization"] = token;
+          }
+          let response = await axios.post(
+            remoteZendroURL, 
+            {
+              query: query,
+            },
+            opts
+          );
           //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
           if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -118,11 +134,12 @@
         });
         let foreignKey = `MATCH (n:<%- model_name_in_storage -%>) WHERE n.<%-idAttribute%> = $id 
           SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN count(n)`
-        
-        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        const target_model = models.<%-associationsArguments["to_one"][i].target_lc-%>.definition.model_name_in_storage ?? "<%-associationsArguments["to_one"][i].target_lc_pl-%>";
+
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
           DELETE r`<% } 
-        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
           CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
 
@@ -244,11 +261,12 @@
         });
         let foreignKey = `MATCH (n:<%- model_name_in_storage -%>) WHERE n.<%-idAttribute%> = $id 
           SET n.<%-associationsArguments["to_many"][i].sourceKey-%> = $updated_ids`
+        const target_model = models.<%-associationsArguments["to_many"][i].target_lc-%>.definition.model_name_in_storage ?? "<%-associationsArguments["to_many"][i].target_lc_pl-%>";
         
-        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_many"][i].target_cp-%>) 
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_many"][i].target-%>.idAttribute()} IN $source
           DELETE r`<% }
-        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:<%-associationsArguments["to_many"][i].target_cp-%>) 
+        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_many"][i].target-%>.idAttribute()} IN $source
           CREATE (a)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
 
@@ -274,7 +292,7 @@
     <%}-%>
       <%#  /*** End of the the neo4j-adapter case */ -%>
       <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
-        static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter) {
+        static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token) {
           let query = `
                 mutation
                   update<%- nameCp-%>{
@@ -290,7 +308,22 @@
 
           try {
             // Send an HTTP request to the remote server
-            let response = await axios.post(remoteZendroURL, {query:query});
+            let opts = {
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/graphql",
+              },
+            };
+            if (token) {
+              opts.headers["authorization"] = token;
+            }
+            let response = await axios.post(
+              remoteZendroURL, 
+              {
+                query: query,
+              },
+              opts
+            );
             //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
             if(helper.isNonEmptyArray(response.data.errors)) {
               benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));

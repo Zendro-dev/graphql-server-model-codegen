@@ -6,6 +6,9 @@
    *
    * @param  {array} bulkAssociationInput Array of associations to <%- op %>
    * @param  {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+   <% if(storageType === 'distributed-data-model' || storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter' || storageType === 'zendro-server'){-%>
+   * @param  {string} token The token used for authorization
+   <% } _%>
    * @return {string} returns message on success
    */
     <% if(storageType === 'sql' || storageType === 'sql-adapter'){_%>
@@ -23,27 +26,40 @@
       }
     <%}_%>
     <% if(storageType === 'distributed-data-model'){-%>
-      static async bulk<% if(op === 'remove'){_%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
+      static async bulk<% if(op === 'remove'){_%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter, token){
         let mappedBulkAssociateInputToAdapters = this.mapBulkAssociationInputToAdapters(bulkAssociationInput);
         var promises = [];
         Object.keys(mappedBulkAssociateInputToAdapters).forEach(responsibleAdapter => {
-            promises.push(adapters[responsibleAdapter].bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter))
+            promises.push(adapters[responsibleAdapter].bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(mappedBulkAssociateInputToAdapters[responsibleAdapter], benignErrorReporter, token))
         });
         await Promise.all(promises);
         return "Records successfully updated!";
       }
     <%}_%>
     <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter' || storageType === 'zendro-server'){_%>
-      static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter){
+      static async bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter, token){
         let query = `mutation  bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>($bulkAssociationInput: [bulkAssociation<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>Input]){
           bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>(bulkAssociationInput: $bulkAssociationInput, skipAssociationsExistenceChecks: true) 
         }`
         try {
             // Send an HTTP request to the remote server
-            let response = await axios.post(remoteZendroURL, {
+            let opts = {
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/graphql",
+              },
+            };
+            if (token) {
+              opts.headers["authorization"] = token;
+            }
+            let response = await axios.post(
+              remoteZendroURL, 
+              {
                 query: query,
-                variables: {bulkAssociationInput: bulkAssociationInput}
-            });
+                variables: {bulkAssociationInput: bulkAssociationInput},
+              },
+              opts
+            );      
             //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
             if (helper.isNonEmptyArray(response.data.errors)) {
                 benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -104,12 +120,13 @@
           defaultAccessMode: neo4j.session.WRITE,
         });
         let foreignKey = `MATCH (n:<%- model_name_in_storage -%>) WHERE n.<%-idAttribute%> IN $id 
-          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target`
+          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target`;
+        const target_model = models.<%-associationsArguments["to_one"][i].target_lc-%>.definition.model_name_in_storage ?? "<%-associationsArguments["to_one"][i].target_lc_pl-%>";
 
-        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:${target_model}) 
           WHERE a.<%-idAttribute%> IN $id AND b.<%-associationsArguments["to_one"][i].targetKey-%> = $target
           DELETE r`<% } 
-        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:${target_model}) 
           WHERE a.<%-idAttribute%> IN $id AND b.<%-associationsArguments["to_one"][i].targetKey-%> = $target
           CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
         

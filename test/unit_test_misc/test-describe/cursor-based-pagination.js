@@ -59,7 +59,7 @@ module.exports.resolver_read_all_connection = `
             helper.checkCursorBasedPaginationArgument(pagination);
             let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
             helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
-            return await book.readAllCursor(search, order, pagination, context.benignErrors);
+            return await book.readAllCursor(search, order, pagination, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -133,7 +133,7 @@ booksConnectionImpl({
 `;
 
 module.exports.read_all_zendro_server = `
-static async readAllCursor(search, order, pagination, benignErrorReporter){
+static async readAllCursor(search, order, pagination, benignErrorReporter, token){
     let query = \`query booksConnection($search: searchBookInput $pagination: paginationCursorInput! $order: [orderBookInput]){
         booksConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  id  title
           genre
@@ -142,7 +142,23 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      let opts = {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, 
+        {
+          query: query,
+          variables: {search: search, order:order, pagination: pagination},
+        },
+        opts
+      );
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
@@ -178,7 +194,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
 `;
 
 module.exports.many_to_many_association_connection_zendro_server = `
-static async updateOne(input, benignErrorReporter){
+static async updateOne(input, benignErrorReporter, token){
   //validate input
   await validatorUtil.validateData('validateForUpdate', this, input);
     let query = \`mutation updatePerson($id:ID!        $firstName:String
@@ -197,7 +213,23 @@ static async updateOne(input, benignErrorReporter){
     try {
 
         // Send an HTTP request to the remote server
-        let response = await axios.post(remoteZendroURL, {query:query, variables:input});
+        let opts = {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/graphql",
+          },
+        };
+        if (token) {
+          opts.headers["authorization"] = token;
+        }
+        let response = await axios.post(
+          remoteZendroURL, 
+          {
+            query: query,
+            variables: input,
+          },
+          opts
+        );
         //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
         if(helper.isNonEmptyArray(response.data.errors)) {
             benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));

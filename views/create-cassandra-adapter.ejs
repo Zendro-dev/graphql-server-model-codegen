@@ -286,10 +286,6 @@ module.exports = class <%- adapterName -%> {
   <%- include('./includes/create-adapter-fields-mutations', {op: "remove"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "add"}); %>
   <%- include('./includes/bulkAssociations-models', {op: "remove"}); %>
-  
-  static async bulkAddCsv(context){
-    throw new Error('Bulk Adding from a CSV file is currently not implemented!');
-  }
 
   /**
    * csvTableTemplate - Allows the user to download a template in CSV format with the

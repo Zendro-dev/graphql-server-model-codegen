@@ -14,12 +14,13 @@
           defaultAccessMode: neo4j.session.WRITE,
         });
         let foreignKey = `MATCH (n:<%- model_name_in_storage -%> ) WHERE n.<%-idAttribute%> = $id 
-          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN count(n)`
-        
-        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+          SET n.<%-associationsArguments["to_one"][i].targetKey-%> = $target RETURN count(n)`;
+        const target_model = models.<%-associationsArguments["to_one"][i].target_lc-%>.definition.model_name_in_storage ?? "<%-associationsArguments["to_one"][i].target_lc_pl-%>";
+
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
           DELETE r`<% } 
-        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:<%-associationsArguments["to_one"][i].target_cp-%>) 
+        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
           CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
 
@@ -66,12 +67,13 @@
           defaultAccessMode: neo4j.session.WRITE,
         });
         let foreignKey = `MATCH (n:<%- model_name_in_storage -%> ) WHERE n.<%-idAttribute%> = $id 
-          SET n.<%-associationsArguments["to_many"][i].sourceKey-%> = $updated_ids`
+          SET n.<%-associationsArguments["to_many"][i].sourceKey-%> = $updated_ids`;
+        const target_model = models.<%-associationsArguments["to_many"][i].target_lc-%>.definition.model_name_in_storage ?? "<%-associationsArguments["to_many"][i].target_lc_pl-%>";
         
-        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:<%-associationsArguments["to_many"][i].target_cp-%>) 
+        <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_many"][i].target-%>.idAttribute()} IN $source
           DELETE r`<% } 
-        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:<%-associationsArguments["to_many"][i].target_cp-%>) 
+        else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:${target_model}) 
           WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_many"][i].target-%>.idAttribute()} IN $source
           CREATE (a)-[r:${"<%-associationsArguments["to_many"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
 

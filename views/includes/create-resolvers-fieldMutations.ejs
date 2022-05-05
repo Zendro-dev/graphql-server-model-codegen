@@ -17,15 +17,16 @@
   *
   * @param {object} input   Info of input Ids to <%- op %>  the association
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+  * @param {string} token The token used for authorization
   */
-  <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input, benignErrorReporter) {
+  <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_many"][i].name_lc-%> = async function(input, benignErrorReporter, token) {
 
     <%if(associationsArguments["to_many"][i].assocThroughArray){-%>
-      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_many"][i].sourceKey%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>, benignErrorReporter);
+      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_many"][i].sourceKey%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>, benignErrorReporter, token);
       this.<%-associationsArguments["to_many"][i].sourceKey%> = helper.<% if(op === 'remove'){%>differenceIds<%}else{%>unionIds<%}-%>(this.<%-associationsArguments["to_many"][i].sourceKey%>, input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>);
     <%}else{-%>
     let bulkAssociationInput = input.<%- op %><%-associationsArguments["to_many"][i].name_cp-%>.map(associatedRecordId => {return {<%-associationsArguments["to_many"][i].targetKey-%>: this.getIdValue(), [models.<%-associationsArguments["to_many"][i].target_lc-%>.idAttribute()]: associatedRecordId}});
-    await models.<%-associationsArguments["to_many"][i].target_lc-%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-associationsArguments["to_many"][i].target_cp-%>With<%-associationsArguments["to_many"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter);
+    await models.<%-associationsArguments["to_many"][i].target_lc-%>.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-associationsArguments["to_many"][i].target_cp-%>With<%-associationsArguments["to_many"][i].targetKey_cp-%>(bulkAssociationInput, benignErrorReporter, token);
     <%}-%>
   }
 
@@ -36,12 +37,13 @@
   *
   * @param {object} input   Info of input Ids to <%- op %>  the association
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+  * @param {string} token The token used for authorization
   */
-  <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input, benignErrorReporter) {
+  <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input, benignErrorReporter, token) {
   <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
     <% if (op === 'remove') { -%>
       if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> == this.<%-associationsArguments["to_one"][i].targetKey%>) {
-        await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter);
+        await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
         this.<%-associationsArguments["to_one"][i].targetKey%> = null;
       }
     <%} else { -%>
@@ -60,7 +62,8 @@
           { first: 2 },
           undefined,
           benignErrorReporter,
-          Object.values(<%- nameLc -%>.registeredAdapters)
+          Object.values(<%- nameLc -%>.registeredAdapters),
+          token
         );
         <%}-%>
         const num = associated.<%- namePl %>.length;
@@ -72,18 +75,18 @@
             return 0;
           } else {
             const <%- idAttribute -%> = associated.<%- namePl %>[0].<%- idAttribute -%>;
-            const removed = await <%- nameLc %>.remove_<%-associationsArguments["to_one"][i].targetKey%>(<%- idAttribute -%>, input.add<%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter);
+            const removed = await <%- nameLc %>.remove_<%-associationsArguments["to_one"][i].targetKey%>(<%- idAttribute -%>, input.add<%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
             benignErrorReporter.push({
               message: `Hint: update ${removed} existing association!`,
             });
           }
         }
       <%}-%>
-      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter);
+      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
       this.<%-associationsArguments["to_one"][i].targetKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>;
     <%}-%>
   <%} else {-%>
-    await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, this.getIdValue(), benignErrorReporter);
+    await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, this.getIdValue(), benignErrorReporter, token);
   <%}-%>
   }
 

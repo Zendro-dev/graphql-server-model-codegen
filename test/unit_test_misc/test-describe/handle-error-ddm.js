@@ -1,6 +1,6 @@
 module.exports.count_dogs_model_ddm = `
 
-static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+static countRecords(search, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters, token) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -39,7 +39,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
             case 'ddm-adapter':
             case 'generic-adapter':
                 let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                return adapter.countRecords(nsearch, benignErrorReporter);
+                return adapter.countRecords(nsearch, benignErrorReporter, token);
 
             case 'sql-adapter':
             case 'mongodb-adapter':
@@ -47,8 +47,9 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
             case 'trino-adapter':
             case 'presto-adapter':
             case 'neo4j-adapter':
-            case 'zendro-webservice-adapter':
                 return adapter.countRecords(search, benignErrorReporter);
+            case 'zendro-webservice-adapter':
+                return adapter.countRecords(search, benignErrorReporter, token);
             case 'cassandra-adapter':
                 return adapter.countRecords(search, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
@@ -75,7 +76,7 @@ static countRecords(search, authorizedAdapters, benignErrorReporter, searchAutho
 `;
 
 module.exports.readAllCursor_dogs_model_ddm = `
-static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters) {
+static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorReporter, searchAuthorizedAdapters, token) {
     let authAdapters = [];
     /**
      * Differentiated cases:
@@ -114,7 +115,7 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
         switch (adapter.adapterType) {
             case 'ddm-adapter':
                 let nsearch = helper.addExclusions(search, adapter.adapterName, Object.values(this.registeredAdapters));
-                return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter);
+                return adapter.readAllCursor(nsearch, order, pagination, benignErrorReporter, token);
 
             case 'generic-adapter':
             case 'sql-adapter':
@@ -123,8 +124,9 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
             case 'trino-adapter':
             case 'presto-adapter':
             case 'neo4j-adapter':
-            case 'zendro-webservice-adapter':
                 return adapter.readAllCursor(search, order, pagination, benignErrorReporter);
+            case 'zendro-webservice-adapter':
+                return adapter.readAllCursor(search, order, pagination, benignErrorReporter, token);
             case 'cassandra-adapter':
                 return adapter.readAllCursor(search, pagination, benignErrorReporter, searchAuthAdapters.includes(adapter.adapterName));
 
@@ -229,7 +231,7 @@ dogsConnection: async function({
             context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters);
+        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, context.request.headers.authorization);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -266,7 +268,7 @@ countDogs: async function({
             context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters);
+        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, context.request.headers.authorization);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -279,7 +281,7 @@ countDogs: async function({
 `;
 
 module.exports.readAllCursor_dogs_adapter_ddm = `
-static async readAllCursor(search, order, pagination, benignErrorReporter) {
+static async readAllCursor(search, order, pagination, benignErrorReporter, token) {
     let query = \`query dogsConnection($search: searchDogInput $pagination: paginationCursorInput! $order: [orderDogInput]){
   dogsConnection(search:$search pagination:$pagination order:$order){ edges{cursor node{  dog_id  name
      person_id
@@ -288,7 +290,26 @@ static async readAllCursor(search, order, pagination, benignErrorReporter) {
 
     try {
       // Send an HTTP request to the remote server
-      let response = await axios.post(remoteZendroURL, {query:query, variables: {search: search, order:order, pagination: pagination}});
+      let opts = {
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/graphql",
+        },
+      };
+      if (token) {
+        opts.headers["authorization"] = token;
+      }
+      let response = await axios.post(
+        remoteZendroURL, {
+            query: query,
+            variables: {
+                search: search,
+                order: order,
+                pagination: pagination
+            },
+        },
+        opts
+      );        
       //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
       if(helper.isNonEmptyArray(response.data.errors)) {
         benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
