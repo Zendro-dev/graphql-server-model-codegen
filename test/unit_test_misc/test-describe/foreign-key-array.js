@@ -4,6 +4,24 @@ updateAuthor(id: ID!, name: String, lastname: String, email: String, addBooks: [
 
 `;
 
+module.exports.remote_server_operator = `
+input searchPost_authorInput {
+  field: post_authorField
+  value: String
+  valueType: InputType
+  operator: CassandraOperator 
+  search: [searchPost_authorInput]
+}`;
+
+module.exports.remote_adapter_operator = `
+input searchSq_authorInput {
+  field: sq_authorField
+  value: String
+  valueType: InputType
+  operator: AmazonS3Operator
+  search: [searchSq_authorInput]
+}`;
+
 module.exports.resolver_filter_association = `
 author.prototype.booksFilter = function({
     search,
