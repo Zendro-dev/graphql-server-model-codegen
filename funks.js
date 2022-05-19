@@ -577,7 +577,7 @@ module.exports.getOptions = function (dataModel) {
     cassandraStringAttributes: getStringAttributesInCassandraSchema(
       dataModel.attributes
     ),
-    operators: getOperators(getStorageType(dataModel)),
+    operators: getOperators(getStorageType(dataModel), dataModel.operatorSet),
   };
   opts["editableAttributesStr"] = attributesToString(
     getEditableAttributes(

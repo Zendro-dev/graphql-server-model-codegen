@@ -124,6 +124,12 @@ describe("Count functionality", function () {
     testCompare(generated_schema, data_test.individual_schema);
   });
 
+  it("GraphQL Schema - specie", async function () {
+    let opts = funks.getOptions(models.specie);
+    let generated_schema = await funks.generateJs("create-schemas", opts);
+    testCompare(generated_schema, data_test.specie_schema);
+  });
+
   it("Resolvers - individual", async function () {
     let opts = funks.getOptions(models.individual);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
@@ -2424,6 +2430,18 @@ describe("Foreign-key array", function () {
     let opts = funks.getOptions(models.author_foreignKeyArray);
     let generated_schema = await funks.generateJs("create-schemas", opts);
     testCompare(generated_schema, data_test.add_and_update);
+  });
+
+  it("schema - remote server - author", async function () {
+    let opts = funks.getOptions(models.author_zendro_remote);
+    let generated_schema = await funks.generateJs("create-schemas", opts);
+    testCompare(generated_schema, data_test.remote_server_operator);
+  });
+
+  it("schema - remote adapter - author", async function () {
+    let opts = funks.getOptions(models.author_zendro_adapter_array_fk);
+    let generated_schema = await funks.generateJs("create-schemas", opts);
+    testCompare(generated_schema, data_test.remote_adapter_operator);
   });
 
   it("resolver filter association - author", async function () {

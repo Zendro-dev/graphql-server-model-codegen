@@ -2,6 +2,16 @@ module.exports.individual_schema = `
 countIndividuals(search: searchIndividualInput ): Int
 `;
 
+module.exports.specie_schema = `
+input searchSpecieInput {
+    field: SpecieField
+    value: String
+    valueType: InputType
+    operator: MongodbNeo4jOperator 
+    search: [searchSpecieInput]
+}
+`;
+
 module.exports.individual_resolvers = `
 /**
      * countIndividuals - Counts number of records that holds the conditions specified in the search argument

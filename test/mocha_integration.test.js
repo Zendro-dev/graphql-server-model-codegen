@@ -2812,25 +2812,7 @@ describe("Zendro Webservice Data Models", function () {
     );
   });
 
-  it("18 CSV Export - Accessions", async function () {
-    /**
-     * This test assumes that accessions from previous test are still in the DB
-     * */
-
-    let res = await itHelpers.request_export("Accession");
-
-    expect(res.data).to.equal(
-      "accession_id,collectors_name,collectors_initials,sampling_date,locationId\n" +
-        '"a-instance1","aa","NULL","NULL","NULL"\n' +
-        '"b-instance1","bb","NULL","NULL","NULL"\n' +
-        '"c-instance1","cc","NULL","NULL","NULL"\n' +
-        '"d-instance1","dd","NULL","NULL","NULL"\n' +
-        '"zendro-2-accession","NULL","NULL","NULL","NULL"\n' +
-        '"zendro-3-accession","NULL","NULL","NULL","NULL"\n'
-    );
-  });
-
-  it("19. Delete all remaining accessions", async function () {
+  it("18. Delete all remaining accessions", async function () {
     let res = itHelpers.request_graph_ql_post_instance2(
       "{accessions(pagination:{limit:25}){accession_id}}"
     );
@@ -2847,7 +2829,7 @@ describe("Zendro Webservice Data Models", function () {
     expect(cnt).to.equal(0);
   });
 
-  it("20. Delete all remaining measurements", async function () {
+  it("19. Delete all remaining measurements", async function () {
     let res = itHelpers.request_graph_ql_post_instance2(
       "{measurements(pagination:{limit:25}){measurement_id}}"
     );
@@ -2864,7 +2846,7 @@ describe("Zendro Webservice Data Models", function () {
     expect(cnt).to.equal(0);
   });
 
-  it("21. Delete all remaining locations", async function () {
+  it("20. Delete all remaining locations", async function () {
     let res = itHelpers.request_graph_ql_post_instance2(
       "{locations(pagination:{limit:25}){locationId}}"
     );

@@ -15,7 +15,7 @@ GRAPHQL_SERVER_2_MODELS="${TEST_DIR}/integration_test_misc/integration_test_mode
 
 GRAPHQL_SERVER_1_URL="localhost:3000/graphql"
 GRAPHQL_SERVER_2_URL="localhost:3030/graphql"
-SERVER_CHECK_WAIT_TIME=60
+SERVER_CHECK_WAIT_TIME=120
 
 # ACL setup
 OPT_ACL_SETUP=false
