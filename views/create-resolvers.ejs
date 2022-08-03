@@ -149,7 +149,41 @@ const associationArgsDef = {
    * @return {type}         Associated record
    */
   <%- nameLc -%>.prototype.<%=associations_one[i].name%> = async function({search}, context){
-    <% if (associations_one[i].holdsForeignKey) { %>
+    <% if (associations_one[i].assocThroughArray) { %>
+    if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].sourceKey%>)){
+        if (search === undefined || search === null) {
+          return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].sourceKey%>},context)
+        } else {
+          <%# WORKAROUND FOR Cassandra targetStorageType:
+          In case of an association to a model within cassandra we need to do intersections
+          of the search parameters with the foreignkey array if the search is on the idAttribute
+          and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
+          with an "eq" / "in" on the primary key field. %>
+          <%if(associations_one[i].targetStorageType === 'cassandra'){%>
+          //WORKAROUND for cassandra targetStorageType. Mainpulate search to intersect Equal searches on the primaryKey
+          const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_one[i].sourceKey%>, models.<%=associations_one[i].target_lc-%>.idAttribute());
+          <%}-%>
+          //build new search filter
+          let nsearch = <%if(associations_one[i].targetStorageType === 'cassandra'){%>hasIdSearch ? search : <%}-%>helper.addSearchField({
+            "search": search,
+            "field": models.<%=associations_one[i].target_lc-%>.idAttribute(),
+            "value": this.<%= associations_one[i].sourceKey -%>,
+            "operator": "eq"
+          });
+          let found = (await resolvers.<%=associations_one[i].target_lc_pl%>Connection({search: nsearch,  pagination: {first:1}}, context)).edges;
+          if (found.length > 0) {
+            if(found.length > 1){
+              context.benignErrors.push(new Error(
+                `Not unique "to_one" association Error: Found > 1 <%=associations_one[i].target_lc_pl%> matching <%- nameLc -%> with <%- idAttribute-%> ${this.<%= associations_one[i].sourceKey -%>}. 
+                Consider making this a "to_many" association, or using unique constraints, or moving the foreign key into the <%- name -%> model. Returning first <%=associations_one[i].target-%>.`
+              ));
+            }
+            return found[0].node;
+          }
+          return null;
+        }
+    }
+    <% } else if (associations_one[i].holdsForeignKey) { %>
     if(helper.isNotUndefinedAndNotNull(this.<%=associations_one[i].targetKey%>)){
         if (search === undefined || search === null) {
           return resolvers.readOne<%=associations_one[i].target_cp%>({[models.<%=associations_one[i].target_lc-%>.idAttribute()]: this.<%=associations_one[i].targetKey%>},context)
@@ -228,21 +262,19 @@ const associationArgsDef = {
    * @return {array}             Array of associated records holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Filter = function({search,order,pagination}, context){
-
     <%if(associations_temp[i].assocThroughArray){%>
-        //return an empty response if the foreignKey Array is empty, no need to query the database
-        if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
-          return [];
-        }
-        let nsearch = helper.addSearchField({
-          "search": search,
-          "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
-          "value": this.<%=associations_temp[i].sourceKey%>.join(','),
-          "valueType": "Array",
-          "operator": "in"
-        });
+      //return an empty response if the foreignKey Array is empty, no need to query the database
+      if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
+        return [];
+      }
+      let nsearch = helper.addSearchField({
+        "search": search,
+        "field": models.<%=associations_temp[i].target_lc-%>.idAttribute(),
+        "value": this.<%=associations_temp[i].sourceKey%>.join(','),
+        "valueType": "Array",
+        "operator": "in"
+      });
     <%}else{-%>
-
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -250,7 +282,6 @@ const associationArgsDef = {
         "value": this.getIdValue(),
         "operator": "eq"
       });
-
     <%}-%>
     return resolvers.<%=associations_temp[i].target_lc_pl%>({search: nsearch,order: order,pagination: pagination},context);
   }
@@ -263,7 +294,6 @@ const associationArgsDef = {
    * @return {type}          Number of associated records that holds the conditions specified in the search argument
    */
   <%- nameLc -%>.prototype.countFiltered<%=associations_temp[i].name_cp%> = function({search}, context){
-
     <%if(associations_temp[i].assocThroughArray){%>
         //return 0 if the foreignKey Array is empty, no need to query the database
         if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
@@ -272,8 +302,8 @@ const associationArgsDef = {
         <%# WORKAROUND FOR Cassandra targetStorageType:
         In case of an association to a model within cassandra we need to do intersections
         of the search parameters with the foreignkey array if the search is on the idAttribute
-        and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
-        with an "eq" / "in" on the primary key field. %> 
+        and with operator "eq" / "in", since cassandra doesn't support multiple restricions
+        with an "eq" / "in" on the primary key field. %>
         <%if(associations_temp[i].targetStorageType === 'cassandra'){%>
           //WORKAROUND for cassandra targetStorageType. Mainpulate search to intersect Equal searches on the primaryKey
           const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_temp[i].sourceKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
@@ -285,7 +315,6 @@ const associationArgsDef = {
           "valueType": "Array",
           "operator": "in"
         });
-        
     <%}else{-%>
       //build new search filter
       let nsearch = helper.addSearchField({
@@ -310,7 +339,6 @@ const associationArgsDef = {
    * @return {array}             Array of records as grapqhql connections holding conditions specified by search, order and pagination argument
    */
   <%- nameLc -%>.prototype.<%=associations_temp[i].name%>Connection = function({search,order,pagination}, context){
-
     <%if(associations_temp[i].assocThroughArray){%>
       //return an empty response if the foreignKey Array is empty, no need to query the database
       if (!Array.isArray(this.<%=associations_temp[i].sourceKey%>) || this.<%=associations_temp[i].sourceKey%>.length === 0 ) {
@@ -328,8 +356,8 @@ const associationArgsDef = {
       <%# WORKAROUND FOR Cassandra targetStorageType:
       In case of an association to a model within cassandra we need to do intersections
       of the search parameters with the foreignkey array if the search is on the idAttribute
-      and with operator "eq" / "in", since cassandra doesn't support multiple restricions 
-      with an "eq" / "in" on the primary key field. %> 
+      and with operator "eq" / "in", since cassandra doesn't support multiple restricions
+      with an "eq" / "in" on the primary key field. %>
       <%if(associations_temp[i].targetStorageType === 'cassandra'){%>
         const hasIdSearch = helper.parseFieldResolverSearchArgForCassandra(search, this.<%=associations_temp[i].sourceKey%>, models.<%=associations_temp[i].target_lc-%>.idAttribute());
       <%}-%>
@@ -341,7 +369,6 @@ const associationArgsDef = {
         "operator": "in"
       });
     <%}else{-%>
-
       //build new search filter
       let nsearch = helper.addSearchField({
         "search": search,
@@ -503,6 +530,7 @@ const associationArgsDef = {
   let promises_to_many = [];
   let promises_to_one = [];
   let get_to_many_associated_fk = 0;
+  let get_to_one_associated_fk = 0;
   <%if(associationsArguments["generic_to_many"].length > 0) {-%>
     let promises_generic_to_many = [];
   <%}-%>
@@ -526,7 +554,11 @@ const associationArgsDef = {
   <%associations_temp = associationsArguments["to_one"] -%>
   <% for(let i=0; i < associations_temp.length; i++){ -%>
     <% if (associations_temp[i].delete_action==='reject'){-%>
-    promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+      <%if(associations_temp[i].assocThroughArray){%>
+        get_to_one_associated_fk += [null, undefined].includes(<%- nameLc %>.<%=associations_temp[i].sourceKey%>) ? 0 : 1;
+      <%}else{-%>
+        promises_to_one.push(<%- nameLc %>.<%=associations_temp[i].name%>({}, context) );
+      <%}-%>
     <%}-%>
   <%}-%>
   
@@ -573,7 +605,7 @@ const associationArgsDef = {
   let get_cross_to_many_associated = result_cross_to_many.reduce( (accumulator, current_val )=> accumulator + current_val ,  0 );
   <%}-%>
 
-  return get_to_one_associated + get_to_many_associated_fk + get_to_many_associated <%if(associationsArguments["generic_to_many"].length > 0) {%>+ get_generic_to_many_associated<%}-%><%if(associationsArguments["generic_to_one"].length > 0) {%> + get_generic_to_one_associated<%}%><%if(associationsArguments["to_many_through_sql_cross_table"].length > 0) {%>+ get_cross_to_many_associated<%}-%>;
+  return get_to_one_associated + get_to_many_associated_fk + get_to_many_associated + get_to_one_associated_fk <%if(associationsArguments["generic_to_many"].length > 0) {%>+ get_generic_to_many_associated<%}-%><%if(associationsArguments["generic_to_one"].length > 0) {%> + get_generic_to_one_associated<%}%><%if(associationsArguments["to_many_through_sql_cross_table"].length > 0) {%>+ get_cross_to_many_associated<%}-%>;
 }
 
 /**
@@ -604,7 +636,15 @@ const updateAssociations = async (id, context) => {
   const pagi_first = globals.LIMIT_RECORDS;
   <% for(let i=0; i < associations_one.length; i++){ -%>
   <% if (associations_one[i].delete_action==='update'){-%>
-  <% if (associations_one[i].holdsForeignKey) { %>
+  <%if(associations_one[i].assocThroughArray){%>
+    const <%=`${associations_one[i].name}_id`%> = <%-  nameLc  -%>_record.<%=associations_one[i].sourceKey%>;
+    if (<%=`${associations_one[i].name}_id`%>) {
+      await resolvers.update<%- nameCp -%>(
+        { <%- idAttribute -%>: id, remove<%=associations_one[i].name_cp%>: <%=`${associations_one[i].name}_id`%> },
+        context
+      );
+    }
+  <%} else if (associations_one[i].holdsForeignKey) { %>
     const <%=`${associations_one[i].name}_id`%> = <%-  nameLc  -%>_record.<%=associations_one[i].targetKey%>;
     if (<%=`${associations_one[i].name}_id`%>) {
       await resolvers.update<%- nameCp -%>(
@@ -621,8 +661,8 @@ const updateAssociations = async (id, context) => {
         context
       );
     }
-    <%}-%>
-    <%}-%>
+  <%}-%>
+  <%}-%>
   <%}-%>
   
   <% let associations_many = associationsArguments["to_many"]-%>

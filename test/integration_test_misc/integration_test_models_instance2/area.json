@@ -1,0 +1,27 @@
+{
+    "model": "area",
+    "storageType": "sql",
+    "attributes": {
+        "area_id": "String",
+        "area_name": "String",
+        "hospital_ids": "[String]"
+    },
+    "associations": {
+        "hospitals": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "hospital",
+            "targetKey": "area_id",
+            "sourceKey": "hospital_ids",
+            "keysIn": "area",
+            "targetStorageType": "sql",
+            "deletion":"update"
+        }
+    },
+    "internalId": "area_id",
+    "id": {
+        "name": "area_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

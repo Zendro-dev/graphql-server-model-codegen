@@ -1,0 +1,27 @@
+{
+    "model": "district",
+    "storageType": "cassandra",
+    "attributes": {
+        "district_id": "String",
+        "district_name": "String",
+        "bank_ids": "[String]"
+    },
+    "associations": {
+        "banks": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "bank",
+            "targetKey": "district_id",
+            "sourceKey": "bank_ids",
+            "keysIn": "district",
+            "targetStorageType": "cassandra",
+            "deletion":"update"
+        }
+    },
+    "internalId": "district_id",
+    "id": {
+        "name": "district_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

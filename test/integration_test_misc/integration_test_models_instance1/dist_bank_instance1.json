@@ -1,0 +1,40 @@
+{
+    "model": "dist_bank",
+    "storageType": "cassandra-adapter",
+    "adapterName": "dist_bank_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "bank_id": "String",
+        "foundation_year": "Int",
+        "district_id": "String",
+        "founder_id": "String"
+    },
+    "associations": {
+        "dist_district": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_district",
+            "targetKey": "bank_ids",
+            "sourceKey": "district_id",
+            "keysIn": "dist_bank",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        },
+        "dist_unique_founder": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_founder",
+            "targetKey": "bank_id",
+            "sourceKey": "founder_id",
+            "keysIn": "dist_bank",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "bank_id",
+    "id": {
+        "name": "bank_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

@@ -276,7 +276,7 @@ module.exports.test16_11 =
 module.exports.test16_12 =
   /countAssociatedRecordsWithRejectReaction.+letget_generic_to_many_associated=result_generic_to_many\.reduce\(\(accumulator,current_val\)=>accumulator\+current_val,0\);/;
 module.exports.test16_13 =
-  /countAssociatedRecordsWithRejectReaction.+returnget_to_one_associated\+get_to_many_associated_fk\+get_to_many_associated\+get_generic_to_many_associated;/;
+  /countAssociatedRecordsWithRejectReaction.+returnget_to_one_associated\+get_to_many_associated_fk\+get_to_many_associated\+get_to_one_associated_fk\+get_generic_to_many_associated;/;
 
 /**
  * 17.    generic <generic_to_one> - dog
@@ -303,7 +303,7 @@ module.exports.test17_9 =
 module.exports.test17_10 =
   /countAssociatedRecordsWithRejectReaction.+letget_generic_to_one_associated=result_generic_to_one\.filter\(\(r,index\)=>helper\.isNotUndefinedAndNotNull\(r\)\).length;/;
 module.exports.test17_11 =
-  /countAssociatedRecordsWithRejectReaction.+returnget_to_one_associated\+get_to_many_associated_fk\+get_to_many_associated\+get_generic_to_one_associated;/;
+  /countAssociatedRecordsWithRejectReaction.+returnget_to_one_associated\+get_to_many_associated_fk\+get_to_many_associated\+get_to_one_associated_fk\+get_generic_to_one_associated;/;
 
 /* Models */
 

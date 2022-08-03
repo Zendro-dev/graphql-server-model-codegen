@@ -1,0 +1,26 @@
+{
+    "model": "spot",
+    "storageType": "mongodb",
+    "attributes": {
+      "spot_id": "String",
+      "plant_id": "String",
+      "location": "String"
+    },
+    "associations": {
+      "unique_plant": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "plant",
+        "targetKey": "spot_id",
+        "sourceKey": "plant_id",
+        "keysIn": "spot",
+        "targetStorageType": "mongodb",
+        "deletion":"update"
+      }
+    },
+    "internalId": "spot_id",
+    "id": {
+        "name": "spot_id",
+        "type": "String"
+    }
+}

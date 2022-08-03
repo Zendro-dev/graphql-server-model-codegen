@@ -40,7 +40,26 @@
   * @param {string} token The token used for authorization
   */
   <%- nameLc -%>.prototype.<%- op %>_<%-associationsArguments["to_one"][i].name_lc-%> = async function(input, benignErrorReporter, token) {
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+    <% if (associationsArguments["to_one"][i].assocThroughArray) { -%>
+    <% if (op === 'remove') { -%>
+      if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> == this.<%-associationsArguments["to_one"][i].sourceKey%>) {
+        await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].sourceKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
+        this.<%-associationsArguments["to_one"][i].sourceKey%> = null;
+      }
+    <%} else { -%>
+      <% if (associationsArguments["to_one"][i].type==="one_to_one" && op === 'add') { -%>
+        const associated = await models.<%=associationsArguments["to_one"][i].target_lc-%>.readById(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
+        if (associated.<%=associationsArguments["to_one"][i].targetKey%>) {
+          const removed = await <%- nameLc %>.remove_<%-associationsArguments["to_one"][i].sourceKey%>(associated.<%=associationsArguments["to_one"][i].targetKey%>, input.add<%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
+          benignErrorReporter.push({
+            message: `Hint: update ${removed} existing association!`,
+          });
+        }
+      <%}-%>
+      await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].sourceKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);
+      this.<%-associationsArguments["to_one"][i].sourceKey%> = input.<%- op %><%-associationsArguments["to_one"][i].name_cp%>;
+    <%}-%>
+  <%} else if (associationsArguments["to_one"][i].holdsForeignKey) {-%>
     <% if (op === 'remove') { -%>
       if(input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%> == this.<%-associationsArguments["to_one"][i].targetKey%>) {
         await <%- nameLc -%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey-%>(this.getIdValue(), input.<%- op %><%-associationsArguments["to_one"][i].name_cp-%>, benignErrorReporter, token);

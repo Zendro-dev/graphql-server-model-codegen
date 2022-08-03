@@ -1,0 +1,26 @@
+{
+    "model": "owner",
+    "storageType": "neo4j",
+    "attributes": {
+      "owner_id": "String",
+      "house_id": "String",
+      "name": "String"
+    },
+    "associations": {
+      "unique_house": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "house",
+        "targetKey": "owner_id",
+        "sourceKey": "house_id",
+        "keysIn": "owner",
+        "targetStorageType": "neo4j",
+        "deletion":"update"
+      }
+    },
+    "internalId": "owner_id",
+    "id": {
+        "name": "owner_id",
+        "type": "String"
+    }
+}

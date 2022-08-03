@@ -160,21 +160,24 @@ person.prototype.worksFilter = function({
     order,
     pagination
 }, context) {
-        //build new search filter
-        let nsearch = helper.addSearchField({
-            "search": search,
-            "field": "book_id",
-            "value": this.getIdValue(),
-            "operator": "eq"
-        });
 
-        return resolvers.books({
-            search: nsearch,
-            order: order,
-            pagination: pagination
-        }, context);
+    //return an empty response if the foreignKey Array is empty, no need to query the database
+    if (!Array.isArray(this.person_id) || this.person_id.length === 0) {
+        return [];
+    }
+    let nsearch = helper.addSearchField({
+        "search": search,
+        "field": models.book.idAttribute(),
+        "value": this.person_id.join(','),
+        "valueType": "Array",
+        "operator": "in"
+    });
+    return resolvers.books({
+        search: nsearch,
+        order: order,
+        pagination: pagination
+    }, context);
 }
-
 `;
 
 module.exports.class_name_model_person = `

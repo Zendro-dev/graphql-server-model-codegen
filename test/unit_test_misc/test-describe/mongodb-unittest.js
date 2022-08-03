@@ -291,12 +291,12 @@ static async remove_farm_id(animal_id, farm_id, benignErrorReporter) {
 `;
 
 module.exports.animal_fieldMutation_add_food = `
-static async add_food_ids(animal_id, food_ids, benignErrorReporter, handle_inverse = true) {
+static async add_food_ids(animal_id, food_ids, benignErrorReporter, token, handle_inverse = true) {
     //handle inverse association
     if (handle_inverse) {
         let promises = [];
         food_ids.forEach(idx => {
-            promises.push(models.food.add_animal_ids(idx, [\`\${animal_id}\`], benignErrorReporter, false));
+            promises.push(models.food.add_animal_ids(idx, [\`\${animal_id}\`], benignErrorReporter, token, false));
         });
         await Promise.all(promises);
     }
@@ -322,12 +322,12 @@ static async add_food_ids(animal_id, food_ids, benignErrorReporter, handle_inver
 `;
 
 module.exports.animal_fieldMutation_remove_food = `
-static async remove_food_ids(animal_id, food_ids, benignErrorReporter, handle_inverse = true) {
+static async remove_food_ids(animal_id, food_ids, benignErrorReporter, token, handle_inverse = true) {
     //handle inverse association
     if (handle_inverse) {
         let promises = [];
         food_ids.forEach(idx => {
-            promises.push(models.food.remove_animal_ids(idx, [\`\${animal_id}\`], benignErrorReporter, false));
+            promises.push(models.food.remove_animal_ids(idx, [\`\${animal_id}\`], benignErrorReporter, token, false));
         });
         await Promise.all(promises);
     }

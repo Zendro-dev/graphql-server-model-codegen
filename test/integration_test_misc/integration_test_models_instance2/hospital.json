@@ -1,0 +1,38 @@
+{
+    "model": "hospital",
+    "storageType": "sql",
+    "attributes": {
+        "hospital_id": "String",
+        "construction_year": "Int",
+        "area_id": "String",
+        "leader_id": "String"
+    },
+    "associations": {
+        "area": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "area",
+            "targetKey": "hospital_ids",
+            "sourceKey": "area_id",
+            "keysIn": "hospital",
+            "targetStorageType": "sql",
+            "deletion":"update"
+        },
+        "unique_leader": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "leader",
+            "targetKey": "hospital_id",
+            "sourceKey": "leader_id",
+            "keysIn": "hospital",
+            "targetStorageType": "sql",
+            "deletion":"update"
+        }
+    },
+    "internalId": "hospital_id",
+    "id": {
+        "name": "hospital_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

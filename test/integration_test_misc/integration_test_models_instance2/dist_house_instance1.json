@@ -1,0 +1,40 @@
+{
+    "model": "dist_house",
+    "storageType": "neo4j-adapter",
+    "adapterName": "dist_house_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "house_id": "String",
+        "construction_year": "Int",
+        "street_id": "String",
+        "owner_id": "String"
+    },
+    "associations": {
+        "dist_street": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_street",
+            "targetKey": "house_ids",
+            "sourceKey": "street_id",
+            "keysIn": "dist_house",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        },
+        "dist_unique_owner": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_owner",
+            "targetKey": "house_id",
+            "sourceKey": "owner_id",
+            "keysIn": "dist_house",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "house_id",
+    "id": {
+        "name": "house_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

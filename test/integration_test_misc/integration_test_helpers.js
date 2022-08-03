@@ -175,3 +175,16 @@ module.exports.count_all_records = async function (count_func) {
   let res = await module.exports.request_graph_ql_post(`{ ${count_func} }`);
   return JSON.parse(res.body.toString("utf8")).data[count_func];
 };
+
+/**
+ * count_all_records - Count all records using given GraphQL query
+ *
+ * @param  {count_func} {string}  GraphQL count function name for the given table, e.g. 'countIndividuals'
+ * @return {integer}         Number of the records in a given table
+ */
+module.exports.count_all_records_instance2 = async function (count_func) {
+  let res = await module.exports.request_graph_ql_post_instance2(
+    `{ ${count_func} }`
+  );
+  return JSON.parse(res.body.toString("utf8")).data[count_func];
+};

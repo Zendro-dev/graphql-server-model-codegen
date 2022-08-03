@@ -17,6 +17,7 @@ module.exports.count_associations = `
     let promises_to_many = [];
     let promises_to_one = [];
     let get_to_many_associated_fk = 0;
+    let get_to_one_associated_fk = 0;
 
     promises_to_many.push(accession.countFilteredIndividuals({}, context));
     promises_to_many.push(accession.countFilteredMeasurements({}, context));
@@ -28,7 +29,7 @@ module.exports.count_associations = `
     let get_to_many_associated = result_to_many.reduce((accumulator, current_val) => accumulator + current_val, 0);
     let get_to_one_associated = result_to_one.filter((r, index) => helper.isNotUndefinedAndNotNull(r)).length;
 
-    return get_to_one_associated + get_to_many_associated_fk + get_to_many_associated;
+    return get_to_one_associated + get_to_many_associated_fk + get_to_many_associated + get_to_one_associated_fk;
 }
 
 `;
@@ -336,11 +337,12 @@ module.exports.add_assoc_ddm_model = `
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  * @param {string} token The token used for authorization
+ * @param {boolean} handle_inverse Handle inverse association
  */
-static async add_locationId(accession_id, locationId, benignErrorReporter, token) {
+static async add_locationId(accession_id, locationId, benignErrorReporter, token, handle_inverse) {
     try {
         let responsibleAdapter = this.adapterForIri(accession_id);
-        return await adapters[responsibleAdapter].add_locationId(accession_id, locationId, benignErrorReporter, token);
+        return await adapters[responsibleAdapter].add_locationId(accession_id, locationId, benignErrorReporter, token, handle_inverse);
     } catch (error) {
         benignErrorReporter.push({
             message: error,
@@ -357,11 +359,12 @@ module.exports.remove_assoc_ddm_model = `
  * @param {Id}   locationId Foreign Key (stored in "Me") of the Association to be updated.
  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
  * @param {string} token The token used for authorization
+ * @param {boolean} handle_inverse Handle inverse association
  */
-static async remove_locationId(accession_id, locationId, benignErrorReporter, token) {
+static async remove_locationId(accession_id, locationId, benignErrorReporter, token, handle_inverse) {
     try {
         let responsibleAdapter = this.adapterForIri(accession_id);
-        return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId, benignErrorReporter, token);
+        return await adapters[responsibleAdapter].remove_locationId(accession_id, locationId, benignErrorReporter, token, handle_inverse);
     } catch (error) {
         benignErrorReporter.push({
             message: error,

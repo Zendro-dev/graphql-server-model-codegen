@@ -1,0 +1,38 @@
+{
+    "model": "bank",
+    "storageType": "cassandra",
+    "attributes": {
+        "bank_id": "String",
+        "foundation_year": "Int",
+        "district_id": "String",
+        "founder_id": "String"
+    },
+    "associations": {
+        "district": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "district",
+            "targetKey": "bank_ids",
+            "sourceKey": "district_id",
+            "keysIn": "bank",
+            "targetStorageType": "cassandra",
+            "deletion":"update"
+        },
+        "unique_founder": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "founder",
+            "targetKey": "bank_id",
+            "sourceKey": "founder_id",
+            "keysIn": "bank",
+            "targetStorageType": "cassandra",
+            "deletion":"update"
+        }
+    },
+    "internalId": "bank_id",
+    "id": {
+        "name": "bank_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

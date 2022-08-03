@@ -31,8 +31,6 @@ describe("Neo4j - Basic CRUD Operations", () => {
   });
 
   it("02. Movie: add", async () => {
-    // movie_id,release,runtime,box_office,is_adult,genres,votes
-    // m1,2008-12-03T10:15:30Z,130,17845632.32,true,action;thriller,50;200;140;1200;150
     let res = itHelpers.request_graph_ql_post_instance2(
       `mutation{
             addMovie(movie_id:"m0", release:"1998-12-03T10:15:30Z", runtime:110, box_office:13145632.32, 
@@ -1581,6 +1579,496 @@ describe("data loader for readById method", () => {
         genres: ["wuxia", "mystery"],
         unique_review: {
           review_id: "r1",
+        },
+      },
+    });
+  });
+});
+
+describe("Neo4j - Associations for Paired-end Foreign Keys (local)", () => {
+  // set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        n0: addHouse(house_id:"h1", construction_year:1997) {house_id}
+        n1: addHouse(house_id:"h2", construction_year:1853) {house_id}
+        n2: addHouse(house_id:"h3", construction_year:2012) {house_id}
+      }`
+    );
+
+    expect(res.statusCode).to.equal(200);
+  });
+
+  // clean up records
+  after(async () => {
+    // Delete all houses
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "{ houses(pagination:{limit:25}) {house_id} }"
+    );
+    let houses = JSON.parse(res.body.toString("utf8")).data.houses;
+
+    for (let i = 0; i < houses.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteHouse (house_id: "${houses[i].house_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records_instance2("countHouses");
+    expect(cnt).to.equal(0);
+
+    // Delete all streets
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ streets(pagination:{limit:25}) {street_id} }"
+    );
+    let streets = JSON.parse(res.body.toString("utf8")).data.streets;
+
+    for (let i = 0; i < streets.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteStreet (street_id: "${streets[i].street_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countStreets");
+    expect(cnt).to.equal(0);
+
+    // Delete all owners
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ owners(pagination:{limit:25}) {owner_id} }"
+    );
+    let owner = JSON.parse(res.body.toString("utf8")).data.owners;
+
+    for (let i = 0; i < owner.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteOwner (owner_id: "${owner[i].owner_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countOwners");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. House : Street (n:1) - add houses to street", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        addStreet( street_id: "s1", street_name: "Melatener Str.", addHouses: ["h1", "h2"] ){
+          street_name
+          house_ids
+          housesFilter(pagination:{limit:10}){
+            construction_year
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addStreet: {
+          housesFilter: [
+            {
+              construction_year: 1997,
+            },
+            {
+              construction_year: 1853,
+            },
+          ],
+          street_name: "Melatener Str.",
+          house_ids: ["h1", "h2"],
+        },
+      },
+    });
+  });
+  it("02. House : Street (n:1) - read one associated house", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(`{
+      readOneHouse(house_id: "h1"){
+        construction_year
+        street_id
+      }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneHouse: {
+          construction_year: 1997,
+          street_id: "s1",
+        },
+      },
+    });
+  });
+
+  it("03. House : Street (n:1) - delete the associations in the street record", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{updateStreet(street_id: "s1", removeHouses: ["h1", "h2"]) {
+          street_name
+          housesFilter(pagination:{limit:10}){
+            construction_year
+          }
+          housesConnection(pagination:{first:5}){
+            houses{
+              house_id
+            }
+          }
+        }
+      }`
+    );
+
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateStreet: {
+          housesFilter: [],
+          street_name: "Melatener Str.",
+          housesConnection: {
+            houses: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. House : Owner (1:1) - add house to owner", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+          addOwner(owner_id:"o1", name:"Maximillian", addUnique_house:"h3"){
+            owner_id
+            house_id
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addOwner: {
+          owner_id: "o1",
+          house_id: "h3",
+        },
+      },
+    });
+  });
+
+  it("05. House : Owner (1:1) - read one associated house", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(`
+      {
+        readOneHouse(house_id: "h3"){
+          construction_year
+          owner_id
+        }
+      }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneHouse: {
+          construction_year: 2012,
+          owner_id: "o1",
+        },
+      },
+    });
+  });
+
+  it("06. House : Owner (1:1) - update the existing association", () => {
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+          addOwner(owner_id:"o2", name:"Lily", addUnique_house:"h3"){
+            owner_id
+            house_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: { addOwner: { owner_id: "o2", house_id: "h3" } },
+    });
+  });
+
+  it("07. House : Owner (1:1) - delete the associations in the owner record", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        updateOwner(owner_id:"o2", removeUnique_house:"h3"){
+          owner_id
+          house_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateOwner: {
+          owner_id: "o2",
+          house_id: null,
+        },
+      },
+    });
+  });
+});
+
+describe("Neo4j - Associations for Paired-end Foreign Keys (distributed)", () => {
+  after(async () => {
+    // Delete all houses
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "{ dist_housesConnection(pagination:{first:10}) {edges {node {house_id}}}}"
+    );
+    let edges = JSON.parse(res.body.toString("utf8")).data.dist_housesConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDist_house (house_id: "${edge.node.house_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records_instance2("countDist_houses");
+    expect(cnt).to.equal(0);
+
+    // Delete all streets
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ dist_streetsConnection(pagination:{first:10}) {edges {node {street_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_streetsConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDist_street (street_id: "${edge.node.street_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countDist_streets");
+    expect(cnt).to.equal(0);
+
+    // Delete all owners
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ dist_ownersConnection(pagination:{first:10}) {edges {node {owner_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_ownersConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDist_owner (owner_id: "${edge.node.owner_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countDist_owners");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. House DDM: create a street and 2 houses", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        addDist_street(street_id: "instance1-s1", street_name: "Melatener Str.") {
+          street_id
+          street_name
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_street: {
+          street_id: "instance1-s1",
+          street_name: "Melatener Str.",
+        },
+      },
+    });
+
+    const year = [1993, 2016, 1982];
+    for (let i = 0; i < year.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation {
+          addDist_house(house_id: "instance1-h${i + 1}", construction_year: ${
+          year[i]
+        })
+          {
+            house_id
+            construction_year
+          }
+        }
+        `
+      );
+      resBody = JSON.parse(res.body.toString("utf8"));
+      expect(res.statusCode).to.equal(200);
+
+      expect(resBody).to.deep.equal({
+        data: {
+          addDist_house: {
+            house_id: `instance1-h${i + 1}`,
+            construction_year: year[i],
+          },
+        },
+      });
+    }
+  });
+
+  it("02. House DDM: update the street to associate with houses", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        updateDist_street(street_id: "instance1-s1", addDist_houses: ["instance1-h1", "instance1-h2"]) {
+          street_name
+          countFilteredDist_houses
+          dist_housesConnection(pagination: {first: 5}) {
+            edges {
+              node {
+                construction_year
+              }
+            }
+            dist_houses{
+              house_id
+            }
+          }
+        }
+      }
+      `
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_street: {
+          street_name: "Melatener Str.",
+          countFilteredDist_houses: 2,
+          dist_housesConnection: {
+            edges: [
+              {
+                node: {
+                  construction_year: 1993,
+                },
+              },
+              {
+                node: {
+                  construction_year: 2016,
+                },
+              },
+            ],
+            dist_houses: [
+              { house_id: "instance1-h1" },
+              { house_id: "instance1-h2" },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it("03. House DDM: update the street to remove associations", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        updateDist_street(street_id:"instance1-s1" removeDist_houses:["instance1-h1", "instance1-h2"]) {
+          street_name
+          countFilteredDist_houses
+          dist_housesConnection(pagination:{first:5}){
+            edges {
+              node {
+                construction_year
+              }
+            }
+            dist_houses{
+              house_id
+            }
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_street: {
+          street_name: "Melatener Str.",
+          countFilteredDist_houses: 0,
+          dist_housesConnection: {
+            edges: [],
+            dist_houses: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. House DDM: add house to owner", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        addDist_owner(owner_id:"instance1-o1", name:"Haribo", addDist_unique_house:"instance1-h3"){
+          owner_id
+          house_id
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_owner: {
+          owner_id: "instance1-o1",
+          house_id: "instance1-h3",
+        },
+      },
+    });
+  });
+
+  it("05. House DDM: update the existing association", () => {
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+          addDist_owner(owner_id:"instance1-o2", name:"Bing", addDist_unique_house:"instance1-h3"){
+            owner_id
+            house_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: {
+        addDist_owner: { owner_id: "instance1-o2", house_id: "instance1-h3" },
+      },
+    });
+  });
+
+  it("06. House DDM: delete the associations in the house record", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        updateDist_house(house_id:"instance1-h3", removeDist_unique_owner:"instance1-o2"){
+          owner_id
+          house_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_house: {
+          house_id: "instance1-h3",
+          owner_id: null,
         },
       },
     });

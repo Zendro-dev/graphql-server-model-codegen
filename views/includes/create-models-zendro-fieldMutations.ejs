@@ -1,5 +1,62 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  <% if (associationsArguments["to_one"][i].assocThroughArray) { -%>
+    /**
+    * <%- op %>_<%-associationsArguments["to_one"][i].sourceKey-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
+    *
+    * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+    * @param {Id}   <%-associationsArguments["to_one"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+    * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+    * @param {string} token The token used for authorization
+    */
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token) {
+      let query = `
+            mutation
+              update<%- nameCp-%>{
+                update<%- nameCp-%>(
+                  <%- idAttribute -%>:"${<%- idAttribute -%>}"
+                  <%- op %><%= associationsArguments["to_one"][i].name_cp%>:"${<%-associationsArguments["to_one"][i].sourceKey-%>}"
+                ){
+                  <%- idAttribute -%>
+                  <%-associationsArguments["to_one"][i].sourceKey-%>
+                }
+              }`
+
+      try {
+        // Send an HTTP request to the remote server
+        let opts = {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/graphql",
+          },
+        };
+        if (token) {
+          opts.headers["authorization"] = token;
+        }
+        let response = await axios.post(
+          remoteZendroURL, 
+          {
+            query: query,
+          },
+          opts
+        );
+        //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+        if(helper.isNonEmptyArray(response.data.errors)) {
+          benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+        }
+        // STATUS-CODE is 200
+        // NO ERROR as such has been detected by the server (Express)
+        // check if data was send
+        if(response && response.data && response.data.data) {
+          return new <%- nameLc -%>(response.data.data.update<%- nameCp -%>);
+        } else {
+          throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
+        }
+      } catch(error){
+        //handle caught errors
+        errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL);
+      }
+    }
+  <%} else if (associationsArguments["to_one"][i].holdsForeignKey) {-%>
     /**
     * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
     *

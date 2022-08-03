@@ -117,12 +117,12 @@ author.prototype.remove_books = async function(input, benignErrorReporter, token
 `;
 
 module.exports.model_add_association = `
- static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true){
+ static async add_book_ids(id, book_ids, benignErrorReporter, token, handle_inverse = true){
    //handle inverse association
    if (handle_inverse) {
    let promises = [];
    book_ids.forEach( idx => {
-     promises.push( models.book.add_author_ids( idx ,[ \`\${id}\`], benignErrorReporter, false ) );
+     promises.push( models.book.add_author_ids( idx ,[ \`\${id}\`], benignErrorReporter, token, false ) );
    });
    await Promise.all(promises);
     }
@@ -137,12 +137,12 @@ module.exports.model_add_association = `
  `;
 
 module.exports.model_remove_association = `
- static async remove_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true){
+ static async remove_book_ids(id, book_ids, benignErrorReporter, token, handle_inverse = true){
    //handle inverse association
    if (handle_inverse) {
    let promises = [];
    book_ids.forEach( idx => {
-     promises.push( models.book.remove_author_ids(idx, [ \`\${id}\`], benignErrorReporter, false ));
+     promises.push( models.book.remove_author_ids(idx, [ \`\${id}\`], benignErrorReporter, token, false ));
    });
    await Promise.all(promises);
    }
@@ -264,21 +264,21 @@ module.exports.remote_model_remove_association = `
  `;
 
 module.exports.ddm_model_add = `
-static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true, token) {
+static async add_book_ids(id, book_ids, benignErrorReporter, token, handle_inverse) {
   let responsibleAdapter = this.adapterForIri(id);
-  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter, handle_inverse, token);
+  return await adapters[responsibleAdapter].add_book_ids(id, book_ids, benignErrorReporter, token, handle_inverse);
 
 }
 
 `;
 module.exports.sql_adapter_add = `
-static async add_book_ids(id, book_ids, benignErrorReporter, handle_inverse = true) {
+static async add_book_ids(id, book_ids, benignErrorReporter, token, handle_inverse = true) {
 
   //handle inverse association
   if (handle_inverse) {
       let promises = [];
       book_ids.forEach(idx => {
-          promises.push(models.sq_book.add_author_ids(idx, [\`\${id}\`], benignErrorReporter, false));
+          promises.push(models.sq_book.add_author_ids(idx, [\`\${id}\`], benignErrorReporter, token, false));
       });
       await Promise.all(promises);
   }

@@ -1,0 +1,28 @@
+{
+    "model": "field",
+    "storageType": "mongodb",
+    "attributes": {
+        "field_id": "String",
+        "field_name": "String",
+        "owner": "String",
+        "plant_ids": "[String]"
+    },
+    "associations": {
+        "plants": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "plant",
+            "targetKey": "field_id",
+            "sourceKey": "plant_ids",
+            "keysIn": "field",
+            "targetStorageType": "mongodb",
+            "deletion":"update"
+        }
+    },
+    "internalId": "field_id",
+    "id": {
+        "name": "field_id",
+        "type": "String"
+    },
+    "useDataLoader": false
+}

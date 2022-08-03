@@ -1,0 +1,41 @@
+{
+    "model": "plant",
+    "storageType": "mongodb",
+    "attributes": {
+        "plant_id": "String",
+        "category": "String",
+        "plant_name": "String",
+        "age": "Int",
+        "weight": "Float",
+        "field_id": "String",
+        "spot_id": "String"
+    },
+    "associations": {
+        "field": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "field",
+            "targetKey": "plant_ids",
+            "sourceKey": "field_id",
+            "keysIn": "plant",
+            "targetStorageType": "mongodb",
+            "deletion":"update"
+        },
+        "unique_spot": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "spot",
+            "targetKey": "plant_id",
+            "sourceKey": "spot_id",
+            "keysIn": "plant",
+            "targetStorageType": "mongodb",
+            "deletion":"update"
+        }
+    },
+    "internalId": "plant_id",
+    "id": {
+        "name": "plant_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

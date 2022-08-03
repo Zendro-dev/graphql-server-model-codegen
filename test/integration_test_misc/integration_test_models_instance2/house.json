@@ -1,0 +1,38 @@
+{
+    "model": "house",
+    "storageType": "neo4j",
+    "attributes": {
+        "house_id": "String",
+        "construction_year": "Int",
+        "street_id": "String",
+        "owner_id": "String"
+    },
+    "associations": {
+        "street": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "street",
+            "targetKey": "house_ids",
+            "sourceKey": "street_id",
+            "keysIn": "house",
+            "targetStorageType": "neo4j",
+            "deletion":"update"
+        },
+        "unique_owner": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "owner",
+            "targetKey": "house_id",
+            "sourceKey": "owner_id",
+            "keysIn": "house",
+            "targetStorageType": "neo4j",
+            "deletion":"update"
+        }
+    },
+    "internalId": "house_id",
+    "id": {
+        "name": "house_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

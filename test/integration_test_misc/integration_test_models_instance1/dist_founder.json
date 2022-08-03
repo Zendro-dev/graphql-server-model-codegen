@@ -1,0 +1,27 @@
+{
+    "model": "dist_founder",
+    "storageType": "distributed-data-model",
+    "registry": ["dist_founder_instance1"],
+    "attributes": {
+      "founder_id": "String",
+      "bank_id": "String",
+      "name": "String"
+    },
+    "associations": {
+      "dist_unique_bank": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "dist_bank",
+        "targetKey": "founder_id",
+        "sourceKey": "bank_id",
+        "keysIn": "dist_founder",
+        "targetStorageType": "distributed-data-model",
+        "deletion":"update"
+      }
+    },
+    "internalId": "founder_id",
+    "id": {
+        "name": "founder_id",
+        "type": "String"
+    }
+}

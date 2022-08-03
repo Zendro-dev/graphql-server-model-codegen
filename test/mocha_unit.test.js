@@ -374,9 +374,7 @@ describe("All webservice (generic) models", function () {
   it("Resolvers - person", async function () {
     let opts = funks.getOptions(models_generic_webservice.person);
     let generated_resolvers = await funks.generateJs("create-resolvers", opts);
-    let g_resolvers = generated_resolvers.replace(/\s/g, "");
-    let test_resolvers = data_test.resolvers_person.replace(/\s/g, "");
-    expect(g_resolvers).to.have.string(test_resolvers);
+    testCompare(generated_resolvers, data_test.resolvers_person);
   });
 
   it("Model - person", async function () {
@@ -1338,6 +1336,7 @@ describe("Parse associations", function () {
           targetKey: "projectId",
           targetKey_cp: "ProjectId",
           sourceKey: "researcherId",
+          sourceKey_cp: "ResearcherId",
           keysIn: "project_to_researcher",
           keysIn_lc: "project_to_researcher",
           targetStorageType: "sql",
@@ -1430,6 +1429,7 @@ describe("Parse associations", function () {
           targetKey: "bookId",
           targetKey_cp: "BookId",
           sourceKey: "personId",
+          sourceKey_cp: "PersonId",
           keysIn: "books_to_people",
           keysIn_lc: "books_to_people",
           targetStorageType: "sql",
@@ -2984,5 +2984,47 @@ describe("Neo4j Unit Test", function () {
     let opts = funks.getOptions(models_neo4j.dist_movie_instance1);
     let generated_model = await funks.generateJs("create-neo4j-adapter", opts);
     testCompare(generated_model, data_test.neo4j_adapter_readById);
+  });
+
+  it("neo4j model - paired end FK - manyToOne - add steet to house", async function () {
+    let opts = funks.getOptions(models_neo4j.house);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.house_pairedEnd_add_street);
+  });
+
+  it("neo4j model - paired end FK - manyToOne - remove street from house", async function () {
+    let opts = funks.getOptions(models_neo4j.house);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.house_pairedEnd_remove_street);
+  });
+
+  it("neo4j model - paired end oneToOne - add owner to house", async function () {
+    let opts = funks.getOptions(models_neo4j.house);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.house_pairedEnd_add_owner);
+  });
+
+  it("neo4j model - paired end oneToOne - remove owner from house", async function () {
+    let opts = funks.getOptions(models_neo4j.house);
+    let generated_model = await funks.generateJs("create-models-neo4j", opts);
+    testCompare(generated_model, data_test.house_pairedEnd_remove_owner);
+  });
+
+  it("neo4j ddm - paired end FK - manyToOne - add dist_steet to dist_house", async function () {
+    let opts = funks.getOptions(models_neo4j.dist_house);
+    let generated_model = await funks.generateJs(
+      "create-distributed-model",
+      opts
+    );
+    testCompare(generated_model, data_test.neo4j_ddm_add_dist_steet);
+  });
+
+  it("neo4j ddm - paired end FK - manyToOne - remove dist_steet from dist_house", async function () {
+    let opts = funks.getOptions(models_neo4j.dist_house);
+    let generated_model = await funks.generateJs(
+      "create-distributed-model",
+      opts
+    );
+    testCompare(generated_model, data_test.neo4j_ddm_remove_dist_steet);
   });
 });

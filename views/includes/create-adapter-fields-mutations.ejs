@@ -1,5 +1,221 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  <% if (associationsArguments["to_one"][i].assocThroughArray) { -%>
+  /**
+  * <%- op %>_<%-associationsArguments["to_one"][i].sourceKey-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associationsArguments["to_one"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+  * @param {string} token The token used for authorization
+  <% if(storageType != 'zendro-webservice-adapter' || storageType != 'ddm-adapter'){-%>
+  * @param {boolean} handle_inverse Handle inverse association
+  <% } _%>
+  */
+      <%#
+    /**
+      *check the type of adapter and handle zendro-webservice-adapter and ddm-adapter
+      */
+    -%>
+    <% if(storageType === 'zendro-webservice-adapter' || storageType === 'ddm-adapter'){-%>
+      static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token) {
+        let query = `
+              mutation
+                update<%- nameCp-%>{
+                  update<%- nameCp-%>(
+                    <%- idAttribute -%>:"${<%- idAttribute -%>}"
+                    <%- op %><%= associationsArguments["to_one"][i].name_cp%>:"${<%-associationsArguments["to_one"][i].sourceKey-%>}"
+                    skipAssociationsExistenceChecks: true
+                  ){
+                    <%- idAttribute -%>
+                    <%-associationsArguments["to_one"][i].sourceKey-%>
+                  }
+                }`
+
+        try {
+          // Send an HTTP request to the remote server
+          let opts = {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/graphql",
+            },
+          };
+          if (token) {
+            opts.headers["authorization"] = token;
+          }
+          let response = await axios.post(
+            remoteZendroURL, 
+            {
+              query: query,
+            },
+            opts
+          );
+          //check if remote service returned benign Errors in the response and add them to the benignErrorReporter
+          if(helper.isNonEmptyArray(response.data.errors)) {
+            benignErrorReporter.push(errorHelper.handleRemoteErrors(response.data.errors, remoteZendroURL));
+          }
+          // STATUS-CODE is 200
+          // NO ERROR as such has been detected by the server (Express)
+          // check if data was send
+          if(response && response.data && response.data.data) {
+            return 1;
+          } else {
+            benignErrorReporter.push({
+              message: `Remote zendro-server (${remoteZendroURL}) did not respond with data.`,
+            });
+          }
+        } catch(error) {
+          //handle caught errors
+          benignErrorReporter.push(errorHelper.handleCaughtErrorAndBenignErrors(error, benignErrorReporter, remoteZendroURL));
+        }
+      }
+  <%}-%>
+  <%#  /** End of the zendro-webservice-adapter case and the ddm-adapter case */ -%>
+
+
+  <%#
+  /**
+    *check the type of adapter and handle sql-adapter
+    */
+  -%>
+  <%if(storageType === 'sql-adapter'){-%>
+  static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
+    try{
+      //handle inverse association
+      if(handle_inverse){
+        <%if (associationsArguments["to_one"][i].type==="many_to_one") {-%>
+        await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false);
+        <%} else if (associationsArguments["to_one"][i].type==="one_to_one") {-%>
+        await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, <%- idAttribute-%>, benignErrorReporter, token, false);
+        <%}-%>
+      }
+      let updated = await super.update({ <%-associationsArguments["to_one"][i].sourceKey-%>:  <% if (op == 'remove') { %>null<% } else { %><%-associationsArguments["to_one"][i].sourceKey-%><%}-%>},{where: {<%- idAttribute -%>: <%- idAttribute -%><% if (op == 'remove') { -%>,<%-associationsArguments["to_one"][i].sourceKey-%>: <%-associationsArguments["to_one"][i].sourceKey-%> <%}-%>}});
+      return updated[0];
+    } catch (error) {
+      benignErrorReporter.push({
+        message:error
+      });
+    }
+   }
+  <%}-%>
+  <%#  /*** End of the the sql-adapter case */ -%>
+
+  <%#
+  /**
+   * check the type of adapter and handle mongodb-adapter
+   */
+  -%>
+  <%if(storageType === 'mongodb-adapter'){-%>
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
+      try {
+        //handle inverse association
+        if(handle_inverse){
+          <%if (associationsArguments["to_one"][i].type==="many_to_one") {-%>
+          await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false);
+          <%} else if (associationsArguments["to_one"][i].type==="one_to_one") {-%>
+          await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, <%- idAttribute-%>, benignErrorReporter, token, false);
+          <%}-%>
+        }
+        const db = await this.storageHandler
+        const collection = await db.collection("<%- model_name_in_storage -%>")
+        const updatedContent = {<%-associationsArguments["to_one"][i].sourceKey-%>: <% if (op === 'remove') 
+        { -%>null<% } else { %><%-associationsArguments["to_one"][i].sourceKey-%><%}-%>}
+        const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
+        {-%>,<%-associationsArguments["to_one"][i].sourceKey-%>: <%-associationsArguments["to_one"][i].sourceKey-%> <%}-%>}, {$set: updatedContent});
+        if (response.result.ok !== 1){
+          benignErrorReporter.push({
+            message:`Record with ID = ${<%- idAttribute-%>} has not been updated`
+          });
+        }
+        return response.modifiedCount;
+      } catch (error) {
+        benignErrorReporter.push({
+          message:error
+        });
+      }
+    }
+  <%}-%>
+  <%#  /*** End of the the mongodb-adapter case */ -%>
+  
+  <%#
+  /**
+   * check the type of adapter and handle neo4j-adapter
+   */
+  -%>
+  <%if(storageType === 'neo4j-adapter'){-%>
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
+      //handle inverse association
+      if(handle_inverse){
+        <%if (associationsArguments["to_one"][i].type==="many_to_one") {-%>
+        await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false);
+        <%} else if (associationsArguments["to_one"][i].type==="one_to_one") {-%>
+        await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, <%- idAttribute-%>, benignErrorReporter, token, false);
+        <%}-%>
+      }
+      const driver = await this.storageHandler;
+      const session = driver.session({
+        database: config.database,
+        defaultAccessMode: neo4j.session.WRITE,
+      });
+      let foreignKey = `MATCH (n:<%- model_name_in_storage -%>) WHERE n.<%-idAttribute%> = $id 
+        SET n.<%-associationsArguments["to_one"][i].sourceKey-%> = $target RETURN count(n)`
+      const target_model = models.<%-associationsArguments["to_one"][i].target_lc-%>.definition.model_name_in_storage ?? "<%-associationsArguments["to_one"][i].target_lc_pl-%>";
+
+      <% if (op == 'remove') { %>let delete_relationships = `MATCH (a:<%- model_name_in_storage -%>)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]-> (b:${target_model}) 
+        WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
+        DELETE r`<% } 
+      else { %>let create_relationships = `MATCH (a:<%- model_name_in_storage -%>), (b:${target_model}) 
+        WHERE a.<%-idAttribute%> = $id AND b.${models.<%-associationsArguments["to_one"][i].target-%>.idAttribute()} = $target
+        CREATE (a)-[r:${"<%-associationsArguments["to_one"][i].name-%>".toUpperCase() + "_EDGE"}]->(b)`<%}-%>
+
+      try{
+        const result = await session.run(foreignKey, {id: <%-idAttribute%>, target: <% if (op == 'remove') { _%>null<% } else { %><%-associationsArguments["to_one"][i].sourceKey-%><%}-%>});
+        await session.run(<% if (op == 'remove') { %>delete_relationships<% } else { %>create_relationships<%}-%>, 
+        {
+          id: <%-idAttribute%>,
+          target: <%-associationsArguments["to_one"][i].sourceKey-%>,
+        })
+        return result.records[0].get(0);
+      } catch (error) {
+        benignErrorReporter.push({
+          message:error
+        });
+      } finally {
+        await session.close();
+      }
+    }
+  <%}-%>
+  <%#  /*** End of the the neo4j-adapter case */ -%>
+
+  <%#
+  /**
+   * check the type of adapter and handle cassandra-adapter
+   */
+  -%>
+  <%if(storageType === 'cassandra-adapter'){-%>
+    static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
+      try{
+        //handle inverse association
+        if(handle_inverse){
+          <%if (associationsArguments["to_one"][i].type==="many_to_one") {-%>
+          await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false);
+          <%} else if (associationsArguments["to_one"][i].type==="one_to_one") {-%>
+          await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, <%- idAttribute-%>, benignErrorReporter, token, false);
+          <%}-%>
+        }
+        const mutationCql = `UPDATE <%- model_name_in_storage -%> SET <%-associationsArguments["to_one"][i].sourceKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+        await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].sourceKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
+        const checkCql = `SELECT COUNT(*) FROM <%- model_name_in_storage -%> WHERE <%- idAttribute-%> = ?`;
+        let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
+        return parseInt(result.first()["count"]);
+      } catch (error) {
+        benignErrorReporter.push({
+          message: error,
+        });
+      }
+    }
+  <%}-%>
+   <%#  /*** End of the the cassandra-adapter case */ -%>
+  <%} else if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
   /**
   * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (adapter-layer) for to_one associationsArguments to <%- op %>
   *
@@ -194,16 +410,24 @@
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+    * @param {string} token The token used for authorization
+    <% if(storageType != 'zendro-webservice-adapter' || storageType != 'ddm-adapter'){-%>
+    * @param {boolean} handle_inverse Handle inverse association
+    <% } _%>
     */
 
     <%if(storageType === 'sql-adapter'){-%>
-      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
 
         //handle inverse association
         if(handle_inverse){
           let promises = [];
           <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
-            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+            <%if (associationsArguments["to_many"][i].type==="many_to_many") {-%>
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false) );
+            <%} else if (associationsArguments["to_many"][i].type==="one_to_many") {-%>
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, <%- idAttribute-%>, benignErrorReporter, token, false) );
+            <%}-%>
           });
           await Promise.all(promises);
         }
@@ -218,13 +442,17 @@
     <%}-%>
       <%#  /*** End of the the sql-adapter case */ -%>
       <%if(storageType === 'mongodb-adapter'){-%>
-      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
 
         //handle inverse association
         if(handle_inverse){
           let promises = [];
           <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
-              promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+            <%if (associationsArguments["to_many"][i].type==="many_to_many") {-%>
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false) );
+            <%} else if (associationsArguments["to_many"][i].type==="one_to_many") {-%>
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, <%- idAttribute-%>, benignErrorReporter, token, false) );
+            <%}-%>
           });
           await Promise.all(promises);
         }
@@ -244,12 +472,16 @@
     <%}-%>
       <%#  /*** End of the the mongodb-adapter case */ -%>
       <%if(storageType === 'neo4j-adapter'){-%>
-      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
         //handle inverse association
         if(handle_inverse){
           let promises = [];
           <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
-            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+            <%if (associationsArguments["to_many"][i].type==="many_to_many") {-%>
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false) );
+            <%} else if (associationsArguments["to_many"][i].type==="one_to_many") {-%>
+            promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, <%- idAttribute-%>, benignErrorReporter, token, false) );
+            <%}-%>
           });
           await Promise.all(promises);
         }
@@ -350,12 +582,16 @@
      */
     -%>
     <%if(storageType === 'cassandra-adapter'){-%>
-      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+      static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
       //handle inverse association
       if(handle_inverse){
         let promises = [];
         <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
-          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+          <%if (associationsArguments["to_many"][i].type==="many_to_many") {-%>
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false) );
+          <%} else if (associationsArguments["to_many"][i].type==="one_to_many") {-%>
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, <%- idAttribute-%>, benignErrorReporter, token, false) );
+          <%}-%>
         });
         await Promise.all(promises);
       }

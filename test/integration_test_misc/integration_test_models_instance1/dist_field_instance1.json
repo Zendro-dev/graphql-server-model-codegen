@@ -1,0 +1,30 @@
+{
+    "model": "dist_field",
+    "storageType": "mongodb-adapter",
+    "adapterName": "dist_field_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "field_id": "String",
+        "field_name": "String",
+        "owner": "String",
+        "plant_ids": "[String]"
+    },
+    "associations": {
+        "dist_plants": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "dist_plant",
+            "targetKey": "field_id",
+            "sourceKey": "plant_ids",
+            "keysIn": "dist_field",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "field_id",
+    "id": {
+        "name": "field_id",
+        "type": "String"
+    },
+    "useDataLoader": false
+}

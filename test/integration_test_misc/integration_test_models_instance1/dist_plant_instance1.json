@@ -1,0 +1,43 @@
+{
+    "model": "dist_plant",
+    "storageType": "mongodb-adapter",
+    "adapterName": "dist_plant_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "plant_id": "String",
+        "category": "String",
+        "plant_name": "String",
+        "age": "Int",
+        "weight": "Float",
+        "field_id": "String",
+        "spot_id": "String"
+    },
+    "associations": {
+        "dist_field": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_field",
+            "targetKey": "plant_ids",
+            "sourceKey": "field_id",
+            "keysIn": "dist_plant",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        },
+        "dist_unique_spot": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_spot",
+            "targetKey": "plant_id",
+            "sourceKey": "spot_id",
+            "keysIn": "dist_plant",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "plant_id",
+    "id": {
+        "name": "plant_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}
