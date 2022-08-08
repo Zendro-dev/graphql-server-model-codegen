@@ -795,6 +795,10 @@ module.exports.parseAssociations = function (dataModel) {
         // set extra association fields
         assoc["targetKey"] = association.targetKey;
         assoc["targetKey_cp"] = capitalizeString(association.targetKey);
+        if (association.sourceKey) {
+          assoc["sourceKey"] = association.sourceKey;
+          assoc["sourceKey_cp"] = capitalizeString(association.sourceKey);
+        }
         assoc["keysIn_lc"] = uncapitalizeString(association.keysIn);
         assoc["holdsForeignKey"] = false;
         assoc["assocThroughArray"] = false;
@@ -852,19 +856,22 @@ module.exports.parseAssociations = function (dataModel) {
               // schema attrtibutes
               associations_info.schema_attributes["one"][name] =
                 schema_attributes;
-              // holds foreignKey ?
-              if (association.keysIn === dataModel.model) {
+              if (association.sourceKey) {
+                assoc["assocThroughArray"] = true;
+              } else if (association.keysIn === dataModel.model) {
                 assoc["holdsForeignKey"] = true;
               }
               associations_info["to_one"].push(assoc);
               break;
             case "many_to_many":
               assoc["assocThroughArray"] = true;
-              assoc["sourceKey"] = association.sourceKey;
             case "one_to_many":
               associations_info.schema_attributes["many"][name] =
                 schema_attributes;
               associations_info["to_many"].push(assoc);
+              if (association.sourceKey) {
+                assoc["assocThroughArray"] = true;
+              }
               break;
             default:
               break;

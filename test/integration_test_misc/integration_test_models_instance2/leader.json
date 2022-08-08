@@ -1,0 +1,26 @@
+{
+    "model": "leader",
+    "storageType": "sql",
+    "attributes": {
+      "leader_id": "String",
+      "hospital_id": "String",
+      "name": "String"
+    },
+    "associations": {
+      "unique_hospital": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "hospital",
+        "targetKey": "leader_id",
+        "sourceKey": "hospital_id",
+        "keysIn": "leader",
+        "targetStorageType": "sql",
+        "deletion":"update"
+      }
+    },
+    "internalId": "leader_id",
+    "id": {
+        "name": "leader_id",
+        "type": "String"
+    }
+}

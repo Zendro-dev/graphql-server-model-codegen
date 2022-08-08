@@ -1,0 +1,28 @@
+{
+    "model": "dist_district",
+    "storageType": "distributed-data-model",
+    "registry": ["dist_district_instance1"],
+    "attributes": {
+        "district_id": "String",
+        "district_name": "String",
+        "bank_ids": "[String]"
+    },
+    "associations": {
+        "dist_banks": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "dist_bank",
+            "targetKey": "district_id",
+            "sourceKey": "bank_ids",
+            "keysIn": "dist_district",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "district_id",
+    "id": {
+        "name": "district_id",
+        "type": "String"
+    },
+    "useDataLoader": false
+}

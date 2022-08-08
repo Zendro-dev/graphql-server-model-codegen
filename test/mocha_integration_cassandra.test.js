@@ -2034,3 +2034,484 @@ describe("data loader for readById method", () => {
     });
   });
 });
+
+describe("Cassandra - Associations for Paired-end Foreign Keys (local)", () => {
+  // set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: addBank(bank_id:"b1", foundation_year:1997) {bank_id}
+        n1: addBank(bank_id:"b2", foundation_year:1983) {bank_id}
+        n2: addBank(bank_id:"b3", foundation_year:2012) {bank_id}
+      }`
+    );
+
+    expect(res.statusCode).to.equal(200);
+  });
+
+  // clean up records
+  after(async () => {
+    // Delete all banks
+    let res = itHelpers.request_graph_ql_post(
+      "{ banksConnection(pagination:{first:25}) {banks{bank_id}} }"
+    );
+    let banks = JSON.parse(res.body.toString("utf8")).data.banksConnection
+      .banks;
+
+    for (let i = 0; i < banks.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteBank (bank_id: "${banks[i].bank_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countBanks");
+    expect(cnt).to.equal(0);
+
+    // Delete all districts
+    res = itHelpers.request_graph_ql_post(
+      "{ districtsConnection(pagination:{first:25}) {districts{district_id}} }"
+    );
+    let districts = JSON.parse(res.body.toString("utf8")).data
+      .districtsConnection.districts;
+
+    for (let i = 0; i < districts.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDistrict (district_id: "${districts[i].district_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countDistricts");
+    expect(cnt).to.equal(0);
+
+    // Delete all founders
+    res = itHelpers.request_graph_ql_post(
+      "{ foundersConnection(pagination:{first:25}) {founders{founder_id}} }"
+    );
+    let founder = JSON.parse(res.body.toString("utf8")).data.foundersConnection
+      .founders;
+
+    for (let i = 0; i < founder.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteFounder (founder_id: "${founder[i].founder_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countFounders");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Bank : District (n:1) - add banks to district", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        addDistrict( district_id: "d1", district_name: "Aachen", addBanks: ["b1", "b2"] ){
+          district_name
+          bank_ids
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDistrict: {
+          district_name: "Aachen",
+          bank_ids: ["b1", "b2"],
+        },
+      },
+    });
+  });
+  it("02. Bank : District (n:1) - read one associated bank", () => {
+    let res = itHelpers.request_graph_ql_post(`{
+      readOneBank(bank_id: "b1"){
+        foundation_year
+        district_id
+      }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneBank: {
+          foundation_year: 1997,
+          district_id: "d1",
+        },
+      },
+    });
+  });
+
+  it("03. Bank : District (n:1) - delete the associations in the district record", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{updateDistrict(district_id: "d1", removeBanks: ["b1", "b2"]) {
+          district_name
+          banksConnection(pagination:{first:5}){
+            banks{
+              bank_id
+            }
+          }
+        }
+      }`
+    );
+
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDistrict: {
+          district_name: "Aachen",
+          banksConnection: {
+            banks: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. Bank : Founder (1:1) - add bank to founder", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addFounder(founder_id:"f1", name:"Frank", addUnique_bank:"b3"){
+            founder_id
+            bank_id
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addFounder: {
+          founder_id: "f1",
+          bank_id: "b3",
+        },
+      },
+    });
+  });
+
+  it("05. Bank : Founder (1:1) - read one associated bank", () => {
+    let res = itHelpers.request_graph_ql_post(`
+      {
+        readOneBank(bank_id: "b3"){
+          foundation_year
+          founder_id
+        }
+      }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneBank: {
+          foundation_year: 2012,
+          founder_id: "f1",
+        },
+      },
+    });
+  });
+
+  it("06. Bank : Founder (1:1) - update the existing association", () => {
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addFounder(founder_id:"f2", name:"Lily", addUnique_bank:"b3"){
+            founder_id
+            bank_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: { addFounder: { founder_id: "f2", bank_id: "b3" } },
+    });
+  });
+
+  it("07. Bank : Founder (1:1) - delete the associations in the founder record", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        updateFounder(founder_id:"f2", removeUnique_bank:"b3"){
+          founder_id
+          bank_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateFounder: {
+          founder_id: "f2",
+          bank_id: null,
+        },
+      },
+    });
+  });
+});
+
+describe("Cassandra - Associations for Paired-end Foreign Keys (distributed)", () => {
+  after(async () => {
+    // Delete all banks
+    let res = itHelpers.request_graph_ql_post(
+      "{ dist_banksConnection(pagination:{first:10}) {edges {node {bank_id}}}}"
+    );
+    let edges = JSON.parse(res.body.toString("utf8")).data.dist_banksConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_bank (bank_id: "${edge.node.bank_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countDist_banks");
+    expect(cnt).to.equal(0);
+
+    // Delete all districts
+    res = itHelpers.request_graph_ql_post(
+      "{ dist_districtsConnection(pagination:{first:10}) {edges {node {district_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_districtsConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_district (district_id: "${edge.node.district_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countDist_districts");
+    expect(cnt).to.equal(0);
+
+    // Delete all founders
+    res = itHelpers.request_graph_ql_post(
+      "{ dist_foundersConnection(pagination:{first:10}) {edges {node {founder_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_foundersConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_founder (founder_id: "${edge.node.founder_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countDist_founders");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Bank DDM: create a district and 2 banks", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        addDist_district(district_id: "instance1-d1", district_name: "Aachen") {
+          district_id
+          district_name
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_district: {
+          district_id: "instance1-d1",
+          district_name: "Aachen",
+        },
+      },
+    });
+
+    const year = [1993, 2016, 1982];
+    for (let i = 0; i < year.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation {
+          addDist_bank(bank_id: "instance1-b${i + 1}", foundation_year: ${
+          year[i]
+        })
+          {
+            bank_id
+            foundation_year
+          }
+        }
+        `
+      );
+      resBody = JSON.parse(res.body.toString("utf8"));
+      expect(res.statusCode).to.equal(200);
+
+      expect(resBody).to.deep.equal({
+        data: {
+          addDist_bank: {
+            bank_id: `instance1-b${i + 1}`,
+            foundation_year: year[i],
+          },
+        },
+      });
+    }
+  });
+
+  it("02. Bank DDM: update the district to associate with banks", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        updateDist_district(district_id: "instance1-d1", addDist_banks: ["instance1-b1", "instance1-b2"]) {
+          district_name
+          countFilteredDist_banks
+          dist_banksConnection(pagination: {first: 5}) {
+            edges {
+              node {
+                foundation_year
+              }
+            }
+            dist_banks{
+              bank_id
+            }
+          }
+        }
+      }
+      `
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_district: {
+          district_name: "Aachen",
+          countFilteredDist_banks: 2,
+          dist_banksConnection: {
+            edges: [
+              {
+                node: {
+                  foundation_year: 1993,
+                },
+              },
+              {
+                node: {
+                  foundation_year: 2016,
+                },
+              },
+            ],
+            dist_banks: [
+              { bank_id: "instance1-b1" },
+              { bank_id: "instance1-b2" },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it("03. Bank DDM: update the district to remove associations", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        updateDist_district(district_id:"instance1-d1" removeDist_banks:["instance1-b1", "instance1-b2"]) {
+          district_name
+          countFilteredDist_banks
+          dist_banksConnection(pagination:{first:5}){
+            edges {
+              node {
+                foundation_year
+              }
+            }
+            dist_banks{
+              bank_id
+            }
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_district: {
+          district_name: "Aachen",
+          countFilteredDist_banks: 0,
+          dist_banksConnection: {
+            edges: [],
+            dist_banks: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. Bank DDM: add bank to founder", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        addDist_founder(founder_id:"instance1-f1", name:"Haribo", addDist_unique_bank:"instance1-b3"){
+          founder_id
+          bank_id
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_founder: {
+          founder_id: "instance1-f1",
+          bank_id: "instance1-b3",
+        },
+      },
+    });
+  });
+
+  it("05. Bank DDM: update the existing association", () => {
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addDist_founder(founder_id:"instance1-f2", name:"Bing", addDist_unique_bank:"instance1-b3"){
+            founder_id
+            bank_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: {
+        addDist_founder: {
+          founder_id: "instance1-f2",
+          bank_id: "instance1-b3",
+        },
+      },
+    });
+  });
+
+  it("06. Bank DDM: delete the associations in the bank record", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        updateDist_bank(bank_id:"instance1-b3", removeDist_unique_founder:"instance1-f2"){
+          founder_id
+          bank_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_bank: {
+          bank_id: "instance1-b3",
+          founder_id: null,
+        },
+      },
+    });
+  });
+});

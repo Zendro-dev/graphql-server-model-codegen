@@ -4301,3 +4301,498 @@ describe("validation API for local setup", () => {
     });
   });
 });
+
+describe("SQL - Associations for Paired-end Foreign Keys (local)", () => {
+  // set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        n0: addHospital(hospital_id:"h1", construction_year:1997) {hospital_id}
+        n1: addHospital(hospital_id:"h2", construction_year:1853) {hospital_id}
+        n2: addHospital(hospital_id:"h3", construction_year:2012) {hospital_id}
+      }`
+    );
+
+    expect(res.statusCode).to.equal(200);
+  });
+
+  // clean up records
+  after(async () => {
+    // Delete all hospitals
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "{ hospitals(pagination:{limit:25}) {hospital_id} }"
+    );
+    let hospitals = JSON.parse(res.body.toString("utf8")).data.hospitals;
+
+    for (let i = 0; i < hospitals.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteHospital (hospital_id: "${hospitals[i].hospital_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records_instance2("countHospitals");
+    expect(cnt).to.equal(0);
+
+    // Delete all areas
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ areas(pagination:{limit:25}) {area_id} }"
+    );
+    let areas = JSON.parse(res.body.toString("utf8")).data.areas;
+
+    for (let i = 0; i < areas.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteArea (area_id: "${areas[i].area_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countAreas");
+    expect(cnt).to.equal(0);
+
+    // Delete all leaders
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ leaders(pagination:{limit:25}) {leader_id} }"
+    );
+    let leader = JSON.parse(res.body.toString("utf8")).data.leaders;
+
+    for (let i = 0; i < leader.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteLeader (leader_id: "${leader[i].leader_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countLeaders");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Hospital : Area (n:1) - add hospitals to area", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        addArea( area_id: "a1", area_name: "area A", addHospitals: ["h1", "h2"] ){
+          area_name
+          hospital_ids
+          hospitalsFilter(pagination:{limit:10}){
+            construction_year
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addArea: {
+          hospitalsFilter: [
+            {
+              construction_year: 1997,
+            },
+            {
+              construction_year: 1853,
+            },
+          ],
+          area_name: "area A",
+          hospital_ids: ["h1", "h2"],
+        },
+      },
+    });
+  });
+  it("02. Hospital : Area (n:1) - read one associated hospital", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(`{
+      readOneHospital(hospital_id: "h1"){
+        construction_year
+        area_id
+      }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneHospital: {
+          construction_year: 1997,
+          area_id: "a1",
+        },
+      },
+    });
+  });
+
+  it("03. Hospital : Area (n:1) - delete the associations in the area record", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{updateArea(area_id: "a1", removeHospitals: ["h1", "h2"]) {
+          area_name
+          hospitalsFilter(pagination:{limit:10}){
+            construction_year
+          }
+          hospitalsConnection(pagination:{first:5}){
+            hospitals{
+              hospital_id
+            }
+          }
+        }
+      }`
+    );
+
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateArea: {
+          hospitalsFilter: [],
+          area_name: "area A",
+          hospitalsConnection: {
+            hospitals: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. Hospital : Leader (1:1) - add hospital to leader", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+          addLeader(leader_id:"l1", name:"Maximillian", addUnique_hospital:"h3"){
+            leader_id
+            hospital_id
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addLeader: {
+          leader_id: "l1",
+          hospital_id: "h3",
+        },
+      },
+    });
+  });
+
+  it("05. Hospital : Leader (1:1) - read one associated hospital", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(`
+      {
+        readOneHospital(hospital_id: "h3"){
+          construction_year
+          leader_id
+        }
+      }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOneHospital: {
+          construction_year: 2012,
+          leader_id: "l1",
+        },
+      },
+    });
+  });
+
+  it("06. Hospital : Leader (1:1) - update the existing association", () => {
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+          addLeader(leader_id:"l2", name:"Lily", addUnique_hospital:"h3"){
+            leader_id
+            hospital_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: { addLeader: { leader_id: "l2", hospital_id: "h3" } },
+    });
+  });
+
+  it("07. Hospital : Leader (1:1) - delete the associations in the leader record", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        updateLeader(leader_id:"l2", removeUnique_hospital:"h3"){
+          leader_id
+          hospital_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateLeader: {
+          leader_id: "l2",
+          hospital_id: null,
+        },
+      },
+    });
+  });
+});
+
+describe("SQL - Associations for Paired-end Foreign Keys (distributed)", () => {
+  after(async () => {
+    // Delete all hospitals
+    let res = itHelpers.request_graph_ql_post_instance2(
+      "{ dist_hospitalsConnection(pagination:{first:10}) {edges {node {hospital_id}}}}"
+    );
+    let edges = JSON.parse(res.body.toString("utf8")).data
+      .dist_hospitalsConnection.edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDist_hospital (hospital_id: "${edge.node.hospital_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records_instance2(
+      "countDist_hospitals"
+    );
+    expect(cnt).to.equal(0);
+
+    // Delete all areas
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ dist_areasConnection(pagination:{first:10}) {edges {node {area_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_areasConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDist_area (area_id: "${edge.node.area_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countDist_areas");
+    expect(cnt).to.equal(0);
+
+    // Delete all leaders
+    res = itHelpers.request_graph_ql_post_instance2(
+      "{ dist_leadersConnection(pagination:{first:10}) {edges {node {leader_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_leadersConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation { deleteDist_leader (leader_id: "${edge.node.leader_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records_instance2("countDist_leaders");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Hospital DDM: create a area and 2 hospitals", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        addDist_area(area_id: "instance1-a1", area_name: "area A") {
+          area_id
+          area_name
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_area: {
+          area_id: "instance1-a1",
+          area_name: "area A",
+        },
+      },
+    });
+
+    const year = [1993, 2016, 1982];
+    for (let i = 0; i < year.length; i++) {
+      res = itHelpers.request_graph_ql_post_instance2(
+        `mutation {
+          addDist_hospital(hospital_id: "instance1-h${
+            i + 1
+          }", construction_year: ${year[i]})
+          {
+            hospital_id
+            construction_year
+          }
+        }
+        `
+      );
+      resBody = JSON.parse(res.body.toString("utf8"));
+      expect(res.statusCode).to.equal(200);
+
+      expect(resBody).to.deep.equal({
+        data: {
+          addDist_hospital: {
+            hospital_id: `instance1-h${i + 1}`,
+            construction_year: year[i],
+          },
+        },
+      });
+    }
+  });
+
+  it("02. Hospital DDM: update the area to associate with hospitals", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        updateDist_area(area_id: "instance1-a1", addDist_hospitals: ["instance1-h1", "instance1-h2"]) {
+          area_name
+          countFilteredDist_hospitals
+          dist_hospitalsConnection(pagination: {first: 5}) {
+            edges {
+              node {
+                construction_year
+              }
+            }
+            dist_hospitals{
+              hospital_id
+            }
+          }
+        }
+      }
+      `
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_area: {
+          area_name: "area A",
+          countFilteredDist_hospitals: 2,
+          dist_hospitalsConnection: {
+            edges: [
+              {
+                node: {
+                  construction_year: 1993,
+                },
+              },
+              {
+                node: {
+                  construction_year: 2016,
+                },
+              },
+            ],
+            dist_hospitals: [
+              { hospital_id: "instance1-h1" },
+              { hospital_id: "instance1-h2" },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it("03. Hospital DDM: update the area to remove associations", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation {
+        updateDist_area(area_id:"instance1-a1" removeDist_hospitals:["instance1-h1", "instance1-h2"]) {
+          area_name
+          countFilteredDist_hospitals
+          dist_hospitalsConnection(pagination:{first:5}){
+            edges {
+              node {
+                construction_year
+              }
+            }
+            dist_hospitals{
+              hospital_id
+            }
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_area: {
+          area_name: "area A",
+          countFilteredDist_hospitals: 0,
+          dist_hospitalsConnection: {
+            edges: [],
+            dist_hospitals: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. Hospital DDM: add hospital to leader", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        addDist_leader(leader_id:"instance1-l1", name:"Haribo", addDist_unique_hospital:"instance1-h3"){
+          leader_id
+          hospital_id
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_leader: {
+          leader_id: "instance1-l1",
+          hospital_id: "instance1-h3",
+        },
+      },
+    });
+  });
+
+  it("05. Hospital DDM: update the existing association", () => {
+    res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+          addDist_leader(leader_id:"instance1-l2", name:"Bing", addDist_unique_hospital:"instance1-h3"){
+            leader_id
+            hospital_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: {
+        addDist_leader: {
+          leader_id: "instance1-l2",
+          hospital_id: "instance1-h3",
+        },
+      },
+    });
+  });
+
+  it("06. Hospital DDM: delete the associations in the hospital record", () => {
+    let res = itHelpers.request_graph_ql_post_instance2(
+      `mutation{
+        updateDist_hospital(hospital_id:"instance1-h3", removeDist_unique_leader:"instance1-l2"){
+          leader_id
+          hospital_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_hospital: {
+          hospital_id: "instance1-h3",
+          leader_id: null,
+        },
+      },
+    });
+  });
+});

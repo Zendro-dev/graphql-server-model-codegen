@@ -1,0 +1,39 @@
+{
+    "model": "dist_hospital",
+    "storageType": "distributed-data-model",
+    "registry": ["dist_hospital_instance1"],
+    "attributes": {
+        "hospital_id": "String",
+        "construction_year": "Int",
+        "area_id": "String",
+        "leader_id": "String"
+    },
+    "associations": {
+        "dist_area": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_area",
+            "targetKey": "hospital_ids",
+            "sourceKey": "area_id",
+            "keysIn": "dist_hospital",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        },
+        "dist_unique_leader": {
+            "type": "one_to_one",
+            "implementation": "foreignkeys",
+            "target": "dist_leader",
+            "targetKey": "hospital_id",
+            "sourceKey": "leader_id",
+            "keysIn": "dist_hospital",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "hospital_id",
+    "id": {
+        "name": "hospital_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

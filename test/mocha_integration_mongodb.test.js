@@ -1873,3 +1873,492 @@ describe("Mongodb - Update Deletion Action", () => {
     }
   });
 });
+
+describe("Mongodb - Associations for Paired-end Foreign Keys (local)", () => {
+  // set up the environment
+  before(async () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        n0: addPlant(plant_id:"p1", plant_name:"Sally", category:"Paeonia suffruticosa", age:1, weight:0.5) {plant_id}
+        n1: addPlant(plant_id:"p2", plant_name:"Lily", category:"French hydrangea", age:2, weight:1.5) {plant_id}
+        n2: addPlant(plant_id:"p3", plant_name:"Milka", category:"Houttuynia cordata", age:1, weight:1.0) {plant_id}
+      }`
+    );
+
+    expect(res.statusCode).to.equal(200);
+  });
+
+  // clean up records
+  after(async () => {
+    // Delete all plants
+    let res = itHelpers.request_graph_ql_post(
+      "{ plants(pagination:{limit:25}) {plant_id} }"
+    );
+    let plants = JSON.parse(res.body.toString("utf8")).data.plants;
+
+    for (let i = 0; i < plants.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deletePlant (plant_id: "${plants[i].plant_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countPlants");
+    expect(cnt).to.equal(0);
+
+    // Delete all fields
+    res = itHelpers.request_graph_ql_post(
+      "{ fields(pagination:{limit:25}) {field_id} }"
+    );
+    let fields = JSON.parse(res.body.toString("utf8")).data.fields;
+
+    for (let i = 0; i < fields.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteField (field_id: "${fields[i].field_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countFields");
+    expect(cnt).to.equal(0);
+
+    // Delete all spots
+    res = itHelpers.request_graph_ql_post(
+      "{ spots(pagination:{limit:25}) {spot_id} }"
+    );
+    let spot = JSON.parse(res.body.toString("utf8")).data.spots;
+
+    for (let i = 0; i < spot.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteSpot (spot_id: "${spot[i].spot_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countSpots");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Plant : Field (n:1) - add plants to field", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        addField( field_id: "f1", field_name: "Flowers' Home", addPlants: ["p1", "p2"] ){
+          field_name
+          plant_ids
+          plantsFilter(pagination:{limit:10}){
+            plant_name
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addField: {
+          plantsFilter: [
+            {
+              plant_name: "Sally",
+            },
+            {
+              plant_name: "Lily",
+            },
+          ],
+          field_name: "Flowers' Home",
+          plant_ids: ["p1", "p2"],
+        },
+      },
+    });
+  });
+  it("02. Plant : Field (n:1) - read one associated plant", () => {
+    let res = itHelpers.request_graph_ql_post(`{
+      readOnePlant(plant_id: "p1"){
+        plant_name
+        field_id
+      }
+    }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOnePlant: {
+          plant_name: "Sally",
+          field_id: "f1",
+        },
+      },
+    });
+  });
+
+  it("03. Plant : Field (n:1) - delete the associations in the field record", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{updateField(field_id: "f1", removePlants: ["p1", "p2"]) {
+          field_name
+          plantsFilter(pagination:{limit:10}){
+            plant_name
+          }
+          plantsConnection(pagination:{first:5}){
+            plants{
+              plant_id
+            }
+          }
+        }
+      }`
+    );
+
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateField: {
+          plantsFilter: [],
+          field_name: "Flowers' Home",
+          plantsConnection: {
+            plants: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. Plant : Spot (1:1) - add plant to spot", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addSpot(spot_id:"s1", location:"spot1", addUnique_plant:"p3"){
+            spot_id
+            plant_id
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addSpot: {
+          spot_id: "s1",
+          plant_id: "p3",
+        },
+      },
+    });
+  });
+
+  it("05. Plant : Spot (1:1) - read one associated plant", () => {
+    let res = itHelpers.request_graph_ql_post(`
+      {
+        readOnePlant(plant_id: "p3"){
+          plant_name
+          spot_id
+        }
+      }`);
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        readOnePlant: {
+          plant_name: "Milka",
+          spot_id: "s1",
+        },
+      },
+    });
+  });
+
+  it("06. Plant : Spot (1:1) - update the existing association", () => {
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addSpot(spot_id:"s2", location:"spot2", addUnique_plant:"p3"){
+            spot_id
+            plant_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: { addSpot: { spot_id: "s2", plant_id: "p3" } },
+    });
+  });
+
+  it("07. Plant : Spot (1:1) - delete the associations in the spot record", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        updateSpot(spot_id:"s2", removeUnique_plant:"p3"){
+          spot_id
+          plant_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateSpot: {
+          spot_id: "s2",
+          plant_id: null,
+        },
+      },
+    });
+  });
+});
+
+describe("Mongodb - Associations for Paired-end Foreign Keys (distributed)", () => {
+  after(async () => {
+    // Delete all plants
+    let res = itHelpers.request_graph_ql_post(
+      "{ dist_plantsConnection(pagination:{first:10}) {edges {node {plant_id}}}}"
+    );
+    let edges = JSON.parse(res.body.toString("utf8")).data.dist_plantsConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_plant (plant_id: "${edge.node.plant_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    let cnt = await itHelpers.count_all_records("countDist_plants");
+    expect(cnt).to.equal(0);
+
+    // Delete all fields
+    res = itHelpers.request_graph_ql_post(
+      "{ dist_fieldsConnection(pagination:{first:10}) {edges {node {field_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_fieldsConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_field (field_id: "${edge.node.field_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countDist_fields");
+    expect(cnt).to.equal(0);
+
+    // Delete all spots
+    res = itHelpers.request_graph_ql_post(
+      "{ dist_spotsConnection(pagination:{first:10}) {edges {node {spot_id}}}}"
+    );
+    edges = JSON.parse(res.body.toString("utf8")).data.dist_spotsConnection
+      .edges;
+
+    for (let edge of edges) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation { deleteDist_spot (spot_id: "${edge.node.spot_id}") }`
+      );
+      expect(res.statusCode).to.equal(200);
+    }
+
+    cnt = await itHelpers.count_all_records("countDist_spots");
+    expect(cnt).to.equal(0);
+  });
+
+  it("01. Plant DDM: create a field and 2 plants", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        addDist_field(field_id: "instance1-f1", field_name: "Flowers' Home") {
+          field_id
+          field_name
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_field: {
+          field_id: "instance1-f1",
+          field_name: "Flowers' Home",
+        },
+      },
+    });
+
+    const name = ["Milka", "Sally", "Lily"];
+    for (let i = 0; i < name.length; i++) {
+      res = itHelpers.request_graph_ql_post(
+        `mutation {
+          addDist_plant(plant_id: "instance1-p${i + 1}",
+          plant_name: "${name[i]}")
+          {
+            plant_id
+            plant_name
+          }
+        }
+        `
+      );
+      resBody = JSON.parse(res.body.toString("utf8"));
+      expect(res.statusCode).to.equal(200);
+
+      expect(resBody).to.deep.equal({
+        data: {
+          addDist_plant: {
+            plant_id: `instance1-p${i + 1}`,
+            plant_name: `${name[i]}`,
+          },
+        },
+      });
+    }
+  });
+
+  it("02. Plant DDM: update the field to associate with plants", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        updateDist_field(field_id: "instance1-f1", addDist_plants: ["instance1-p1", "instance1-p2"]) {
+          field_name
+          countFilteredDist_plants
+          dist_plantsConnection(pagination: {first: 5}) {
+            edges {
+              node {
+                plant_name
+              }
+            }
+            dist_plants{
+              plant_id
+            }
+          }
+        }
+      }
+      `
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_field: {
+          field_name: "Flowers' Home",
+          countFilteredDist_plants: 2,
+          dist_plantsConnection: {
+            edges: [
+              {
+                node: {
+                  plant_name: "Milka",
+                },
+              },
+              {
+                node: {
+                  plant_name: "Sally",
+                },
+              },
+            ],
+            dist_plants: [
+              { plant_id: "instance1-p1" },
+              { plant_id: "instance1-p2" },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it("03. Plant DDM: update the field to remove associations", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation {
+        updateDist_field(field_id:"instance1-f1" removeDist_plants:["instance1-p1", "instance1-p2"]) {
+          field_name
+          countFilteredDist_plants
+          dist_plantsConnection(pagination:{first:5}){
+            edges {
+              node {
+                plant_name
+              }
+            }
+            dist_plants{
+              plant_id
+            }
+          }
+        }
+      }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_field: {
+          field_name: "Flowers' Home",
+          countFilteredDist_plants: 0,
+          dist_plantsConnection: {
+            edges: [],
+            dist_plants: [],
+          },
+        },
+      },
+    });
+  });
+
+  it("04. Plant DDM: add plant to spot", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addDist_spot(spot_id:"instance1-s1", location:"spot1", addDist_unique_plant:"instance1-p3"){
+            spot_id
+            plant_id
+          }
+        }`
+    );
+    let resBody = JSON.parse(res.body.toString("utf8"));
+
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        addDist_spot: {
+          spot_id: "instance1-s1",
+          plant_id: "instance1-p3",
+        },
+      },
+    });
+  });
+
+  it("05. Plant DDM: update the existing association", () => {
+    res = itHelpers.request_graph_ql_post(
+      `mutation{
+          addDist_spot(spot_id:"instance1-s2", location:"spot2", addDist_unique_plant:"instance1-p3"){
+            spot_id
+            plant_id
+          }
+        }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      errors: [
+        {
+          message: "Hint: update 1 existing association!",
+          locations: "",
+        },
+      ],
+      data: {
+        addDist_spot: { spot_id: "instance1-s2", plant_id: "instance1-p3" },
+      },
+    });
+  });
+
+  it("06. Plant DDM: delete the associations in the plant record", () => {
+    let res = itHelpers.request_graph_ql_post(
+      `mutation{
+        updateDist_plant(plant_id:"instance1-p3", removeDist_unique_spot:"instance1-s2"){
+          spot_id
+          plant_id
+        }
+      }`
+    );
+    resBody = JSON.parse(res.body.toString("utf8"));
+    expect(res.statusCode).to.equal(200);
+    expect(resBody).to.deep.equal({
+      data: {
+        updateDist_plant: {
+          plant_id: "instance1-p3",
+          spot_id: null,
+        },
+      },
+    });
+  });
+});

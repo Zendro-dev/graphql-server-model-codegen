@@ -1,5 +1,36 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  <% if (associationsArguments["to_one"][i].assocThroughArray) { -%>
+  /**
+  * <%- op %>_<%-associationsArguments["to_one"][i].sourceKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associationsArguments["to_one"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated. 
+  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors
+  * @param {string} token The token used for authorization
+  * @param {boolean} handle_inverse Handle inverse association
+  */
+  static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
+    try {
+      //handle inverse association
+      if(handle_inverse){
+        <%if (associationsArguments["to_one"][i].type==="many_to_one") {-%>
+        await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false);
+        <%} else if (associationsArguments["to_one"][i].type==="one_to_one") {-%>
+        await models.<%-associationsArguments["to_one"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_one"][i].targetKey%>(<%-associationsArguments["to_one"][i].sourceKey-%>, <%- idAttribute-%>, benignErrorReporter, token, false);
+        <%}-%>
+      }
+      const mutationCql = `UPDATE "<%- model_name_in_storage -%>" SET <%-associationsArguments["to_one"][i].sourceKey-%> = ? WHERE <%- idAttribute -%> = ?`;
+      await this.storageHandler.execute(mutationCql, [<% if (op == 'remove') { -%>null<% } else { %><%-associationsArguments["to_one"][i].sourceKey-%><%}-%>, <%- idAttribute -%>], {prepare: true});
+      const checkCql = `SELECT COUNT(*) FROM "<%- model_name_in_storage -%>" WHERE <%- idAttribute-%> = ?`;
+      let result = await this.storageHandler.execute(checkCql, [<%- idAttribute-%>]);
+      return parseInt(result.first()["count"]);
+    } catch (error) {
+      benignErrorReporter.push({
+        message: error,
+      });
+    }
+  }
+  <% } else if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
   /**
   * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %> 
   *
@@ -30,13 +61,19 @@
     *
     * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
     * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Array foreign Key (stored in "Me") of the Association to be updated.
+    * @param {string} token The token used for authorization
+    * @param {boolean} handle_inverse Handle inverse association
     */
-    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true) {
+    static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse = true) {
       //handle inverse association
       if(handle_inverse){
         let promises = [];
         <%-associationsArguments["to_many"][i].sourceKey-%>.forEach( idx =>{
-          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, false) );
+          <%if (associationsArguments["to_many"][i].type==="many_to_many") {-%>
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, [`${<%- idAttribute-%>}`], benignErrorReporter, token, false) );
+          <%} else if (associationsArguments["to_many"][i].type==="one_to_many") {-%>
+          promises.push(models.<%-associationsArguments["to_many"][i].target_lc-%>.<%- op %>_<%-associationsArguments["to_many"][i].targetKey%>(idx, <%- idAttribute-%>, benignErrorReporter, token, false) );
+          <%}-%>
         });
         await Promise.all(promises);
       }

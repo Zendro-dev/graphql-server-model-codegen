@@ -413,12 +413,12 @@ static async remove_director_id(movie_id, director_id, benignErrorReporter) {
 `;
 
 module.exports.movie_fieldMutation_add_actor = `
-static async add_actor_ids(movie_id, actor_ids, benignErrorReporter, handle_inverse = true) {
+static async add_actor_ids(movie_id, actor_ids, benignErrorReporter, token, handle_inverse = true) {
     //handle inverse association
     if (handle_inverse) {
         let promises = [];
         actor_ids.forEach(idx => {
-            promises.push(models.actor.add_movie_ids(idx, [\`\${movie_id}\`], benignErrorReporter, false));
+            promises.push(models.actor.add_movie_ids(idx, [\`\${movie_id}\`], benignErrorReporter, token, false));
         });
         await Promise.all(promises);
     }
@@ -459,12 +459,12 @@ static async add_actor_ids(movie_id, actor_ids, benignErrorReporter, handle_inve
 `;
 
 module.exports.movie_fieldMutation_remove_actor = `
-static async remove_actor_ids(movie_id, actor_ids, benignErrorReporter, handle_inverse = true) {
+static async remove_actor_ids(movie_id, actor_ids, benignErrorReporter, token, handle_inverse = true) {
     //handle inverse association
     if (handle_inverse) {
         let promises = [];
         actor_ids.forEach(idx => {
-            promises.push(models.actor.remove_movie_ids(idx, [\`\${movie_id}\`], benignErrorReporter, false));
+            promises.push(models.actor.remove_movie_ids(idx, [\`\${movie_id}\`], benignErrorReporter, token, false));
         });
         await Promise.all(promises);
     }
@@ -620,5 +620,183 @@ static readByIdLoader = new DataLoader(dist_movie_instance1.batchReadById, {
  */
 static async readById(id) {
     return await dist_movie_instance1.readByIdLoader.load(id);
+}
+`;
+
+module.exports.house_pairedEnd_add_street = `
+static async add_street_id(house_id, street_id, benignErrorReporter, token, handle_inverse = true) {
+    //handle inverse association
+    if (handle_inverse) {
+        await models.street.add_house_ids(street_id, [\`\${house_id}\`], benignErrorReporter, token, false);
+    }
+    const driver = await this.storageHandler;
+    const session = driver.session({
+        database: config.database,
+        defaultAccessMode: neo4j.session.WRITE,
+    });
+    let foreignKey = \`MATCH (n:houses ) WHERE n.house_id = \$id 
+    SET n.street_id = \$target RETURN count(n)\`;
+    const target_model = models.street.definition.model_name_in_storage ?? "streets";
+
+    let create_relationships = \`MATCH (a:houses), (b:\${target_model}) 
+    WHERE a.house_id = $id AND b.\${models.street.idAttribute()} = $target
+    CREATE (a)-[r:\${"street".toUpperCase() + "_EDGE"}]->(b)\`
+    try {
+        const result = await session.run(foreignKey, {
+            id: house_id,
+            target: street_id
+        });
+        await session.run(create_relationships, {
+            id: house_id,
+            target: street_id,
+        })
+        return result.records[0].get(0);
+    } catch (error) {
+        benignErrorReporter.push({
+            message: error
+        });
+    } finally {
+        await session.close();
+    }
+}
+`;
+
+module.exports.house_pairedEnd_remove_street = `
+static async remove_street_id(house_id, street_id, benignErrorReporter, token, handle_inverse = true) {
+    //handle inverse association
+    if (handle_inverse) {
+        await models.street.remove_house_ids(street_id, [\`\${house_id}\`], benignErrorReporter, token, false);
+    }
+    const driver = await this.storageHandler;
+    const session = driver.session({
+        database: config.database,
+        defaultAccessMode: neo4j.session.WRITE,
+    });
+    let foreignKey = \`MATCH (n:houses ) WHERE n.house_id = \$id 
+    SET n.street_id = \$target RETURN count(n)\`;
+    const target_model = models.street.definition.model_name_in_storage ?? "streets";
+
+    let delete_relationships = \`MATCH (a:houses)-[r:\${"street".toUpperCase() + "_EDGE"}]-> (b:\${target_model}) 
+    WHERE a.house_id = $id AND b.\${models.street.idAttribute()} = $target
+    DELETE r\`
+    try {
+        const result = await session.run(foreignKey, {
+            id: house_id,
+            target: null
+        });
+        await session.run(delete_relationships, {
+            id: house_id,
+            target: street_id,
+        })
+        return result.records[0].get(0);
+    } catch (error) {
+        benignErrorReporter.push({
+            message: error
+        });
+    } finally {
+        await session.close();
+    }
+}
+`;
+
+module.exports.house_pairedEnd_add_owner = `
+static async add_owner_id(house_id, owner_id, benignErrorReporter, token, handle_inverse = true) {
+    //handle inverse association
+    if (handle_inverse) {
+        await models.owner.add_house_id(owner_id, house_id, benignErrorReporter, token, false);
+    }
+    const driver = await this.storageHandler;
+    const session = driver.session({
+        database: config.database,
+        defaultAccessMode: neo4j.session.WRITE,
+    });
+    let foreignKey = \`MATCH (n:houses ) WHERE n.house_id = \$id 
+    SET n.owner_id = \$target RETURN count(n)\`;
+    const target_model = models.owner.definition.model_name_in_storage ?? "owners";
+
+    let create_relationships = \`MATCH (a:houses), (b:\${target_model}) 
+    WHERE a.house_id = $id AND b.\${models.owner.idAttribute()} = $target
+    CREATE (a)-[r:\${"unique_owner".toUpperCase() + "_EDGE"}]->(b)\`
+    try {
+        const result = await session.run(foreignKey, {
+            id: house_id,
+            target: owner_id
+        });
+        await session.run(create_relationships, {
+            id: house_id,
+            target: owner_id,
+        })
+        return result.records[0].get(0);
+    } catch (error) {
+        benignErrorReporter.push({
+            message: error
+        });
+    } finally {
+        await session.close();
+    }
+}
+`;
+
+module.exports.house_pairedEnd_remove_owner = `
+static async remove_owner_id(house_id, owner_id, benignErrorReporter, token, handle_inverse = true) {
+    //handle inverse association
+    if (handle_inverse) {
+        await models.owner.remove_house_id(owner_id, house_id, benignErrorReporter, token, false);
+    }
+    const driver = await this.storageHandler;
+    const session = driver.session({
+        database: config.database,
+        defaultAccessMode: neo4j.session.WRITE,
+    });
+    let foreignKey = \`MATCH (n:houses ) WHERE n.house_id = \$id 
+    SET n.owner_id = \$target RETURN count(n)\`;
+    const target_model = models.owner.definition.model_name_in_storage ?? "owners";
+
+    let delete_relationships = \`MATCH (a:houses)-[r:\${"unique_owner".toUpperCase() + "_EDGE"}]-> (b:\${target_model}) 
+    WHERE a.house_id = $id AND b.\${models.owner.idAttribute()} = $target
+    DELETE r\`
+    try {
+        const result = await session.run(foreignKey, {
+            id: house_id,
+            target: null
+        });
+        await session.run(delete_relationships, {
+            id: house_id,
+            target: owner_id,
+        })
+        return result.records[0].get(0);
+    } catch (error) {
+        benignErrorReporter.push({
+            message: error
+        });
+    } finally {
+        await session.close();
+    }
+}
+`;
+
+module.exports.neo4j_ddm_add_dist_steet = `
+static async add_street_id(house_id, street_id, benignErrorReporter, token, handle_inverse) {
+    try {
+        let responsibleAdapter = this.adapterForIri(house_id);
+        return await adapters[responsibleAdapter].add_street_id(house_id, street_id, benignErrorReporter, token, handle_inverse);
+    } catch (error) {
+        benignErrorReporter.push({
+            message: error,
+        });
+    }
+}
+`;
+
+module.exports.neo4j_ddm_remove_dist_steet = `
+static async remove_street_id(house_id, street_id, benignErrorReporter, token, handle_inverse) {
+    try {
+        let responsibleAdapter = this.adapterForIri(house_id);
+        return await adapters[responsibleAdapter].remove_street_id(house_id, street_id, benignErrorReporter, token, handle_inverse);
+    } catch (error) {
+        benignErrorReporter.push({
+            message: error,
+        });
+    }
 }
 `;

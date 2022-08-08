@@ -1,0 +1,28 @@
+{
+    "model": "dist_leader",
+    "storageType": "sql-adapter",
+    "adapterName": "dist_leader_instance1",
+    "regex": "instance1",
+    "attributes": {
+      "leader_id": "String",
+      "hospital_id": "String",
+      "name": "String"
+    },
+    "associations": {
+      "dist_unique_hospital": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "dist_hospital",
+        "targetKey": "leader_id",
+        "sourceKey": "hospital_id",
+        "keysIn": "dist_leader",
+        "targetStorageType": "distributed-data-model",
+        "deletion":"update"
+      }
+    },
+    "internalId": "leader_id",
+    "id": {
+        "name": "leader_id",
+        "type": "String"
+    }
+}

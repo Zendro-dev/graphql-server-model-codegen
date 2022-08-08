@@ -71,3 +71,82 @@ module.exports.dist_movie_instance1 = {
 
   internalId: "movie_id",
 };
+
+module.exports.house = {
+  model: "house",
+  storageType: "neo4j",
+  attributes: {
+    house_id: "String",
+    construction_year: "Int",
+    street_id: "String",
+    owner_id: "String",
+  },
+  associations: {
+    street: {
+      type: "many_to_one",
+      implementation: "foreignkeys",
+      target: "street",
+      targetKey: "house_ids",
+      sourceKey: "street_id",
+      keysIn: "house",
+      targetStorageType: "neo4j",
+      deletion: "update",
+    },
+    unique_owner: {
+      type: "one_to_one",
+      implementation: "foreignkeys",
+      target: "owner",
+      targetKey: "house_id",
+      sourceKey: "owner_id",
+      keysIn: "house",
+      targetStorageType: "neo4j",
+      deletion: "update",
+    },
+  },
+  internalId: "house_id",
+  id: {
+    name: "house_id",
+    type: "String",
+  },
+  useDataLoader: true,
+};
+
+module.exports.dist_house = {
+  model: "dist_house",
+  storageType: "distributed-data-model",
+  registry: ["dist_house_instance1"],
+  attributes: {
+    house_id: "String",
+    construction_year: "Int",
+    street_id: "String",
+    owner_id: "String",
+  },
+  associations: {
+    dist_street: {
+      type: "many_to_one",
+      implementation: "foreignkeys",
+      target: "dist_street",
+      targetKey: "house_ids",
+      sourceKey: "street_id",
+      keysIn: "dist_house",
+      targetStorageType: "distributed-data-model",
+      deletion: "update",
+    },
+    dist_unique_owner: {
+      type: "one_to_one",
+      implementation: "foreignkeys",
+      target: "dist_owner",
+      targetKey: "house_id",
+      sourceKey: "owner_id",
+      keysIn: "dist_house",
+      targetStorageType: "distributed-data-model",
+      deletion: "update",
+    },
+  },
+  internalId: "house_id",
+  id: {
+    name: "house_id",
+    type: "String",
+  },
+  useDataLoader: true,
+};

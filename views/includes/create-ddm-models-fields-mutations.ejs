@@ -1,5 +1,25 @@
 <%for(let i=0; i < associationsArguments["to_one"].length; i++){-%>
-  <% if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
+  <% if (associationsArguments["to_one"][i].assocThroughArray) { -%>
+  /**
+  * <%- op %>_<%-associationsArguments["to_one"][i].sourceKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
+  *
+  * @param {Id}   <%- idAttribute-%>   IdAttribute of the root model to be updated
+  * @param {Id}   <%-associationsArguments["to_one"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated.
+  * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
+  * @param {string} token The token used for authorization
+  * @param {boolean} handle_inverse Handle inverse association
+  */
+  static async <%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse) {
+    try {
+      let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
+      return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse);
+    } catch (error) {
+      benignErrorReporter.push({
+        message: error,
+      });
+    }
+  }
+  <% } else if (associationsArguments["to_one"][i].holdsForeignKey) { -%>
   /**
   * <%- op %>_<%-associationsArguments["to_one"][i].targetKey-%> - field Mutation (model-layer) for to_one associationsArguments to <%- op %>
   *
@@ -7,11 +27,12 @@
   * @param {Id}   <%-associationsArguments["to_one"][i].targetKey-%> Foreign Key (stored in "Me") of the Association to be updated.
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
   * @param {string} token The token used for authorization
+  * @param {boolean} handle_inverse Handle inverse association
   */
-  static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter, token) {
+  static async <%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter, token, handle_inverse) {
     try {
       let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-      return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter, token);
+      return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_one"][i].targetKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_one"][i].targetKey-%>, benignErrorReporter, token, handle_inverse);
     } catch (error) {
       benignErrorReporter.push({
         message: error,
@@ -30,10 +51,11 @@
   * @param {Array}   <%-associationsArguments["to_many"][i].sourceKey-%> Foreign Key (stored in "Me") of the Association to be updated.
   * @param {BenignErrorReporter} benignErrorReporter Error Reporter used for reporting Errors from remote zendro services
   * @param {string} token The token used for authorization
+  * @param {boolean} handle_inverse Handle inverse association
   */
-  static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse = true, token) {
+  static async <%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse) {
     let responsibleAdapter = this.adapterForIri(<%- idAttribute-%>);
-    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, handle_inverse, token);
+    return await adapters[responsibleAdapter].<%- op -%>_<%-associationsArguments["to_many"][i].sourceKey-%>(<%- idAttribute-%>, <%-associationsArguments["to_many"][i].sourceKey-%>, benignErrorReporter, token, handle_inverse);
   }
   <%}-%>
 <%}-%>

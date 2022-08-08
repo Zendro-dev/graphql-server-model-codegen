@@ -1,0 +1,26 @@
+{
+    "model": "founder",
+    "storageType": "cassandra",
+    "attributes": {
+      "founder_id": "String",
+      "bank_id": "String",
+      "name": "String"
+    },
+    "associations": {
+      "unique_bank": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "bank",
+        "targetKey": "founder_id",
+        "sourceKey": "bank_id",
+        "keysIn": "founder",
+        "targetStorageType": "cassandra",
+        "deletion":"update"
+      }
+    },
+    "internalId": "founder_id",
+    "id": {
+        "name": "founder_id",
+        "type": "String"
+    }
+}

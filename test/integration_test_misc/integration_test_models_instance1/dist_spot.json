@@ -1,0 +1,27 @@
+{
+    "model": "dist_spot",
+    "storageType": "distributed-data-model",
+    "registry": ["dist_spot_instance1"],
+    "attributes": {
+      "spot_id": "String",
+      "plant_id": "String",
+      "location": "String"
+    },
+    "associations": {
+      "dist_unique_plant": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "dist_plant",
+        "targetKey": "spot_id",
+        "sourceKey": "plant_id",
+        "keysIn": "dist_spot",
+        "targetStorageType": "distributed-data-model",
+        "deletion":"update"
+      }
+    },
+    "internalId": "spot_id",
+    "id": {
+        "name": "spot_id",
+        "type": "String"
+    }
+}

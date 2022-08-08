@@ -1,0 +1,28 @@
+{
+    "model": "dist_street",
+    "storageType": "distributed-data-model",
+    "registry": ["dist_street_instance1"],
+    "attributes": {
+        "street_id": "String",
+        "street_name": "String",
+        "house_ids": "[String]"
+    },
+    "associations": {
+        "dist_houses": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "dist_house",
+            "targetKey": "street_id",
+            "sourceKey": "house_ids",
+            "keysIn": "dist_street",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "street_id",
+    "id": {
+        "name": "street_id",
+        "type": "String"
+    },
+    "useDataLoader": false
+}

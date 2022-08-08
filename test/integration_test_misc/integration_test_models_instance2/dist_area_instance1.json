@@ -1,0 +1,29 @@
+{
+    "model": "dist_area",
+    "storageType": "sql-adapter",
+    "adapterName": "dist_area_instance1",
+    "regex": "instance1",
+    "attributes": {
+        "area_id": "String",
+        "area_name": "String",
+        "hospital_ids": "[String]"
+    },
+    "associations": {
+        "dist_hospitals": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "dist_hospital",
+            "targetKey": "area_id",
+            "sourceKey": "hospital_ids",
+            "keysIn": "dist_area",
+            "targetStorageType": "distributed-data-model",
+            "deletion":"update"
+        }
+    },
+    "internalId": "area_id",
+    "id": {
+        "name": "area_id",
+        "type": "String"
+    },
+    "useDataLoader": true
+}

@@ -1,0 +1,27 @@
+{
+    "model": "dist_owner",
+    "storageType": "distributed-data-model",
+    "registry": ["dist_owner_instance1"],
+    "attributes": {
+      "owner_id": "String",
+      "house_id": "String",
+      "name": "String"
+    },
+    "associations": {
+      "dist_unique_house": {
+        "type": "one_to_one",
+        "implementation": "foreignkeys",
+        "target": "dist_house",
+        "targetKey": "owner_id",
+        "sourceKey": "house_id",
+        "keysIn": "dist_owner",
+        "targetStorageType": "distributed-data-model",
+        "deletion":"update"
+      }
+    },
+    "internalId": "owner_id",
+    "id": {
+        "name": "owner_id",
+        "type": "String"
+    }
+}

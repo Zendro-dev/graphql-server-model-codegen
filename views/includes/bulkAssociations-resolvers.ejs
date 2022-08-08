@@ -1,5 +1,5 @@
 <%_for(let i=0; i < associationsArguments["to_one"].length; i++){_%>
-  <%_ if (associationsArguments["to_one"][i].holdsForeignKey){_%>
+  <%_ if (!associationsArguments["to_one"][i].assocThroughArray && associationsArguments["to_one"][i].holdsForeignKey){_%>
     /**
      * bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%> - bulk<% if(op === 'remove'){ %>Dis<% } %>Associaton resolver of given ids
      *
