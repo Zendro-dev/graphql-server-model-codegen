@@ -8,7 +8,8 @@ module.exports = {
   /**
    * up - Creates a table with the given attributes.
    *
-   * @param  {object} zendro initialized zendro object
+   * @param  {object} zendro initialized zendro object which provides the access to different APIs
+   * in zendro layers (resolvers, models, adapters) and enables graphql queries.
    */
   up: async (zendro) => {
     try{
@@ -43,7 +44,8 @@ module.exports = {
   /**
    * down - Drop a table and indices.
    *
-   * @param  {object} zendro initialized zendro object
+   * @param  {object} zendro initialized zendro object which provides the access to different APIs
+   * in zendro layers (resolvers, models, adapters) and enables graphql queries.
    */
   down: async (zendro) => {
     try{ 

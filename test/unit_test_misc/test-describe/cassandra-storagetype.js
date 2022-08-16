@@ -139,7 +139,12 @@ citiesConnection: async function({
       let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
       helper.checkCountAndReduceRecordsLimit(limit, context, "citiesConnection");
       let allowFiltering = await checkAuthorization(context, 'city', 'search');
-      return await city.readAllCursor(search, pagination, context.benignErrors, allowFiltering, context.request.headers.authorization);
+      let token = context.request ?
+      context.request.headers
+        ? context.request.headers.authorization
+        : undefined
+      : undefined;
+      return await city.readAllCursor(search, pagination, context.benignErrors, allowFiltering, token);
   } else {
       throw new Error("You don't have authorization to perform this action");
   }
@@ -152,7 +157,12 @@ countCities: async function({
 }, context) {
   if (await checkAuthorization(context, 'city', 'read') === true) {
       let allowFiltering = await checkAuthorization(context, 'city', 'search');
-      return await city.countRecords(search, context.benignErrors, allowFiltering, context.request.headers.authorization);
+      let token = context.request ?
+      context.request.headers
+        ? context.request.headers.authorization
+        : undefined
+      : undefined;
+      return await city.countRecords(search, context.benignErrors, allowFiltering, token);
   } else {
       throw new Error("You don't have authorization to perform this action");
   }
