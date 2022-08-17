@@ -13,7 +13,7 @@
   "scripts": {
     "test-unit": "mocha ./test/mocha_unit.test.js",
     "test-integration": "bash ./test/testenv_cli.sh",
-    "test-migration": "mocha ./test/migration_test.js"
+    "test-migration": "mocha ./test/mocha_migration.test.js"
 
   },
   "author": "Science-DB team",
