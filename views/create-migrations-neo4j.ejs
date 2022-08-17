@@ -9,7 +9,8 @@ module.exports = {
   /**
    * up - Creates indices.
    *
-   * @param  {object} zendro initialized zendro object
+   * @param  {object} zendro initialized zendro object which provides the access to different APIs
+   * in zendro layers (resolvers, models, adapters) and enables graphql queries.
    */
   up: async (zendro) => {
     let session;
@@ -35,7 +36,8 @@ module.exports = {
   /**
    * down - Drop nodes and indices for a specific label.
    *
-   * @param  {object} zendro initialized zendro object
+   * @param  {object} zendro initialized zendro object which provides the access to different APIs
+   * in zendro layers (resolvers, models, adapters) and enables graphql queries.
    */
   down: async (zendro) => {
     let session;

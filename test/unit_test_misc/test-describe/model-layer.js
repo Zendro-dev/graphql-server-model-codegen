@@ -27,7 +27,12 @@ module.exports.count_in_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
-            return await dog.countRecords(search, context.benignErrors, context.request.headers.authorization);
+            let token = context.request
+            ? context.request.headers
+              ? context.request.headers.authorization
+              : undefined
+            : undefined;
+            return await dog.countRecords(search, context.benignErrors, token);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -62,7 +67,12 @@ module.exports.read_all_resolver = `
     }, context) {
         if (await checkAuthorization(context, 'Dog', 'read') === true) {
             helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "dogs");
-            return await dog.readAll(search, order, pagination, context.benignErrors, context.request.headers.authorization);
+            let token = context.request
+            ? context.request.headers
+              ? context.request.headers.authorization
+              : undefined
+            : undefined;
+            return await dog.readAll(search, order, pagination, context.benignErrors, token);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -111,8 +121,13 @@ module.exports.add_one_resolver = `
             if(!input.skipAssociationsExistenceChecks) {
                 await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
             }
-            let createdBook = await book.addOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
-            await createdBook.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
+            let token = context.request
+            ? context.request.headers
+              ? context.request.headers.authorization
+              : undefined
+            : undefined;
+            let createdBook = await book.addOne(inputSanitized, context.benignErrors, token);
+            await createdBook.handleAssociations(inputSanitized, context.benignErrors, token);
             return createdBook;
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -147,7 +162,12 @@ module.exports.delete_one_resolver = `
         if (await checkAuthorization(context, 'Book', 'delete') === true) {
             if (await validForDeletion(id, context)) {
                 await updateAssociations(id, context);
-                return book.deleteOne(id, context.benignErrors, context.request.headers.authorization);
+                let token = context.request
+                ? context.request.headers
+                  ? context.request.headers.authorization
+                  : undefined
+                : undefined;
+                return book.deleteOne(id, context.benignErrors, token);
             }
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -197,8 +217,13 @@ updateBook: async function(input, context) {
         if(!input.skipAssociationsExistenceChecks) {
             await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
         }
-        let updatedBook = await book.updateOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
-        await updatedBook.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
+        let token = context.request
+        ? context.request.headers
+          ? context.request.headers.authorization
+          : undefined
+        : undefined;
+        let updatedBook = await book.updateOne(inputSanitized, context.benignErrors, token);
+        await updatedBook.handleAssociations(inputSanitized, context.benignErrors, token);
         return updatedBook;
     } else {
         throw new Error("You don't have authorization to perform this action");
@@ -222,7 +247,12 @@ module.exports.table_template_resolver = `
      */
     csvTableTemplateIndividual: async function(_, context) {
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            return individual.csvTableTemplate(context.benignErrors, context.request.headers.authorization);
+            let token = context.request
+            ? context.request.headers
+              ? context.request.headers.authorization
+              : undefined
+            : undefined;
+            return individual.csvTableTemplate(context.benignErrors, token);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
