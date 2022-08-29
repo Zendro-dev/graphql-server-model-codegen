@@ -16,12 +16,7 @@ module.exports.resolvers_webservice_aminoAcid = `
     }, context) {
         if (await checkAuthorization(context, 'aminoAcidSequence', 'read') === true) {
             helper.checkCountAndReduceRecordsLimit(pagination.limit, context, "aminoAcidSequences");
-            let token = context.request
-            ? context.request.headers
-              ? context.request.headers.authorization
-              : undefined
-            : undefined;
-            return await aminoAcidSequence.readAll(search, order, pagination, context.benignErrors, token);
+            return await aminoAcidSequence.readAll(search, order, pagination, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -149,12 +144,7 @@ module.exports.transcriptCount_resolvers_camelcase = `
     }, context) {
         if (await checkAuthorization(context, 'transcriptCount', 'read') === true) {
             helper.checkCountAndReduceRecordsLimit(1, context, "readOneTranscriptCount");
-            let token = context.request
-            ? context.request.headers
-              ? context.request.headers.authorization
-              : undefined
-            : undefined;
-            return await transcriptCount.readById(id, context.benignErrors, token);
+            return await transcriptCount.readById(id, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

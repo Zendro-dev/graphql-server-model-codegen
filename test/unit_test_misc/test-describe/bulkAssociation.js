@@ -24,11 +24,7 @@ module.exports.bulkAssociation_resolver_add = `
  * @return {string} returns message on success
  */
 bulkAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
-    let token = context.request
-    ? context.request.headers
-      ? context.request.headers.authorization
-      : undefined
-    : undefined;
+    const token = context.request.headers.authorization;
     //if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({
@@ -51,11 +47,7 @@ module.exports.bulkAssociation_resolver_remove = `
  * @return {string} returns message on success
  */
 bulkDisAssociateBookWithInternalPersonId: async function(bulkAssociationInput, context) {
-    let token = context.request
-    ? context.request.headers
-      ? context.request.headers.authorization
-      : undefined
-    : undefined;
+    const token = context.request.headers.authorization;
     // if specified, check existence of the unique given ids
     if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({

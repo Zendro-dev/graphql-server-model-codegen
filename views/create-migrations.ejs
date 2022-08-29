@@ -10,8 +10,7 @@ module.exports = {
   /**
    * up - Creates a table with the fields specified in the the createTable function.
    *
-   * @param  {object} zendro initialized zendro object which provides the access to different APIs
-   * in zendro layers (resolvers, models, adapters) and enables graphql queries.
+   * @param  {object} zendro initialized zendro object
    */
   up: async (zendro) => {
     try{
@@ -65,8 +64,7 @@ module.exports = {
   /**
    * down - Drop a table.
    *
-   * @param  {object} zendro initialized zendro object which provides the access to different APIs
-   * in zendro layers (resolvers, models, adapters) and enables graphql queries.
+   * @param  {object} zendro initialized zendro object
    */
   down: async (zendro) => {
     try{

@@ -17,12 +17,7 @@ module.exports.researcher_resolver = `
     }, context) {
 
         if (await checkAuthorization(context, 'Researcher', 'read') === true) {
-            let token = context.request
-            ? context.request.headers
-              ? context.request.headers.authorization
-              : undefined
-            : undefined;
-            return await researcher.countRecords(search, context.benignErrors, token);
+            return await researcher.countRecords(search, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

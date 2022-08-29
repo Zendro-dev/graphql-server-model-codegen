@@ -64,12 +64,7 @@ module.exports.delete_resolver = `
         if (await checkAuthorization(context, 'Accession', 'delete') === true) {
             if (await validForDeletion(accession_id, context)) {
                 await updateAssociations(accession_id, context);
-                let token = context.request ?
-                context.request.headers
-                  ? context.request.headers.authorization
-                  : undefined
-                : undefined;
-                return accession.deleteOne(accession_id, context.benignErrors, token);
+                return accession.deleteOne(accession_id, context.benignErrors, context.request.headers.authorization);
             }
         } else {
             throw new Error("You don't have authorization to perform this action");
@@ -549,32 +544,27 @@ module.exports.add_one_resolver = `
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {object}         New record created
  */
-addAccession: async function(input, context) {
-  //check: input has idAttribute
-  if (!input.accession_id) {
-    throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
-  }
-  //check: adapters auth
-  let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'create');
-  if (authorizationCheck === true) {
-    let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-    await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
-    await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-    if(!input.skipAssociationsExistenceChecks) {
-      await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
-    }
-    let token = context.request
-    ? context.request.headers
-      ? context.request.headers.authorization
-      : undefined
-    : undefined;
-    let createdRecord = await accession.addOne(inputSanitized, context.benignErrors, token);
-    await createdRecord.handleAssociations(inputSanitized, context.benignErrors, token);
-    return createdRecord;
-  } else { //adapter not auth
-    throw new Error("You don't have authorization to perform this action on adapter");
-  }
-}
+ addAccession: async function(input, context) {
+     //check: input has idAttribute
+     if (!input.accession_id) {
+         throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
+     }
+     //check: adapters auth
+         let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'create');
+         if (authorizationCheck === true) {
+           let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+            await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
+            await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+            if(!input.skipAssociationsExistenceChecks) {
+              await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+            }
+           let createdRecord = await accession.addOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+           await createdRecord.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
+           return createdRecord;
+         } else { //adapter not auth
+             throw new Error("You don't have authorization to perform this action on adapter");
+         }
+ }
 `;
 
 module.exports.update_one_resolver = `
@@ -585,32 +575,27 @@ module.exports.update_one_resolver = `
  * @param  {object} context Provided to every resolver holds contextual information like the resquest query and user info.
  * @return {object}         Updated record
  */
-updateAccession: async function(input, context) {
-  //check: input has idAttribute
-  if (! input.accession_id) {
-    throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
-  }
-  //check: adapters auth
-  let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'update');
-  if (authorizationCheck === true) {
-    let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-    await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
-    await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
-    if(!input.skipAssociationsExistenceChecks) {
-      await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
-    }
-    let token = context.request
-    ? context.request.headers
-      ? context.request.headers.authorization
-      : undefined
-    : undefined;
-    let updatedRecord = await accession.updateOne(inputSanitized, context.benignErrors, token);
-    await updatedRecord.handleAssociations(inputSanitized, context.benignErrors, token);
-    return updatedRecord;
-  } else {//adapter not auth
-    throw new Error("You don't have authorization to perform this action on adapter");
-  }
-}
+ updateAccession: async function(input, context) {
+   //check: input has idAttribute
+   if (! input.accession_id) {
+     throw new Error(\`Illegal argument. Provided input requires attribute 'accession_id'.\`);
+   }
+      //check: adapters auth
+           let authorizationCheck = await checkAuthorization(context, accession.adapterForIri(input.accession_id), 'update');
+           if (authorizationCheck === true) {
+             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
+              await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'update'], models);
+              await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
+              if(!input.skipAssociationsExistenceChecks) {
+                await helper.validateAssociationArgsExistence(inputSanitized, context, associationArgsDef);
+              }
+               let updatedRecord = await accession.updateOne(inputSanitized, context.benignErrors, context.request.headers.authorization);
+               await updatedRecord.handleAssociations(inputSanitized, context.benignErrors, context.request.headers.authorization);
+               return updatedRecord;
+           } else {//adapter not auth
+               throw new Error("You don't have authorization to perform this action on adapter");
+           }
+   }
 `;
 
 module.exports.add_one_zendro_adapter = `

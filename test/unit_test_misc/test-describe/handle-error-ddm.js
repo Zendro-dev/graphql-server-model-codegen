@@ -231,12 +231,7 @@ dogsConnection: async function({
             context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        let token = context.request ?
-        context.request.headers
-          ? context.request.headers.authorization
-          : undefined
-        : undefined;
-        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, token);
+        return await dog.readAllCursor(search, order, pagination, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, context.request.headers.authorization);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {
@@ -273,12 +268,7 @@ countDogs: async function({
             context.benignErrors.push(authorizationCheck.authorizationErrors);
         }
         let searchAuthorizationCheck = await helper.authorizedAdapters(context, adapters, 'search');
-        let token = context.request ?
-        context.request.headers
-          ? context.request.headers.authorization
-          : undefined
-        : undefined;
-        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, token);
+        return await dog.countRecords(search, authorizationCheck.authorizedAdapters, context.benignErrors, searchAuthorizationCheck.authorizedAdapters, context.request.headers.authorization);
     } else { //adapters not auth || errors
         // else new Error
         if (authorizationCheck.authorizationErrors.length > 0) {

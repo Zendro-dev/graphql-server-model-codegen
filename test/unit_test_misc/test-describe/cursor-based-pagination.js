@@ -59,12 +59,7 @@ module.exports.resolver_read_all_connection = `
             helper.checkCursorBasedPaginationArgument(pagination);
             let limit = helper.isNotUndefinedAndNotNull(pagination.first) ? pagination.first : pagination.last;
             helper.checkCountAndReduceRecordsLimit(limit, context, "booksConnection");
-            let token = context.request ?
-            context.request.headers
-              ? context.request.headers.authorization
-              : undefined
-            : undefined;
-            return await book.readAllCursor(search, order, pagination, context.benignErrors, token);
+            return await book.readAllCursor(search, order, pagination, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }

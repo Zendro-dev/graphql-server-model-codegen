@@ -24,12 +24,7 @@ module.exports.individual_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'individual', 'read') === true) {
-            let token = context.request
-            ? context.request.headers
-              ? context.request.headers.authorization
-              : undefined
-            : undefined;
-            return await individual.countRecords(search, context.benignErrors, token);
+            return await individual.countRecords(search, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
@@ -48,12 +43,7 @@ module.exports.specie_resolvers = `
         search
     }, context) {
         if (await checkAuthorization(context, 'Specie', 'read') === true) {
-            let token = context.request
-            ? context.request.headers
-              ? context.request.headers.authorization
-              : undefined
-            : undefined;
-            return await specie.countRecords(search, context.benignErrors, token);
+            return await specie.countRecords(search, context.benignErrors, context.request.headers.authorization);
         } else {
             throw new Error("You don't have authorization to perform this action");
         }
