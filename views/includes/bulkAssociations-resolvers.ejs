@@ -8,7 +8,11 @@
      * @return {string} returns message on success
      */
     bulk<% if(op === 'remove'){ %>Dis<% } %>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>: async function(bulkAssociationInput, context){
-      const token = context.request.headers.authorization;
+      let token = context.request
+        ? context.request.headers
+          ? context.request.headers.authorization
+          : undefined
+        : undefined;
       // if specified, check existence of the unique given ids
       if (!bulkAssociationInput.skipAssociationsExistenceChecks) {
         await helper.validateExistence(helper.unique(bulkAssociationInput.bulkAssociationInput.map(({<%-associationsArguments["to_one"][i].targetKey_%>}) => <%-associationsArguments["to_one"][i].targetKey_%>)), models.<%-associationsArguments["to_one"][i].target_lc_%>, token);
