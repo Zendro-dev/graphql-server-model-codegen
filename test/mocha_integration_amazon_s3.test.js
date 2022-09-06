@@ -53,7 +53,7 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
           reader_name: "Sally",
           age: 15.4,
           student: true,
-          lastSeen: "2020-10-03T10:15:30Z",
+          lastSeen: "2020-10-03T10:15:30.000Z",
           history: [
             "Critique of Pure Reason",
             "The World as Will and Representation",
@@ -696,7 +696,7 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
           reader_name: "dist_Sally",
           age: 15.4,
           student: true,
-          lastSeen: "2020-10-03T10:15:30Z",
+          lastSeen: "2020-10-03T10:15:30.000Z",
           history: [
             "Critique of Pure Reason",
             "The World as Will and Representation",
