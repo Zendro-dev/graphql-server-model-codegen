@@ -24,8 +24,10 @@ program
   .option("-b, --noBasicCode", "does not generate basic code", false)
   .parse(process.argv);
 
+const opts = program.opts();
+
 //check input JSON files
-if (!program.jsonFiles) {
+if (!opts.jsonFiles) {
   //msg
   console.log(
     colors.red("! Error: "),
@@ -35,18 +37,18 @@ if (!program.jsonFiles) {
 }
 
 //ops: output/input directories
-let jsonFiles = program.jsonFiles;
-let directory = program.outputDirectory || __dirname;
+let jsonFiles = opts.jsonFiles;
+let directory = opts.outputDirectory || __dirname;
 //msg
 console.log("Input directory: ", colors.dim(path.resolve(jsonFiles)));
 console.log("Output directory: ", colors.dim(path.resolve(directory)));
 
 //op: verbose, migrations
-let verbose = program.verbose !== undefined ? true : false;
-let migrations = program.migrations;
-let basicCode = !program.noBasicCode;
+let verbose = opts.verbose !== undefined ? true : false;
+let migrations = opts.migrations;
+let basicCode = !opts.noBasicCode;
 //run codegen
-funks.generateCode(program.jsonFiles, directory, {
+funks.generateCode(opts.jsonFiles, directory, {
   verbose,
   migrations,
   basicCode,

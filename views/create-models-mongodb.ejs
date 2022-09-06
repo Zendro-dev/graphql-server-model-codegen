@@ -273,7 +273,7 @@ module.exports = class <%- nameLc -%> {
         const collection = await db.collection("<%- model_name_in_storage -%>");
         const id_name = this.idAttribute();
         const response = await collection.deleteOne({[id_name]: id});
-        if (response.result.ok !== 1){
+        if (!response.acknowledged){
             throw new Error(`Record with ID = ${id} has not been deleted!`);
         }
         return 'Item successfully deleted';
@@ -306,7 +306,7 @@ module.exports = class <%- nameLc -%> {
         const id_name = this.idAttribute();
         const response = await collection.updateOne({[id_name]:input[id_name]}, {$set: updatedContent});
 
-        if (response.result.ok !== 1){
+        if (!response.acknowledged){
             throw new Error(`Record with ID = ${input[id_name]} has not been updated`);
         }
         const document = await this.readById(input[id_name]);

@@ -5,7 +5,6 @@ const jsb = require("js-beautify").js_beautify;
 const { join, parse } = require("path");
 const { promisify } = require("util");
 const ejsRenderFile = promisify(ejs.renderFile);
-const stringify_obj = require("stringify-object");
 const colors = require("colors/safe");
 const { getModelDatabase } = require("./lib/generators-aux");
 const { getOperators } = require("./lib/operators-aux");
@@ -616,7 +615,7 @@ module.exports.getOptions = function (dataModel) {
     type: opts.idAttributeType,
   };
 
-  opts["definition"] = stringify_obj(dataModel);
+  opts["definition"] = JSON.stringify(dataModel);
   delete opts.attributes[opts.idAttribute];
   return opts;
 };
