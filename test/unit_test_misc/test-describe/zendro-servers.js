@@ -310,38 +310,38 @@ static async csvTableTemplate(benignErrorReporter, token){
 
 module.exports.many_to_many_association = `
 const definition = {
-    model: 'Person',
-    storageType: 'zendro-server',
-    url: 'http://something.other:7000/graphql',
-    attributes: {
-        firstName: 'String',
-        lastName: 'String',
-        email: 'String',
-        companyId: 'Int'
+    "model": "Person",
+    "storageType": "zendro-server",
+    "url": "http://something.other:7000/graphql",
+    "attributes": {
+        "firstName": "String",
+        "lastName": "String",
+        "email": "String",
+        "companyId": "Int"
     },
-    associations: {
-        works: {
-            type: 'many_to_many',
-            implementation: 'sql_cross_table',
-            target: 'Book',
-            targetKey: 'bookId',
-            sourceKey: 'personId',
-            keysIn: 'books_to_people',
-            targetStorageType: 'zendro-server',
-            label: 'title'
+    "associations": {
+        "works": {
+            "type": "many_to_many",
+            "implementation": "sql_cross_table",
+            "target": "Book",
+            "targetKey": "bookId",
+            "sourceKey": "personId",
+            "keysIn": "books_to_people",
+            "targetStorageType": "zendro-server",
+            "label": "title"
         },
-        company: {
-            type: 'many_to_one',
-            implementation: 'foreignkeys',
-            target: 'publi_sher',
-            targetKey: 'companyId',
-            keysIn: 'Person',
-            targetStorageType: 'generic'
+        "company": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "publi_sher",
+            "targetKey": "companyId",
+            "keysIn": "Person",
+            "targetStorageType": "generic"
         }
     },
-    id: {
-        name: 'id',
-        type: 'Int'
+    "id": {
+        "name": "id",
+        "type": "Int"
     }
 };
 
