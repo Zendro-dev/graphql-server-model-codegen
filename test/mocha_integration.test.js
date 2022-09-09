@@ -758,6 +758,7 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
         {
           message:
             "Remote server (http://server1:3000/graphql) did not respond with data.",
+          extensions: {},
           locations: [
             {
               line: 1,
@@ -1098,7 +1099,7 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
       errors: [
         {
           message:
-            'Field "hello" is not defined by type paginationCursorInput.',
+            'Field \"hello\" is not defined by type \"paginationCursorInput\".',
           locations: [
             {
               line: 1,
@@ -1141,7 +1142,7 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
       errors: [
         {
           message:
-            'Expected type Date, found "today"; Date cannot represent an invalid date-string today.',
+            'Expected value of type \"Date\", found \"today\"; Date cannot represent an invalid date-string today.',
           locations: [
             {
               line: 1,
@@ -1171,28 +1172,28 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
             validationErrors: [
               {
                 keyword: "type",
-                dataPath: ".name",
+                instancePath: "/name",
                 schemaPath: "#/properties/name/anyOf/0/type",
                 params: {
                   type: "null",
                 },
-                message: "should be null",
+                message: "must be null",
               },
               {
                 keyword: "pattern",
-                dataPath: ".name",
+                instancePath: "/name",
                 schemaPath: "#/properties/name/anyOf/1/pattern",
                 params: {
                   pattern: "^[a-zA-Z0-9]+$",
                 },
-                message: 'should match pattern "^[a-zA-Z0-9]+$"',
+                message: 'must match pattern "^[a-zA-Z0-9]+$"',
               },
               {
                 keyword: "anyOf",
-                dataPath: ".name",
+                instancePath: "/name",
                 schemaPath: "#/properties/name/anyOf",
                 params: {},
-                message: "should match some schema in anyOf",
+                message: "must match a schema in anyOf",
               },
             ],
           },
@@ -2605,6 +2606,7 @@ describe("Zendro Webservice Data Models", function () {
         {
           message:
             "Web-service http://server1:3000/graphql returned attached (see below) error(s).",
+          extensions: {},
           locations: [{ line: 1, column: 10 }],
           path: ["addAccession"],
         },
@@ -2615,10 +2617,10 @@ describe("Zendro Webservice Data Models", function () {
             validationErrors: [
               {
                 keyword: "pattern",
-                dataPath: ".collectors_name",
+                instancePath: "/collectors_name",
                 schemaPath: "#/properties/collectors_name/pattern",
                 params: { pattern: "^[a-zA-Z0-9_]+$" },
-                message: 'should match pattern "^[a-zA-Z0-9_]+$"',
+                message: 'must match pattern "^[a-zA-Z0-9_]+$"',
               },
             ],
             receivedFrom: ["http://server1:3000/graphql"],

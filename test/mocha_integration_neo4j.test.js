@@ -660,6 +660,7 @@ describe("Neo4j - Association", () => {
         {
           message:
             "director with director_id d1 has associated records with 'reject' reaction and is NOT valid for deletion. Please clean up before you delete.",
+          extensions: {},
           locations: [
             {
               column: 12,
@@ -1417,6 +1418,7 @@ describe("data loader for readById method", () => {
     expect(resBody.errors).to.deep.equal([
       {
         message: 'Record with ID = "m4" does not exist',
+        extensions: {},
         locations: [
           {
             column: 7,

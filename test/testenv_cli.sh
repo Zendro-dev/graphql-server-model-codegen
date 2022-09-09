@@ -123,7 +123,7 @@ if [[ $OPT_RUN_TESTS == "true" ]]; then
     mocha "${TEST_DIR}/mocha_integration_mongodb.test.js"
     mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
     mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
-    mocha --timeout 10000 "${TEST_DIR}/mocha_integration_trino.test.js"
+    mocha --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
     mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
     mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
   fi

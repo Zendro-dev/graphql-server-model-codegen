@@ -192,7 +192,7 @@ static async deleteOne(id) {
         const response = await collection.deleteOne({
             [id_name]: id
         });
-        if (response.result.ok !== 1) {
+        if (!response.acknowledged) {
             throw new Error(\`Record with ID = \${id} has not been deleted!\`);
         }
         return 'Item successfully deleted';
@@ -224,7 +224,7 @@ static async updateOne(input) {
             $set: updatedContent
         });
 
-        if (response.result.ok !== 1) {
+        if (!response.acknowledged) {
             throw new Error(\`Record with ID = \${input[id_name]} has not been updated\`);
         }
         const document = await this.readById(input[id_name]);
@@ -248,7 +248,7 @@ static async add_farm_id(animal_id, farm_id, benignErrorReporter) {
         }, {
             $set: updatedContent
         });
-        if (response.result.ok !== 1) {
+        if (!response.acknowledged) {
             benignErrorReporter.push({
                 message: \`Record with ID = \${animal_id} has not been updated\`
             });
@@ -276,7 +276,7 @@ static async remove_farm_id(animal_id, farm_id, benignErrorReporter) {
         }, {
             $set: updatedContent
         });
-        if (response.result.ok !== 1) {
+        if (!response.acknowledged) {
             benignErrorReporter.push({
                 message: \`Record with ID = \${animal_id} has not been updated\`
             });

@@ -1,6 +1,7 @@
 module.exports.transcriptCount_indiv_validation = `
 transcriptCount.prototype.validatorSchema = {
        "$async": true,
+       "type": "object",
        "properties": {
          "gene": {
            "type": ["string", "null"]

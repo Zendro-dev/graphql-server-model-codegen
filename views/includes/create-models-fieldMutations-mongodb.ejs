@@ -25,7 +25,7 @@
             { -%>null<% } else { %><%-associationsArguments["to_one"][i].sourceKey-%><%}-%>}
             const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
             {-%>,<%-associationsArguments["to_one"][i].sourceKey-%>: <%-associationsArguments["to_one"][i].sourceKey-%> <%}-%>}, {$set: updatedContent});
-            if (response.result.ok !== 1){
+            if (!response.acknowledged){
                 benignErrorReporter.push({
                     message: `Record with ID = ${<%- idAttribute-%>} has not been updated`
                 });
@@ -53,7 +53,7 @@
             { -%>null<% } else { %><%-associationsArguments["to_one"][i].targetKey-%><%}-%>}
             const response = await collection.updateOne({<%- idAttribute -%>: <%- idAttribute -%><% if (op === 'remove') 
             {-%>,<%-associationsArguments["to_one"][i].targetKey-%>: <%-associationsArguments["to_one"][i].targetKey-%> <%}-%>}, {$set: updatedContent});
-            if (response.result.ok !== 1){
+            if (!response.acknowledged){
                 benignErrorReporter.push({
                     message: `Record with ID = ${<%- idAttribute-%>} has not been updated`
                 });

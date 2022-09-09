@@ -356,85 +356,85 @@ static readAllCursor(search, order, pagination, authorizedAdapters, benignErrorR
 
 module.exports.person_ddm_many_association = `
 const definition = {
-    model: 'Person',
-    storageType: 'distributed-data-model',
-    registry: [
-        'PeopleOne',
-        'PeopleTwo'
+    "model": "Person",
+    "storageType": "distributed-data-model",
+    "registry": [
+        "PeopleOne",
+        "PeopleTwo"
     ],
-    attributes: {
-        firstName: 'String',
-        lastName: 'String',
-        email: 'String',
-        companyId: 'Int'
+    "attributes": {
+        "firstName": "String",
+        "lastName": "String",
+        "email": "String",
+        "companyId": "Int"
     },
-    associations: {
-        works: {
-            type: 'many_to_many',
-            implementation: 'sql_cross_table',
-            target: 'Book',
-            targetKey: 'bookId',
-            sourceKey: 'personId',
-            keysIn: 'books_to_people',
-            targetStorageType: 'sql'
+    "associations": {
+        "works": {
+            "type": "many_to_many",
+            "implementation": "sql_cross_table",
+            "target": "Book",
+            "targetKey": "bookId",
+            "sourceKey": "personId",
+            "keysIn": "books_to_people",
+            "targetStorageType": "sql"
         },
-        company: {
-            type: 'many_to_one',
-            implementation: 'foreignkeys',
-            target: 'publi_sher',
-            targetKey: 'companyId',
-            keysIn: 'Person',
-            targetStorageType: 'zendro-server'
+        "company": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "publi_sher",
+            "targetKey": "companyId",
+            "keysIn": "Person",
+            "targetStorageType": "zendro-server"
         },
-        dogs: {
-            type: 'one_to_many',
-            implementation: 'foreignkeys',
-            target: 'Dog',
-            targetKey: 'personId',
-            keysIn: 'Dog',
-            targetStorageType: 'sql'
+        "dogs": {
+            "type": "one_to_many",
+            "implementation": "foreignkeys",
+            "target": "Dog",
+            "targetKey": "personId",
+            "keysIn": "Dog",
+            "targetStorageType": "sql"
         },
-        parrot: {
-            type: 'many_to_one',
-            implementation: 'foreignkeys',
-            target: 'Parrot',
-            targetKey: 'personId',
-            keysIn: 'Parrot',
-            targetStorageType: 'sql'
+        "parrot": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "Parrot",
+            "targetKey": "personId",
+            "keysIn": "Parrot",
+            "targetStorageType": "sql"
         }
     },
-    id: {
-        name: 'id',
-        type: 'Int'
+    "id": {
+        "name": "id",
+        "type": "Int"
     }
 };
 `;
 module.exports.dog_ddm_one_association = `
 const definition = {
-    model: 'Dog',
-    storageType: 'distributed-data-model',
-    registry: [
-        'DogsOne',
-        'DogsTwo'
+    "model": "Dog",
+    "storageType": "distributed-data-model",
+    "registry": [
+        "DogsOne",
+        "DogsTwo"
     ],
-    attributes: {
-        name: 'String',
-        breed: 'String',
-        personId: 'String'
+    "attributes": {
+        "name": "String",
+        "breed": "String",
+        "personId": "String"
     },
-    associations: {
-        owner: {
-            type: 'many_to_one',
-            implementation: 'foreignkeys',
-            target: 'Person',
-            targetKey: 'personId',
-            keysIn: 'Dog',
-            targetStorageType: 'sql'
+    "associations": {
+        "owner": {
+            "type": "many_to_one",
+            "implementation": "foreignkeys",
+            "target": "Person",
+            "targetKey": "personId",
+            "keysIn": "Dog",
+            "targetStorageType": "sql"
         }
     },
-    id: {
-        name: 'id',
-        type: 'Int'
+    "id": {
+        "name": "id",
+        "type": "Int"
     }
 };
 `;

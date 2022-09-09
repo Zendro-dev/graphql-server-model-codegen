@@ -15,6 +15,7 @@ module.exports.validator_patch = function(<%- nameLc -%>){
 
     <%- nameLc -%>.prototype.validatorSchema = {
       "$async": true,
+      "type": "object",
       "properties": <%- JSON.stringify(jsonSchemaProperties) -%>
     }
 

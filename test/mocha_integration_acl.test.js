@@ -1093,10 +1093,10 @@ describe("Zendro Webservice Data Models", function () {
             validationErrors: [
               {
                 keyword: "pattern",
-                dataPath: ".collectors_name",
+                instancePath: "/collectors_name",
                 schemaPath: "#/properties/collectors_name/pattern",
                 params: { pattern: "^[a-zA-Z0-9_]+$" },
-                message: 'should match pattern "^[a-zA-Z0-9_]+$"',
+                message: 'must match pattern "^[a-zA-Z0-9_]+$"',
               },
             ],
             receivedFrom: ["http://server1:3000/graphql"],
