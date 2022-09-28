@@ -902,6 +902,8 @@ module.exports = {
         );
         return true;
       } catch (error) {
+        delete input.skipAssociationsExistenceChecks;
+        error.input = input;
         context.benignErrors.push(error);
         return false;
       }
@@ -938,6 +940,8 @@ module.exports = {
         );
         return true;
       } catch (error) {
+        delete input.skipAssociationsExistenceChecks;
+        error.input = input;
         context.benignErrors.push(error);
         return false;
       }
@@ -964,6 +968,9 @@ module.exports = {
         );
         return true;
       } catch (error) {
+        error.input = {
+          <%- idAttribute -%> : <%- idAttribute -%>
+        };
         context.benignErrors.push(error);
         return false;
       }
@@ -989,6 +996,9 @@ module.exports = {
         );
         return true;
       } catch (error) {
+        error.input = {
+          <%- idAttribute -%> : <%- idAttribute -%>
+        };
         context.benignErrors.push(error);
         return false;
       }
