@@ -63,8 +63,8 @@ module.exports = class <%- nameLc -%> extends Sequelize.Model{
       <%}-%>
 
 
-    },{ <%if(indices !== undefined){let string_indices = indices.map(x => { return "'" + x + "'" }) -%>
-      indexes: [<%- string_indices.join() -%> ], <%}-%>
+    },{ <%if(indices !== undefined){let obj_indices = indices.map(x => { return {fields:[x]} }) -%>
+      indexes: <%- JSON.stringify(obj_indices) -%>, <%}-%>
       modelName: "<%- nameLc -%>",
       tableName: "<%-model_name_in_storage-%>",
       sequelize
