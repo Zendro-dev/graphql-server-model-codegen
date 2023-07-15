@@ -1,7 +1,7 @@
 module.exports.book = {
   "model" : "Book",
   "storageType" : "zendro-server",
-  "url": "http://something.other:7000/graphql",
+  "url": "http://something.other:7070/graphql",
   "attributes" : {
     "title" : "String",
     "genre" : "String",
@@ -35,7 +35,7 @@ module.exports.book = {
 module.exports.person = {
   "model" : "Person",
   "storageType" : "zendro-server",
-  "url": "http://something.other:7000/graphql",
+  "url": "http://something.other:7070/graphql",
   "attributes" : {
     "firstName" : "String",
     "lastName" : "String",
@@ -68,7 +68,7 @@ module.exports.person = {
 module.exports.dog_one_assoc = {
   "model" : "Dog",
   "storageType" : "zendro-server",
-  "url": "http://something.other:7000/graphql",
+  "url": "http://something.other:7070/graphql",
   "attributes" : {
     "name" : "String",
     "breed" : "String",
@@ -100,7 +100,7 @@ module.exports.dog_one_assoc = {
 module.exports.person_one_assoc = {
   "model": "Person",
   "storageType": "zendro-server",
-  "url": "http://something.other:7000/graphql",
+  "url": "http://something.other:7070/graphql",
   "attributes" :{
     "firstName": "String",
     "lastName": "String",
