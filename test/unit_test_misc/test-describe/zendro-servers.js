@@ -1,5 +1,5 @@
 module.exports.server_url = `
-  const remoteZendroURL = "http://something.other:7000/graphql";
+  const remoteZendroURL = "http://something.other:7070/graphql";
 `;
 
 module.exports.read_by_id = `
@@ -312,7 +312,7 @@ module.exports.many_to_many_association = `
 const definition = {
     "model": "Person",
     "storageType": "zendro-server",
-    "url": "http://something.other:7000/graphql",
+    "url": "http://something.other:7070/graphql",
     "attributes": {
         "firstName": "String",
         "lastName": "String",
