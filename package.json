@@ -14,13 +14,13 @@
     "test-unit": "mocha ./test/mocha_unit.test.js",
     "test-integration": "bash ./test/testenv_cli.sh",
     "test-migration": "mocha ./test/mocha_migration.test.js"
-
   },
   "author": "Science-DB team",
   "license": "GPL-3.0",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.370.0",
+    "@aws-sdk/lib-storage": "^3.370.0",
     "ajv": "^8.11.0",
-    "aws-sdk": "^2.1207.0",
     "colors": "^1.4.0",
     "commander": "^9.4.0",
     "dotenv": "^16.0.2",
