@@ -15,10 +15,13 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
     let csvPath = __dirname + "/integration_test_misc/minio/reader.csv";
     try {
       const s3 = new S3({
-        accessKeyId: "sciencedb",
-        secretAccessKey: "sciencedb",
+        region: "eu-central-1",
+        credentials: {
+            accessKeyId: "sciencedb",
+            secretAccessKey: "sciencedb"
+        },
         endpoint: `http://127.0.0.1:9000`,
-        s3ForcePathStyle: true,
+        forcePathStyle: true,
         signatureVersion: "v4",
       });
       let file_param = {
@@ -661,10 +664,13 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
     let csvPath = __dirname + "/integration_test_misc/minio/dist_reader.csv";
     try {
       const s3 = new S3({
-        accessKeyId: "sciencedb",
-        secretAccessKey: "sciencedb",
+        region: "eu-central-1",
+        credentials: {
+            accessKeyId: "sciencedb",
+            secretAccessKey: "sciencedb"
+        },
         endpoint: `http://127.0.0.1:9000`,
-        s3ForcePathStyle: true,
+        forcePathStyle: true,
         signatureVersion: "v4",
       });
       let file_param = {
