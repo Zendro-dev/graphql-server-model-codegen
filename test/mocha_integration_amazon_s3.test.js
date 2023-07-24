@@ -2,18 +2,26 @@ const { expect } = require("chai");
 const delay = require("delay");
 const path = require("path");
 const itHelpers = require("./integration_test_misc/integration_test_helpers");
-const AWS = require("aws-sdk");
+const {
+        Upload
+      } = require("@aws-sdk/lib-storage"),
+      {
+        S3
+      } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 
 describe("Amazon S3/ Minio - Upload/Read Operations", () => {
   it("01. Reader: CSV bulkUpload", async () => {
     let csvPath = __dirname + "/integration_test_misc/minio/reader.csv";
     try {
-      const s3 = new AWS.S3({
-        accessKeyId: "sciencedb",
-        secretAccessKey: "sciencedb",
+      const s3 = new S3({
+        region: "eu-central-1",
+        credentials: {
+            accessKeyId: "sciencedb",
+            secretAccessKey: "sciencedb"
+        },
         endpoint: `http://127.0.0.1:9000`,
-        s3ForcePathStyle: true,
+        forcePathStyle: true,
         signatureVersion: "v4",
       });
       let file_param = {
@@ -21,7 +29,10 @@ describe("Amazon S3/ Minio - Upload/Read Operations", () => {
         Key: "reader.csv",
         Body: fs.createReadStream(csvPath),
       };
-      await s3.upload(file_param).promise();
+      await new Upload({
+        client: s3,
+        params: file_param
+      }).done();
     } catch (e) {
       throw new Error(e);
     }
@@ -652,11 +663,14 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
   it("01. Reader: CSV bulkUpload", async () => {
     let csvPath = __dirname + "/integration_test_misc/minio/dist_reader.csv";
     try {
-      const s3 = new AWS.S3({
-        accessKeyId: "sciencedb",
-        secretAccessKey: "sciencedb",
+      const s3 = new S3({
+        region: "eu-central-1",
+        credentials: {
+            accessKeyId: "sciencedb",
+            secretAccessKey: "sciencedb"
+        },
         endpoint: `http://127.0.0.1:9000`,
-        s3ForcePathStyle: true,
+        forcePathStyle: true,
         signatureVersion: "v4",
       });
       let file_param = {
@@ -664,7 +678,10 @@ describe("Amazon S3/ Minio - Distributed Data Models", () => {
         Key: "dist_reader.csv",
         Body: fs.createReadStream(csvPath),
       };
-      await s3.upload(file_param).promise();
+      await new Upload({
+        client: s3,
+        params: file_param
+      }).done();
     } catch (e) {
       throw new Error(e);
     }

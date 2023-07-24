@@ -60,13 +60,13 @@ static async countRecords(search, benignErrorReporter) {
     let num = null;
     try {
       const s3 = await this.storageHandler;
-      const result = await s3.selectObjectContent(query).promise();
+      const result = await s3.selectObjectContent(query);
       const events = result.Payload;
       for await (const event of events) {
         // Check the top-level field to determine which event this is.
         if (event.Records) {
           // handle Records event
-          num = event.Records.Payload.toString();
+          num = Buffer.from(event.Records.Payload).toString();
           num = JSON.parse(num.slice(0, num.length - 1)).num;
         }
       }
@@ -108,14 +108,13 @@ static async readAllCursor(search, order, pagination, benignErrorReporter){
       .selectObjectContent({
         ...params,
         Expression: query,
-        })
-      .promise();
+        });
     const events = result.Payload;
     for await (const event of events) {
       // Check the top-level field to determine which event this is.
       if (event.Records) {
         // handle Records event
-        records = event.Records.Payload.toString();
+        records = Buffer.from(event.Records.Payload).toString();
         records = JSON.parse("[" + records.slice(0, records.length - 1) + "]");
       }
     }
