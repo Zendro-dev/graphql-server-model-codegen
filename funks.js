@@ -615,9 +615,25 @@ module.exports.getOptions = function (dataModel) {
     type: opts.idAttributeType,
   };
 
-  opts["definition"] = JSON.stringify(dataModel);
+  opts["definition"] = JSON.stringify(definitionAttributeValuesToTypes(dataModel));
   delete opts.attributes[opts.idAttribute];
   return opts;
+};
+
+/**
+ * definitionAttributeValuesToTypes - Replace the attributes' values by their types if the values are objects with descriptions
+ * @param {Object} dataModelDefinition  The parsed data model definition
+ * @returns {Object} copy  A deep copy of the input, attributes' values replaced by their types
+ */
+definitionAttributeValuesToTypes = function (dataModelDefinition) {
+  let copy = JSON.parse(JSON.stringify(dataModelDefinition));
+
+  for (let attr in copy.attributes) {
+    let type = copy.attributes[attr];
+    copy.attributes[attr] = type.type ?? type;
+  }
+
+  return copy;
 };
 
 /**
