@@ -256,7 +256,7 @@ getOnlyDescriptionAttributes = function (attributes) {
       typeof attributes[key] === "object" &&
       attributes[key].constructor === Object
     ) {
-      only_description[key_no_spaces] = attributes[key].description || "";
+      only_description[key_no_spaces] = attributes[key].description.replaceAll(/(`)/g, "\\$1") || "";
     } else if (
       typeof attributes[key] === "string" ||
       attributes[key] instanceof String
