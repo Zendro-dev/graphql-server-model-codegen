@@ -603,11 +603,11 @@ module.exports.getOptions = function (dataModel) {
   opts["idAttributeType"] =
     dataModel.internalId === undefined
       ? "Int"
-      : opts.attributes[opts.idAttribute];
+      : opts.attributes[opts.idAttribute].type ?? opts.attributes[opts.idAttribute];
   opts["cassandraIdAttributeType"] = getCassandraType(
     dataModel.internalId === undefined
       ? "Int"
-      : opts.attributes[opts.idAttribute]
+      : opts.idAttributeType
   );
   opts["defaultId"] = dataModel.internalId === undefined ? true : false;
   dataModel["id"] = {
