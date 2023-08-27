@@ -578,6 +578,11 @@ module.exports.getOptions = function (dataModel) {
     ),
     operators: getOperators(getStorageType(dataModel), dataModel.operatorSet),
   };
+  if (opts.jsonSchemaProperties[opts.idAttribute] !== undefined) {
+    let props = opts.jsonSchemaProperties[opts.idAttribute];
+    props.type &&= props.type?.filter( type => type !== "null");
+    props.anyOf &&= props.anyOf?.filter( obj => obj.type !== "null");
+  }
   opts["editableAttributesStr"] = attributesToString(
     getEditableAttributes(
       opts.attributes,
