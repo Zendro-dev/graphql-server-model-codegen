@@ -81,7 +81,8 @@ services:
       - /bin/sh
       - -c
       - |
-        ./migrateDbAndStartServer.sh dev
+        npm install
+        node migrateDbAndStartServer.js dev
 
   gql_ncbi_sim_srv1:
     container_name: gql_ncbi_sim_srv
@@ -183,7 +184,8 @@ services:
       - /bin/sh
       - -c
       - |
-        ./migrateDbAndStartServer.sh dev
+        npm install
+        node migrateDbAndStartServer.js dev
 
 networks:
   instance1:

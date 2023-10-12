@@ -41,9 +41,9 @@ services:
       context: .
       dockerfile: Dockerfile.postgres
     ports:
-     - 1234:5432
+      - 1234:5432
     networks:
-     - instance1
+      - instance1
 
   gql_mongodb1:
     image: mongo
@@ -64,17 +64,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.cassandra
-    volumes: 
+    volumes:
       - ./docker-entrypoint.sh.cassandra:/docker-entrypoint.sh
       - ./cassandra-keyspace.cql:/docker-entrypoint-initdb.d/cassandra-keyspace.cql
-    ports: 
+    ports:
       - 9042:9042
-    environment: 
+    environment:
       - MAX_HEAP_SIZE=256M
       - HEAP_NEWSIZE=128M
-    networks: 
+    networks:
       - instance1
-      
+
   gql_minio1:
     image: minio/minio
     container_name: minio1
@@ -101,7 +101,7 @@ services:
       - ../integration_test_env/gql_science_db_graphql_server1:/usr/src/app
       - ./data_models_storage_config1.json:/usr/src/app/config/data_models_storage_config.json
       - ./.env.acl:/usr/src/app/.env
-      - ./migrateDbAndStartServer_acl.sh:/usr/src/app/migrateDbAndStartServer_acl.sh
+      - ./migrateDbAndStartServer_acl.js:/usr/src/app/migrateDbAndStartServer_acl.js
       - ./2021-12-08T17_37_17.804Z#keycloak.js:/usr/src/app/migrations/2021-12-08T17_37_17.804Z#keycloak.js
     ports:
       - "3000:3000"
@@ -117,8 +117,8 @@ services:
       - /bin/sh
       - -c
       - |
-        chmod u+x ./migrateDbAndStartServer_acl.sh
-        ./migrateDbAndStartServer_acl.sh
+        npm install
+        node migrateDbAndStartServer_acl.js dev
 
   gql_ncbi_sim_srv1:
     container_name: gql_ncbi_sim_srv
@@ -133,8 +133,8 @@ services:
     ports:
       - "3344:3344"
     environment:
-        PORT: 3344
-        BASE_URL: /aminoAcidSequence
+      PORT: 3344
+      BASE_URL: /aminoAcidSequence
     networks:
       - instance1
     command:
@@ -150,16 +150,16 @@ services:
       context: .
       dockerfile: Dockerfile.postgres2
     ports:
-     - 1235:5432
+      - 1235:5432
     networks:
-     - instance2
+      - instance2
 
   gql_presto:
     image: ahanaio/prestodb-sandbox
     container_name: presto1
     depends_on:
       - gql_postgres2
-    volumes: 
+    volumes:
       - ./postgresql.properties:/opt/presto-server/etc/catalog/postgresql.properties
     ports:
       - 8081:8080
@@ -167,11 +167,11 @@ services:
       - instance2
 
   gql_trino:
-    image: trinodb/trino 
+    image: trinodb/trino
     container_name: trino1
     depends_on:
       - gql_postgres2
-    volumes: 
+    volumes:
       - ./postgresql.properties:/etc/trino/catalog/postgresql.properties
     ports:
       - 8080:8080
@@ -206,7 +206,7 @@ services:
       - ../integration_test_env/gql_science_db_graphql_server2:/usr/src/app
       - ./data_models_storage_config2.json:/usr/src/app/config/data_models_storage_config.json
       - ./.env.acl:/usr/src/app/.env
-      - ./migrateDbAndStartServer_acl.sh:/usr/src/app/migrateDbAndStartServer_acl.sh
+      - ./migrateDbAndStartServer_acl.js:/usr/src/app/migrateDbAndStartServer_acl.js
     ports:
       - "3030:3030"
     environment:
@@ -221,8 +221,8 @@ services:
       - /bin/sh
       - -c
       - |
-        chmod u+x ./migrateDbAndStartServer_acl.sh
-        ./migrateDbAndStartServer_acl.sh
+        npm install
+        node migrateDbAndStartServer_acl.js dev
 
 volumes:
   keycloak_pg_data:

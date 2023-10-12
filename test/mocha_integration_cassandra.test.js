@@ -725,7 +725,7 @@ describe("Cassandra Local", function () {
     expect(resBody).to.deep.equal({
       data: {
         csvTableTemplateIncident: [
-          "incident_id,incident_description,incident_number,capital_id",
+          "incident_id,incident_description,incident_number,addTown",
           "String,String,Int,String",
         ],
       },

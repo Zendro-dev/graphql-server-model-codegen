@@ -36,13 +36,13 @@ printBlockHeader "START" "UP DOCKER CONTAINERS"
 
 # Up detached docker containers
 if [[ $OPT_ACL_SETUP == "true" ]]; then
-  UID_GID="$(id -u):$(id -g)" docker-compose \
+  UID_GID="$(id -u):$(id -g)" docker compose \
     -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" up -d \
     --force-recreate \
     --remove-orphans \
     --renew-anon-volumes
 else
-  UID_GID="$(id -u):$(id -g)" docker-compose \
+  UID_GID="$(id -u):$(id -g)" docker compose \
     -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" up -d \
     --force-recreate \
     --remove-orphans \
@@ -67,7 +67,7 @@ done
 
 # Restart server2 for using OAUTH2 env variables from server1
 if [[ $OPT_ACL_SETUP == "true" ]]; then
-  UID_GID="$(id -u):$(id -g)" docker-compose \
+  UID_GID="$(id -u):$(id -g)" docker compose \
     -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" restart "gql_science_db_graphql_server2"
   
   isServerReadyForRequests "$GRAPHQL_SERVER_2_URL" "$SERVER_CHECK_WAIT_TIME" &

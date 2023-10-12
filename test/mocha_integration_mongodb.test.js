@@ -288,7 +288,7 @@ describe("Mongodb - Basic CRUD Operations", () => {
     expect(resBody).to.deep.equal({
       data: {
         csvTableTemplateAnimal: [
-          "animal_id,category,animal_name,age,weight,health,birthday,personality,farm_id,food_ids",
+          "animal_id,category,animal_name,age,weight,health,birthday,personality,addFarm,addFood",
           "String,String,String,Int,Float,Boolean,DateTime,[String],String,[String]",
         ],
       },
@@ -1671,6 +1671,12 @@ describe("validation API for distributed models", () => {
         {
           message: "A given ID has no existing record in data model dist_farm",
           locations: "",
+          "extensions": {
+            "input": {
+              "animal_id": "instance1-12",
+              "addDist_farm": 'instance1-01' 
+            }
+          }
         },
       ],
       data: {
@@ -1692,6 +1698,11 @@ describe("validation API for distributed models", () => {
         {
           message: 'Record with ID = "instance1-12" does not exist',
           locations: "",
+          "extensions": {
+            "input": {
+              "animal_id": "instance1-12"
+            }
+          }
         },
       ],
       data: {
