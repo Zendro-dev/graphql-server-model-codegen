@@ -1034,7 +1034,7 @@ module.exports = {
         let authorization = await checkAuthorization(context, '<%- name -%>', 'create');
         if (authorization === true) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-            inputSanitized = helper.castIdIntoRespectiveType(inputSanitized, models.<%- nameLc -%>.definition);
+            inputSanitized = helper.castIdentifierToCorrectType(inputSanitized, models.<%- nameLc -%>.definition);
             await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
             await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
             if(!input.skipAssociationsExistenceChecks) {
@@ -1089,7 +1089,7 @@ module.exports = {
         let authorization = await checkAuthorization(context, '<%- name -%>', 'update');
         if (authorization === true) {
             let inputSanitized = helper.sanitizeAssociationArguments(input, [Object.keys(associationArgsDef)]);
-            inputSanitized = helper.castIdIntoRespectiveType(inputSanitized, models.<%- nameLc -%>.definition);
+            inputSanitized = helper.castIdentifierToCorrectType(inputSanitized, models.<%- nameLc -%>.definition);
             await helper.checkAuthorizationOnAssocArgs(inputSanitized, context, associationArgsDef,['read', 'create'], models);
             await helper.checkAndAdjustRecordLimitForCreateUpdate(inputSanitized, context, associationArgsDef);
             if(!input.skipAssociationsExistenceChecks) {
