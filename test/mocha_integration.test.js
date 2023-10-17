@@ -4806,3 +4806,102 @@ describe("SQL - Associations for Paired-end Foreign Keys (distributed)", () => {
 		});
 	});
 });
+
+describe('InternalId type Int: CRUD functions for fisher', function () {
+	it("01. create records", function () {
+		res = itHelpers.request_graph_ql_post(
+			'mutation { addFisher(fisher_id: 1, name: "Harriett") {fisher_id} }'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation { addFisher(fisher_id: 2, name: "Clint") {fisher_id} }'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation { addFisher(fisher_id: 3, name: "Cohen") {fisher_id} }'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation { addRiver(river_id: "river_1_rhine", name: "rhine", length:1230, addFishers:[1, 2, 3]) {river_id} }'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation { addRiver(river_id: "river_2_donau", name: "donau", length:2850, addFishers:[1, 2]) {river_id} }'
+		);
+		expect(res.statusCode).to.equal(200);
+	});
+
+	it("02. update records", function () {
+		res = itHelpers.request_graph_ql_post(
+			'mutation { updateFisher(fisher_id: 2, name: "Cayla") {fisher_id} }'
+		);
+		expect(res.statusCode).to.equal(200);
+	});
+
+	it("03. read records", function () {
+		//Connection
+		res = itHelpers.request_graph_ql_post(
+			"{fishers(pagination:{limit:5}){name fishingRiversConnection(pagination:{first:5}){edges{node{name}}} countFilteredFishingRivers} countFishers}"
+		);
+		resBody = JSON.parse(res.body.toString("utf8"));
+		expect(res.statusCode).to.equal(200);
+		expect(resBody.data.fishers.length).equal(3);
+
+		//Filter
+		res = itHelpers.request_graph_ql_post(
+			'{ fishers(pagination:{limit:5} order:{field:name order:ASC}){ name fishingRiversFilter(search:{field:length,value:"2000",valueType:Int, operator:gt},pagination:{limit:5}){ name }}}'
+		);
+		resBody = JSON.parse(res.body.toString("utf8"));
+		expect(res.statusCode).to.equal(200);
+
+		expect(resBody).to.deep.equal({
+			data: {
+				fishers: [
+					{
+						name: "Cayla",
+						fishingRiversFilter: [
+							{
+								name: "donau",
+							},
+						],
+					},
+					{
+						name: "Cohen",
+						fishingRiversFilter: [],
+					},
+					{
+						name: "Harriett",
+						fishingRiversFilter: [
+							{
+								name: "donau",
+							},
+						],
+					},
+				],
+			},
+		});
+	});
+
+	it("04. delete records", function () {
+		res = itHelpers.request_graph_ql_post(
+			'mutation{deleteRiver(river_id:"river_1_rhine")}'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation{deleteRiver(river_id:"river_2_donau")}'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation{deleteFisher(fisher_id:1)}'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation{deleteFisher(fisher_id:2)}'
+		);
+		expect(res.statusCode).to.equal(200);
+		res = itHelpers.request_graph_ql_post(
+			'mutation{deleteFisher(fisher_id:3)}'
+		);
+		expect(res.statusCode).to.equal(200);
+	});
+});

@@ -1,0 +1,21 @@
+{
+    "model": "fisher",
+    "storageType": "SQL",
+    "attributes": {
+      "name": "String",
+      "fisher_id": "Int"
+    },
+    "associations": {
+      "fishingRivers": {
+        "type": "many_to_many",
+        "implementation": "sql_cross_table",
+        "target": "river",
+        "sourceKey": "fisher_id",
+        "targetKey": "river_id",
+        "keysIn": "fisher_to_river",
+        "targetStorageType": "sql",
+        "deletion":"update"
+      }
+    },
+    "internalId": "fisher_id"
+}

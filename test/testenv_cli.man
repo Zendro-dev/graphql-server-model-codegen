@@ -49,7 +49,7 @@ Perform a full cleanup as described in \fB1)\fR (this step can be optionally dis
 
     Run the code generator and apply custom integration test patches.
 
-.B -h, -help
+.B -h, --help
 
     Display this manual page.
 

@@ -27,6 +27,16 @@
       "sourceKey": "city_ids",
       "targetKey": "river_ids",
       "keysIn": "river"
+    },
+    "fishers": {
+      "type": "many_to_many",
+      "implementation": "sql_cross_table",
+      "target": "fisher",
+      "sourceKey": "river_id",
+      "targetKey": "fisher_id",
+      "keysIn": "fisher_to_river",
+      "targetStorageType": "sql",
+      "deletion":"update"
     }
   },
   "internalId": "river_id"

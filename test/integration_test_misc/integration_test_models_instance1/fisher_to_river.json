@@ -1,0 +1,8 @@
+{
+  "model": "fisher_to_river",
+  "storageType": "SQL",
+  "attributes": {
+    "fisher_id": "Int",
+    "river_id": "String"
+  }
+}
