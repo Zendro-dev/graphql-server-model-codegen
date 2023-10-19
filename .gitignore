@@ -4,6 +4,7 @@
 # NPM package manager temporary files and folders
 node_modules
 npm-debug.log
+package-lock.json
 
 # ModelGen output folders
 test/integration_test_env

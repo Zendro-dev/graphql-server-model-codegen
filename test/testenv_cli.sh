@@ -99,9 +99,9 @@ fi
 # 2. Re-start the docker containers
 if [[ $OPT_RESTART_DOCKER == "true" ]]; then
   if [[ $OPT_ACL_SETUP == "true" ]]; then
-    UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" down -v
+    UID_GID="$(id -u):$(id -g)" docker compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" down -v
   else
-    UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
+    UID_GID="$(id -u):$(id -g)" docker compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
   fi
   rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_log.json"
   rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_state.json"
@@ -146,9 +146,9 @@ fi
 # 5. Perform a full cleanup (optionally disabled)
 if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
   if [[ $OPT_ACL_SETUP == "true" ]]; then
-    UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" down -v
+    UID_GID="$(id -u):$(id -g)" docker compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" down -v
   else
-    UID_GID="$(id -u):$(id -g)" docker-compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
+    UID_GID="$(id -u):$(id -g)" docker compose -f "${TEST_DIR}/integration_test_misc/docker-compose-test.yml" down -v
   fi
   rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_log.json"
   rm -rf "${TEST_DIR}/integration_test_env/gql_science_db_graphql_server1/zendro_migration_state.json"

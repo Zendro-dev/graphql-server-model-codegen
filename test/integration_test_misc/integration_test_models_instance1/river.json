@@ -6,7 +6,8 @@
     "length": "Int",
     "river_id": "String",
     
-    "city_ids": "[String]"
+    "city_ids": "[String]",
+    "fisher_ids": "[Int]"
   },
   "associations": {
     "countries": {
@@ -27,6 +28,16 @@
       "sourceKey": "city_ids",
       "targetKey": "river_ids",
       "keysIn": "river"
+    },
+    "fishers": {
+      "type": "many_to_many",
+      "implementation": "foreignkeys",
+      "target": "fisher",
+      "sourceKey": "fisher_ids",
+      "targetKey": "river_ids",
+      "keysIn": "river",
+      "targetStorageType": "sql",
+      "deletion": "update"
     }
   },
   "internalId": "river_id"
