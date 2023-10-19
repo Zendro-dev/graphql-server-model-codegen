@@ -3,18 +3,19 @@
     "storageType": "SQL",
     "attributes": {
       "name": "String",
-      "fisher_id": "Int"
+      "fisher_id": "Int",
+      "river_ids": "[String]"
     },
     "associations": {
       "fishingRivers": {
         "type": "many_to_many",
-        "implementation": "sql_cross_table",
+        "implementation": "foreignkeys",
         "target": "river",
-        "sourceKey": "fisher_id",
-        "targetKey": "river_id",
-        "keysIn": "fisher_to_river",
+        "sourceKey": "river_ids",
+        "targetKey": "fisher_ids",
+        "keysIn": "fisher",
         "targetStorageType": "sql",
-        "deletion":"update"
+        "deletion": "update"
       }
     },
     "internalId": "fisher_id"
