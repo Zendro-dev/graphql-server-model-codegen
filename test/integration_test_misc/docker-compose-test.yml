@@ -119,7 +119,7 @@ services:
      - instance2
 
   gql_presto:
-    image: ahanaio/prestodb-sandbox
+    image: prestodb/presto
     container_name: presto1
     depends_on:
       - gql_postgres2
