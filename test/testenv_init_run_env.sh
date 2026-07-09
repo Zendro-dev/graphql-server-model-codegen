@@ -16,17 +16,17 @@ printCloneTaskEnd () {
 
 cloneAndInstallGraphqlServerRepository () {
 
-  branch=$1
-  outpath=$2
-  name=$(basename $outpath)
+  branch="$1"
+  outpath="$2"
+  name="$(basename "$outpath")"
 
   printCloneTaskStart "$branch" "$name"
 
   # Clone graphql server instance from the upstream remote, using the appropriate branch
-  git clone --branch $branch https://github.com/Zendro-dev/graphql-server $outpath
+  git clone --branch "$branch" https://github.com/Zendro-dev/graphql-server "$outpath"
 
   # Install node modules
-  cd $outpath
+  cd "$outpath"
   NODE_JQ_SKIP_INSTALL_BINARY=true npm install
   cd - &>/dev/null
 
@@ -36,16 +36,17 @@ cloneAndInstallGraphqlServerRepository () {
 
 
 # Load integration test constants
-SCRIPT_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
-source "${SCRIPT_DIR}/testenv_constants.sh"
+SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+cd "$SCRIPT_DIR"
+source "./testenv_constants.sh"
 
 printBlockHeader "START" "CLONE GRAPHQL SERVER INSTANCES"
 
 # (Re-)Create the environment directory
-mkdir -p $ENV_DIR
+mkdir -p "$ENV_DIR"
 
 # Install graphql server instances
-cloneAndInstallGraphqlServerRepository $GRAPHQL_SERVER_BRANCH $GRAPHQL_SERVER_1
-cloneAndInstallGraphqlServerRepository $GRAPHQL_SERVER_BRANCH $GRAPHQL_SERVER_2
+cloneAndInstallGraphqlServerRepository "$GRAPHQL_SERVER_BRANCH" "$GRAPHQL_SERVER_1"
+cloneAndInstallGraphqlServerRepository "$GRAPHQL_SERVER_BRANCH" "$GRAPHQL_SERVER_2"
 
 printBlockHeader "END" "CLONE GRAPHQL SERVER INSTANCES"

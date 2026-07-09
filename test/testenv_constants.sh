@@ -2,8 +2,8 @@
 
 # DIRECTORIES
 # TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-TEST_DIR="$(dirname $(readlink -f ${BASH_SOURCE[0]}))"
-ROOT_DIR="$(dirname ${TEST_DIR})"
+TEST_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+ROOT_DIR="$(dirname "${TEST_DIR}")"
 ENV_DIR="${TEST_DIR}/integration_test_env"
 
 GRAPHQL_SERVER_BRANCH=master
