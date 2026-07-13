@@ -8,7 +8,6 @@ const fs = require("fs");
 const config = require("../../config/data_models_storage_config.json")["<%- database -%>"];
 const amazonS3Helper = require("../../utils/amazonS3_helper");
 const path = require("path");
-const { v4: uuidv4 } = await import('uuid');
 const os = require("os");
 
 const iriRegex = new RegExp('<%- regex -%>');
