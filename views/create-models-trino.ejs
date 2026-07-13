@@ -7,7 +7,7 @@ const errorHelper = require("../../utils/errors");
 const fs = require("fs");
 const prestoHelper = require("../../utils/presto_helper");
 const path = require("path");
-const uuidv4 = require("uuid").v4;
+const { v4: uuidv4 } = await import('uuid');
 const os = require("os");
 
 // An exact copy of the the model definition that comes from the .json file
