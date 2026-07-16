@@ -4,15 +4,29 @@ set -e
 
 isServerReadyForRequests() {
 
-  url="${1}"
+  # app.listen() binds the port (making curl succeed) before its callback
+  # awaits initializeStorageHandlers() for models and adapters - so a bare
+  # curl only proves Express is up, not that storage handlers (e.g. the
+  # MongoDB connection) have finished loading. The callback's own
+  # "App listening on port" log line is the only signal that's actually
+  # true once storage handlers are ready, so wait on that instead - a
+  # container reachable via curl but still mid-initialization causes
+  # ECONNRESET storms in the very first test suite that runs against it.
+  container="${1}"
   max_time="${2}"
+  # docker logs is cumulative across restarts, so a plain grep would match
+  # a stale line left over from before a restart (see the ACL branch below,
+  # which restarts an already-logged container) instead of waiting for the
+  # new one - scope the check to only what's been logged since this
+  # (re)start.
+  since="${3:-$(docker inspect -f '{{.State.StartedAt}}' "$container")}"
 
   elapsedTime=0
-  until curl "$url" &>/dev/null
+  until docker logs --since "$since" "$container" 2>&1 | grep -q "App listening on port"
   do
 
     if [ $elapsedTime == $max_time ]; then
-      echo "${RED}${url}${NC} time limit reached"
+      echo "${RED}${container}${NC} time limit reached"
       return 1
     fi
 
@@ -21,7 +35,7 @@ isServerReadyForRequests() {
     elapsedTime=$(expr $elapsedTime + 2)
   done
 
-  echo -e ${YELLOW}$url${NC} is ${GREEN}ready${NC}
+  echo -e ${YELLOW}$container${NC} is ${GREEN}ready${NC}
 
   return 0
 
@@ -56,25 +70,25 @@ echo -e "\nWaiting for GraphQL servers to start ..."
 
 # Async check that the servers are ready to take requests
 pids=( )
-isServerReadyForRequests "$GRAPHQL_SERVER_1_URL" "$SERVER_CHECK_WAIT_TIME" &
+isServerReadyForRequests "server1" "$SERVER_CHECK_WAIT_TIME" &
 pids+="$! "
-isServerReadyForRequests "$GRAPHQL_SERVER_2_URL" "$SERVER_CHECK_WAIT_TIME" &
+isServerReadyForRequests "server2" "$SERVER_CHECK_WAIT_TIME" &
 pids+="$! "
 
 # Wait for the check responses
 for id in ${pids[@]}; do
-  wait $id || exit 0
+  wait $id || exit 1
 done
 
 # Restart server2 for using OAUTH2 env variables from server1
 if [[ $OPT_ACL_SETUP == "true" ]]; then
   UID_GID="$(id -u):$(id -g)" docker compose \
     -f "${TEST_DIR}/integration_test_misc/docker-compose-test-acl.yml" restart "gql_science_db_graphql_server2"
-  
-  isServerReadyForRequests "$GRAPHQL_SERVER_2_URL" "$SERVER_CHECK_WAIT_TIME" &
+
+  isServerReadyForRequests "server2" "$SERVER_CHECK_WAIT_TIME" &
   pid_restart="$! "
 
-  wait $pid_restart || exit 0
+  wait $pid_restart || exit 1
 fi
 
 printBlockHeader "END" "UP DOCKER CONTAINERS"

@@ -46,7 +46,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -70,6 +70,8 @@ module.exports = class <%- nameLc -%>{
         let item = new <%- nameLc -%>(response.data.data.readOne<%- nameCp -%>);
         await validatorUtil.validateData('validateAfterRead', this, item);
         return item;
+      } else if (helper.isNonEmptyArray(response.data.errors)) {
+        throw new Error(`Web-service ${remoteZendroURL} returned attached (see below) error(s).`);
       } else {
         throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
@@ -89,7 +91,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -112,6 +114,8 @@ module.exports = class <%- nameLc -%>{
       // check if data was send
       if(response && response.data && response.data.data) {
         return response.data.data.count<%- namePlCp -%>;
+      } else if (helper.isNonEmptyArray(response.data.errors)) {
+        throw new Error(`Web-service ${remoteZendroURL} returned attached (see below) error(s).`);
       } else {
         throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
@@ -132,7 +136,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -176,7 +180,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -249,7 +253,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -272,6 +276,8 @@ module.exports = class <%- nameLc -%>{
       // check if data was send
       if(response && response.data && response.data.data) {
         return new <%- nameLc -%>(response.data.data.add<%- nameCp -%>);
+      } else if (helper.isNonEmptyArray(response.data.errors)) {
+        throw new Error(`Web-service ${remoteZendroURL} returned attached (see below) error(s).`);
       } else {
         throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
@@ -296,7 +302,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -318,6 +324,8 @@ module.exports = class <%- nameLc -%>{
       // check if data was send
       if(response && response.data && response.data.data) {
         return response.data.data.delete<%- nameCp -%>;
+      } else if (helper.isNonEmptyArray(response.data.errors)) {
+        throw new Error(`Web-service ${remoteZendroURL} returned attached (see below) error(s).`);
       } else {
         throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
@@ -350,7 +358,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -373,6 +381,8 @@ module.exports = class <%- nameLc -%>{
       // check if data was send
       if(response && response.data && response.data.data) {
         return new <%- nameLc -%>(response.data.data.update<%- nameCp -%>);
+      } else if (helper.isNonEmptyArray(response.data.errors)) {
+        throw new Error(`Web-service ${remoteZendroURL} returned attached (see below) error(s).`);
       } else {
         throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
       }
@@ -399,7 +409,7 @@ module.exports = class <%- nameLc -%>{
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {

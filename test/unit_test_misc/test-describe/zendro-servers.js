@@ -11,7 +11,7 @@ static async readById( id, benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -57,7 +57,7 @@ static async readAll(search, order, pagination, benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -103,7 +103,7 @@ static async countRecords(search, benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -150,7 +150,7 @@ static async addOne(input, benignErrorReporter, token) {
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -194,7 +194,7 @@ static async deleteOne(id, benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -241,7 +241,7 @@ static async updateOne(input, benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -283,7 +283,7 @@ static async csvTableTemplate(benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -361,7 +361,7 @@ static async countRecords(search, benignErrorReporter, token){
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -419,7 +419,7 @@ static async add_personId(id, personId, benignErrorReporter, token) {
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {
@@ -475,7 +475,7 @@ static async remove_personId(id, personId, benignErrorReporter, token) {
     let opts = {
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/graphql",
+        Accept: "application/json",
       },
     };
     if (token) {

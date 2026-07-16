@@ -176,7 +176,7 @@ module.exports.remote_model_add_association = `
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -230,7 +230,7 @@ module.exports.remote_model_remove_association = `
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -312,7 +312,7 @@ static async remove_book_ids(id, book_ids, benignErrorReporter, token) {
         let opts = {
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/graphql",
+            Accept: "application/json",
           },
         };
         if (token) {

@@ -143,7 +143,7 @@ static async bulkAssociateDogWithVeterinarianId(bulkAssociationInput, benignErro
         let opts = {
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/graphql",
+              Accept: "application/json",
             },
           };
           if (token) {
@@ -195,7 +195,7 @@ static async bulkDisAssociateDogWithVeterinarianId(bulkAssociationInput, benignE
         let opts = {
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/graphql",
+              Accept: "application/json",
             },
           };
           if (token) {

@@ -445,7 +445,7 @@ let query = \`
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -508,7 +508,7 @@ static async remove_locationId(accession_id, locationId, benignErrorReporter, to
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -639,7 +639,7 @@ static async addOne(input, benignErrorReporter, token) {
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -697,7 +697,7 @@ static async updateOne(input, benignErrorReporter, token) {
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {

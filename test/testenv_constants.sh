@@ -15,7 +15,11 @@ GRAPHQL_SERVER_2_MODELS="${TEST_DIR}/integration_test_misc/integration_test_mode
 
 GRAPHQL_SERVER_1_URL="localhost:3000/graphql"
 GRAPHQL_SERVER_2_URL="localhost:3030/graphql"
-SERVER_CHECK_WAIT_TIME=120
+# A cold, from-scratch env (npm install + full migrations, including many
+# slow serial Cassandra CREATE INDEX statements) has been observed taking
+# ~200s before the server is truly ready - 120s cut it close on a loaded
+# machine and let the readiness check time out mid-migration.
+SERVER_CHECK_WAIT_TIME=300
 
 # ACL setup
 OPT_ACL_SETUP=false

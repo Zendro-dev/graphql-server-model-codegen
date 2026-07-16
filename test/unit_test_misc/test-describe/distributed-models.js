@@ -18,7 +18,7 @@ static async readById(iri, benignErrorReporter, token) {
               let opts = {
                 headers: {
                   "Content-Type": "application/json",
-                  Accept: "application/graphql",
+                  Accept: "application/json",
                 },
               };
               if (token) {
@@ -61,7 +61,7 @@ static async countRecords(search, benignErrorReporter, token) {
         let opts = {
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/graphql",
+            Accept: "application/json",
           },
         };
         if (token) {
@@ -108,7 +108,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter, token
           let opts = {
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/graphql",
+              Accept: "application/json",
             },
           };
           if (token) {

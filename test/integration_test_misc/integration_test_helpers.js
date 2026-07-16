@@ -74,7 +74,7 @@ module.exports.axios_graph_ql_post = async (query, token) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
           authorization: "Bearer " + token,
         },
       }
@@ -100,7 +100,7 @@ module.exports.axios_graph_ql_post_instance2 = async (query, token) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
           authorization: "Bearer " + token,
         },
       }

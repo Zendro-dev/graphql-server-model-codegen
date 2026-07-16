@@ -150,7 +150,7 @@ static async readAllCursor(search, order, pagination, benignErrorReporter, token
       let opts = {
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/graphql",
+          Accept: "application/json",
         },
       };
       if (token) {
@@ -221,7 +221,7 @@ static async updateOne(input, benignErrorReporter, token){
         let opts = {
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/graphql",
+            Accept: "application/json",
           },
         };
         if (token) {

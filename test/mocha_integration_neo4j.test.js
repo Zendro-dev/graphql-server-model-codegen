@@ -654,7 +654,8 @@ describe("Neo4j - Association", () => {
       `mutation { deleteDirector (director_id: "d1") }`
     );
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(500);
+    // GraphQL resolver-level errors (as opposed to malformed requests) are reported in the response body per spec, not via the HTTP status.
+    expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [
         {

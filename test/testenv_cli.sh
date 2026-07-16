@@ -118,15 +118,15 @@ fi
 # 2. Perform a full cleanup (optionally disabled)
 if [[ $OPT_RUN_TESTS == "true" ]]; then
   if [[ $OPT_ACL_SETUP == "true" ]]; then
-    mocha "${TEST_DIR}/mocha_integration_acl.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_acl.test.js"
   else
-    mocha --timeout 10000 "${TEST_DIR}/mocha_integration.test.js"
-    mocha "${TEST_DIR}/mocha_integration_mongodb.test.js"
-    mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
-    mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
-    mocha --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
-    mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
-    mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 10000 "${TEST_DIR}/mocha_integration.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_mongodb.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_cassandra.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_neo4j.test.js"
   fi
 
   # 1. Remove docker containers, images, and volumes
@@ -159,15 +159,15 @@ if [[ $OPT_GENCODE_RUNTESTS == "true" ]]; then
   bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
   if [[ $OPT_ACL_SETUP == "true" ]]; then
-    mocha "${TEST_DIR}/mocha_integration_acl.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_acl.test.js"
   else
-    mocha "${TEST_DIR}/mocha_integration.test.js"
-    mocha "${TEST_DIR}/mocha_integration_mongodb.test.js"
-    mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
-    mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
-    mocha --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
-    mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
-    mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_mongodb.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_cassandra.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_neo4j.test.js"
   fi
 
   # 1. Remove docker containers, images, and volumes
@@ -194,15 +194,15 @@ if [[ $DEFAULT_RUN == "true" ]]; then
   bash "${TEST_DIR}/testenv_sync.sh"
   bash "${TEST_DIR}/testenv_docker_up.sh"
   if [[ $OPT_ACL_SETUP == "true" ]]; then
-    mocha "${TEST_DIR}/mocha_integration_acl.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_acl.test.js"
   else
-    mocha "${TEST_DIR}/mocha_integration.test.js"
-    mocha "${TEST_DIR}/mocha_integration_mongodb.test.js"
-    mocha "${TEST_DIR}/mocha_integration_cassandra.test.js"
-    mocha "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
-    mocha --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
-    mocha --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
-    mocha "${TEST_DIR}/mocha_integration_neo4j.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_mongodb.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_cassandra.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_amazon_s3.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 15000 "${TEST_DIR}/mocha_integration_trino.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" --timeout 10000 "${TEST_DIR}/mocha_integration_presto.test.js"
+    "${ROOT_DIR}/node_modules/.bin/mocha" "${TEST_DIR}/mocha_integration_neo4j.test.js"
   fi
 
   # 1. Remove docker containers, images, and volumes

@@ -46,7 +46,7 @@
             let opts = {
               headers: {
                 "Content-Type": "application/json",
-                Accept: "application/graphql",
+                Accept: "application/json",
               },
             };
             if (token) {
@@ -70,8 +70,10 @@
 
             if (response && response.data && response.data.data) {
                 return response.data.data.bulk<% if(op === 'remove'){%>Dis<%}%>Associate<%-nameCp-%>With<%-associationsArguments["to_one"][i].targetKey_cp-%>;
+            } else if (helper.isNonEmptyArray(response.data.errors)) {
+              throw new Error(`Web-service ${remoteZendroURL} returned attached (see below) error(s).`);
             } else {
-                throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
+              throw new Error(`Remote zendro-server (${remoteZendroURL}) did not respond with data.`);
             }
         } catch (error) {
             //handle caught errors

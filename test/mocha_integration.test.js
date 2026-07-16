@@ -666,7 +666,9 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
       `mutation { deleteTranscript_count (id: ${idValue}) }`
     );
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(500);
+    // GraphQL resolver-level errors (as opposed to malformed requests) are
+    // reported in the response body per spec, not via the HTTP status.
+    expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [{
         message: `transcript_count with id ${idValue} has associated records with 'reject' reaction and is NOT valid for deletion. Please clean up before you delete.`,
@@ -1082,7 +1084,11 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
       "{individualsConnection(pagination:{hello:1}) {edges {node {id}}}}"
     );
     let resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(400);
+    // Query validation errors (unknown field) are still well-formed
+    // GraphQL-over-HTTP requests per graphql-http's spec-compliant handling
+    // with Accept: application/json, so they get 200 too - only requests
+    // graphql-http can't parse/execute at all (e.g. malformed JSON) get 400.
+    expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [{
         message: 'Field "hello" is not defined by type "paginationCursorInput".',
@@ -1115,7 +1121,9 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
       'mutation{addAccession(accession_id:"acc1" sampling_date:"today") {accession_id sampling_date}}'
     );
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(400);
+    // Scalar coercion failures are also well-formed GraphQL-over-HTTP
+    // requests per graphql-http's spec-compliant handling, so 200 too.
+    expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [{
         message: "Date cannot represent an invalid date-string today.",
@@ -1130,7 +1138,7 @@ describe('Clean GraphQL Server: one new basic function per test ("Individual" mo
       'mutation { addIndividual(name: "@#$%^&") { name } }'
     );
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(500);
+    expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [{
         message: "validation failed",
@@ -2523,7 +2531,7 @@ describe("Zendro Webservice Data Models", function() {
       'mutation{addAccession(accession_id:"faulty-accesion-instance1" collectors_name:"@#$%^&") {accession_id sampling_date}}'
     );
     resBody = JSON.parse(res.body.toString("utf8"));
-    expect(res.statusCode).to.equal(500);
+    expect(res.statusCode).to.equal(200);
     expect(resBody).to.deep.equal({
       errors: [{
           message: "Web-service http://server1:3000/graphql returned attached (see below) error(s).",
