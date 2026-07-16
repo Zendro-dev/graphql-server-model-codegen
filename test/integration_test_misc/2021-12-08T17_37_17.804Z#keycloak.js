@@ -10,13 +10,13 @@ const SPA_PRD_ENV = require("dotenv").config({
   path: path.resolve(__dirname, "../../single-page-app/.env.production"),
 });
 const GIQL_PRD_ENV = require("dotenv").config({
-  path: path.resolve(__dirname, "../../graphiql-auth/.env.production"),
+  path: path.resolve(__dirname, "../../graphiql-auth/.env"),
 });
 const SPA_DEV_ENV = require("dotenv").config({
   path: path.resolve(__dirname, "../../single-page-app/.env.production"),
 });
 const GIQL_DEV_ENV = require("dotenv").config({
-  path: path.resolve(__dirname, "../../graphiql-auth/.env.production"),
+  path: path.resolve(__dirname, "../../graphiql-auth/.env"),
 });
 
 const {
@@ -76,7 +76,7 @@ module.exports = {
       if (GIQL_PRD_ENV.parsed) {
         envPath = path.resolve(
           __dirname,
-          "../../graphiql-auth/.env.production"
+          "../../graphiql-auth/.env"
         );
         parsedEnv = GIQL_PRD_ENV.parsed;
         parsedEnv.OAUTH2_CLIENT_ID = KEYCLOAK_GIQL_CLIENT;

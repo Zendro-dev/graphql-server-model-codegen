@@ -23,7 +23,7 @@ cloneAndInstallGraphqlServerRepository () {
   printCloneTaskStart "$branch" "$name"
 
   # Clone graphql server instance from the upstream remote, using the appropriate branch
-  git clone --branch "$branch" https://github.com/Zendro-dev/graphql-server "$outpath"
+  git clone --branch "$branch" --recurse-submodules https://github.com/Zendro-dev/graphql-server "$outpath"
 
   # Install node modules
   cd "$outpath"
