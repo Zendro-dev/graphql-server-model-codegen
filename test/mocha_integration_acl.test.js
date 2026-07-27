@@ -1077,8 +1077,11 @@ describe("Zendro Webservice Data Models", function () {
       'mutation{addAccession(accession_id:"faulty-accesion-instance1" collectors_name:"@#$%^&") {accession_id sampling_date}}',
       token
     );
-    expect(res.response.status).to.equal(500);
-    expect(res.response.data).to.deep.equal({
+    // GraphQL resolver-level errors (as opposed to malformed requests) are
+    // reported in the response body per spec, not via the HTTP status - see
+    // the analogous fix in mocha_integration.test.js.
+    expect(res.status).to.equal(200);
+    expect(res.data).to.deep.equal({
       errors: [
         {
           message:
