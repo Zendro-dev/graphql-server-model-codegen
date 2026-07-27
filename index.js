@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const program = require("commander");
+const { program } = require("commander");
 var fs = require("fs");
 const funks = require("./funks");
 path = require("path");

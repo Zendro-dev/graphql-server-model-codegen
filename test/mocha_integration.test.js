@@ -3,7 +3,7 @@ const {
 } = require("chai");
 const should = require("chai").should();
 const path = require("path");
-const delay = require("delay");
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const itHelpers = require("./integration_test_misc/integration_test_helpers");
 
 //HINT:

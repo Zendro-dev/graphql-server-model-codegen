@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const delay = require("delay");
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const path = require("path");
 const itHelpers = require("./integration_test_misc/integration_test_helpers");
 const {
